@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!--
+    Cadena canonica del IRB 120 basada en DH clasico.
+    Cada fila se separa en: Rz(q_i), Rz(offset_i), Tz(d_i) Tx(a_i) Rx(alpha_i).
+    Esta separacion evita esconder offsets en los valores publicados por /joint_states.
+  -->
+  <xacro:macro name="irb120_robot" params="prefix:=''">
+    <link name="${prefix}base_link">
+      <visual>
+        <origin xyz="0 0 0.0935" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.09" length="0.187"/></geometry>
+        <material name="abb_dark"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.0935" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.09" length="0.187"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Fila DH 1: d=0.290, a=0, alpha=-pi/2. -->
+    <link name="${prefix}joint_1_frame">
+      <visual>
+        <origin xyz="0 0 0.145" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.055" length="0.290"/></geometry>
+        <material name="abb_orange"/>
+      </visual>
+    </link>
+    <joint name="${prefix}joint_1" type="revolute">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}joint_1_frame"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-2.8797932658" upper="2.8797932658" effort="100" velocity="4.3633231300"/>
+    </joint>
+    <link name="${prefix}theta_1_frame"/>
+    <joint name="${prefix}theta_offset_1" type="fixed">
+      <parent link="${prefix}joint_1_frame"/>
+      <child link="${prefix}theta_1_frame"/>
+    </joint>
+    <link name="${prefix}link_1">
+      <inertial>
+        <origin xyz="0 0.054 0" rpy="0 0 0"/>
+        <mass value="4.248"/>
+        <inertia ixx="0.019699" ixy="0" ixz="0" iyy="0.014484" iyz="0" izz="0.019952"/>
+      </inertial>
+      <visual>
+        <geometry><sphere radius="0.065"/></geometry>
+        <material name="abb_orange"/>
+      </visual>
+    </link>
+    <joint name="${prefix}dh_1" type="fixed">
+      <parent link="${prefix}theta_1_frame"/>
+      <child link="${prefix}link_1"/>
+      <origin xyz="0 0 0.290" rpy="${-pi/2} 0 0"/>
+    </joint>
+
+    <!-- Fila DH 2: theta=q2-pi/2, d=0, a=0.270, alpha=0. -->
+    <link name="${prefix}joint_2_frame"/>
+    <joint name="${prefix}joint_2" type="revolute">
+      <parent link="${prefix}link_1"/>
+      <child link="${prefix}joint_2_frame"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.9198621772" upper="1.9198621772" effort="100" velocity="4.3633231300"/>
+    </joint>
+    <link name="${prefix}theta_2_frame">
+      <visual>
+        <origin xyz="0.135 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.270 0.075 0.075"/></geometry>
+        <material name="abb_orange"/>
+      </visual>
+    </link>
+    <joint name="${prefix}theta_offset_2" type="fixed">
+      <parent link="${prefix}joint_2_frame"/>
+      <child link="${prefix}theta_2_frame"/>
+      <origin xyz="0 0 0" rpy="0 0 ${-pi/2}"/>
+    </joint>
+    <link name="${prefix}link_2">
+      <inertial>
+        <origin xyz="-0.169 0 0" rpy="0 0 0"/>
+        <mass value="5.412"/>
+        <inertia ixx="0.035942" ixy="0" ixz="0" iyy="0.083522" iyz="0" izz="0.057569"/>
+      </inertial>
+      <visual><geometry><sphere radius="0.060"/></geometry><material name="abb_orange"/></visual>
+    </link>
+    <joint name="${prefix}dh_2" type="fixed">
+      <parent link="${prefix}theta_2_frame"/>
+      <child link="${prefix}link_2"/>
+      <origin xyz="0.270 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Fila DH 3: d=0, a=0.070, alpha=-pi/2. -->
+    <link name="${prefix}joint_3_frame"/>
+    <joint name="${prefix}joint_3" type="revolute">
+      <parent link="${prefix}link_2"/>
+      <child link="${prefix}joint_3_frame"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.9198621772" upper="1.2217304764" effort="100" velocity="4.3633231300"/>
+    </joint>
+    <link name="${prefix}theta_3_frame">
+      <visual>
+        <origin xyz="0.035 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.070 0.070 0.070"/></geometry>
+        <material name="abb_orange"/>
+      </visual>
+    </link>
+    <joint name="${prefix}theta_offset_3" type="fixed">
+      <parent link="${prefix}joint_3_frame"/>
+      <child link="${prefix}theta_3_frame"/>
+    </joint>
+    <link name="${prefix}link_3">
+      <inertial>
+        <origin xyz="-0.012 0 0.023" rpy="0 0 0"/>
+        <mass value="4.077"/>
+        <inertia ixx="0.017562" ixy="0" ixz="-0.001993" iyy="0.023140" iyz="0" izz="0.011589"/>
+      </inertial>
+      <visual><geometry><sphere radius="0.055"/></geometry><material name="abb_orange"/></visual>
+    </link>
+    <joint name="${prefix}dh_3" type="fixed">
+      <parent link="${prefix}theta_3_frame"/>
+      <child link="${prefix}link_3"/>
+      <origin xyz="0.070 0 0" rpy="${-pi/2} 0 0"/>
+    </joint>
+
+    <!-- Fila DH 4: d=0.302, a=0, alpha=pi/2. -->
+    <link name="${prefix}joint_4_frame"/>
+    <joint name="${prefix}joint_4" type="revolute">
+      <parent link="${prefix}link_3"/>
+      <child link="${prefix}joint_4_frame"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-2.7925268032" upper="2.7925268032" effort="100" velocity="5.5850536064"/>
+    </joint>
+    <link name="${prefix}theta_4_frame">
+      <visual>
+        <origin xyz="0 0 0.151" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.045" length="0.302"/></geometry>
+        <material name="abb_orange"/>
+      </visual>
+    </link>
+    <joint name="${prefix}theta_offset_4" type="fixed">
+      <parent link="${prefix}joint_4_frame"/>
+      <child link="${prefix}theta_4_frame"/>
+    </joint>
+    <link name="${prefix}link_4">
+      <inertial>
+        <origin xyz="0 -0.007 0" rpy="0 0 0"/>
+        <mass value="1.832"/>
+        <inertia ixx="0.007247" ixy="0" ixz="0" iyy="0.003919" iyz="0" izz="0.005551"/>
+      </inertial>
+      <visual><geometry><sphere radius="0.045"/></geometry><material name="abb_orange"/></visual>
+    </link>
+    <joint name="${prefix}dh_4" type="fixed">
+      <parent link="${prefix}theta_4_frame"/>
+      <child link="${prefix}link_4"/>
+      <origin xyz="0 0 0.302" rpy="${pi/2} 0 0"/>
+    </joint>
+
+    <!-- Fila DH 5: d=0, a=0, alpha=-pi/2. -->
+    <link name="${prefix}joint_5_frame"/>
+    <joint name="${prefix}joint_5" type="revolute">
+      <parent link="${prefix}link_4"/>
+      <child link="${prefix}joint_5_frame"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-2.0943951024" upper="2.0943951024" effort="100" velocity="5.5850536064"/>
+    </joint>
+    <link name="${prefix}theta_5_frame"/>
+    <joint name="${prefix}theta_offset_5" type="fixed">
+      <parent link="${prefix}joint_5_frame"/>
+      <child link="${prefix}theta_5_frame"/>
+    </joint>
+    <link name="${prefix}link_5">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.755"/>
+        <inertia ixx="0.001120" ixy="0" ixz="0" iyy="0.001227" iyz="0" izz="0.000559"/>
+      </inertial>
+      <visual><geometry><sphere radius="0.035"/></geometry><material name="abb_orange"/></visual>
+    </link>
+    <joint name="${prefix}dh_5" type="fixed">
+      <parent link="${prefix}theta_5_frame"/>
+      <child link="${prefix}link_5"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+    </joint>
+
+    <!-- Fila DH 6: theta=q6+pi, d=0.072, a=0, alpha=0. -->
+    <link name="${prefix}joint_6_frame"/>
+    <joint name="${prefix}joint_6" type="revolute">
+      <parent link="${prefix}link_5"/>
+      <child link="${prefix}joint_6_frame"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-6.9813170080" upper="6.9813170080" effort="100" velocity="7.3303828584"/>
+    </joint>
+    <link name="${prefix}theta_6_frame">
+      <visual>
+        <origin xyz="0 0 0.036" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.028" length="0.072"/></geometry>
+        <material name="metal"/>
+      </visual>
+    </link>
+    <joint name="${prefix}theta_offset_6" type="fixed">
+      <parent link="${prefix}joint_6_frame"/>
+      <child link="${prefix}theta_6_frame"/>
+      <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+    </joint>
+    <link name="${prefix}link_6">
+      <inertial>
+        <origin xyz="0 0 -0.007" rpy="0 0 0"/>
+        <mass value="0.019"/>
+        <inertia ixx="0.000002347" ixy="0" ixz="0" iyy="0.000002347" iyz="0" izz="0.000004123"/>
+      </inertial>
+      <visual><geometry><cylinder radius="0.032" length="0.018"/></geometry><material name="metal"/></visual>
+    </link>
+    <joint name="${prefix}dh_6" type="fixed">
+      <parent link="${prefix}theta_6_frame"/>
+      <child link="${prefix}link_6"/>
+      <origin xyz="0 0 0.072" rpy="0 0 0"/>
+    </joint>
+    <link name="${prefix}tool0"/>
+    <joint name="${prefix}tool0_fixed" type="fixed">
+      <parent link="${prefix}link_6"/>
+      <child link="${prefix}tool0"/>
+    </joint>
+  </xacro:macro>
+</robot>

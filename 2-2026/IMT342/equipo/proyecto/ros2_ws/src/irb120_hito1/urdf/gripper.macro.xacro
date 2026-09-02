@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Pinza paralela parametrica provisional; sustituible por los meshes/CAD definitivos. -->
+  <xacro:macro name="parallel_gripper" params="parent prefix:=''">
+    <link name="${prefix}gripper_base_link">
+      <visual>
+        <origin xyz="0 0 0.020" rpy="0 0 0"/>
+        <geometry><box size="0.080 0.060 0.040"/></geometry>
+        <material name="abb_dark"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.020" rpy="0 0 0"/>
+        <geometry><box size="0.080 0.060 0.040"/></geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}gripper_mount" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${prefix}gripper_base_link"/>
+      <origin xyz="0 0 0.020" rpy="0 0 0"/>
+    </joint>
+
+    <link name="${prefix}left_finger_link">
+      <visual>
+        <origin xyz="0 0 0.050" rpy="0 0 0"/>
+        <geometry><box size="0.014 0.014 0.100"/></geometry>
+        <material name="metal"/>
+      </visual>
+    </link>
+    <joint name="${prefix}gripper_left_joint" type="prismatic">
+      <parent link="${prefix}gripper_base_link"/>
+      <child link="${prefix}left_finger_link"/>
+      <origin xyz="0 0.020 0.040" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="0.0" upper="0.015" effort="20" velocity="0.10"/>
+    </joint>
+
+    <link name="${prefix}right_finger_link">
+      <visual>
+        <origin xyz="0 0 0.050" rpy="0 0 0"/>
+        <geometry><box size="0.014 0.014 0.100"/></geometry>
+        <material name="metal"/>
+      </visual>
+    </link>
+    <joint name="${prefix}gripper_right_joint" type="prismatic">
+      <parent link="${prefix}gripper_base_link"/>
+      <child link="${prefix}right_finger_link"/>
+      <origin xyz="0 -0.020 0.040" rpy="0 0 0"/>
+      <axis xyz="0 -1 0"/>
+      <limit lower="0.0" upper="0.015" effort="20" velocity="0.10"/>
+    </joint>
+
+    <link name="${prefix}tcp_link"/>
+    <joint name="${prefix}tcp_fixed" type="fixed">
+      <parent link="${prefix}gripper_base_link"/>
+      <child link="${prefix}tcp_link"/>
+      <origin xyz="0 0 0.140" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+</robot>

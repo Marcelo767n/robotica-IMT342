@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot name="irb120_hito1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="$(find irb120_hito1)/urdf/materials.xacro"/>
+  <xacro:include filename="$(find irb120_hito1)/urdf/irb120.macro.xacro"/>
+  <xacro:include filename="$(find irb120_hito1)/urdf/gripper.macro.xacro"/>
+
+  <xacro:irb120_materials/>
+  <xacro:irb120_robot/>
+  <xacro:parallel_gripper parent="tool0"/>
+</robot>

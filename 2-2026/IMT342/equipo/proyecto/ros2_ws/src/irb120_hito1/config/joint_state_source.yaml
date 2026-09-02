@@ -1,0 +1,5 @@
+irb120_joint_state_source:
+  ros__parameters:
+    initial_positions_deg: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    gripper_opening_m: 0.0
+    publish_rate_hz: 20.0
