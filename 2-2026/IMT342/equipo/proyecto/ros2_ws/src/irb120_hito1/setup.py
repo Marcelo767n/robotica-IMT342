@@ -36,7 +36,6 @@ setup(
     maintainer_email="equipo.imt342@example.com",
     description="Gemelo digital y cinematica directa del ABB IRB 120 para el Hito 1.",
     license="Apache-2.0",
-    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             "fk_validator = irb120_hito1.nodes.fk_validator:main",

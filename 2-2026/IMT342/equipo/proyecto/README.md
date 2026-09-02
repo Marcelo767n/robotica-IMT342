@@ -35,6 +35,11 @@ Construcción y comprobación completa:
 ./scripts/check_hito1.sh
 ```
 
+> **Importante:** no ejecutes los nodos ROS con el `python3` de Miniconda. En
+> esta computadora entra en conflicto con `rclpy` de Jazzy por su versión de
+> `libstdc++`. Usa los comandos `ros2 ...` indicados abajo o `/usr/bin/python3`
+> para diagnósticos directos.
+
 ## Demostración en RViz
 
 ```bash
