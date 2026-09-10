@@ -10,8 +10,9 @@ sección 4.
 | Pinza acoplada | macro `parallel_gripper`, `gripper_mount` y `tcp_link` | presencia y cadena hasta `tcp_link` |
 | Cinemática directa analítica | `kinematics/dh.py` | pruebas de postura cero y ortonormalidad |
 | Sin MoveIt/resolvedor automático | implementación NumPy explícita | prueba de ausencia de dependencia MoveIt |
-| Comparación RViz/TF vs. Python | nodo `fk_validator` | error publicado en `/irb120/fk_position_error_m` |
+| Comparación RViz/URDF vs. Python | nodo `fk_validator` evalúa cada `JointState` por DH y URDF | error publicado en `/irb120/fk_position_error_m` |
 | Error menor a `1e-6 m` | tolerancia del nodo y CLI | 100 posturas aleatorias + 4 posturas documentadas |
+| Movimiento demostrable | `motion.py` y nodo `motion_demo` | lanzamiento `demo_motion:=true` y pruebas de continuidad/límites |
 
 ## Evidencia reproducible
 
@@ -19,9 +20,9 @@ La verificación offline evalúa el URDF con un algoritmo independiente del
 modelo DH:
 
 ```bash
-PYTHONPATH=ros2_ws/src/irb120_hito1 \
-python3 -m irb120_hito1.verify_model \
-  --urdf ros2_ws/src/irb120_hito1/urdf/irb120_with_gripper.urdf
+source /opt/ros/jazzy/setup.bash
+source ros2_ws/install/setup.bash
+ros2 run irb120_hito1 verify_model
 ```
 
 La evidencia ROS en vivo se obtiene con:
@@ -31,8 +32,14 @@ ros2 launch irb120_hito1 display.launch.py
 ros2 topic echo /irb120/fk_position_error_m
 ```
 
-Para la defensa conviene guardar una captura de RViz donde se vean el robot, los
-frames y la salida `APROBADO` del nodo validador para al menos tres posturas.
+Para observar el movimiento automático durante la defensa:
+
+```bash
+ros2 launch irb120_hito1 display.launch.py demo_motion:=true
+```
+
+La captura real de la demostración está en
+`assets/rviz_irb120_demo_automatica.png`.
 
 ## Pendiente para el gemelo visual definitivo
 
@@ -50,3 +57,6 @@ recibirlos, `0.160 m` y la geometría de la pinza son valores provisionales.
 
 Al integrar los meshes se conservarán los joints y frames actuales; las pruebas
 de cinemática impedirán que un cambio visual altere la pose matemática.
+
+Los valores obtenidos en esta computadora están registrados en
+[resultados.md](resultados.md).

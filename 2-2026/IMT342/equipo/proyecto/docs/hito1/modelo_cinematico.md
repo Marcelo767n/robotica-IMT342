@@ -48,9 +48,9 @@ dos joints prismáticos independientes y un `tcp_link` fijo a `0.160 m` de
 
 ## Parámetros dinámicos aproximados
 
-Truc y Lam estimaron mediante CAD los siguientes parámetros. Se incluyen en el
-URDF como aproximación académica, no como datos certificados para controlar el
-robot real:
+Truc y Lam estimaron mediante CAD los siguientes parámetros. Los valores de los
+links 1 a 6 se incluyen en el URDF como aproximación académica, no como datos
+certificados para controlar el robot real:
 
 | Cuerpo | Masa [kg] | Centro de masa [m] |
 |---|---:|---|
@@ -62,9 +62,10 @@ robot real:
 | Link 5 | 0.755 | `[0, 0, 0]` |
 | Link 6 | 0.019 | `[0, 0, -0.007]` |
 
-Las matrices de inercia completas están transcritas en
-`urdf/irb120.macro.xacro`. No se asigna una inercia inventada a la base ni a la
-pinza provisional.
+Las matrices de inercia completas de los links 1 a 6 están transcritas en
+`urdf/irb120.macro.xacro`. La masa publicada de la base se documenta, pero no se
+añade un bloque inercial incompleto: no se asigna una inercia inventada a la base
+ni a la pinza provisional.
 
 ## Límites usados
 
