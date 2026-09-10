@@ -18,6 +18,7 @@ def generate_launch_description() -> LaunchDescription:
     robot_description = urdf_path.read_text(encoding="utf-8")
 
     use_rviz = LaunchConfiguration("use_rviz")
+    demo_motion = LaunchConfiguration("demo_motion")
     target_frame = LaunchConfiguration("target_frame")
 
     return LaunchDescription(
@@ -26,6 +27,11 @@ def generate_launch_description() -> LaunchDescription:
                 "use_rviz",
                 default_value="true",
                 description="Abrir RViz junto con la validacion.",
+            ),
+            DeclareLaunchArgument(
+                "demo_motion",
+                default_value="false",
+                description="Mover automaticamente los seis ejes y la pinza.",
             ),
             DeclareLaunchArgument(
                 "target_frame",
@@ -56,8 +62,16 @@ def generate_launch_description() -> LaunchDescription:
                         "base_frame": "base_link",
                         "target_frame": target_frame,
                         "position_tolerance_m": 1.0e-6,
+                        "urdf_path": str(urdf_path),
                     }
                 ],
+            ),
+            Node(
+                package="irb120_hito1",
+                executable="motion_demo",
+                name="irb120_motion_demo",
+                output="screen",
+                condition=IfCondition(demo_motion),
             ),
             Node(
                 package="rviz2",

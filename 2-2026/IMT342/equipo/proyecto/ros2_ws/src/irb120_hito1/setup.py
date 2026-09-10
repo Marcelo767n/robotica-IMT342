@@ -12,7 +12,7 @@ def package_files(directory: str) -> list[tuple[str, list[str]]]:
     result: list[tuple[str, list[str]]] = []
     root = Path(directory)
     for path in sorted(root.rglob("*")):
-        if path.is_file():
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
             destination = Path("share") / PACKAGE_NAME / path.parent
             result.append((str(destination), [str(path)]))
     return result
@@ -36,10 +36,12 @@ setup(
     maintainer_email="equipo.imt342@example.com",
     description="Gemelo digital y cinematica directa del ABB IRB 120 para el Hito 1.",
     license="Apache-2.0",
+    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             "fk_validator = irb120_hito1.nodes.fk_validator:main",
             "joint_state_source = irb120_hito1.nodes.joint_state_source:main",
+            "motion_demo = irb120_hito1.nodes.motion_demo:main",
             "verify_model = irb120_hito1.verify_model:main",
         ],
     },

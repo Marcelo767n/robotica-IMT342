@@ -7,7 +7,7 @@ offsets de las filas 2 y 6 se aplican internamente.
 """
 
 from dataclasses import dataclass
-from math import cos, pi, sin
+from math import atan2, cos, pi, sin
 from typing import Iterable
 
 import numpy as np
@@ -104,4 +104,12 @@ def rotation_error_rad(reference: Matrix4, measured: Matrix4) -> float:
     """Geodesic angular distance between two rotation matrices."""
     relative_rotation = reference[:3, :3].T @ measured[:3, :3]
     cosine = (float(np.trace(relative_rotation)) - 1.0) / 2.0
-    return float(np.arccos(np.clip(cosine, -1.0, 1.0)))
+    skew_vector = np.array(
+        [
+            relative_rotation[2, 1] - relative_rotation[1, 2],
+            relative_rotation[0, 2] - relative_rotation[2, 0],
+            relative_rotation[1, 0] - relative_rotation[0, 1],
+        ]
+    )
+    sine = float(np.linalg.norm(skew_vector)) / 2.0
+    return atan2(sine, float(np.clip(cosine, -1.0, 1.0)))
