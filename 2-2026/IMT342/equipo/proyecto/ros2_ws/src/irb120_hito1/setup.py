@@ -42,6 +42,7 @@ setup(
             "fk_validator = irb120_hito1.nodes.fk_validator:main",
             "joint_state_source = irb120_hito1.nodes.joint_state_source:main",
             "motion_demo = irb120_hito1.nodes.motion_demo:main",
+            "slider_gui = irb120_hito1.nodes.slider_gui:main",
             "verify_model = irb120_hito1.verify_model:main",
         ],
     },

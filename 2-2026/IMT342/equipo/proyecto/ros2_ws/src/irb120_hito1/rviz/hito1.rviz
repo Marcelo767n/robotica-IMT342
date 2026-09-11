@@ -23,7 +23,7 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /robot_description
       Enabled: true
-      Name: ABB IRB 120 + pinza
+      Name: ABB IRB 120 - 6 juntas
       Visual Enabled: true
       Collision Enabled: false
     - Class: rviz_default_plugins/TF

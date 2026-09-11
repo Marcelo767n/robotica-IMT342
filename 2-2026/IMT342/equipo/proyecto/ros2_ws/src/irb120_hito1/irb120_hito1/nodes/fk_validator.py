@@ -11,7 +11,6 @@ from std_msgs.msg import Float64
 from irb120_hito1.kinematics.dh import (
     JOINT_NAMES,
     forward_kinematics,
-    forward_kinematics_tcp,
     position_error_m,
     rotation_error_rad,
 )
@@ -39,8 +38,8 @@ class ForwardKinematicsValidator(Node):
         self._urdf_path = Path(str(self.get_parameter("urdf_path").value))
         if self._tolerance <= 0.0:
             raise ValueError("position_tolerance_m debe ser positiva.")
-        if self._target_frame not in {"tool0", "tcp_link"}:
-            raise ValueError("target_frame debe ser tool0 o tcp_link.")
+        if self._target_frame != "tool0":
+            raise ValueError("El modelo cinemático de seis juntas termina en tool0.")
         if not self._urdf_path.is_file():
             raise FileNotFoundError(f"No se encontro el URDF expandido: {self._urdf_path}")
 
@@ -54,11 +53,7 @@ class ForwardKinematicsValidator(Node):
         if any(name not in received for name in JOINT_NAMES):
             return
         joint_vector = [float(received[name]) for name in JOINT_NAMES]
-        analytic = (
-            forward_kinematics_tcp(joint_vector)
-            if self._target_frame == "tcp_link"
-            else forward_kinematics(joint_vector)
-        )
+        analytic = forward_kinematics(joint_vector)
         joint_map = dict(zip(JOINT_NAMES, joint_vector, strict=True))
         urdf_matrix = chain_transform(
             self._urdf_path,

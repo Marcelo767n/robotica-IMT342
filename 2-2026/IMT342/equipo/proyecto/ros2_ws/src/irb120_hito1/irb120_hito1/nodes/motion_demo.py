@@ -9,7 +9,7 @@ from irb120_hito1.motion import interpolate_demo
 
 
 class MotionDemo(Node):
-    """Animate all six joints and the provisional gripper."""
+    """Anima las seis juntas revolutas del robot."""
 
     def __init__(self) -> None:
         super().__init__("irb120_motion_demo")
@@ -29,7 +29,7 @@ class MotionDemo(Node):
         )
         self.create_timer(1.0 / publish_rate, self._publish)
         self.get_logger().info(
-            "Demostracion automatica activa: seis ejes y pinza en movimiento."
+            "Demostración automática activa: seis ejes en movimiento."
         )
 
     def _publish(self) -> None:

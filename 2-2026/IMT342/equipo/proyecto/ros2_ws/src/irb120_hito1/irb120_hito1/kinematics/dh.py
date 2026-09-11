@@ -37,10 +37,6 @@ DH_PARAMETERS = (
     DHParameter(d_m=0.072, a_m=0.000, alpha_rad=0.0, theta_offset_rad=pi),
 )
 
-# tool0 -> gripper_base_link (20 mm) -> tcp_link (140 mm).
-TCP_OFFSET_M = 0.160
-
-
 def dh_transform(theta_rad: float, parameter: DHParameter) -> Matrix4:
     """Return the classical DH matrix Rz(theta) Tz(d) Tx(a) Rx(alpha)."""
     theta = theta_rad + parameter.theta_offset_rad
@@ -86,13 +82,6 @@ def forward_kinematics(joint_positions_rad: Iterable[float]) -> Matrix4:
     for angle, parameter in zip(joints, DH_PARAMETERS, strict=True):
         transform = transform @ dh_transform(float(angle), parameter)
     return transform
-
-
-def forward_kinematics_tcp(joint_positions_rad: Iterable[float]) -> Matrix4:
-    """Compute base_link -> tcp_link for the provisional parallel gripper."""
-    tool_to_tcp = np.eye(4, dtype=float)
-    tool_to_tcp[2, 3] = TCP_OFFSET_M
-    return forward_kinematics(joint_positions_rad) @ tool_to_tcp
 
 
 def position_error_m(reference: Matrix4, measured: Matrix4) -> float:

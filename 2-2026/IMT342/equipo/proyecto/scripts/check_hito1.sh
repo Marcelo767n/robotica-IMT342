@@ -26,7 +26,7 @@ colcon test --packages-select irb120_hito1 --event-handlers console_direct+
 colcon test-result --verbose
 ros2 run irb120_hito1 verify_model
 
-xacro_source="${workspace_dir}/src/irb120_hito1/urdf/irb120_with_gripper.urdf.xacro"
+xacro_source="${workspace_dir}/src/irb120_hito1/urdf/irb120.urdf.xacro"
 xacro_output="/tmp/imt342_irb120_from_xacro.urdf"
 xacro "${xacro_source}" -o "${xacro_output}"
 ros2 run irb120_hito1 verify_model --urdf "${xacro_output}"

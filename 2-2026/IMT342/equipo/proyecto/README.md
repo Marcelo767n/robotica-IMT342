@@ -1,6 +1,6 @@
 # Proyecto Final IMT-342 - Hito 1
 
-Gemelo digital modular del **ABB IRB 120-3/0.6 con pinza paralela** y validación
+Gemelo digital cinemático del **ABB IRB 120-3/0.6** y validación
 independiente de su cinemática directa. El proyecto sigue la Guía PFI y cumple
 el pasaporte del Hito 1: el error entre el modelo DH analítico y la cadena URDF
 es menor a `1e-6 m`.
@@ -8,12 +8,11 @@ es menor a `1e-6 m`.
 ## Estado
 
 - Paquete ROS 2 Jazzy compilado correctamente.
-- URDF/Xacro modular del robot y la pinza.
-- Seis articulaciones del brazo y dos articulaciones de la pinza visibles en RViz.
+- URDF/Xacro reducido a seis juntas revolutas y seis marcos móviles.
+- Sin juntas fijas auxiliares, pinza, masas, inercias ni colisiones en el Hito 1.
 - Movimiento manual y demostración automática.
 - Validación DH contra URDF en vivo y verificación offline.
-- Nueve pruebas automatizadas aprobadas.
-- Error máximo documentado: `2.220446049250e-16 m`.
+- Doce pruebas automatizadas aprobadas.
 - Geometría CAD real pendiente; se usan primitivas provisionales sin afectar la cinemática.
 
 ## Estructura
@@ -51,10 +50,10 @@ correcto después de ejecutar los dos `source` anteriores.
 
 ## Demostración recomendada para la defensa
 
-Para abrir RViz y mover automáticamente los seis ejes y la pinza:
+Para abrir RViz y mover automáticamente los seis ejes:
 
 ```bash
-ros2 launch irb120_hito1 display.launch.py demo_motion:=true
+ros2 launch irb120_hito1 display.launch.py demo_motion:=true use_slider_gui:=false
 ```
 
 La terminal debe mostrar repetidamente `APROBADO | DH vs URDF`.
@@ -66,15 +65,18 @@ Para abrir el modelo quieto y enviar una postura manual:
 ros2 launch irb120_hito1 display.launch.py
 ```
 
+Este lanzamiento abre RViz y un panel gráfico con deslizadores para J1-J6,
+además de botones para pose cero y las configuraciones de prueba A/B.
+Para omitir el panel use `use_slider_gui:=false`.
+
 En una segunda terminal repite los dos `source` y ejecuta:
 
 ```bash
 ros2 topic pub --once /irb120/joint_commands_deg std_msgs/msg/Float64MultiArray \
-  "{data: [30.0, -20.0, 15.0, 40.0, -35.0, 60.0, 0.010]}"
+  "{data: [30.0, -20.0, 15.0, 40.0, -35.0, 60.0]}"
 ```
 
-Los primeros seis valores son grados para `joint_1` a `joint_6`. El séptimo
-valor es la apertura de cada dedo de la pinza en metros, entre `0` y `0.015`.
+Los seis valores son grados para `joint_1` a `joint_6`.
 
 ## Verificación
 
@@ -85,26 +87,18 @@ ros2 run irb120_hito1 verify_model
 ros2 topic echo /irb120/fk_position_error_m
 ```
 
-Para validar el punto TCP en lugar de `tool0`:
-
-```bash
-ros2 launch irb120_hito1 display.launch.py target_frame:=tcp_link
-```
-
 ## Documentos
 
 - [Modelo cinemático](docs/hito1/modelo_cinematico.md)
 - [Trazabilidad](docs/hito1/trazabilidad.md)
 - [Resultados](docs/hito1/resultados.md)
 - [Guion de defensa](docs/hito1/guion_defensa.md)
-- [Manual completo en PDF](output/pdf/Guia_Practica_Hito1_ROS2_ABB_IRB120.pdf)
-- [Presentación para la defensa](output/presentation/Defensa_Hito1_ABB_IRB120_ROS2_v2.pptx)
+- [Manual completo corregido en PDF](output/pdf/Guia_Practica_Hito1_IRB120_6_Juntas_CORREGIDA.pdf)
+- [Presentación final para la defensa](output/presentation/Defensa_Hito1_IRB120_6_Juntas_FINAL.pptx)
 
 ## Modelo visual pendiente
 
 Las geometrías actuales son primitivas paramétricas. Cuando esté disponible el
-CAD, se reemplazarán únicamente los bloques `visual` y `collision` por meshes
-separados por eslabón. Los `joint`, frames, parámetros DH y pruebas no deben
-cambiar. El formato preferido es un paquete URDF/Xacro con `.dae` para visual y
-`.stl` para colisión; como alternativa sirve un ensamble STEP con cada eslabón
-como componente independiente.
+CAD, se reemplazarán los bloques `visual` por meshes separados por eslabón. Los
+seis `joint`, sus frames, parámetros DH y pruebas no deben cambiar. En una etapa
+posterior se podrán añadir meshes simplificados bajo `collision`.
