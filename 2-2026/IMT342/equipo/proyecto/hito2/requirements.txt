@@ -1,0 +1,7 @@
+numpy
+matplotlib>=3.8
+pytest
+jupyter
+nbconvert
+nbformat
+ipykernel
