@@ -9,3 +9,6 @@ ros2_ws/log/
 **/.pytest_cache/
 *.pyc
 .venv-notebooks/
+.venv/
+hito2/.venv/
+.ipynb_checkpoints/
