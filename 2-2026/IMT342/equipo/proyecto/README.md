@@ -1,4 +1,4 @@
-# Proyecto Final IMT-342 - Hito 1
+# Proyecto Final IMT-342 - Hitos 1 y 2
 
 Gemelo digital cinemático del **ABB IRB 120-3/0.6** y validación
 independiente de su cinemática directa. El proyecto sigue la Guía PFI y cumple
@@ -32,7 +32,7 @@ es menor a `1e-6 m`.
 │   ├── launch/                      # Lanzamiento integral
 │   ├── config/ y rviz/              # Parámetros y vista
 │   └── test/                        # Pruebas del pasaporte
-└── scripts/check_hito1.sh           # Comprobación automática opcional
+└── scripts/check_proyecto.sh           # Comprobación automática opcional
 ```
 
 ## Construcción manual, sin usar el script
@@ -89,6 +89,12 @@ colcon test-result --verbose
 ros2 run irb120_hito1 verify_model
 ros2 topic echo /irb120/fk_position_error_m
 ```
+
+## Hito 2
+
+Paquete `irb120_hito2`: cinemática inversa de Pieper, trayectorias LSPB, Jacobiano
+y dinámica, y el notebook del pasaporte (`notebooks/hito2_singularidad_q5.ipynb`).
+Detalles y uso en [docs/hito2/metodo_y_resultados.md](docs/hito2/metodo_y_resultados.md).
 
 ## Documentos
 

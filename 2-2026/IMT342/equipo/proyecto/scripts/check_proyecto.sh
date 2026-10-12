@@ -17,12 +17,12 @@ if ! command -v colcon >/dev/null 2>&1; then
 fi
 
 cd "${workspace_dir}"
-colcon build --symlink-install --packages-select irb120_hito1
+colcon build --symlink-install --packages-select irb120_hito1 irb120_hito2
 # shellcheck disable=SC1091
 set +u
 source "${workspace_dir}/install/setup.bash"
 set -u
-colcon test --packages-select irb120_hito1 --event-handlers console_direct+
+colcon test --packages-select irb120_hito1 irb120_hito2 --event-handlers console_direct+
 colcon test-result --verbose
 ros2 run irb120_hito1 verify_model
 
