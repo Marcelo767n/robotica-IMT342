@@ -37,6 +37,11 @@ DH_PARAMETERS = (
     DHParameter(d_m=0.072, a_m=0.000, alpha_rad=0.0, theta_offset_rad=pi),
 )
 
+
+# Pinza neumatica: el TCP esta sobre el eje Z de tool0 (mismo valor que el URDF).
+GRIPPER_TCP_Z_M = 0.100
+
+
 def dh_transform(theta_rad: float, parameter: DHParameter) -> Matrix4:
     """Return the classical DH matrix Rz(theta) Tz(d) Tx(a) Rx(alpha)."""
     theta = theta_rad + parameter.theta_offset_rad
@@ -82,6 +87,18 @@ def forward_kinematics(joint_positions_rad: Iterable[float]) -> Matrix4:
     for angle, parameter in zip(joints, DH_PARAMETERS, strict=True):
         transform = transform @ dh_transform(float(angle), parameter)
     return transform
+
+
+def tcp_transform(tool_to_tcp_z_m: float = GRIPPER_TCP_Z_M) -> Matrix4:
+    """Fixed transform tool0 -> gripper_tcp (traslacion pura sobre Z)."""
+    transform = np.eye(4, dtype=float)
+    transform[2, 3] = tool_to_tcp_z_m
+    return transform
+
+
+def forward_kinematics_tcp(joint_positions_rad: Iterable[float]) -> Matrix4:
+    """Compute base_link -> gripper_tcp: T_DH(q) multiplicada por la pinza."""
+    return forward_kinematics(joint_positions_rad) @ tcp_transform()
 
 
 def position_error_m(reference: Matrix4, measured: Matrix4) -> float:

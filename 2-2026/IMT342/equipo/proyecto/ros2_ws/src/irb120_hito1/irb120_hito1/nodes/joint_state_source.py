@@ -70,6 +70,7 @@ class JointStateSource(Node):
         if clamped != requested:
             self.get_logger().warning("Uno o mas angulos fueron limitados al rango oficial del robot.")
         self._positions = clamped
+
     def _publish(self) -> None:
         message = JointState()
         message.header.stamp = self.get_clock().now().to_msg()

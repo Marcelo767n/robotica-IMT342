@@ -60,7 +60,7 @@ def generate_launch_description() -> LaunchDescription:
                 parameters=[
                     {
                         "base_frame": "base_link",
-                        "target_frame": "tool0",
+                        "target_frame": "gripper_tcp",
                         "position_tolerance_m": 1.0e-6,
                         "urdf_path": str(urdf_path),
                     }
