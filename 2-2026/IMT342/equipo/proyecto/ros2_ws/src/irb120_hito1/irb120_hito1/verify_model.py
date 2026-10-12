@@ -37,7 +37,7 @@ VALIDATION_POSES = (
         joints_deg=(90.0, -60.0, 60.0, 90.0, 60.0, 180.0),
         reason=(
             "Activa los seis ejes y acerca el efector al eje de la base; es útil para "
-            "detectar signos/offsets y señalar una zona de posible colisión."
+            "detectar signos/offsets y estudiar la proximidad a la base."
         ),
     ),
 )
@@ -98,8 +98,8 @@ def verify(urdf_path: Path, tolerance_m: float) -> bool:
     print(f"Máximo error de orientación: {worst_rotation_error:.12e} rad")
     print("RESULTADO: APROBADO" if passed else "RESULTADO: NO APROBADO")
     print(
-        "Nota: la prueba B identifica riesgo geométrico; la detección formal de "
-        "colisiones requiere los meshes de colisión del CAD."
+        "Nota: la prueba B acerca el efector al eje de la base; la autocolisión "
+        "se evalúa con los meshes de colisión en irb120_hito2 (collision.py)."
     )
     return passed
 

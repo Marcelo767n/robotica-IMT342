@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Genera los meshes STL provisionales del IRB 120 y de la pinza neumatica.
+"""Genera el mesh parametrico de la pinza neumatica (visual y collision).
 
-Cada STL ya esta expresado en el marco de su eslabon, por lo que el URDF no
-necesita ningun `<origin>` dentro de `<visual>`: los unicos `origin` del modelo
-son los de las articulaciones. Cuando exista el CAD real basta reemplazar los
-archivos de `meshes/` conservando sus nombres.
+El STL ya esta expresado en el marco de su eslabon, por lo que el URDF no necesita
+ningun `<origin>` en `<visual>` ni en `<collision>`: los unicos `origin` del modelo
+son los de las articulaciones. El brazo usa el CAD real (scripts/import_cad.py).
 
 Uso:  python3 scripts/generate_meshes.py
 """
@@ -65,16 +64,9 @@ def write_stl(path, triangles):
             handle.write(struct.pack("<12fH", *normal, *a, *b, *c, 0))
 
 
+# El CAD real del brazo se importa con scripts/import_cad.py; aqui solo se genera la
+# pinza neumatica (modelo parametrico, aun sin CAD del fabricante) en el marco tool0.
 MESHES = {
-    "base_link": cylinder(0.09, 0.187, (0, 0, 0.0935)),
-    "link_1": cylinder(0.055, 0.290, (0, 0, 0.145)),
-    "link_2": box((0.270, 0.075, 0.075), (0.135, 0, 0)),
-    "link_3": box((0.070, 0.070, 0.070), (0.035, 0, 0)),
-    "link_4": cylinder(0.045, 0.302, (0, 0, 0.151)),
-    # El eje del cilindro va sobre +y del marco de link_5 (de 0 a 0.072 m).
-    "link_5": cylinder(0.035, 0.072, (0, 0.036, 0), axis="y"),
-    "tool0": cylinder(0.032, 0.018, (0, 0, -0.009)),
-    # Pinza neumatica de doble efecto en el marco tool0 (+z sale de la brida).
     "gripper_link": (
         cylinder(0.030, 0.015, (0, 0, 0.0075))
         + box((0.060, 0.040, 0.050), (0, 0, 0.040))
@@ -85,10 +77,11 @@ MESHES = {
 
 
 def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    for name, triangles in MESHES.items():
-        write_stl(OUTPUT_DIR / f"{name}.stl", triangles)
-        print(f"{name}.stl: {len(triangles)} triangulos")
+    for kind in ("visual", "collision"):
+        (OUTPUT_DIR / kind).mkdir(parents=True, exist_ok=True)
+        for name, triangles in MESHES.items():
+            write_stl(OUTPUT_DIR / kind / f"{name}.stl", triangles)
+            print(f"{kind}/{name}.stl: {len(triangles)} triangulos")
 
 
 if __name__ == "__main__":

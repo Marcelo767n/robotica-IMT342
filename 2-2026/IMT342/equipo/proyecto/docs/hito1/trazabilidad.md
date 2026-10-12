@@ -41,9 +41,9 @@ ros2 launch irb120_hito1 display.launch.py
 ros2 topic echo /irb120/fk_position_error_m
 ```
 
-## Pendiente para el gemelo visual definitivo
+## Gemelo visual y colisiones
 
-Falta sustituir los meshes provisionales por el CAD real. Se conservarán las seis
-juntas, sus seis marcos móviles y las pruebas cinemáticas. La detección formal
-de colisiones se añadirá después con meshes simplificados de colisión y la
-geometría del entorno; no se debe afirmar que RViz detecta colisiones.
+El brazo usa el CAD real del IRB 120 (ROS-Industrial, Apache-2.0) como `visual` y
+`collision`, sin `origin` propio. Solo la pinza es paramétrica. La autocolisión y el
+contacto con la mesa se evalúan en `irb120_hito2/kinematics/collision.py`; RViz solo
+visualiza, no detecta colisiones.

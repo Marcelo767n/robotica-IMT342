@@ -81,8 +81,10 @@ Error DH-URDF [m]: 1.118863022828e-16
 
 La prueba B usa `[90,-60,60,90,60,180]°`. Su `tool0` queda a `0.121409 m`
 del eje de la base, por lo que representa una postura plegada de riesgo
-geométrico. La detección formal de colisiones queda pendiente hasta recibir los
-meshes de colisión del CAD.
+geométrico. Con los meshes `collision` del CAD, el módulo
+`irb120_hito2/kinematics/collision.py` confirma que las pruebas A y B no tienen
+autocolisión ni contacto con la mesa (margen 5 mm), y detecta posturas agachadas
+contra la base o la mesa.
 
 ## Herramientas disponibles
 
@@ -90,7 +92,10 @@ En esta computadora ya están instalados `colcon`, `xacro`, `rclpy`, NumPy,
 `robot_state_publisher` y RViz 2. No queda una instalación pendiente para el
 Hito 1.
 
-## Pendiente que no afecta la calificación de hoy
+## Geometría CAD
 
-Falta reemplazar las primitivas/meshes provisionales por la geometría CAD real del ABB IRB
-120. La cadena de seis juntas y el pasaporte de precisión están completos.
+Los meshes `visual` y `collision` del brazo son el CAD real del IRB 120 publicado por
+ROS-Industrial (Apache-2.0), re-expresados en los marcos del URDF con
+`scripts/import_cad.py`; la atribución está en `meshes/NOTICE.md`. Solo la pinza sigue
+siendo un modelo paramétrico propio. La cadena de seis juntas y el pasaporte de
+precisión están completos.

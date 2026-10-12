@@ -16,19 +16,29 @@
   <link name="base_link">
     <visual>
       <geometry>
-        <mesh filename="package://irb120_hito1/meshes/base_link.stl"/>
+        <mesh filename="package://irb120_hito1/meshes/visual/base_link.stl"/>
       </geometry>
       <material name="abb_dark"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://irb120_hito1/meshes/collision/base_link.stl"/>
+      </geometry>
+    </collision>
   </link>
   <!-- J1: O1=I. -->
   <link name="link_1">
     <visual>
       <geometry>
-        <mesh filename="package://irb120_hito1/meshes/link_1.stl"/>
+        <mesh filename="package://irb120_hito1/meshes/visual/link_1.stl"/>
       </geometry>
       <material name="abb_orange"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://irb120_hito1/meshes/collision/link_1.stl"/>
+      </geometry>
+    </collision>
   </link>
   <joint name="joint_1" type="revolute">
     <parent link="base_link"/>
@@ -41,10 +51,15 @@
   <link name="link_2">
     <visual>
       <geometry>
-        <mesh filename="package://irb120_hito1/meshes/link_2.stl"/>
+        <mesh filename="package://irb120_hito1/meshes/visual/link_2.stl"/>
       </geometry>
       <material name="abb_orange"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://irb120_hito1/meshes/collision/link_2.stl"/>
+      </geometry>
+    </collision>
   </link>
   <joint name="joint_2" type="revolute">
     <parent link="link_1"/>
@@ -57,10 +72,15 @@
   <link name="link_3">
     <visual>
       <geometry>
-        <mesh filename="package://irb120_hito1/meshes/link_3.stl"/>
+        <mesh filename="package://irb120_hito1/meshes/visual/link_3.stl"/>
       </geometry>
       <material name="abb_orange"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://irb120_hito1/meshes/collision/link_3.stl"/>
+      </geometry>
+    </collision>
   </link>
   <joint name="joint_3" type="revolute">
     <parent link="link_2"/>
@@ -73,10 +93,15 @@
   <link name="link_4">
     <visual>
       <geometry>
-        <mesh filename="package://irb120_hito1/meshes/link_4.stl"/>
+        <mesh filename="package://irb120_hito1/meshes/visual/link_4.stl"/>
       </geometry>
       <material name="abb_orange"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://irb120_hito1/meshes/collision/link_4.stl"/>
+      </geometry>
+    </collision>
   </link>
   <joint name="joint_4" type="revolute">
     <parent link="link_3"/>
@@ -89,10 +114,15 @@
   <link name="link_5">
     <visual>
       <geometry>
-        <mesh filename="package://irb120_hito1/meshes/link_5.stl"/>
+        <mesh filename="package://irb120_hito1/meshes/visual/link_5.stl"/>
       </geometry>
       <material name="abb_orange"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://irb120_hito1/meshes/collision/link_5.stl"/>
+      </geometry>
+    </collision>
   </link>
   <joint name="joint_5" type="revolute">
     <parent link="link_4"/>
@@ -105,10 +135,15 @@
   <link name="tool0">
     <visual>
       <geometry>
-        <mesh filename="package://irb120_hito1/meshes/tool0.stl"/>
+        <mesh filename="package://irb120_hito1/meshes/visual/tool0.stl"/>
       </geometry>
       <material name="metal"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://irb120_hito1/meshes/collision/tool0.stl"/>
+      </geometry>
+    </collision>
   </link>
   <joint name="joint_6" type="revolute">
     <parent link="link_5"/>
@@ -121,10 +156,15 @@
   <link name="gripper_link">
     <visual>
       <geometry>
-        <mesh filename="package://irb120_hito1/meshes/gripper_link.stl"/>
+        <mesh filename="package://irb120_hito1/meshes/visual/gripper_link.stl"/>
       </geometry>
       <material name="abb_dark"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://irb120_hito1/meshes/collision/gripper_link.stl"/>
+      </geometry>
+    </collision>
   </link>
   <joint name="gripper_mount" type="fixed">
     <parent link="tool0"/>

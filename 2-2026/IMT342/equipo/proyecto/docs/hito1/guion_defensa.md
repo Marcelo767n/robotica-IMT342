@@ -43,8 +43,8 @@ mismo producto total con solamente seis joints.”
 
 “Hay un único `origin` por grado de libertad. Los visuales son meshes STL ya
 dibujados en el marco de su eslabón, así que no llevan `origin`. La pinza se
-acopla con dos juntas fijas que no son grados de libertad. Retiramos `<inertial>` y `<collision>`
-porque este hito no simula dinámica ni tiene todavía el CAD de colisión.”
+acopla con dos juntas fijas que no son grados de libertad. Retiramos `<inertial>`
+porque este hito no simula dinámica; los `<collision>` usan los meshes del CAD.”
 
 ### 4. Cálculo del error
 
@@ -59,10 +59,10 @@ matrices DH y otra recorre el XML URDF. El error de posición es
   de cero y representa una postura elevada de trabajo.
 - Prueba B: `[90,-60,60,90,60,180]°`. Activa los seis ejes y pliega el robot;
   `tool0` queda a `0.121409 m` del eje de la base. Es una configuración crítica
-  para revisar riesgo geométrico de colisión.
+  para revisar la proximidad a la base.
 
-“Todavía no afirmamos detección automática de colisión: para eso faltan meshes
-de colisión del CAD y el modelo del entorno.”
+“La autocolisión se evalúa con los meshes `collision` del CAD en
+`irb120_hito2/kinematics/collision.py`; RViz no detecta colisiones.”
 
 ## Demostración gráfica
 
@@ -93,4 +93,4 @@ Z local para que coincida con cada eje físico del ABB.
 punto flotante; está muy por debajo de `1e-6 m`.
 
 **¿RViz simula física o detecta colisiones?** No. RViz visualiza el URDF y TF.
-La dinámica y la detección de colisiones requieren modelos adicionales.
+La dinámica requiere masas e inercias (Hito 2) y las colisiones, el verificador propio.

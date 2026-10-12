@@ -17,7 +17,7 @@ el marco de `gripper_link` coincide con `tool0`) y `gripper_tcp_joint`, cuyo
 T_{TCP}(q)=T_{DH}(q)\,T_z(0.100)
 \]
 
-No se incluyen colisiones, masas ni inercias.
+Los bloques `collision` usan los meshes simplificados del CAD; no hay masas ni inercias.
 
 ## Tabla DH clásica
 
@@ -115,11 +115,10 @@ robot. Representa una postura de aproximación o manipulación.
 
 `qB=[90,-60,60,90,60,180]°`. También activa los seis ejes, pero pliega el brazo
 y acerca `tool0` al eje de la base. Sirve para detectar signos y offsets
-incorrectos y para marcar una configuración con mayor riesgo geométrico de
-colisión con la base o el entorno.
+incorrectos y para estudiar la proximidad a la base.
 
-La validación de Hito 1 comprueba la pose, no una colisión formal. Esa segunda
-etapa necesita meshes de colisión obtenidos del CAD y la geometría del entorno.
+La validación de Hito 1 comprueba la pose. La comprobación de colisión con los
+meshes `collision` del CAD vive en `irb120_hito2/kinematics/collision.py`.
 
 ## Límites articulares
 

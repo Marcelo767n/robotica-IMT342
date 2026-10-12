@@ -11,12 +11,12 @@ es menor a `1e-6 m`.
 - URDF/Xacro reducido a seis juntas revolutas y seis marcos móviles.
 - Un único `origin` por grado de libertad: los visuales son meshes STL ya colocados en el marco de su eslabón, sin `origin` propio.
 - Pinza neumática acoplada a `tool0` con dos juntas fijas (`gripper_mount`, `gripper_tcp_joint`); el TCP queda a 0.100 m de la brida.
-- Sin masas, inercias ni colisiones en el Hito 1.
+- Meshes `visual` y `collision` del CAD real del IRB 120 (ROS-Industrial, Apache-2.0); sin masas ni inercias en el URDF.
 - Movimiento manual y demostración automática.
 - Validación DH contra URDF en vivo y verificación offline.
-- Quince pruebas automatizadas aprobadas.
+- Treinta y ocho pruebas automatizadas aprobadas entre ambos paquetes.
 - La pose `[x, y, z]` del TF que muestra RViz se compara en vivo con la función DH analítica.
-- Geometría CAD real pendiente; los meshes de `meshes/` son provisionales (`scripts/generate_meshes.py`) y se reemplazan sin tocar la cinemática.
+- Solo la pinza es un modelo paramétrico propio (`scripts/generate_meshes.py`) mientras no haya su CAD.
 
 ## Estructura
 
@@ -105,10 +105,7 @@ Detalles y uso en [docs/hito2/metodo_y_resultados.md](docs/hito2/metodo_y_result
 - [Manual completo corregido en PDF](output/pdf/Guia_Practica_Hito1_IRB120_6_Juntas_CORREGIDA.pdf)
 - [Presentación final para la defensa](output/presentation/Defensa_Hito1_IRB120_6_Juntas_FINAL.pptx)
 
-## Modelo visual pendiente
+## Geometría CAD
 
-Las geometrías actuales son meshes STL provisionales generados con
-`scripts/generate_meshes.py`. Cuando esté disponible el CAD, se reemplazarán los
-archivos de `meshes/` conservando sus nombres. Los
-seis `joint`, sus frames, parámetros DH y pruebas no deben cambiar. En una etapa
-posterior se podrán añadir meshes simplificados bajo `collision`.
+El brazo usa el CAD real del ABB IRB 120 de ROS-Industrial (Apache-2.0), importado con
+`scripts/import_cad.py` a los marcos del URDF; ver `ros2_ws/src/irb120_hito1/meshes/NOTICE.md`.

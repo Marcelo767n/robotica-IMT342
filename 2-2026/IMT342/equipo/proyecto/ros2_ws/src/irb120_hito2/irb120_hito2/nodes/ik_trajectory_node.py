@@ -17,6 +17,7 @@ from std_msgs.msg import Float64MultiArray, String
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 from irb120_hito1.kinematics.dh import JOINT_NAMES, forward_kinematics_tcp, position_error_m
+from irb120_hito2.kinematics.collision import CollisionChecker
 from irb120_hito2.kinematics.pieper import inverse_kinematics_tcp
 from irb120_hito2.kinematics.transforms import pose_matrix, quaternion_to_matrix
 from irb120_hito2.trajectory.lspb import LspbTrajectory, plan_lspb
@@ -31,6 +32,8 @@ class IkTrajectoryNode(Node):
         self.declare_parameter("speed_scale", 0.3)
         self.declare_parameter("max_accel_rad_s2", 3.0)
         self.declare_parameter("publish_rate_hz", 50.0)
+        self.declare_parameter("check_collisions", True)
+        self.declare_parameter("collision_margin_m", 0.005)
         self._speed_scale = float(self.get_parameter("speed_scale").value)
         self._max_accel = float(self.get_parameter("max_accel_rad_s2").value)
         rate_hz = float(self.get_parameter("publish_rate_hz").value)
@@ -39,6 +42,10 @@ class IkTrajectoryNode(Node):
         if self._max_accel <= 0.0 or rate_hz <= 0.0:
             raise ValueError("max_accel_rad_s2 y publish_rate_hz deben ser positivos.")
 
+        self._margin = float(self.get_parameter("collision_margin_m").value)
+        self._checker = (
+            CollisionChecker() if self.get_parameter("check_collisions").value else None
+        )
         self._current_q: np.ndarray | None = None
         self._trajectory: LspbTrajectory | None = None
         self._start_time = None
@@ -88,6 +95,17 @@ class IkTrajectoryNode(Node):
             )
             return
         best = solutions[0]
+        if self._checker is not None:
+            free = [s for s in solutions if not self._checker.in_collision(np.array(s.q), self._margin)]
+            if not free:
+                pairs = self._checker.colliding_pairs(np.array(best.q), self._margin)
+                self._status(
+                    f"{len(solutions)} soluciones Pieper, todas en colision (p. ej. {pairs}); "
+                    "no se mueve el robot.",
+                    error=True,
+                )
+                return
+            best = free[0]
         goal = np.array(best.q)
         fk_error = position_error_m(target, forward_kinematics_tcp(goal))
         trajectory = plan_lspb(

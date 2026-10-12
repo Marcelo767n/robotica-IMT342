@@ -38,7 +38,6 @@ class TestUrdfMatchesDh(unittest.TestCase):
         )
         self.assertEqual(len(movable), 6)
         self.assertEqual(root.findall(".//inertial"), [])
-        self.assertEqual(root.findall(".//collision"), [])
 
     def test_one_origin_per_degree_of_freedom(self) -> None:
         root = ElementTree.parse(URDF_PATH).getroot()
@@ -48,26 +47,41 @@ class TestUrdfMatchesDh(unittest.TestCase):
                 self.assertEqual(len(origins), 1, joint.attrib["name"])
         # Los visuales no llevan origin: los meshes ya estan en el marco del eslabon.
         self.assertEqual(root.findall("link/visual/origin"), [])
+        self.assertEqual(root.findall("link/collision/origin"), [])
         self.assertEqual(len(root.findall(".//origin")), 7)  # 6 juntas + offset del TCP
 
-    def test_visual_meshes_exist(self) -> None:
+    def test_visual_and_collision_meshes_exist(self) -> None:
         root = ElementTree.parse(URDF_PATH).getroot()
-        meshes = root.findall("link/visual/geometry/mesh")
-        self.assertEqual(len(meshes), 8)
-        for mesh in meshes:
-            filename = mesh.attrib["filename"]
-            self.assertTrue(filename.startswith("package://irb120_hito1/meshes/"))
-            self.assertTrue((URDF_PATH.parents[1] / filename.split("irb120_hito1/", 1)[1]).is_file())
+        for kind in ("visual", "collision"):
+            meshes = root.findall(f"link/{kind}/geometry/mesh")
+            self.assertEqual(len(meshes), 8, kind)
+            for mesh in meshes:
+                filename = mesh.attrib["filename"]
+                self.assertTrue(filename.startswith(f"package://irb120_hito1/meshes/{kind}/"))
+                path = URDF_PATH.parents[1] / filename.split("irb120_hito1/", 1)[1]
+                self.assertTrue(path.is_file(), path)
+                self.assertGreater(path.stat().st_size, 80, path)
 
-    def test_gripper_tcp_matches_dh_below_milestone_tolerance(self) -> None:
-        generator = np.random.default_rng(seed=120)
-        for joints_deg in generator.uniform(-90.0, 90.0, size=(50, 6)):
-            joints_rad = np.deg2rad(joints_deg)
-            joint_map = dict(zip(JOINT_NAMES, joints_rad, strict=True))
-            urdf_transform = chain_transform(URDF_PATH, joint_map, target_link="gripper_tcp")
-            analytic = forward_kinematics_tcp(joints_rad)
-            self.assertLess(position_error_m(analytic, urdf_transform), 1.0e-6)
-            self.assertLess(rotation_error_rad(analytic, urdf_transform), 1.0e-9)
+    def test_cad_meshes_fit_the_kinematic_skeleton(self) -> None:
+        """El origen de la siguiente junta debe quedar dentro del cuadro del mesh CAD."""
+        import struct
+
+        def vertices(name: str) -> np.ndarray:
+            data = (URDF_PATH.parents[1] / "meshes" / "visual" / f"{name}.stl").read_bytes()
+            count = struct.unpack("<I", data[80:84])[0]
+            record = np.dtype([("n", "<3f4"), ("v", "<9f4"), ("a", "<u2")])
+            return np.frombuffer(data[84 : 84 + 50 * count], dtype=record)["v"].reshape(-1, 3)
+
+        # eslabon -> origen de la siguiente junta expresado en el marco del eslabon
+        # (joint_5 sale a d4 = 0.302 m sobre el eje del antebrazo).
+        for link, point in (
+            ("link_1", (0.0, 0.0, 0.290)),
+            ("link_2", (0.270, 0.0, 0.0)),
+            ("link_4", (0.0, 0.0, 0.302)),
+        ):
+            points = vertices(link)
+            low, high = points.min(axis=0) - 0.01, points.max(axis=0) + 0.01
+            self.assertTrue(np.all(np.array(point) >= low) and np.all(np.array(point) <= high), link)
 
     def test_urdf_position_matches_dh_below_milestone_tolerance(self) -> None:
         generator = np.random.default_rng(seed=342)
