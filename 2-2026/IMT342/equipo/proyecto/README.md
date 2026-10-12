@@ -14,7 +14,7 @@ es menor a `1e-6 m`.
 - Meshes `visual` y `collision` del CAD real del IRB 120 (ROS-Industrial, Apache-2.0); sin masas ni inercias en el URDF.
 - Movimiento manual y demostración automática.
 - Validación DH contra URDF en vivo y verificación offline.
-- Treinta y ocho pruebas automatizadas aprobadas entre ambos paquetes.
+- Treinta y nueve pruebas automatizadas aprobadas entre ambos paquetes.
 - La pose `[x, y, z]` del TF que muestra RViz se compara en vivo con la función DH analítica.
 - Solo la pinza es un modelo paramétrico propio (`scripts/generate_meshes.py`) mientras no haya su CAD.
 

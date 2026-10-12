@@ -45,6 +45,19 @@ class TestWristSingularity(unittest.TestCase):
         np.testing.assert_allclose(matrix, matrix.T, atol=1e-12)
         self.assertGreater(np.linalg.eigvalsh(matrix).min(), 0.0)
 
+    def test_gripper_mass_is_merged_into_link_six(self) -> None:
+        with_gripper, paper = dynamics.LINKS, dynamics.LINKS_NO_GRIPPER
+        self.assertAlmostEqual(
+            with_gripper[-1].mass_kg - paper[-1].mass_kg, dynamics.GRIPPER_MASS_KG, places=12
+        )
+        self.assertEqual(with_gripper[:5], paper[:5])
+        heavier = dynamics.gravity_vector(Q)
+        lighter = dynamics.gravity_vector(Q, dynamics.LINKS_NO_GRIPPER)
+        self.assertGreater(abs(heavier[1]) + abs(heavier[2]), abs(lighter[1]) + abs(lighter[2]))
+        self.assertGreater(
+            np.linalg.eigvalsh(dynamics.mass_matrix(Q, dynamics.LINKS_NO_GRIPPER)).min(), 0.0
+        )
+
     def test_coriolis_is_zero_at_rest_and_energy_consistent(self) -> None:
         np.testing.assert_allclose(dynamics.coriolis_vector(Q, np.zeros(6)), 0.0, atol=1e-12)
         q_dot = np.array([0.3, -0.2, 0.1, 0.5, -0.4, 0.2])

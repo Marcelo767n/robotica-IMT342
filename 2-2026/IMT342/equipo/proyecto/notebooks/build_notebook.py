@@ -77,7 +77,7 @@ except J.SingularityError as error:
 print("sigma_min(J) en q5=0:", J.smallest_singular_value(with_q5(0.0)))
 print("rango de J en q5=0:", np.linalg.matrix_rank(J.geometric_jacobian(with_q5(0.0)), tol=1e-9))"""),
 md("""## 3. Divergencia de aceleraciones y torques
-Parámetros inerciales: aproximaciones CAD de Truc & Lam (2018), ec. 18, en `irb120_hito2/dynamics.py`.
+Parámetros inerciales: aproximaciones CAD de Truc & Lam (2018), ec. 18, más la pinza SMC MHZ2-16D (115 g) fusionada con el eslabón 6, en `irb120_hito2/dynamics.py`.
 Se grafica la parte **dinámica** $\\tau-g(q)$, pues la gravedad es finita en la singularidad."""),
 code("""q5_dyn = np.logspace(-1, -5, 25)
 rows = []

@@ -32,7 +32,7 @@ ros2_ws/src/irb120_hito2/
 │       ├── ik_trajectory_node.py   # nodo principal
 │       └── send_target.py          # utilidad de terminal para enviar poses
 ├── launch/hito2.launch.py   # Hito 1 (sin sliders) + nodo IK
-└── test/                    # 23 pruebas (Pieper, LSPB, singularidad, colisión)
+└── test/                    # 24 pruebas (Pieper, LSPB, singularidad, colisión)
 ```
 
 El paquete reutiliza del Hito 1 la cinemática directa (`irb120_hito1.kinematics.dh`): la
@@ -210,7 +210,7 @@ for e in (0.1, 0.01, 0.001):
 ## 7. Dinámica (`dynamics.py`)
 
 Modelo Lagrangiano `τ = M(q) q̈ + c(q, q̇) + g(q)` con masas, centros de masa e inercias por
-CAD de Truc y Lam (2018) en los marcos DH de los eslabones 1 a 6 (sin pinza):
+CAD de Truc y Lam (2018) en los marcos DH de los eslabones 1 a 6, más la pinza **SMC MHZ2-16D** (115 g, centro de masa a 0.040 m de la brida) fusionada con el eslabón 6 por ejes paralelos (`LINKS`; `LINKS_NO_GRIPPER` reproduce el paper):
 
 - `mass_matrix(q)`: `Σ mᵢ JvᵀJv + Jwᵀ R I Rᵀ Jw` (simétrica y definida positiva).
 - `gravity_vector(q)`: `Σ mᵢ g Jv[z]`.
@@ -311,7 +311,7 @@ python3 -m venv --system-site-packages .venv-notebooks
 ## 11. Pruebas y verificación
 
 ```bash
-bash scripts/check_proyecto.sh        # compila, 38 pruebas, verify_model, xacro
+bash scripts/check_proyecto.sh        # compila, 39 pruebas, verify_model, xacro
 ```
 
 | Archivo | Qué comprueba |
@@ -337,5 +337,10 @@ y el tiempo mínimo se calcula en forma cerrada (más bisección).
 **¿Qué pasa en `q5 = 0`?** `J` pierde rango, `q̇` y `τ` divergen (`1/sin q5` y `1/sin² q5`)
 y Pieper solo determina `q4 + q6`.
 
+**¿Qué pinza se asumió?** La SMC MHZ2-16D: pinza paralela neumática de doble efecto, muy
+usada en robots pequeños, de 115 g, dentro de la carga adicional de 0.3 kg del IRB 120.
+Su masa es dato de hoja de datos; su geometría en el URDF sigue siendo paramétrica (el CAD
+lo publica SMC en su web).
+
 **¿Qué tan fiable es la dinámica?** Cualitativamente sí; cuantitativamente no, porque los
-parámetros inerciales son estimaciones por CAD y excluyen la pinza.
+parámetros inerciales son estimaciones por CAD.

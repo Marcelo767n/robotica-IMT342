@@ -53,7 +53,7 @@ Con el centro de muñeca como referencia, `J` es triangular por bloques:
 - Para `q5 = 0` exacto, `joint_velocity` lanza `SingularityError`.
 
 Evidencia ejecutada: [`notebooks/hito2_singularidad_q5.ipynb`](../../notebooks/hito2_singularidad_q5.ipynb).
-Los parámetros inerciales no incluyen la pinza y son aproximaciones por CAD:
+Los parámetros inerciales son aproximaciones por CAD más la masa de la pinza SMC MHZ2-16D (115 g):
 sirven para la tendencia, no como identificación del robot real.
 
 ## Uso

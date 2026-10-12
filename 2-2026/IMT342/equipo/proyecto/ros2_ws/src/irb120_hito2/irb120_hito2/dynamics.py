@@ -2,9 +2,11 @@
 
 Los parametros inerciales (masa, centro de masa e inercia por eslabon) son las
 aproximaciones por CAD de Truc y Lam (Turk J Elec Eng & Comp Sci, 2018, ec. 18),
-expresadas en los marcos DH clasicos de los eslabones 1 a 6. No incluyen la
-pinza. Se usan para evidenciar tendencias (divergencia en singularidad), no
-como identificacion del robot real.
+expresadas en los marcos DH clasicos de los eslabones 1 a 6. Por defecto se suma
+la pinza SMC MHZ2-16D (115 g, hoja de datos del fabricante) al eslabon 6 con el
+teorema de ejes paralelos; `links=LINKS_NO_GRIPPER` reproduce el paper tal cual.
+Se usan para evidenciar tendencias (divergencia en singularidad), no como
+identificacion del robot real.
 
 tau = M(q) q_ddot + c(q, q_dot) + g(q), con
 c = M_dot q_dot - 1/2 grad_q(q_dot^T M q_dot) calculada por diferencias finitas.
@@ -41,7 +43,7 @@ _LINK3_INERTIA = np.array(
     [[17.562, 0.0, -1.993], [0.0, 23.140, 0.0], [-1.993, 0.0, 11.589]]
 ) * 1.0e-3
 
-LINKS = (
+_PAPER_LINKS = (
     LinkInertia(4.248, (0.0, 0.054, 0.0), _diag(19.699, 14.484, 19.952, 1.0e-3)),
     LinkInertia(5.412, (-0.169, 0.0, 0.0), _diag(35.942, 83.522, 57.569, 1.0e-3)),
     LinkInertia(4.077, (-0.012, 0.0, 0.023), _LINK3_INERTIA),
@@ -51,11 +53,33 @@ LINKS = (
 )
 
 
-def _com_jacobians(q: np.ndarray):
+GRIPPER_MASS_KG = 0.115  # SMC MHZ2-16D
+GRIPPER_COM_M = (0.0, 0.0, 0.040)  # en el marco tool0 (aprox.: cuerpo de la pinza)
+
+
+def _parallel_axis(inertia: Matrix, mass: float, offset: np.ndarray) -> Matrix:
+    return inertia + mass * (float(offset @ offset) * np.eye(3) - np.outer(offset, offset))
+
+
+def _with_gripper(links: tuple[LinkInertia, ...]) -> tuple[LinkInertia, ...]:
+    """Fusiona la pinza (masa puntual) con el eslabon 6."""
+    wrist = links[-1]
+    mass = wrist.mass_kg + GRIPPER_MASS_KG
+    com = (wrist.mass_kg * np.array(wrist.com_m) + GRIPPER_MASS_KG * np.array(GRIPPER_COM_M)) / mass
+    inertia = _parallel_axis(wrist.inertia_kg_m2, wrist.mass_kg, np.array(wrist.com_m) - com)
+    inertia = _parallel_axis(inertia, GRIPPER_MASS_KG, np.array(GRIPPER_COM_M) - com)
+    return (*links[:-1], LinkInertia(mass, tuple(com), inertia))
+
+
+LINKS_NO_GRIPPER = _PAPER_LINKS
+LINKS = _with_gripper(_PAPER_LINKS)
+
+
+def _com_jacobians(q: np.ndarray, links: tuple[LinkInertia, ...] = LINKS):
     """Por eslabon: (Jv, Jw, R) del centro de masa en base_link."""
     frames = joint_frames(q)
     result = []
-    for link_index, link in enumerate(LINKS, start=1):
+    for link_index, link in enumerate(links, start=1):
         transform = frames[link_index]
         point = (transform @ np.array([*link.com_m, 1.0]))[:3]
         jv = np.zeros((3, 6))
@@ -68,22 +92,27 @@ def _com_jacobians(q: np.ndarray):
     return result
 
 
-def mass_matrix(q: np.ndarray) -> Matrix:
+def mass_matrix(q: np.ndarray, links: tuple[LinkInertia, ...] = LINKS) -> Matrix:
     matrix = np.zeros((6, 6))
-    for link, (jv, jw, rotation) in zip(LINKS, _com_jacobians(q), strict=True):
+    for link, (jv, jw, rotation) in zip(links, _com_jacobians(q, links), strict=True):
         inertia_base = rotation @ link.inertia_kg_m2 @ rotation.T
         matrix += link.mass_kg * jv.T @ jv + jw.T @ inertia_base @ jw
     return 0.5 * (matrix + matrix.T)
 
 
-def gravity_vector(q: np.ndarray) -> Matrix:
+def gravity_vector(q: np.ndarray, links: tuple[LinkInertia, ...] = LINKS) -> Matrix:
     torque = np.zeros(6)
-    for link, (jv, _, _) in zip(LINKS, _com_jacobians(q), strict=True):
+    for link, (jv, _, _) in zip(links, _com_jacobians(q, links), strict=True):
         torque += link.mass_kg * GRAVITY_M_S2 * jv[2, :]
     return torque
 
 
-def coriolis_vector(q: np.ndarray, q_dot: np.ndarray, step: float = 1.0e-6) -> Matrix:
+def coriolis_vector(
+    q: np.ndarray,
+    q_dot: np.ndarray,
+    step: float = 1.0e-6,
+    links: tuple[LinkInertia, ...] = LINKS,
+) -> Matrix:
     """c(q, q_dot) = M_dot q_dot - 1/2 grad_q(q_dot^T M q_dot)."""
     q = np.asarray(q, dtype=float)
     q_dot = np.asarray(q_dot, dtype=float)
@@ -91,21 +120,28 @@ def coriolis_vector(q: np.ndarray, q_dot: np.ndarray, step: float = 1.0e-6) -> M
     for k in range(6):
         delta = np.zeros(6)
         delta[k] = step
-        d_mass[k] = (mass_matrix(q + delta) - mass_matrix(q - delta)) / (2.0 * step)
+        d_mass[k] = (mass_matrix(q + delta, links) - mass_matrix(q - delta, links)) / (2.0 * step)
     m_dot_q_dot = sum(q_dot[k] * d_mass[k] @ q_dot for k in range(6))
     gradient = np.array([q_dot @ d_mass[k] @ q_dot for k in range(6)])
     return m_dot_q_dot - 0.5 * gradient
 
 
-def inverse_dynamics(q: np.ndarray, q_dot: np.ndarray, q_ddot: np.ndarray) -> Matrix:
+def inverse_dynamics(
+    q: np.ndarray,
+    q_dot: np.ndarray,
+    q_ddot: np.ndarray,
+    links: tuple[LinkInertia, ...] = LINKS,
+) -> Matrix:
     return (
-        mass_matrix(q) @ np.asarray(q_ddot, dtype=float)
-        + coriolis_vector(q, q_dot)
-        + gravity_vector(q)
+        mass_matrix(q, links) @ np.asarray(q_ddot, dtype=float)
+        + coriolis_vector(q, q_dot, links=links)
+        + gravity_vector(q, links)
     )
 
 
-def cartesian_demand(q: np.ndarray, twist: np.ndarray, accel: np.ndarray):
+def cartesian_demand(
+    q: np.ndarray, twist: np.ndarray, accel: np.ndarray, links: tuple[LinkInertia, ...] = LINKS
+):
     """(q_dot, q_ddot, tau) que exige seguir un twist/aceleracion cartesianos.
 
     q_dot = J^-1 v ;  q_ddot = J^-1 (a - J_dot q_dot) ;  tau = inverse_dynamics.
@@ -116,4 +152,4 @@ def cartesian_demand(q: np.ndarray, twist: np.ndarray, accel: np.ndarray):
     q_ddot = solve_with_jacobian(
         q, np.asarray(accel, dtype=float) - jacobian_dot(q, q_dot) @ q_dot, jacobian
     )
-    return q_dot, q_ddot, inverse_dynamics(q, q_dot, q_ddot)
+    return q_dot, q_ddot, inverse_dynamics(q, q_dot, q_ddot, links)
