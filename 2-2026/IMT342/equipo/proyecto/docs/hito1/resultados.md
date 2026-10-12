@@ -22,11 +22,12 @@ colcon test --packages-select irb120_hito1 --event-handlers console_direct+
 colcon test-result --verbose
 ```
 
-Resultado: `12 tests, 0 errors, 0 failures, 0 skipped`. Incluyen cinemática DH,
+Resultado: `15 tests, 0 errors, 0 failures, 0 skipped`. Incluyen cinemática DH,
 límites y continuidad de la demostración automática, y equivalencia URDF-DH
 con 100 posturas pseudoaleatorias reproducibles. También verifican exactamente
-seis joints revolutos, siete links contando `base_link`, y cero bloques
-`fixed`, `inertial` o `collision`.
+seis joints revolutos más las dos juntas fijas de la pinza, nueve links, un único
+`origin` por junta (siete en total contando el offset del TCP), meshes existentes,
+y cero bloques `inertial` o `collision`.
 
 ## Pasaporte offline
 
@@ -91,5 +92,5 @@ Hito 1.
 
 ## Pendiente que no afecta la calificación de hoy
 
-Falta reemplazar las primitivas visuales por la geometría CAD real del ABB IRB
+Falta reemplazar las primitivas/meshes provisionales por la geometría CAD real del ABB IRB
 120. La cadena de seis juntas y el pasaporte de precisión están completos.

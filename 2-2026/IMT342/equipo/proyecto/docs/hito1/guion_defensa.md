@@ -3,7 +3,7 @@
 ## Preparación
 
 ```bash
-cd /home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/ros2_ws
+cd <ruta-del-repo>/2-2026/IMT342/equipo/proyecto/ros2_ws
 source /opt/ros/jazzy/setup.bash
 colcon build --symlink-install --packages-select irb120_hito1
 source install/setup.bash
@@ -12,7 +12,7 @@ colcon test-result --verbose
 ros2 run irb120_hito1 verify_model
 ```
 
-Resultado esperado: `12 tests, 0 errors, 0 failures, 0 skipped` y
+Resultado esperado: `15 tests, 0 errors, 0 failures, 0 skipped` y
 `RESULTADO: APROBADO`.
 
 ## Explicación sugerida
@@ -20,9 +20,9 @@ Resultado esperado: `12 tests, 0 errors, 0 failures, 0 skipped` y
 ### 1. Estructura
 
 “El URDF corregido tiene seis juntas revolutas y seis marcos móviles. El árbol
-es `base_link → link_1 → link_2 → link_3 → link_4 → link_5 → tool0`. El marco
-base es necesario para conectar las seis juntas, pero no cuenta como junta. No
-hay frames auxiliares ni joints fijos.”
+es `base_link → link_1 → … → link_5 → tool0`, y de `tool0` cuelgan la pinza
+(`gripper_link`) y su punto de agarre `gripper_tcp` mediante dos juntas fijas, que
+no son grados de libertad. Cada una de las seis juntas tiene un único `origin`.”
 
 Para demostrarlo:
 
@@ -41,8 +41,9 @@ mismo producto total con solamente seis joints.”
 
 ### 3. Geometría frente a física
 
-“Los números de `<visual><origin>` solo centran las figuras primitivas en RViz.
-No crean frames ni cambian la cinemática. Retiramos `<inertial>` y `<collision>`
+“Hay un único `origin` por grado de libertad. Los visuales son meshes STL ya
+dibujados en el marco de su eslabón, así que no llevan `origin`. La pinza se
+acopla con dos juntas fijas que no son grados de libertad. Retiramos `<inertial>` y `<collision>`
 porque este hito no simula dinámica ni tiene todavía el CAD de colisión.”
 
 ### 4. Cálculo del error

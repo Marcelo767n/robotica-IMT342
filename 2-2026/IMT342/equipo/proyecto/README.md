@@ -9,11 +9,14 @@ es menor a `1e-6 m`.
 
 - Paquete ROS 2 Jazzy compilado correctamente.
 - URDF/Xacro reducido a seis juntas revolutas y seis marcos móviles.
-- Sin juntas fijas auxiliares, pinza, masas, inercias ni colisiones en el Hito 1.
+- Un único `origin` por grado de libertad: los visuales son meshes STL ya colocados en el marco de su eslabón, sin `origin` propio.
+- Pinza neumática acoplada a `tool0` con dos juntas fijas (`gripper_mount`, `gripper_tcp_joint`); el TCP queda a 0.100 m de la brida.
+- Sin masas, inercias ni colisiones en el Hito 1.
 - Movimiento manual y demostración automática.
 - Validación DH contra URDF en vivo y verificación offline.
-- Doce pruebas automatizadas aprobadas.
-- Geometría CAD real pendiente; se usan primitivas provisionales sin afectar la cinemática.
+- Quince pruebas automatizadas aprobadas.
+- La pose `[x, y, z]` del TF que muestra RViz se compara en vivo con la función DH analítica.
+- Geometría CAD real pendiente; los meshes de `meshes/` son provisionales (`scripts/generate_meshes.py`) y se reemplazan sin tocar la cinemática.
 
 ## Estructura
 
@@ -37,7 +40,7 @@ es menor a `1e-6 m`.
 Desde una terminal nueva:
 
 ```bash
-cd /home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto
+cd <ruta-del-repo>/2-2026/IMT342/equipo/proyecto
 source /opt/ros/jazzy/setup.bash
 cd ros2_ws
 colcon build --symlink-install --packages-select irb120_hito1
@@ -98,7 +101,8 @@ ros2 topic echo /irb120/fk_position_error_m
 
 ## Modelo visual pendiente
 
-Las geometrías actuales son primitivas paramétricas. Cuando esté disponible el
-CAD, se reemplazarán los bloques `visual` por meshes separados por eslabón. Los
+Las geometrías actuales son meshes STL provisionales generados con
+`scripts/generate_meshes.py`. Cuando esté disponible el CAD, se reemplazarán los
+archivos de `meshes/` conservando sus nombres. Los
 seis `joint`, sus frames, parámetros DH y pruebas no deben cambiar. En una etapa
 posterior se podrán añadir meshes simplificados bajo `collision`.

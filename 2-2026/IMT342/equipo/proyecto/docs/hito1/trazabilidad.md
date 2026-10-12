@@ -9,6 +9,9 @@ sección 4, y worksheet de validación URDF.
 | Seis juntas | `joint_1` a `joint_6` | prueba XML exige exactamente 6 joints revolutos |
 | Árbol mínimo | `base_link → link_1 → … → link_5 → tool0` | `check_urdf`, sin ramas ni joints fijos |
 | Seis marcos móviles | `link_1` a `link_5` y `tool0` | TF y prueba estructural |
+| Pinza acoplada (Guía PFI, Hito 1) | `gripper_link` y `gripper_tcp` con 2 joints fixed | pruebas de estructura y de TCP |
+| Un `origin` por grado de libertad | visuales con mesh STL sin `origin` | prueba `test_one_origin_per_degree_of_freedom` |
+| Pose de RViz = función analítica | `fk_validator` compara TF con DH | `/irb120/fk_tf_position_error_m` |
 | Sin física innecesaria | no hay `inertial` ni `collision` | prueba estructural automática |
 | Conversión DH a URDF | origins `O1...O6` en `irb120.macro.xacro` | 100 posturas pseudoaleatorias |
 | Cinemática directa analítica | `kinematics/dh.py` | pose cero y ortonormalidad |
@@ -40,7 +43,7 @@ ros2 topic echo /irb120/fk_position_error_m
 
 ## Pendiente para el gemelo visual definitivo
 
-Falta sustituir las primitivas por meshes CAD reales. Se conservarán las seis
+Falta sustituir los meshes provisionales por el CAD real. Se conservarán las seis
 juntas, sus seis marcos móviles y las pruebas cinemáticas. La detección formal
 de colisiones se añadirá después con meshes simplificados de colisión y la
 geometría del entorno; no se debe afirmar que RViz detecta colisiones.

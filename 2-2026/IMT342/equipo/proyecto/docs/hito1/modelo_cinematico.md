@@ -5,8 +5,19 @@
 El URDF contiene únicamente la cadena cinemática del brazo: seis juntas
 revolutas (`joint_1` a `joint_6`) y seis marcos móviles (`link_1` a `link_5` y
 `tool0`). `base_link` es el marco de referencia base y no se cuenta como una
-junta. No se incluyen pinza, juntas fijas auxiliares, colisiones, masas ni
-inercias. Las primitivas bajo `<visual>` solo permiten ver el brazo en RViz.
+junta. Cada junta tiene un único `origin`; los visuales son meshes STL ya
+expresados en el marco de su eslabón, sin `origin` propio.
+
+La pinza neumática (entregable de la Guía PFI) se acopla a `tool0` con dos
+juntas **fijas**, que no son grados de libertad: `gripper_mount` (sin `origin`,
+el marco de `gripper_link` coincide con `tool0`) y `gripper_tcp_joint`, cuyo
+único offset es `Tz(0.100 m)` hasta el punto de agarre `gripper_tcp`. Así:
+
+\[
+T_{TCP}(q)=T_{DH}(q)\,T_z(0.100)
+\]
+
+No se incluyen colisiones, masas ni inercias.
 
 ## Tabla DH clásica
 
@@ -63,17 +74,14 @@ La igualdad que se verifica numéricamente es:
 O_1R_z(q_1)O_2R_z(q_2)\cdots O_6R_z(q_6)=T_{DH}(q)
 \]
 
-## Qué significan los números de `<visual><origin>`
+## Por qué los visuales no tienen `origin`
 
-Un `origin` dentro de `<joint>` modifica la cinemática y proviene de DH. Un
-`origin` dentro de `<visual>` únicamente coloca el centro de una caja, esfera o
-cilindro para que se vea entre dos articulaciones. Por ejemplo, un cilindro de
-longitud `0.290 m` usa un centro en `z=0.145 m`; eso no crea otro frame ni
-afecta la matriz cinemática.
-
-Los antiguos valores como masa `4.248 kg`, centro de masa e inercias pertenecen
-a un modelo dinámico. Se retiraron porque no son necesarios para validar URDF,
-TF y cinemática directa en este hito.
+Solo los `origin` de `<joint>` pertenecen a la cinemática y provienen de DH
+(uno por grado de libertad). Los STL de `meshes/` ya están dibujados en el marco
+de cada eslabón (por ejemplo, el cilindro de `link_1` va de `z=0` a `z=0.290 m`
+dentro del propio archivo), de modo que `<visual>` solo referencia el mesh y no
+añade traslaciones ni rotaciones. Los antiguos valores de masa `4.248 kg`, centro
+de masa e inercias pertenecen a un modelo dinámico y se retiraron.
 
 ## Cálculo del error
 
