@@ -1,5 +1,7 @@
 # Hito 2: cinemática inversa de Pieper, LSPB y singularidad q5 = 0
 
+> Guía detallada con ejemplos de cada módulo: [guia_hito2.md](guia_hito2.md).
+
 Requisito (Guía PFI, Hito 2): nodo ROS en Python que reciba una pose, ejecute
 Pieper y genere una trayectoria LSPB; pasaporte: notebook que muestre la
 divergencia analítica de velocidades y torques en `q5 = 0`.
@@ -12,6 +14,7 @@ divergencia analítica de velocidades y torques en `q5 = 0`.
 | `kinematics/jacobian.py` | Jacobiano geométrico, `det J`, número de condición, `SingularityError` |
 | `dynamics.py` | `M(q)`, `c(q, q̇)`, `g(q)` y torques; parámetros CAD de Truc y Lam (2018) |
 | `trajectory/lspb.py` | LSPB sincronizado con límites de velocidad y aceleración |
+| `kinematics/collision.py` | Autocolisión y mesa con los meshes `collision` del CAD |
 | `nodes/ik_trajectory_node.py` | `PoseStamped` → Pieper → LSPB → `/irb120/joint_commands_deg` |
 | `nodes/send_target.py` | Publica una pose objetivo desde terminal |
 

@@ -94,7 +94,7 @@ ros2 topic echo /irb120/fk_position_error_m
 
 Paquete `irb120_hito2`: cinemática inversa de Pieper, trayectorias LSPB, Jacobiano
 y dinámica, y el notebook del pasaporte (`notebooks/hito2_singularidad_q5.ipynb`).
-Detalles y uso en [docs/hito2/metodo_y_resultados.md](docs/hito2/metodo_y_resultados.md).
+Guía completa con ejemplos: [docs/hito2/guia_hito2.md](docs/hito2/guia_hito2.md); resumen: [docs/hito2/metodo_y_resultados.md](docs/hito2/metodo_y_resultados.md).
 
 ## Documentos
 
