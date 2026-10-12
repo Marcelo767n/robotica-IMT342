@@ -8,3 +8,18 @@ este proyecto con `scripts/import_cad.py` (rotación y traslación rígidas; la 
 
 `gripper_link.stl` es un modelo paramétrico propio (`scripts/generate_meshes.py`) mientras no
 se disponga del CAD de la pinza real.
+
+## Cómo reemplazar la pinza por el CAD de SMC (MHZ2-16D)
+
+El sitio de SMC exige verificación anti-bots y una cuenta para descargar, por eso no se pudo
+automatizar. Pasos: en <https://www.smcworld.com/cad3d> abrir la serie **MHZ2**, elegir
+**MHZ2-16D**, descargar en formato **STL** y ejecutar
+
+```bash
+python3 scripts/import_gripper_cad.py MHZ2-16D.stl --scale 0.001 [--rpy-deg R P Y] [--offset X Y Z]
+```
+
+El script lo lleva al marco `tool0` (cara de montaje en z = 0, dedos hacia +Z) y reemplaza
+`visual/gripper_link.stl` y `collision/gripper_link.stl`. Luego ajustar `gripper_tcp_z` en
+`urdf/irb120.macro.xacro` y en `GRIPPER_TCP_Z_M` de `kinematics/dh.py` si el centro de agarre
+cambia, y regenerar el URDF y correr `bash scripts/check_proyecto.sh`.
