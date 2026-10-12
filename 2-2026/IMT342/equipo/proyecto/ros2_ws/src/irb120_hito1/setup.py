@@ -29,6 +29,7 @@ setup(
         *package_files("launch"),
         *package_files("config"),
         *package_files("rviz"),
+        *package_files("meshes"),
     ],
     install_requires=["setuptools", "numpy"],
     zip_safe=True,
