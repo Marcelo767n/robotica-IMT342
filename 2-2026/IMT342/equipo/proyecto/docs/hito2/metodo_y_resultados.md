@@ -12,7 +12,7 @@ divergencia analítica de velocidades y torques en `q5 = 0`.
 |---|---|
 | `kinematics/pieper.py` | IK analítica por Pieper (sin MoveIt ni solvers numéricos) |
 | `kinematics/jacobian.py` | Jacobiano geométrico, `det J`, número de condición, `SingularityError` |
-| `dynamics.py` | `M(q)`, `c(q, q̇)`, `g(q)` y torques; parámetros CAD de Truc y Lam (2018) |
+| `dynamics.py` | `M(q)`, `c(q, q̇)`, `g(q)` y torques; parámetros CAD de Truc y Lam (2020) |
 | `trajectory/lspb.py` | LSPB sincronizado con límites de velocidad y aceleración |
 | `kinematics/collision.py` | Autocolisión y mesa con los meshes `collision` del CAD |
 | `nodes/ik_trajectory_node.py` | `PoseStamped` → Pieper → LSPB → `/irb120/joint_commands_deg` |

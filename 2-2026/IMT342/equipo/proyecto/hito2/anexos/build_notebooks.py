@@ -5,7 +5,7 @@ from pathlib import Path
 import nbformat as nbf
 
 md, code = nbf.v4.new_markdown_cell, nbf.v4.new_code_cell
-OUT = Path(__file__).parent / "notebooks"
+OUT = Path(__file__).parent
 OUT.mkdir(exist_ok=True)
 
 SETUP = """import sys

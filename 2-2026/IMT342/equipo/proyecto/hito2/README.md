@@ -1,29 +1,32 @@
-# Hito 2 — Python puro (sin ROS)
+# Hito 2 — Pipeline del ABB IRB 120 en Python puro (sin ROS)
 
-Cinemática inversa de **Pieper**, trayectorias **LSPB**, Jacobiano, dinámica y análisis de la singularidad `q5 = 0`
-del ABB IRB 120. Solo necesita Python 3 y NumPy; los notebooks añaden Matplotlib y Jupyter.
+Pipeline completo de la guía oficial del Hito 2 (IMT-342), con **dos poses**: la pose inicial (posición de
+calibración ABB, todos los ejes en 0°, constante `HOME_Q`) y la pose objetivo que da el docente:
+`T_d → Pieper (8 ramas) → validación FK → LSPB → Jacobiano / singularidad → dinámica 1R → τ(t)`.
+Solo necesita Python 3 y NumPy; los notebooks añaden Matplotlib y Jupyter. TCP a **0.150 m** de la brida.
 
 ## Contenido
 
 ```text
 hito2/
-├── irb120/                          # paquete Python (solo NumPy)
-│   ├── dh.py                        # tabla DH y cinemática directa (a tool0 y al TCP de la pinza)
-│   ├── pieper.py                    # cinemática inversa analítica, hasta 8 soluciones
-│   ├── lspb.py                      # perfil LSPB sincronizado con límites de v y a
-│   ├── jacobian.py                  # Jacobiano 6x6, det J, cond(J), SingularityError
-│   ├── dynamics.py                  # M(q), c(q, q̇), g(q) y torques (incluye la pinza SMC MHZ2-16D)
-│   └── transforms.py                # rpy, cuaterniones y matrices de pose
-├── notebooks/
-│   ├── 01_cinematica_inversa_pieper.ipynb   # IK de Pieper: ejemplos, alcance y validación de 1000 poses
-│   ├── 02_trayectorias_lspb.ipynb           # LSPB: perfiles, sincronía y efecto de los límites
-│   └── 03_singularidad_q5.ipynb             # PASAPORTE: divergencia de velocidades y torques en q5 = 0
-├── tests/                           # 24 pruebas (pytest)
-├── build_notebooks.py               # regenera y deja listos los tres notebooks
+├── irb120/                  # paquete Python (solo NumPy)
+│   ├── dh.py                # tabla DH, FK a tool0 y al TCP, límites y velocidades del datasheet
+│   ├── pieper.py            # IK analítica: 8 ramas, real/admisible, analyze_pose, select_solution   (A)
+│   ├── validation.py        # validación de candidatos por FK y prueba de ida y vuelta              (B)
+│   ├── lspb.py              # LSPB sincronizado, comprobaciones y límites justificados              (C)
+│   ├── jacobian.py          # Jacobiano, validación numérica, rango por SVD, direcciones perdidas   (D)
+│   ├── dynamics_1r.py       # modelo 1R del hombro con parámetros del CAD                           (E)
+│   ├── dynamics.py          # modelo completo M, c, g (fuente de parámetros y validación del 1R)
+│   └── transforms.py        # rpy, cuaterniones y matrices de pose
+├── Hito2_IRB120_pipeline.ipynb   # ENTREGABLE: notebook integrado, ejecutado (32 verificaciones)
+├── build_pipeline_notebook.py    # regenera y ejecuta el notebook de inicio a fin
+├── figuras/                 # figuras exportadas por el notebook (PDF/PNG) para el informe IEEE
+├── analizar_pose.py         # CLI: escribe una pose y te dice si es alcanzable (tabla de 8 ramas)
+├── explicacion/             # un .md por módulo: código + matemática paso a paso + ejemplo a mano
+├── tests/                   # 49 pruebas (pytest)
+├── anexos/                  # notebooks y explicación de la versión anterior del hito
 └── requirements.txt
 ```
-
-Los notebooks ya están ejecutados: se pueden leer en VS Code o en GitHub sin correr nada.
 
 ## Cómo ejecutarlo
 
@@ -31,27 +34,30 @@ Desde esta carpeta (`hito2/`):
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-python -m pytest -q tests                 # 24 pruebas
-jupyter lab notebooks/                    # abrir y ejecutar los notebooks
+python -m pytest -q tests                        # 49 pruebas
+jupyter lab Hito2_IRB120_pipeline.ipynb          # editar POSE_OBJETIVO (sección 1.3) y Restart & Run All
+python build_pipeline_notebook.py                # o regenerarlo y ejecutarlo sin abrir Jupyter
+python analizar_pose.py 0.40 0.10 0.35 0 180 0    # x y z [m]  roll pitch yaw [grados]
 ```
 
 Uso rápido desde Python:
 
 ```python
 import numpy as np
-from irb120.dh import forward_kinematics_tcp
-from irb120.pieper import inverse_kinematics_tcp
-from irb120.lspb import plan_lspb
+from irb120.dh import HOME_Q
+from irb120.transforms import pose_from_xyz_rpy_deg
+from irb120.pieper import analyze_pose, select_solution
+from irb120.lspb import plan_lspb, default_limits
 
-q = np.deg2rad([30, -20, 15, 40, -35, 60])
-T = forward_kinematics_tcp(q)                          # pose del TCP
-sol = inverse_kinematics_tcp(T, q)[0]                  # solución más cercana a q
-traj = plan_lspb(np.zeros(6), np.array(sol.q), np.deg2rad([75, 75, 75, 96, 96, 126]), 3.0)
-print(traj.tf, traj.sample(traj.tf / 2)[0])
+T_d = pose_from_xyz_rpy_deg(0.40, 0.10, 0.35, 0, 180, 0)
+report = analyze_pose(T_d)                 # 8 ramas verificadas por FK
+print(report.verdict)
+q_f = np.array(select_solution(report, HOME_Q).q)          # desde la pose inicial
+traj = plan_lspb(HOME_Q, q_f, *default_limits())
+print(traj.tf, traj.tb)
 ```
 
-Qué hace cada módulo, con ejemplos y las fórmulas, está en
-[`docs/hito2/guia_hito2.md`](../docs/hito2/guia_hito2.md).
+La explicación de cada módulo está en [`explicacion/`](explicacion/README.md).
 
 ## Relación con el resto del repositorio
 

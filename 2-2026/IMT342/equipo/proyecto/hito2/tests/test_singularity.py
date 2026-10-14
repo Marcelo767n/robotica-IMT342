@@ -69,6 +69,8 @@ class TestWristSingularity(unittest.TestCase):
         )
 
     def test_dynamic_torque_demand_diverges_near_singularity(self) -> None:
+        # Caso de SEGUIMIENTO CARTESIANO: q_ddot = J^-1 (a - J_dot q_dot) explota y con el M q_ddot.
+        # Es consecuencia de exigir ese twist/aceleracion, no un "torque infinito" propio de la singularidad.
         def inertial(e: float) -> float:
             _, _, tau = dynamics.cartesian_demand(with_q5(e), TWIST, ACCEL)
             return float(np.linalg.norm(tau - dynamics.gravity_vector(with_q5(e))))

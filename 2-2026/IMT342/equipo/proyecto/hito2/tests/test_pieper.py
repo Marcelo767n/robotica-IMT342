@@ -8,7 +8,16 @@ from irb120.dh import (
     position_error_m,
     rotation_error_rad,
 )
-from irb120.pieper import LIMITS_RAD, inverse_kinematics, inverse_kinematics_tcp
+from irb120.pieper import (
+    LIMITS_RAD,
+    REACH_MAX_M,
+    analyze_pose,
+    enumerate_candidates,
+    inverse_kinematics,
+    inverse_kinematics_tcp,
+    select_solution,
+)
+from irb120.transforms import pose_matrix, rpy_to_matrix
 
 
 class TestPieper(unittest.TestCase):
@@ -57,6 +66,64 @@ class TestPieper(unittest.TestCase):
             inverse_kinematics(np.eye(3))
         with self.assertRaises(ValueError):
             inverse_kinematics(np.full((4, 4), np.nan))
+
+
+class TestEightBranches(unittest.TestCase):
+    def test_always_eight_candidates_in_fixed_order(self) -> None:
+        q = np.deg2rad([20.0, 10.0, -30.0, 15.0, 50.0, 30.0])
+        candidates = enumerate_candidates(forward_kinematics(q), q)
+        self.assertEqual(len(candidates), 8)
+        self.assertEqual([c.branch for c in candidates], list(range(1, 9)))
+        self.assertEqual(len({(c.arm, c.elbow, c.wrist) for c in candidates}), 8)
+
+    def test_every_real_branch_reproduces_the_pose_even_outside_limits(self) -> None:
+        generator = np.random.default_rng(seed=7)
+        for _ in range(100):
+            q = generator.uniform(LIMITS_RAD[:, 0], LIMITS_RAD[:, 1])
+            report = analyze_pose(forward_kinematics_tcp(q), q)
+            for candidate, check in zip(report.candidates, report.checks):
+                if candidate.real:
+                    self.assertTrue(check.accepted, msg=f"rama {candidate.branch}")
+            self.assertTrue(report.reachable)
+
+    def test_unreachable_pose_has_no_real_branch(self) -> None:
+        target = pose_matrix((1.0, 0.0, 0.5), np.eye(3))
+        report = analyze_pose(target)
+        self.assertFalse(report.geometrically_reachable)
+        self.assertGreater(report.shoulder_to_wrist_m, REACH_MAX_M)
+        self.assertIn("fuera de", report.verdict)
+        self.assertEqual(report.admissible, [])
+
+    def test_pose_that_exists_only_outside_joint_limits(self) -> None:
+        q = np.deg2rad([-106.8, -85.6, 90.1, -79.1, -5.3, 173.1])  # q3 = 90.1 > 70 deg
+        report = analyze_pose(forward_kinematics_tcp(q))
+        self.assertTrue(report.geometrically_reachable)
+        self.assertFalse(report.reachable)
+        self.assertIn("limites", report.verdict)
+
+    def test_pose_from_xyz_rpy_is_reachable(self) -> None:
+        target = pose_matrix((0.40, 0.10, 0.35), rpy_to_matrix(0.0, np.pi, 0.0))
+        report = analyze_pose(target)
+        self.assertTrue(report.reachable)
+        for candidate in report.admissible:
+            reached = forward_kinematics_tcp(candidate.q)
+            self.assertLess(position_error_m(target, reached), 1e-9)
+
+    def test_home_pose_is_calibration_position_and_is_recovered(self) -> None:
+        from irb120.dh import HOME_Q
+        target = forward_kinematics_tcp(HOME_Q)
+        np.testing.assert_allclose(target[:3, 3], [0.374 + 0.150, 0.0, 0.630], atol=1e-12)
+        report = analyze_pose(target, HOME_Q)
+        self.assertTrue(report.reachable)
+        chosen = select_solution(report, HOME_Q)
+        np.testing.assert_allclose(chosen.q, HOME_Q, atol=1e-12)
+        self.assertTrue(chosen.singular_wrist)  # q5 = 0: el home es singularidad de muneca
+
+    def test_selection_prefers_closest_admissible_branch(self) -> None:
+        q = np.deg2rad([30.0, -20.0, 15.0, 40.0, -35.0, 60.0])
+        report = analyze_pose(forward_kinematics_tcp(q), q)
+        chosen = select_solution(report, q)
+        np.testing.assert_allclose(chosen.q, q, atol=1e-9)
 
 
 if __name__ == "__main__":

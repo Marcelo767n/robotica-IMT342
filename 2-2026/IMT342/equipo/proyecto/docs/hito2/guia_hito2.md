@@ -210,7 +210,7 @@ for e in (0.1, 0.01, 0.001):
 ## 7. Dinámica (`dynamics.py`)
 
 Modelo Lagrangiano `τ = M(q) q̈ + c(q, q̇) + g(q)` con masas, centros de masa e inercias por
-CAD de Truc y Lam (2018) en los marcos DH de los eslabones 1 a 6, más la pinza **SMC MHZ2-16D** (115 g, centro de masa a 0.040 m de la brida) fusionada con el eslabón 6 por ejes paralelos (`LINKS`; `LINKS_NO_GRIPPER` reproduce el paper):
+CAD de Truc y Lam (2020) en los marcos DH de los eslabones 1 a 6, más la pinza **SMC MHZ2-16D** (115 g, centro de masa a 0.040 m de la brida) fusionada con el eslabón 6 por ejes paralelos (`LINKS`; `LINKS_NO_GRIPPER` reproduce el paper):
 
 - `mass_matrix(q)`: `Σ mᵢ JvᵀJv + Jwᵀ R I Rᵀ Jw` (simétrica y definida positiva).
 - `gravity_vector(q)`: `Σ mᵢ g Jv[z]`.

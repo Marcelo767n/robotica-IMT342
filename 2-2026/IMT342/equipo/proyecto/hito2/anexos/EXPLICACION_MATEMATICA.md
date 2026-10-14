@@ -579,7 +579,7 @@ exactamente lo que calcula el código.
 ### 5.5 Parámetros inerciales y la pinza SMC MHZ2-16D
 
 Las masas, centros de masa e inercias de los 6 eslabones (`_PAPER_LINKS`) son aproximaciones por
-CAD publicadas en Truc y Lam (2018), ecuación 18 — **no** son una identificación real del robot
+CAD publicadas en Truc y Lam (2020), ecuación 18 — **no** son una identificación real del robot
 físico; sirven para mostrar la *tendencia cualitativa* (la divergencia en la singularidad), no
 valores cuantitativos certificados.
 
@@ -745,7 +745,7 @@ que es la matriz implementada en `dh_transform()` ([`dh.py:45-69`](irb120/dh.py)
 ## Anexo B — Referencias citadas en el código
 
 - Tabla DH: Bahani et al. (2023), Tabla I.
-- Parámetros inerciales: Truc y Lam, *Turk J Elec Eng & Comp Sci* (2018), ecuación 18.
+- Parámetros inerciales: Truc y Lam, *Turk J Elec Eng & Comp Sci* 28 (2020), ecuación 18.
 - Pinza: SMC MHZ2-16D, hoja de datos del fabricante (115 g).
 - Método de cinemática inversa: Pieper, D. L. (1968), *The kinematics of manipulators under
   computer control* (tesis doctoral, Stanford) — origen del método de desacople para muñecas

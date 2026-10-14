@@ -2,7 +2,8 @@ import unittest
 
 import numpy as np
 
-from irb120.lspb import plan_lspb
+from irb120.dh import MAX_SPEED_RAD_S
+from irb120.lspb import check_trajectory, default_limits, plan_lspb
 
 
 class TestLspb(unittest.TestCase):
@@ -54,6 +55,25 @@ class TestLspb(unittest.TestCase):
         np.testing.assert_allclose(still.sample(0.3)[0], self.q0)
         with self.assertRaises(ValueError):
             plan_lspb(self.q0, self.qf, -1.0, 1.0)
+
+
+class TestLspbChecks(unittest.TestCase):
+    def test_check_trajectory_passes_with_datasheet_limits(self) -> None:
+        vmax, amax = default_limits(speed_scale=0.5, ramp_time_s=0.5)
+        np.testing.assert_allclose(vmax, 0.5 * MAX_SPEED_RAD_S)
+        trajectory = plan_lspb(np.zeros(6), np.deg2rad([60, -40, 20, 90, 30, -120]), vmax, amax)
+        self.assertTrue(check_trajectory(trajectory, vmax, amax).passed)
+
+    def test_sample_many_shapes_and_phases(self) -> None:
+        trajectory = plan_lspb(np.zeros(6), np.ones(6), 1.0, 2.0)
+        q, qd, qdd = trajectory.sample_many(np.linspace(0, trajectory.tf, 11))
+        self.assertEqual(q.shape, (11, 6))
+        self.assertEqual(trajectory.phase(0.0), "acelera")
+        self.assertEqual(trajectory.phase(trajectory.tf), "frena")
+
+    def test_invalid_scale_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            default_limits(speed_scale=1.5)
 
 
 if __name__ == "__main__":

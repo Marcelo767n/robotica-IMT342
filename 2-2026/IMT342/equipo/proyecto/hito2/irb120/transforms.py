@@ -60,3 +60,23 @@ def pose_matrix(position: tuple[float, float, float], rotation: NDArray[np.float
     transform[:3, :3] = rotation
     transform[:3, 3] = position
     return transform
+
+
+def pose_from_xyz_rpy_deg(
+    x: float, y: float, z: float, roll_deg: float, pitch_deg: float, yaw_deg: float
+) -> Matrix4:
+    """T_d a partir de posicion [m] y angulos roll-pitch-yaw [grados] (R = Rz Ry Rx)."""
+    rotation = rpy_to_matrix(*np.deg2rad([roll_deg, pitch_deg, yaw_deg]))
+    return pose_matrix((x, y, z), rotation)
+
+
+def matrix_to_rpy_deg(rotation: NDArray[np.float64]) -> tuple[float, float, float]:
+    """(roll, pitch, yaw) en grados tales que R = Rz(yaw) Ry(pitch) Rx(roll); pitch en [-90, 90]."""
+    rotation = np.asarray(rotation, dtype=float)
+    pitch = np.arctan2(-rotation[2, 0], np.hypot(rotation[0, 0], rotation[1, 0]))
+    if np.hypot(rotation[0, 0], rotation[1, 0]) < 1e-12:  # gimbal lock: yaw = 0 por convencion
+        roll, yaw = np.arctan2(-rotation[1, 2], rotation[1, 1]), 0.0
+    else:
+        roll = np.arctan2(rotation[2, 1], rotation[2, 2])
+        yaw = np.arctan2(rotation[1, 0], rotation[0, 0])
+    return tuple(float(v) for v in np.rad2deg([roll, pitch, yaw]))

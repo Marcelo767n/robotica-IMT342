@@ -38,8 +38,29 @@ DH_PARAMETERS = (
 )
 
 
-# Pinza neumatica: el TCP esta sobre el eje Z de tool0 (mismo valor que el URDF).
-GRIPPER_TCP_Z_M = 0.100
+# TCP del Hito 2: punto sobre el eje Z de tool0 (brida) a 0.150 m de ella.
+TCP_Z_M = 0.150
+GRIPPER_TCP_Z_M = TCP_Z_M  # nombre anterior, se conserva por compatibilidad
+
+# Datos del fabricante (ABB, Product specification IRB 120, rango y velocidad por eje).
+JOINT_LIMITS_DEG = np.array(
+    [
+        [-165.0, 165.0],
+        [-110.0, 110.0],
+        [-110.0, 70.0],
+        [-160.0, 160.0],
+        [-120.0, 120.0],
+        [-400.0, 400.0],
+    ]
+)
+JOINT_LIMITS_RAD = np.deg2rad(JOINT_LIMITS_DEG)
+# Pose inicial por defecto: posicion de calibracion / sincronizacion ABB (todos los ejes en 0 grados).
+# Es la unica postura de referencia que define el fabricante (MoveAbsJ a un jointtarget de ceros).
+# Nota: en ella q5 = 0, asi que es una singularidad de muneca (ejes 4 y 6 alineados).
+HOME_Q = np.zeros(6)
+
+MAX_SPEED_DEG_S = np.array([250.0, 250.0, 250.0, 320.0, 320.0, 420.0])
+MAX_SPEED_RAD_S = np.deg2rad(MAX_SPEED_DEG_S)
 
 
 def dh_transform(theta_rad: float, parameter: DHParameter) -> Matrix4:
@@ -89,15 +110,15 @@ def forward_kinematics(joint_positions_rad: Iterable[float]) -> Matrix4:
     return transform
 
 
-def tcp_transform(tool_to_tcp_z_m: float = GRIPPER_TCP_Z_M) -> Matrix4:
-    """Fixed transform tool0 -> gripper_tcp (traslacion pura sobre Z)."""
+def tcp_transform(tool_to_tcp_z_m: float = TCP_Z_M) -> Matrix4:
+    """Transformada fija tool0 -> TCP (traslacion pura sobre Z)."""
     transform = np.eye(4, dtype=float)
     transform[2, 3] = tool_to_tcp_z_m
     return transform
 
 
 def forward_kinematics_tcp(joint_positions_rad: Iterable[float]) -> Matrix4:
-    """Compute base_link -> gripper_tcp: T_DH(q) multiplicada por la pinza."""
+    """Compute base_link -> TCP: T_DH(q) multiplicada por Tz(TCP_Z_M)."""
     return forward_kinematics(joint_positions_rad) @ tcp_transform()
 
 

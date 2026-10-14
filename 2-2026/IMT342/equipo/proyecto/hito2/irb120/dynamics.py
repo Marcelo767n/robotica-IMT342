@@ -1,7 +1,7 @@
 """Modelo dinamico Lagrangiano del IRB 120: M(q), c(q, q_dot), g(q) y torques.
 
 Los parametros inerciales (masa, centro de masa e inercia por eslabon) son las
-aproximaciones por CAD de Truc y Lam (Turk J Elec Eng & Comp Sci, 2018, ec. 18),
+aproximaciones por CAD de Truc y Lam (Turk J Elec Eng & Comp Sci, vol. 28, 2020, ec. 18),
 expresadas en los marcos DH clasicos de los eslabones 1 a 6. Por defecto se suma
 la pinza SMC MHZ2-16D (115 g, hoja de datos del fabricante) al eslabon 6 con el
 teorema de ejes paralelos; `links=LINKS_NO_GRIPPER` reproduce el paper tal cual.
