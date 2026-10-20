@@ -1,0 +1,54 @@
+{
+  "fecha": "2026-10-20",
+  "carpeta_origen": "https://api.github.com/repos/berquiroga/planificacion-UCB/contents/2-2026/IMT342/Semana_10/hito_2?ref=main",
+  "archivos": [
+    {
+      "archivo": "hito_2_guia.pdf",
+      "bytes": 246771,
+      "git_blob_sha1": "e92140158c98bee9f43d7b11e3b606dc9f915358",
+      "origen": "https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_guia.pdf"
+    },
+    {
+      "archivo": "hito_2_guia.tex",
+      "bytes": 5972,
+      "git_blob_sha1": "5aa50c4e873bd1e24f6e270c65dcadb0cb66f29c",
+      "origen": "https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_guia.tex"
+    },
+    {
+      "archivo": "hito_2_ieee_template.pdf",
+      "bytes": 117414,
+      "git_blob_sha1": "5bb21b3d2211bf7a6b4d7c225b804294b95edb02",
+      "origen": "https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_ieee_template.pdf"
+    },
+    {
+      "archivo": "hito_2_ieee_template.tex",
+      "bytes": 5261,
+      "git_blob_sha1": "d4e616a579f0d833efed82ea4dbdeb47a47aa892",
+      "origen": "https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_ieee_template.tex"
+    },
+    {
+      "archivo": "hito_2_rubrica.pdf",
+      "bytes": 212247,
+      "git_blob_sha1": "97b991b1b90857cebf3a45cdc2816462f72e34b7",
+      "origen": "https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_rubrica.pdf"
+    },
+    {
+      "archivo": "hito_2_rubrica.tex",
+      "bytes": 7272,
+      "git_blob_sha1": "360e2321323dfc6a84421b7b9dc21e40f582c988",
+      "origen": "https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_rubrica.tex"
+    },
+    {
+      "archivo": "hito_2_slides.pdf",
+      "bytes": 288176,
+      "git_blob_sha1": "5bdb7f1299de2cf7b0436f7b65de9eb7ed5fea32",
+      "origen": "https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_slides.pdf"
+    },
+    {
+      "archivo": "hito_2_slides.tex",
+      "bytes": 7444,
+      "git_blob_sha1": "4a06450e6e7d13891756dffe4eb0eb877608d044",
+      "origen": "https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_slides.tex"
+    }
+  ]
+}

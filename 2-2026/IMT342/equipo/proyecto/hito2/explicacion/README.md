@@ -21,12 +21,11 @@ T_0 = FK(HOME_Q) (pose inicial: calibración ABB, q = 0)   y   T_d (pose objetiv
 Todo descansa en el modelo geométrico del robot: tabla DH, cinemática directa y TCP, en
 [01_modelo_DH_y_FK.md](01_modelo_DH_y_FK.md).
 
-El pipeline completo, con gráficas y 32 verificaciones automáticas, está en el notebook
+El pipeline completo, con gráficas y 33 verificaciones automáticas, está en el notebook
 [`../Hito2_IRB120_pipeline.ipynb`](../Hito2_IRB120_pipeline.ipynb). Trabaja con **dos poses**:
 
-- **Pose inicial:** la posición de calibración de ABB, con todos los ejes en 0° (`HOME_Q` en `dh.py`). Es la única
-  postura de referencia que define el fabricante: la usada con `MoveAbsJ` a un jointtarget de ceros para la
-  actualización de los contadores de revolución.
+- **Pose inicial (elegida por el equipo):** la posición de calibración de ABB, con todos los ejes en 0° (`HOME_Q` en
+  `dh.py`). Es la postura de referencia que ABB usa para la sincronización (`MoveAbsJ` a un jointtarget de ceros).
 - **Pose objetivo:** la que da el docente. Se escribe en la sección 1.3 del notebook.
 
 ## Índice
@@ -41,6 +40,7 @@ El pipeline completo, con gráficas y 32 verificaciones automáticas, está en e
 | [06_D_singularidades.md](06_D_singularidades.md) | **D** (20 %), segunda parte | `irb120/jacobian.py` | `tests/test_jacobian.py`, `tests/test_singularity.py` |
 | [07_E_dinamica_1R.md](07_E_dinamica_1R.md) | **E** (15 %) | `irb120/dynamics_1r.py` (usa `dynamics.py`) | `tests/test_dynamics_1r.py` |
 | [08_ejemplo_resuelto_a_mano.md](08_ejemplo_resuelto_a_mano.md) | A, B, C, D y E con números | Todos | Contrastado con el código |
+| [09_guia_de_estudio_del_codigo.md](09_guia_de_estudio_del_codigo.md) | Defensa (G1–G4) | **Todos los archivos**: qué hace cada función, flujo de datos, notebook sección por sección y autoevaluación | — |
 
 ## Convenciones (valen para todos los archivos)
 
@@ -58,7 +58,7 @@ Desde `hito2/`:
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-python -m pytest -q tests                      # 49 pruebas
+python -m pytest -q tests                      # 54 pruebas
 python analizar_pose.py 0.40 0.10 0.35 0 180 0  # x y z [m]  roll pitch yaw [grados]
 ```
 

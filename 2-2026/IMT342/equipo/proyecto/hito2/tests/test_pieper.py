@@ -15,6 +15,7 @@ from irb120.pieper import (
     enumerate_candidates,
     inverse_kinematics,
     inverse_kinematics_tcp,
+    rank_candidates,
     select_solution,
 )
 from irb120.transforms import pose_matrix, rpy_to_matrix
@@ -124,6 +125,39 @@ class TestEightBranches(unittest.TestCase):
         report = analyze_pose(forward_kinematics_tcp(q), q)
         chosen = select_solution(report, q)
         np.testing.assert_allclose(chosen.q, q, atol=1e-9)
+
+
+class TestInputAndSelection(unittest.TestCase):
+    def test_rejects_matrices_that_are_not_rigid_poses(self) -> None:
+        good = forward_kinematics_tcp(np.zeros(6))
+        scaled = good.copy(); scaled[:3, :2] *= 2.0            # det(R) = 4
+        bad_row = good.copy(); bad_row[3, 3] = 2.0              # ultima fila invalida
+        mirror = good.copy(); mirror[:3, 0] *= -1.0             # det(R) = -1 (reflexion)
+        for matrix in (scaled, bad_row, mirror):
+            with self.assertRaises(ValueError):
+                analyze_pose(matrix)
+
+    def test_wrist_labels_match_the_sign_of_q5(self) -> None:
+        generator = np.random.default_rng(seed=9)
+        for _ in range(50):
+            q = generator.uniform(LIMITS_RAD[:, 0], LIMITS_RAD[:, 1])
+            for c in analyze_pose(forward_kinematics_tcp(q), q).candidates:
+                if c.real and not c.singular_wrist:
+                    self.assertEqual(c.wrist == "q5+", c.q_raw[4] > 0, msg=f"rama {c.branch}")
+
+    def test_ranking_covers_eight_branches_and_picks_one(self) -> None:
+        q = np.deg2rad([30.0, -20.0, 15.0, 40.0, -35.0, 60.0])
+        report = analyze_pose(forward_kinematics_tcp(q), q)
+        decisions = rank_candidates(report, q)
+        self.assertEqual(len(decisions), 8)
+        chosen = [d for d in decisions if d.rank == 1]
+        self.assertEqual(len(chosen), 1)
+        self.assertTrue(chosen[0].status.startswith("ELEGIDA"))
+        np.testing.assert_allclose(chosen[0].candidate.q, q, atol=1e-9)
+        for d in decisions:
+            if not d.admissible:
+                self.assertIsNone(d.rank)
+                self.assertTrue(d.status.startswith("descartada"))
 
 
 if __name__ == "__main__":

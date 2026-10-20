@@ -34,7 +34,7 @@ def main() -> None:
     header = f"{'rama':>4} {'brazo':>6} {'codo':>6} {'muneca':>6} {'real':>5} {'limites':>13}  q [deg]{'':40} {'e_p [m]':>9} {'e_R [rad]':>9}  acepta"
     print(header)
     for row in report.table():
-        q = "-" if row["q_deg"] is None else " ".join(f"{v:7.2f}" for v in row["q_deg"])
+        q = "-" if row["q_deg"] is None else " ".join(f"{v + 0.0:7.2f}" for v in np.round(row["q_deg"], 2))
         e_p = "-" if row["e_p_m"] is None else f"{row['e_p_m']:.1e}"
         e_r = "-" if row["e_R_rad"] is None else f"{row['e_R_rad']:.1e}"
         limits = "si" if row["en_limites"] else ("-" if not row["real"] else f"no {row['fuera_de_limites']}")

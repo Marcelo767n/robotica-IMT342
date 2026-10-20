@@ -92,11 +92,14 @@ ros2 topic echo /irb120/fk_position_error_m
 
 ## Hito 2
 
-**Entrega en Python puro, sin ROS: carpeta [`hito2/`](hito2/README.md)** (paquete `irb120/`, 3 notebooks y 24 pruebas).
+**Entrega del Hito 2 (Python puro, sin ROS): carpeta [`hito2/`](hito2/README.md)**: paquete `irb120/`, un
+notebook integrado (`Hito2_IRB120_pipeline.ipynb`) y 54 pruebas. El informe IEEE está en
+[`docs/hito2/informe_ieee/`](docs/hito2/informe_ieee/README.md) y la explicación de cada módulo en
+[`hito2/explicacion/`](hito2/explicacion/README.md).
 
-Paquete `irb120_hito2`: cinemática inversa de Pieper, trayectorias LSPB, Jacobiano
-y dinámica, y el notebook del pasaporte (`notebooks/hito2_singularidad_q5.ipynb`).
-Guía completa con ejemplos: [docs/hito2/guia_hito2.md](docs/hito2/guia_hito2.md); resumen: [docs/hito2/metodo_y_resultados.md](docs/hito2/metodo_y_resultados.md).
+El paquete ROS `irb120_hito2` y los documentos `docs/hito2/guia_hito2.md` y `metodo_y_resultados.md` corresponden a
+la **versión anterior** del hito (nodo ROS, TCP de 0.100 m y "pasaporte"). Se conservan como referencia y no son la
+entrega.
 
 ## Documentos
 

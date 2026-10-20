@@ -71,6 +71,16 @@ class TestLspbChecks(unittest.TestCase):
         self.assertEqual(trajectory.phase(0.0), "acelera")
         self.assertEqual(trajectory.phase(trajectory.tf), "frena")
 
+    def test_robot_is_at_rest_outside_the_motion(self) -> None:
+        trajectory = plan_lspb(np.zeros(6), np.ones(6), 1.0, 2.0)
+        before = trajectory.sample(-1.0)
+        after = trajectory.sample(trajectory.tf + 1.0)
+        np.testing.assert_allclose(before[0], 0.0); np.testing.assert_allclose(after[0], 1.0)
+        for state in (before, after):
+            np.testing.assert_allclose(state[1], 0.0)
+            np.testing.assert_allclose(state[2], 0.0)
+        self.assertLess(trajectory.sample(trajectory.tf)[2][0], 0.0)  # en tf: aceleracion de frenado
+
     def test_invalid_scale_is_rejected(self) -> None:
         with self.assertRaises(ValueError):
             default_limits(speed_scale=1.5)

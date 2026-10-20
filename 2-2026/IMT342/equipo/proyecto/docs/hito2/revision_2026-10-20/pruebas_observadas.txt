@@ -1,0 +1,12 @@
+Resultados observados durante la revisión del 20 de octubre de 2026.
+
+Comando: python3 -m pytest -q hito2/tests -p no:cacheprovider
+Resultado: 49 passed in 2.10s
+
+Pruebas auxiliares de ROS 2 (solo componentes Python, con PYTHONPATH a los dos paquetes fuente y en copia temporal):
+Resultado: 24 passed in 1.57s
+Esto no constituye una prueba de nodos ROS, RViz ni simulación física.
+
+Notebook original: 26 celdas de código, ejecución completa en kernel nuevo: 18.8 s, 31/31 verificaciones.
+Generador actualizado: ejecutado de principio a fin en copia temporal; notebook generado sin errores.
+LaTeX después de regenerar: dos pasadas, PDF de cinco páginas; sin errores fatales ni referencias indefinidas; un Overfull hbox de 9.95618 pt.

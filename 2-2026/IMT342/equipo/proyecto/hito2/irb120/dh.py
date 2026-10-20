@@ -55,7 +55,7 @@ JOINT_LIMITS_DEG = np.array(
 )
 JOINT_LIMITS_RAD = np.deg2rad(JOINT_LIMITS_DEG)
 # Pose inicial por defecto: posicion de calibracion / sincronizacion ABB (todos los ejes en 0 grados).
-# Es la unica postura de referencia que define el fabricante (MoveAbsJ a un jointtarget de ceros).
+# Se elige porque es la postura de referencia de ABB para sincronizar (MoveAbsJ a un jointtarget de ceros).
 # Nota: en ella q5 = 0, asi que es una singularidad de muneca (ejes 4 y 6 alineados).
 HOME_Q = np.zeros(6)
 

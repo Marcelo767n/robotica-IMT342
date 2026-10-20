@@ -1,3 +1,8 @@
+> ⚠️ **Documento obsoleto.** Describe la versión anterior del Hito 2 (Guía PFI: nodo ROS, TCP de 0.100 m y
+> "pasaporte" de divergencia en q5 = 0). La versión vigente, alineada con la guía oficial de la semana 10, está en
+> [`hito2/explicacion/`](../../hito2/explicacion/README.md), [`hito2/Hito2_IRB120_pipeline.ipynb`](../../hito2/Hito2_IRB120_pipeline.ipynb)
+> y [`informe_ieee/`](informe_ieee/README.md).
+
 # Guía del Hito 2: cinemática inversa, trayectorias y singularidad
 
 Guía de lo que se hizo, qué se aplicó, cómo funciona cada archivo y cómo usarlo. Todas las

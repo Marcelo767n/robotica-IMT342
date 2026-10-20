@@ -34,11 +34,16 @@ $$
   - $u_6$ = **dirección cartesiana perdida**: ningún $\dot q$ la genera (`lost_twist_directions`).
   - $v_6$ = **movimiento articular nulo**: mueve las juntas pero el TCP queda quieto (`null_joint_motions`).
 
-**El determinante** $\det J = \prod \sigma_i$ solo vale aquí porque $J$ es **cuadrada**. Además:
+**El determinante** cumple $|\det J| = \prod \sigma_i$ (el signo lo dan $\det U$ y $\det V^T$) y solo existe porque $J$ es **cuadrada**. Además:
 
 - No dice **cuántas** direcciones se pierden ni **cuáles**.
 - Su escala depende de las unidades (mezcla m y rad) y puede ser pequeño sin que haya singularidad, o al revés.
 - Se usa solo como **complemento**, para la factorización analítica de abajo.
+
+**Unidades.** $J$ mezcla filas lineales [m/s por rad/s] y angulares [rad/s por rad/s]. El **rango** no cambia si se
+reescalan las unidades, pero los valores $\sigma_i$, el número de condición y la tolerancia $10^{-6}$ sí dependen de
+la escala elegida. Aquí se usa SI con longitudes en metros. Una "carga unitaria en $u_6$" es el vector $[F; M]$ de
+norma 1, con $F$ en N y $M$ en N·m, en esa misma escala.
 
 Código: `rank_analysis(J)` ([jacobian.py:170](../irb120/jacobian.py#L170)) devuelve `singular_values`, `rank`,
 `is_singular`, `condition_number`, `lost_twist_directions` y `null_joint_motions`.
@@ -76,7 +81,7 @@ Se elige la **singularidad de muñeca**, porque es la más común en operación 
 juntas 1 a 4 y 6 se fijan en una postura regular $q = (30°, -20°, 15°, 40°, q_5, 60°)$ y se recorre la secuencia
 
 $$
-q_5 \in \{30°, 10°, 3°, 1°, 0.3°, 0.1°, 0.01°, 0°\}
+q_5 \in \{45°, 30°, 20°, 10°, 5°, 3°, 1°, 0.3°, 0.1°, 0.03°, 0.01°, 0°\}
 $$
 
 En cada punto se registra:
@@ -111,9 +116,11 @@ $$
 
 Código: `weakest_directions(J)` ([jacobian.py:177](../irb120/jacobian.py#L177)) y la prueba
 `test_velocity_amplification_is_inverse_of_sigma_min`. Valores medidos: $\sigma_6/\sin q_5 \approx 0.150$, constante en
-toda la secuencia. Para 1 unidad de twist en $u_6$ hacen falta $\lVert\dot q\rVert \approx 14$ rad/s con
-$q_5 = 30°$, 383 rad/s con $1°$ y unos 38 000 rad/s con $0.01°$, frente a los 5.6 rad/s máximos de los ejes 4 y 5
-según el datasheet. En log-log, la
+toda la secuencia. Para saber si la velocidad exigida es posible hay que comparar **junta por junta** con el
+datasheet, no la norma del vector: $\rho = \max_i |\dot q_i|/v_{\max,i}$. Para un twist unitario en $u_6$ con
+$q_5 = 0.01°$, los ejes 4 y 6 deberían girar a $\dot q_4 \approx -\dot q_6 \approx 27\,040$ rad/s, es decir,
+$\rho \approx 4\,842$ veces su máximo. $\rho$ es proporcional a la magnitud del twist pedido: el notebook informa
+desde qué $q_5$ se supera el datasheet para 1 y para 0.1 unidades. En log-log, la
 pendiente de $\lVert\dot q\rVert$ frente a $q_5$ es $-1$.
 
 ### 4.3 Lo que NO significa: torque infinito

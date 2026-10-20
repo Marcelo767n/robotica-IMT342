@@ -8,6 +8,12 @@
 \usepackage{booktabs}
 \usepackage{cite}
 \usepackage{url}
+\usepackage[table]{xcolor}
+
+% Valores y tablas generados por el notebook (hito2/resultados/). Se actualizan al re-ejecutarlo.
+\newcommand{\resdir}{../../../hito2/resultados}
+\input{\resdir/valores.tex}
+\makeatletter\newcommand{\tabinput}[1]{\@@input #1 }\makeatother  % \input dentro de tabular (tras \midrule)
 
 \graphicspath{{../../../hito2/figuras/}}
 \decimalpoint
@@ -49,7 +55,7 @@ usa para estudiar, en un experimento independiente, la pérdida de rango en la s
 identifica la movilidad perdida y la amplificación $\lVert\dot{\mathbf{q}}\rVert \propto 1/\sin q_5$, que no implica
 torque infinito. Finalmente, un modelo dinámico reducido 1R del hombro, con parámetros obtenidos de datos CAD, entrega
 $\tau(t)$ separado en sus componentes inercial y gravitacional, y aproxima al modelo completo de seis grados de
-libertad con un error RMS del 4.5\,\%.
+libertad con un error RMS del \RMSPct\,\%.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -68,7 +74,7 @@ T_0, T_d &\xrightarrow{\text{Pieper}} \{\mathbf{q}^{(k)}\} \xrightarrow{\text{FK
 &\xrightarrow{J(\mathbf{q})} \dot{\mathbf{x}}(t),\ \operatorname{rank}J \xrightarrow{\text{1R}} \tau(t).
 \end{align*}
 Todo el trabajo se realizó en Python con NumPy y Matplotlib, en un notebook reproducible que se ejecuta de inicio a fin
-con 32 verificaciones automáticas, según la guía del curso~\cite{guia}. No se usan ROS ni solucionadores numéricos de cinemática inversa.
+con \NChecks{} verificaciones automáticas, según la guía del curso~\cite{guia}. No se usan ROS ni solucionadores numéricos de cinemática inversa.
 
 % =====================================================================================================
 \section{Modelo del robot}
@@ -76,7 +82,10 @@ Se usa la convención Denavit--Hartenberg clásica con la tabla de Bahani \texti
 (Tabla~\ref{tab:dh}). Sus cotas coinciden con el datasheet de ABB~\cite{abb}: en $\mathbf{q} = \mathbf{0}$ la brida
 queda en $(0.374, 0, 0.630)$~m. Los límites articulares y las velocidades máximas por eje provienen del mismo
 datasheet. El punto de trabajo (TCP) se ubica a 0.150~m de la brida sobre $z_6$:
-$T_{TCP}(\mathbf{q}) = T_0^6(\mathbf{q})\,T_z(0.150)$.
+$T_{TCP}(\mathbf{q}) = T_0^6(\mathbf{q})\,T_z(0.150)$. Los 0.150~m son una decisión de diseño del equipo (punto de trabajo
+de la herramienta). En la dinámica solo se modela la masa de la pinza SMC MHZ2-16D (0.115~kg, hoja de datos), con su
+centro de masa aproximado a 0.040~m de la brida. Mover ese centro de masa entre 0 y 0.080~m cambia el torque
+gravitacional del hombro en menos de 0.07~N\,m, es decir, por debajo del 1\,\%.
 
 \begin{table}[t]
 \centering
@@ -97,14 +106,14 @@ $i$ & $\theta_i$ & $d_i$ [m] & $a_i$ [m] & $\alpha_i$ & Rango [$^\circ$], $v_{\m
 \end{tabular}
 \end{table}
 
-\textbf{Pose inicial.} La única postura de referencia que define el fabricante es la \emph{posición de calibración}
-(sincronización), con todos los ejes en $0^\circ$. A ella se lleva el robot con \texttt{MoveAbsJ} y un
-\textit{jointtarget} de ceros para verificar los contadores de revolución~\cite{abbcal}. Su pose es
+\textbf{Pose inicial.} Se elige la \emph{posición de calibración} (sincronización) de ABB, con todos los ejes en
+$0^\circ$: es la postura de referencia a la que se lleva el robot con \texttt{MoveAbsJ} y un \textit{jointtarget} de
+ceros para verificar los contadores de revolución~\cite{abbcal}. Su pose es
 $T_0 = FK(\mathbf{0})$: TCP en $(0.524, 0, 0.630)$~m con la herramienta orientada según $+x$. En esta postura
 $q_5 = 0$, es decir, es una singularidad de muñeca.
 
-\textbf{Pose objetivo.} Es la que entrega el docente: el TCP en $(0.40, 0.10, 0.35)$~m con la herramienta apuntando
-hacia abajo, $R_d = R_y(180^\circ)$. Es el único dato que hay que editar en el notebook.
+\textbf{Pose objetivo.} Es la que entrega el docente: el TCP en $\PoseObjPos$~m con roll-pitch-yaw
+$\PoseObjRPY$ ($R = R_z R_y R_x$). Es el único dato que hay que editar en el notebook.
 
 % =====================================================================================================
 \section{Metodología}
@@ -128,10 +137,18 @@ clasifica como \emph{real}, \emph{dentro de límites} (buscando el representante
 
 \subsection{Validación por cinemática directa y selección}
 Cada rama real se reinyecta en la FK y se mide $e_p = \lVert\mathbf{p}(\mathbf{q}^{(k)}) - \mathbf{p}_d\rVert$ y el
-error angular geodésico $e_R = \angle(R_d^TR(\mathbf{q}^{(k)}))$. Se acepta si ambos son menores que $10^{-6}$, una
-tolerancia diez veces menor que la repetibilidad del robot (0.01~mm). Entre las ramas admisibles se descartan las que
-tienen $\sigma_{\min}(J) < 0.01$ y se elige la que minimiza $\lVert W(\mathbf{q} - \mathbf{q}_0)\rVert$ con
-$W = \operatorname{diag}(1,1,1,0.5,0.5,0.5)$. Así se prioriza mover poco las juntas que cargan más masa.
+error angular geodésico $e_R = \angle(R_d^TR(\mathbf{q}^{(k)}))$. Se acepta si $e_p < 10^{-6}$~m y
+$e_R < 10^{-6}$~rad; la tolerancia en posición es diez veces menor que la repetibilidad del robot (0.01~mm). Antes de
+todo, se verifica que $T_d \in SE(3)$ (última fila $[0,0,0,1]$, $R^TR = I$, $\det R = 1$). Como verificación externa
+de la propia FK, se compara con el URDF del Hito~1, evaluado con un código independiente que no usa la tabla DH.
+
+\textbf{Criterio de selección (8 ramas $\to$ 1).} Se aplican filtros en orden: (1) rama admisible; (2)
+$\sigma_{\min}(J) \ge 0.01$, que acota la amplificación de velocidad $\lVert\dot{\mathbf{q}}\rVert \le
+\lVert\dot{\mathbf{x}}\rVert/\sigma_{\min}$ a 100$\times$; (3) margen de al menos $5^\circ$ respecto de cada límite
+articular, para dejar espacio a los límites de software y al error de seguimiento. Entre las ramas que pasan, se elige la
+de menor $\lVert W(\mathbf{q} - \mathbf{q}_0)\rVert$ con $W = \operatorname{diag}(1,1,1,0.5,0.5,0.5)$: menos tiempo,
+energía y volumen barrido, priorizando las juntas que mueven más masa. El $t_f$ del LSPB se informa pero no decide,
+porque lo fija una sola junta y depende del supuesto de $a_{\max}$.
 
 \subsection{Trayectoria LSPB}
 Entre $\mathbf{q}_0$ y $\mathbf{q}_f$ se construye un LSPB sincronizado. Todas las juntas comparten $t_f$ y $t_b$, con
@@ -172,36 +189,42 @@ de Truc y Lam~\cite{truc} y el teorema de Steiner. Las entradas $q_2(t)$ y $\ddo
 \section{Resultados}
 
 \subsection{Cinemática inversa y validación}
-Para la pose objetivo, $\mathbf{p}_W = (0.40, 0.10, 0.572)$~m y $D = 0.4995$~m, dentro de $[0.040, 0.580]$~m, con
-$c = 0.481$. Las ocho ramas son reales, pero solo una es admisible (Tabla~\ref{tab:ik}). Las ramas ``atrás'' exceden el
-límite de la junta 1 por menos de $1^\circ$ ($|q_1| = 165.96^\circ$) y las de codo abajo violan $q_3 \ge -110^\circ$. Las
-16 ramas reales de las dos poses reproducen su pose con $e_p \le 2.2\times10^{-16}$~m y
-$e_R \le 5.1\times10^{-16}$~rad. El criterio rechaza un candidato con error de $0.01$~rad solo en $q_6$, que tiene
+Para la pose objetivo, $\mathbf{p}_W = \PWObj$~m y $D = \DObj$~m, dentro de $[0.040, 0.580]$~m, con
+$c = \CObj$. De las 8 ramas, \NReales{} son reales y \NAdm{} admisibles (Tabla~\ref{tab:ik}); para cada rama no
+admisible la tabla indica qué juntas violan sus límites. % REVISAR si cambia la pose: comentar la causa principal.
+Las \NRamasReales{} ramas reales de las dos poses reproducen su pose con $e_p \le \MaxEp$~m y
+$e_R \le \MaxEr$~rad, y la FK por DH coincide con el URDF independiente del Hito~1 en 302 configuraciones
+(diferencias del orden de $10^{-15}$). El criterio rechaza un candidato con error de $0.01$~rad solo en $q_6$, que tiene
 $e_p = 0$, y la prueba de ida y vuelta con 1000 configuraciones aleatorias recupera el $\mathbf{q}$ original en el
 100\,\% de los casos. Desde $T_0$, Pieper recupera exactamente $\mathbf{q} = \mathbf{0}$, con la muñeca marcada como
-singular. La Fig.~\ref{fig:ramas} muestra la geometría de las ramas del brazo.
+singular. La Fig.~\ref{fig:ramas} muestra la geometría de las ramas del brazo y la Fig.~\ref{fig:ramas3d} el robot
+completo en cada una de las 8 ramas. Con el criterio de selección se elige la rama \RamaSel{} (\RamaSelTxt):
+$\sigma_{\min} = \SigmaMinQf$, margen de $\MargenQf^\circ$ al límite más cercano y costo $\CostoQf$; \NAptas{} rama(s)
+pasan los filtros.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{A_ocho_ramas_3d.pdf}
+\caption{Las 8 ramas de Pieper para la pose objetivo. Verde: rama elegida; azul: admisible no elegida; rojo
+discontinuo: existe pero viola límites (se dibuja con sus ángulos sin ajustar). En todas las ramas reales, el triedro
+del TCP coincide con el triedro objetivo (punteado).}
+\label{fig:ramas3d}
+\end{figure*}
 
 \begin{table}[t]
 \centering
 \caption{Las 8 ramas de Pieper para la pose objetivo [grados]}
 \label{tab:ik}
 \scriptsize
-\setlength{\tabcolsep}{2.5pt}
+\setlength{\tabcolsep}{1.6pt}
 \begin{tabular}{@{}clrrrrrrl@{}}
 \toprule
 $k$ & Rama & $q_1$ & $q_2$ & $q_3$ & $q_4$ & $q_5$ & $q_6$ & Estado\\
 \midrule
-1 & fr/arr/$+$ & 14.04 & 22.67 & $-15.70$ & 180.00 & $-83.03$ & $-165.96$ & J4\\
-\textbf{2} & \textbf{fr/arr/$-$} & \textbf{14.04} & \textbf{22.67} & $\mathbf{-15.70}$ & \textbf{0.00} & \textbf{83.03} & \textbf{14.04} & \textbf{admisible}\\
-3 & fr/ab/$+$ & 14.04 & 88.59 & $-138.20$ & 180.00 & $-139.61$ & $-165.96$ & J3,4,5\\
-4 & fr/ab/$-$ & 14.04 & 88.59 & $-138.20$ & 0.00 & 139.61 & 14.04 & J3,5\\
-5 & at/arr/$+$ & $-165.96$ & $-88.59$ & $-15.70$ & 0.00 & $-165.71$ & $-165.96$ & J1,5\\
-6 & at/arr/$-$ & $-165.96$ & $-88.59$ & $-15.70$ & 180.00 & 165.71 & 14.04 & J1,4,5\\
-7 & at/ab/$+$ & $-165.96$ & $-22.67$ & $-138.20$ & 0.00 & $-109.13$ & $-165.96$ & J1,3\\
-8 & at/ab/$-$ & $-165.96$ & $-22.67$ & $-138.20$ & $-180.00$ & 109.13 & 14.04 & J1,3,4\\
+\tabinput{\resdir/tabla_ramas.tex}
 \bottomrule
 \end{tabular}\\[2pt]
-{\scriptsize Las 8 son reales y pasan la FK ($e_p, e_R < 3\times10^{-16}$). ``J$n$'': juntas fuera de límites.}
+{\scriptsize Rama elegida sombreada. Toda rama real pasa la FK. ``J$n$'': juntas fuera de límites.}
 \end{table}
 
 \begin{figure*}[t]
@@ -214,52 +237,51 @@ objetivo.}
 \end{figure*}
 
 \subsection{Trayectoria LSPB}
-La junta 5 limita tanto la velocidad como la aceleración, de modo que $t_b = v_{\max,5}/a_{\max,5} = 0.25$~s y
-$t_f = D_5/v_{\max,5} + t_b = 1.2879$~s (Tabla~\ref{tab:lspb}). Los perfiles (Fig.~\ref{fig:lspb}) cumplen
+Con la rama elegida,
+$\mathbf{q}_f = (\QfDeg)^\circ$. La junta crítica es la \JuntaCritica, que fija $t_f = \Tf$~s con $t_b = \Tb$~s
+(Tabla~\ref{tab:lspb}); cuando una misma junta satura velocidad y aceleración, $t_b = v_{\max}/a_{\max}$ y
+$t_f = D/v_{\max} + t_b$. Los perfiles (Fig.~\ref{fig:lspb}) cumplen
 $\mathbf{q}(0) = \mathbf{q}_0$, $\mathbf{q}(t_f) = \mathbf{q}_f$ y $\dot{\mathbf{q}}(0) = \dot{\mathbf{q}}(t_f) = \mathbf{0}$. Los
-saltos de $\mathbf{q}$ y $\dot{\mathbf{q}}$ en los empalmes son menores que $10^{-8}$, y las seis juntas respetan
+saltos de $\mathbf{q}$ y $\dot{\mathbf{q}}$ en los empalmes son a lo sumo $\SaltoMax$, y las seis juntas respetan
 $v_{\max}$ y $a_{\max}$.
 
 \begin{table}[t]
 \centering
-\caption{Parámetros del LSPB ($t_f = 1.2879$~s, $t_b = 0.25$~s)}
+\caption{Parámetros del LSPB ($t_f = \Tf$~s, $t_b = \Tb$~s)}
 \label{tab:lspb}
 \small
 \begin{tabular}{@{}crrrcc@{}}
 \toprule
 Junta & $D$ [$^\circ$] & $V$ [$^\circ$/s] & $a$ [$^\circ$/s$^2$] & $|V|/v_{\max}$ & $|a|/a_{\max}$\\
 \midrule
-1 & 14.04 & 13.52 & 54.09 & 0.22 & 0.22\\
-2 & 22.67 & 21.84 & 87.35 & 0.35 & 0.35\\
-3 & $-15.70$ & $-15.13$ & $-60.51$ & 0.24 & 0.24\\
-4 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00\\
-5 & 83.03 & 80.00 & 320.00 & \textbf{1.00} & \textbf{1.00}\\
-6 & 14.04 & 13.52 & 54.09 & 0.13 & 0.13\\
+\tabinput{\resdir/tabla_lspb.tex}
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.78\textwidth]{C_lspb_perfiles.pdf}
+\includegraphics[width=0.68\textwidth]{C_lspb_perfiles.pdf}
 \caption{Perfiles LSPB sincronizados $q(t)$, $\dot q(t)$ y $\ddot q(t)$. En verde, la fase de aceleración; en blanco,
 el crucero; en rojo, el frenado.}
 \label{fig:lspb}
 \end{figure*}
 
 \subsection{Jacobiano y singularidad}
-El Jacobiano analítico coincide con el numérico con un error de $1.4\times10^{-10}$, y $J_v\dot{\mathbf{q}}$ coincide con
-$d\mathbf{p}/dt$ a lo largo de la trayectoria con un error de $2\times10^{-10}$~m/s. En $\mathbf{q} = \mathbf{0}$, las
+El Jacobiano analítico coincide con el numérico con un error de $\ErrJ$, y $J_v\dot{\mathbf{q}}$ coincide con
+$d\mathbf{p}/dt$ a lo largo de la trayectoria con un error de $\ErrV$~m/s. En $\mathbf{q} = \mathbf{0}$, las
 columnas 4 y 6 son idénticas, $[\mathbf{0};(1,0,0)]$, y el rango es 5: la postura de calibración es singular. En
-$\mathbf{q}_f$ el rango es 6, con $\sigma_{\min} = 0.117$. En el experimento de aproximación
+$\mathbf{q}_f$ el rango es \RangoQf, con $\sigma_{\min} = \SigmaMinQf$. En el experimento de aproximación
 (Tabla~\ref{tab:sing}, Fig.~\ref{fig:sing}), solo $\sigma_6$ decrece, con $\sigma_6/\sin q_5 \approx 0.150$. El rango
 baja de 6 a 5 exactamente en $q_5 = 0$, y $\det J$ coincide con~\eqref{eq:det}.
 
 En $q_5 = 0$, el espacio nulo de $J$ es $\dot{\mathbf{q}} \propto (0,0,0,1,0,-1)$: un giro opuesto de las juntas 4 y
 6 que no mueve el TCP. La dirección perdida (con $W$ como punto de referencia) tiene su componente angular paralela a
 $\mathbf{z}_3\times\mathbf{z}_4$, de modo que se pierde una rotación. Para generar un twist unitario en esa dirección
-se requiere $\lVert\dot{\mathbf{q}}\rVert = 1/\sigma_6$, con pendiente $-1.000$ en escala log-log, que llega a
-$3.8\times10^4$~rad/s en $q_5 = 0.01^\circ$, frente a 5.6~rad/s del datasheet. En cambio, el torque estático
+se requiere $\lVert\dot{\mathbf{q}}\rVert = 1/\sigma_6$, con pendiente $-1.000$ en escala log-log. Comparando junta
+por junta con el datasheet, $\rho = \max_i|\dot q_i|/v_{\max,i}$: en $q_5 = 0.01^\circ$, las juntas 4 y 6 deberían
+girar a $\pm\AmpQdMax$~rad/s, es decir, $\rho \approx \AmpRatio$. Los valores $\sigma_i$ y la tolerancia de rango están en
+unidades SI (metros); el rango no depende de esa escala. En cambio, el torque estático
 $\lVert J^T\mathbf{u}_6\rVert = \sigma_6$ \emph{tiende a cero}. También se verificó la singularidad de codo en
 $q_3 = \delta - 90^\circ = -76.95^\circ$, donde $D \to L_2 + L_3$.
 
@@ -285,73 +307,79 @@ $q_5$ [$^\circ$] & rango & $\sigma_6$ & $\kappa(J)$ & $\lVert\dot{\mathbf q}\rVe
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.56\textwidth]{D_singularidad_rango.pdf}\hfill
-\includegraphics[width=0.42\textwidth]{D_amplificacion.pdf}
-\caption{Izquierda: valores singulares y rango de $J$ al aproximarse a $q_5 = 0$. Derecha: la velocidad articular
-diverge como $1/\sin q_5$, mientras que el torque estático necesario en la dirección perdida tiende a cero.}
+\includegraphics[width=0.8\textwidth]{D_singularidad_rango.pdf}\\[2pt]
+\includegraphics[width=0.8\textwidth]{D_amplificacion.pdf}
+\caption{Arriba: valores singulares y rango de $J$ al aproximarse a $q_5 = 0$. Abajo: la velocidad articular para un
+twist unitario en la dirección perdida diverge como $1/\sin q_5$ (también comparada junta por junta con el datasheet,
+$\rho$), mientras que el torque estático necesario en esa dirección tiende a cero.}
 \label{fig:sing}
 \end{figure*}
 
 \subsection{Torque del hombro (modelo 1R)}
-Los parámetros calculados son $m = 12.210$~kg, $\ell_c = 0.2491$~m, $I_c = 0.4479$~kg\,m$^2$,
-$J = 1.2053$~kg\,m$^2$ y $\varphi_0 = -163.82^\circ$, con lo que $mg\ell_c = 29.83$~N\,m. En $\mathbf{q}_{\text{ref}}$
-coinciden exactamente con el modelo de Lagrange completo: $J = M_{22}$ y $\tau_g = g_2$, con diferencias menores que
-$10^{-13}$. La Tabla~\ref{tab:tau} y la Fig.~\ref{fig:tau} muestran $\tau(t)$. A lo largo de toda la trayectoria, el
-1R aproxima el $\tau_2$ del modelo completo de 6~GDL con un error RMS de 0.64~N\,m (4.5\,\%), y un máximo de
-1.17~N\,m (Fig.~\ref{fig:val}).
+Los parámetros calculados son $m = \Masa$~kg, $\ell_c = \Lc$~m, $I_c = \Ic$~kg\,m$^2$,
+$J = \Jsh$~kg\,m$^2$ y $\varphi_0 = \PhiZero^\circ$, con lo que $mg\ell_c = \MGLc$~N\,m. En $\mathbf{q}_{\text{ref}}$
+coinciden exactamente con el modelo de Lagrange completo: $J = M_{22}$ y $\tau_g = g_2$, con diferencias de
+$\ErrModelo$. La Tabla~\ref{tab:tau} y la Fig.~\ref{fig:tau} muestran $\tau(t)$. A lo largo de toda la trayectoria, el
+1R aproxima el $\tau_2$ del modelo completo de 6~GDL con un error RMS de \RMS~N\,m (\RMSPct\,\%), y un máximo de
+\ErrMax~N\,m (Fig.~\ref{fig:val}). Ambos modelos usan los mismos parámetros CAD: la comparación cuantifica la pérdida
+por la reducción a 1R, no la fidelidad respecto del robot real, del que no se midieron torques. Al detenerse, el torque
+pasa del valor de frenado ($t_f^-$) al de sostén, $\tau = \tau_g = \TauSosten$~N\,m ($t_f^+$).
 
 \begin{table}[t]
 \centering
-\caption{Torque del hombro en instantes característicos [N\,m]}
+\caption{Torque del hombro en instantes característicos [N\,m]. $t_f^-$: último instante del frenado; $t_f^+$:
+robot detenido (solo sostén)}
 \label{tab:tau}
 \small
 \begin{tabular}{@{}rlrrrr@{}}
 \toprule
 $t$ [s] & Fase & $\theta$ [$^\circ$] & $\tau_{in}$ & $\tau_g$ & $\tau$\\
 \midrule
-0.000 & arranque & $-163.8$ & 1.84 & $-8.32$ & $-6.48$\\
-0.644 & crucero & $-152.5$ & 0.00 & $-13.78$ & $-13.78$\\
-1.163 & frenado & $-141.8$ & $-1.84$ & $-18.44$ & $-20.27$\\
-1.288 & frenado & $-141.1$ & $-1.84$ & $-18.71$ & $\mathbf{-20.55}$\\
+\tabinput{\resdir/tabla_torque.tex}
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.72\textwidth]{E_torque_1R.pdf}
-\caption{Modelo 1R del hombro: $q_2$ (y $\theta$), $\ddot q_2$ y $\tau = \tau_{in} + \tau_g$ sobre el LSPB.}
+\begin{minipage}[b]{0.55\textwidth}\centering
+\includegraphics[width=\linewidth]{E_torque_1R.pdf}
+\caption{Modelo 1R del hombro: $q_2$ (y $\theta$), $\ddot q_2$ y $\tau = \tau_{in} + \tau_g$ sobre el LSPB, más
+0.25~s de sostén (gris) con el robot detenido.}
 \label{fig:tau}
-\end{figure*}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{E_1R_vs_completo.pdf}
-\caption{Torque del hombro: modelo 1R frente al modelo de Lagrange completo de 6~GDL.}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.42\textwidth}\centering
+\includegraphics[width=\linewidth]{E_1R_vs_completo.pdf}
+\caption{Torque del hombro: modelo 1R frente al modelo de Lagrange completo de 6~GDL (mismos parámetros CAD).}
 \label{fig:val}
-\end{figure}
+\end{minipage}
+\end{figure*}
 
 % =====================================================================================================
 \section{Discusión}
 \textbf{Aceleración frente a crucero.} La componente inercial $\tau_{in} = J\ddot q_2$ solo existe en las mezclas y
-presenta escalones, porque $\ddot q$ en el LSPB es discontinua: el perfil es $C^1$, no $C^2$. En el arranque,
-$\tau_{in} > 0$ se opone a $\tau_g < 0$, y el torque neto ($-6.48$~N\,m) es menor que el estático. En el frenado, ambas
-componentes tienen el mismo signo y se suman, lo que produce el pico de $-20.55$~N\,m. Durante el crucero,
-$\ddot q_2 = 0$ y aun así $|\tau|$ crece de 9.7 a 17.6~N\,m: \emph{velocidad constante no implica torque cero}, porque
-el motor sostiene el peso. Como $\theta \approx -150^\circ$, el centro de masa está por encima del eje y el brazo se
-comporta como un péndulo invertido: inclinarse hacia adelante aumenta $|\sin\theta|$ y con ello el esfuerzo. Al 25\,\%
-de velocidad domina la gravedad. Si la misma trayectoria se recorre $\lambda$ veces más rápido, $\tau_{in}$ crece como
-$\lambda^2$: al 100\,\% alcanza 29.4~N\,m y supera a $\tau_g$ (18.7~N\,m), mientras que $\tau_g$ no cambia.
+presenta escalones, porque $\ddot q$ en el LSPB es discontinua: el perfil es $C^1$, no $C^2$. Donde $\tau_{in}$ y
+$\tau_g$ tienen signos opuestos, el torque neto es menor que el estático (en $t = 0$, $\tau = \TauIni$~N\,m); donde
+tienen el mismo signo se suman, y ahí aparece el pico de $\TauPeak$~N\,m (fase: \TauPeakFase, $t = \TauPeakT$~s).
+% REVISAR si cambia la pose: confirmar en qué fase cae el pico (lo imprime el notebook, sección 9.1).
+Durante el crucero, $\ddot q_2 = 0$ y aun así $|\tau|$ va de \CruceroRango~N\,m: \emph{velocidad constante no implica
+torque cero}, porque el motor sostiene el peso. Con $\theta$ cerca de $\pm180^\circ$, el centro de masa está por encima
+del eje y el brazo se comporta como un péndulo invertido: alejarse de la vertical aumenta $|\sin\theta|$ y con ello el
+esfuerzo. Al 25\,\% de velocidad domina la gravedad ($\max|\tau_{in}| = \TauInMax$ frente a
+$\max|\tau_g| = \TauGMax$~N\,m). Si la misma trayectoria se recorre $\lambda$ veces más rápido, $\tau_{in}$ crece como
+$\lambda^2$: al 100\,\% alcanza \TauInFull~N\,m, mientras que $\tau_g$ (\TauGFull~N\,m) no cambia.
 
 \textbf{Singularidad frente a pico de torque.} La singularidad es una propiedad cinemática de la postura: $J$ pierde
 rango y desaparece una dirección de movimiento instantáneo. Lo que diverge es la velocidad articular necesaria para
 moverse en esa dirección. Por estática ($\tau = J^TF$), una carga en la dirección perdida no requiere torque. El pico de
 torque, en cambio, es un fenómeno dinámico: depende de la aceleración impuesta por el perfil temporal y de la
 gravedad. En este caso, la trayectoria \emph{parte} de una singularidad ($\mathbf{q}_0 = \mathbf{0}$) sin dificultad,
-porque el LSPB es articular y no invierte $J$. El pico de torque ocurre al final del frenado, con rango 6.
+porque el LSPB es articular y no invierte $J$. El pico de torque ocurre en la fase de \TauPeakFase, lejos de esa
+singularidad. % REVISAR si cambia la pose: rango de J en el pico (sección 9.1 del notebook).
 
 \textbf{Limitaciones.} El modelo 1R congela las juntas 3 a 6 y omite la fricción, la carga útil y el acoplamiento entre
-juntas. Su error frente al modelo completo es mayor al principio y al final del movimiento, donde la postura real se
+juntas. Como su inercia $J$ es constante, no tiene término en $\dot\theta^2$; un modelo con inercia dependiente de la
+postura sí lo tendría. Su error frente al modelo completo es mayor al principio y al final del movimiento, donde la postura real se
 aleja de $\mathbf{q}_{\text{ref}}$. El valor de $a_{\max}$ es un supuesto, porque el fabricante no lo publica.
 
 % =====================================================================================================
@@ -362,7 +390,7 @@ cada candidato se verifica por FK con errores del orden de la precisión de máq
 mínimo cumple las fronteras en reposo y los límites del fabricante. El Jacobiano, validado de forma independiente,
 permitió caracterizar la singularidad de muñeca por la pérdida de rango y explicar su efecto: amplificación de
 velocidad, no torque infinito. Finalmente, el modelo 1R del hombro, con parámetros obtenidos de datos CAD, separa las
-contribuciones inercial y gravitacional y reproduce al modelo completo con un 4.5\,\% de error RMS. La solución de
+contribuciones inercial y gravitacional y reproduce al modelo completo con un \RMSPct\,\% de error RMS. La solución de
 posición resulta ser el requisito sobre el cual operan los análisis de sensibilidad diferencial y de demanda de los
 actuadores.
 
@@ -378,8 +406,9 @@ Mech. Eng., Stanford Univ., Stanford, CA, USA, 1968.
 dynamic and control simulation,'' \textit{Turk. J. Elec. Eng. \& Comp. Sci.}, vol.~28, pp.~1949--1964, 2020,
 doi: 10.3906/elk-1909-131.
 \bibitem{abb} ABB Robotics, \textit{Product Specification IRB 120}, doc. 3HAC035960-001.
-\bibitem{abbcal} ABB Robotics, \textit{Product Manual IRB 120}, sección de calibración (posición de calibración y
-actualización de contadores de revolución).
+\bibitem{abbcal} ABB Robotics Tech Community, ``Calibrate an IRB140'' (actualización de contadores de revolución con
+\texttt{MoveAbsJ} a un \textit{jointtarget} de ceros), 2014. [En línea]. Disponible:
+\url{https://tech-community.robotics.abb.com/t/calibrate-an-irb140/4976}
 \bibitem{guia} B. Quiroga, ``Guía oficial y rúbrica de evaluación: Hito 2,'' IMT-342 Robótica, Universidad Católica
 Boliviana, Tarija, 2026.
 \end{thebibliography}

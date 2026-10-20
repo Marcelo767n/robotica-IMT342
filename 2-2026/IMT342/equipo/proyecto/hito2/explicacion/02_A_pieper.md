@@ -134,8 +134,10 @@ a = \operatorname{atan2}\Big(\tfrac{R_{23}}{s_b}, \tfrac{R_{13}}{s_b}\Big),\quad
 c = \operatorname{atan2}\Big(\tfrac{R_{32}}{s_b}, \tfrac{-R_{31}}{s_b}\Big)
 $$
 
-- El signo $\pm$ de $s_b$ da las **dos ramas de muñeca**: `q5+` y `q5-` (la "muñeca volteada"). Las dos son la
-  misma orientación final: $(q_4, q_5, q_6)$ y $(q_4 + \pi, -q_5, q_6 + \pi)$.
+- El signo $\pm$ de $s_b$ da las **dos ramas de muñeca** (la "muñeca volteada"). Como $b = -q_5$, el signo de $s_b$
+  es el **opuesto** al de $q_5$. Las ramas se nombran por el signo **real** de $q_5$: `q5+` ($q_5 > 0$, $s_b < 0$) y
+  `q5-` ($q_5 < 0$, $s_b > 0$). Lo garantiza la prueba `test_wrist_labels_match_the_sign_of_q5`. Las dos dan la misma
+  orientación final: $(q_4, q_5, q_6)$ y $(q_4 + \pi, -q_5, q_6 + \pi)$.
 - En el código no se divide por $s_b$: se multiplican los argumentos de `atan2` por el signo, que es equivalente y no
   falla cuando $s_b$ es pequeño.
 - **Singularidad de muñeca** ($s_b \approx 0$, es decir $q_5 = 0$): los ejes 4 y 6 quedan alineados y solo se
@@ -177,24 +179,36 @@ Así **cualquier pose** que escriba el docente se procesa y se clasifica, y nunc
 ## 6. Pose inicial y selección de la configuración objetivo
 
 **Pose inicial.** Es la posición de calibración de ABB, con todos los ejes en 0° (`HOME_Q` en
-[dh.py](../irb120/dh.py)). El fabricante no define otra "home" para el IRB 120: la postura de referencia es la de
-sincronización, a la que se lleva el robot con `MoveAbsJ` y un jointtarget de ceros para verificar los contadores de
-revolución. Su pose del TCP es $T_0 = FK(0)$: TCP en (0.524, 0, 0.630) m con la herramienta apuntando hacia $+x$.
+[dh.py](../irb120/dh.py)). Se **elige** como pose inicial porque es la postura de referencia de ABB para la sincronización: el robot se lleva a
+ella con `MoveAbsJ` y un jointtarget de ceros para verificar los contadores de revolución. Es una elección del equipo,
+no una "home" obligatoria del fabricante. Su pose del TCP es $T_0 = FK(0)$: TCP en (0.524, 0, 0.630) m con la herramienta apuntando hacia $+x$.
 
 Pieper también se aplica a $T_0$ y recupera $q = 0$ (rama 1, la única admisible). Como en $q = 0$ los ejes 4 y 6 están
 alineados ($q_5 = 0$), la rama sale marcada `singular_wrist`: solo $q_4 + q_6$ queda determinado y se toma $q_4$ de
 la referencia. Lo comprueba la prueba `test_home_pose_is_calibration_position_and_is_recovered`.
 
-**Configuración objetivo.** `select_solution(report, HOME_Q)` ([pieper.py:353](../irb120/pieper.py#L353)) elige,
-entre las ramas admisibles de la pose del docente, a cuál ir desde la pose inicial:
+**Configuración objetivo: de 8 ramas a 1.** `rank_candidates(report, HOME_Q)`
+([pieper.py:377](../irb120/pieper.py#L377)) evalúa **las 8 ramas** y devuelve, para cada una, si es
+admisible, $\sigma_{\min}(J)$, el margen al límite articular más cercano, el desplazamiento ponderado, el $t_f$ del
+LSPB y su estado (elegida, apta o el motivo del descarte). `select_solution`
+([pieper.py:438](../irb120/pieper.py#L438)) devuelve la que queda en el puesto 1.
 
-1. Descarta las ramas admisibles con $\sigma_{\min}(J) < 0.01$, es decir, cerca de una singularidad (ver
-   [06](06_D_singularidades.md)), salvo que todas lo estén. Moverse cerca de una singularidad exige velocidades
-   articulares grandes.
-2. Entre las restantes, minimiza el desplazamiento ponderado $\lVert W(q - q_{\text{ref}})\rVert$ con
-   $W = \operatorname{diag}(1, 1, 1, 0.5, 0.5, 0.5)$. Las juntas 1 a 3 mueven casi toda la masa del robot (unos 12 kg
-   cuelgan del hombro), así que moverlas poco reduce tiempo y esfuerzo. Además, quedarse en la misma rama que la
-   postura actual evita "dar la vuelta" al brazo o a la muñeca.
+**Criterio propuesto** (filtros en orden y luego un costo):
+
+| Paso | Regla | Justificación |
+|---|---|---|
+| 1 | **Admisible**: real, dentro de límites y verificada por FK | Obligatorio. Si no es real, la postura no existe; si viola límites, el robot no la puede adoptar; si no pasa la FK, no es solución |
+| 2 | **Lejos de singularidad**: $\sigma_{\min}(J) \ge 0.01$ | $\lVert\dot q\rVert \le \lVert\dot x\rVert/\sigma_{\min}$: con $\sigma_{\min} \ge 0.01$, la amplificación de velocidad queda acotada a 100× ([06](06_D_singularidades.md)). Terminar cerca de una singularidad haría que cualquier corrección o movimiento posterior exija velocidades enormes |
+| 3 | **Lejos de los topes**: margen $\ge 5°$ en las 6 juntas | El controlador real usa límites de software y el seguimiento tiene error. Una postura pegada a un tope no deja margen para corregir ni para seguir hacia otra pose |
+| 4 | **Mínimo desplazamiento ponderado** $\lVert W(q - q_0)\rVert$, con $W = \operatorname{diag}(1,1,1,\tfrac12,\tfrac12,\tfrac12)$; desempate por mayor $\sigma_{\min}$ | Menor recorrido es menos tiempo, menos energía y menos volumen barrido (menos riesgo de colisión), y evita "voltear" brazo o muñeca. Las juntas 1 a 3 mueven unos 12 kg y las de la muñeca menos de 3 kg: por eso pesan el doble |
+
+**¿Por qué no minimizar $t_f$?** El tiempo del LSPB lo fija una sola junta (a menudo la muñeca) y depende del
+supuesto de $a_{\max}$. Se reporta, pero no decide. **¿Y si ninguna pasa los filtros 2 y 3?** Se relaja primero el
+margen y después $\sigma_{\min}$, y el estado lo indica ("margen relajado"). Así, una pose alcanzable nunca queda sin
+solución.
+
+En el notebook (sección 4) la tabla muestra las 8 ramas con estas columnas. La figura `A_ocho_ramas_3d` dibuja el
+robot en cada rama: verde la elegida, azul las aptas y rojo discontinuo las que violan límites.
 
 ## 7. Herramienta para el docente
 
@@ -215,6 +229,10 @@ $q$ en grados, $e_p$, $e_R$, aceptada), el veredicto y la rama que se selecciona
 | `test_every_real_branch_reproduces_the_pose_even_outside_limits` | Toda rama real reproduce $T_d$ por FK, incluso las que violan límites, así que la geometría es correcta |
 | `test_unreachable_pose_has_no_real_branch` | Pose a 1 m: ninguna rama real, veredicto "fuera de" |
 | `test_pose_that_exists_only_outside_joint_limits` | Pose geométricamente posible pero bloqueada por límites ($q_3 = 90° > 70°$) |
+| `test_home_pose_is_calibration_position_and_is_recovered` | Desde $T_0 = FK(0)$, Pieper recupera $q = 0$ y la marca como muñeca singular |
+| `test_rejects_matrices_that_are_not_rigid_poses` | Rechaza matrices que no son poses rígidas: $\det R \ne 1$, $R$ no ortonormal o última fila incorrecta |
+| `test_wrist_labels_match_the_sign_of_q5` | La etiqueta `q5+`/`q5-` coincide con el signo real de $q_5$ |
+| `test_ranking_covers_eight_branches_and_picks_one` | Se evalúan las 8 ramas, se elige exactamente una y las descartadas tienen motivo |
 | `test_wrist_singularity_q5_zero_is_solved` | En $q_5 = 0$ se marca `singular_wrist` y se sigue resolviendo |
 | `test_selection_prefers_closest_admissible_branch` | La selección recupera la rama de la postura de referencia |
 

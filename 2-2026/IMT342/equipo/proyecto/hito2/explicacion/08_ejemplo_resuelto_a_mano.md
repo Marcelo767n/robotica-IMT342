@@ -127,12 +127,14 @@ $$
 $R_{13} = -0.99262$, $R_{23} = 0$, $R_{33} = 0.12129$, $R_{31} = -0.96298$, $R_{32} = 0.24075$, así que
 $|s_b| = \sqrt{R_{13}^2 + R_{23}^2} = 0.99262$.
 
-| | Rama `q5+` ($s_b = +0.99262$) | Rama `q5-` ($s_b = -0.99262$) |
+Como $b = -q_5$, el signo de $s_b$ es el **opuesto** al de $q_5$. Las ramas se nombran por el signo de $q_5$:
+
+| | Rama `q5+` ($s_b = -0.99262$) | Rama `q5-` ($s_b = +0.99262$) |
 |---|---|---|
-| $b = \operatorname{atan2}(s_b, R_{33})$ | $83.034°$, así $q_5 = -83.034°$ | $-83.034°$, así $q_5 = +83.034°$ |
-| $q_4 = \operatorname{atan2}(R_{23}/s_b,\ R_{13}/s_b)$ | $\operatorname{atan2}(0, -1) = 180°$ | $\operatorname{atan2}(0, +1) = 0°$ |
-| $q_6 + \pi = \operatorname{atan2}(R_{32}/s_b,\ -R_{31}/s_b)$ | $\operatorname{atan2}(0.24075, 0.96298) = 14.036°$, así $q_6 = -165.964°$ | $\operatorname{atan2}(-0.24075, -0.96298) = -165.964°$, así $q_6 = -345.964° \equiv 14.036°$ |
-| ¿En límites? | **No**: $q_4 = 180° > 160°$ | **Sí** |
+| $b = \operatorname{atan2}(s_b, R_{33})$ | $-83.034°$, así $q_5 = +83.034°$ | $83.034°$, así $q_5 = -83.034°$ |
+| $q_4 = \operatorname{atan2}(R_{23}/s_b,\ R_{13}/s_b)$ | $\operatorname{atan2}(0, +1) = 0°$ | $\operatorname{atan2}(0, -1) = 180°$ |
+| $q_6 + \pi = \operatorname{atan2}(R_{32}/s_b,\ -R_{31}/s_b)$ | $\operatorname{atan2}(-0.24075, -0.96298) = -165.964°$, así $q_6 = -345.964° \equiv 14.036°$ | $\operatorname{atan2}(0.24075, 0.96298) = 14.036°$, así $q_6 = -165.964°$ |
+| ¿En límites? | **Sí** | **No**: $q_4 = 180° > 160°$ |
 
 Las dos ramas son la misma orientación, con la muñeca "volteada": $(q_4 + 180°, -q_5, q_6 + 180°)$.
 
@@ -140,29 +142,31 @@ Las dos ramas son la misma orientación, con la muñeca "volteada": $(q_4 + 180�
 
 | Rama | Brazo | Codo | Muñeca | $q$ [°] | ¿Real? | Límites | $e_p$ [m] | $e_R$ [rad] | ¿Admisible? |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | frente | arriba | q5+ | (14.04, 22.67, −15.70, 180.00, −83.03, −165.96) | sí | no: J4 | 6e-17 | 2e-16 | no |
-| **2** | **frente** | **arriba** | **q5−** | **(14.04, 22.67, −15.70, 0.00, 83.03, 14.04)** | sí | **sí** | 8e-17 | 2e-16 | **SÍ** |
-| 3 | frente | abajo | q5+ | (14.04, 88.59, −138.20, 180.00, −139.61, −165.96) | sí | no: J3, J4, J5 | 1e-16 | 3e-16 | no |
-| 4 | frente | abajo | q5− | (14.04, 88.59, −138.20, 0.00, 139.61, 14.04) | sí | no: J3, J5 | 1e-16 | 3e-16 | no |
-| 5 | atrás | arriba | q5+ | (−165.96, −88.59, −15.70, 0.00, −165.71, −165.96) | sí | no: J1, J5 | 8e-17 | 2e-16 | no |
-| 6 | atrás | arriba | q5− | (−165.96, −88.59, −15.70, 180.00, 165.71, 14.04) | sí | no: J1, J4, J5 | 1e-16 | 2e-16 | no |
-| 7 | atrás | abajo | q5+ | (−165.96, −22.67, −138.20, 0.00, −109.13, −165.96) | sí | no: J1, J3 | 1e-16 | 1e-16 | no |
-| 8 | atrás | abajo | q5− | (−165.96, −22.67, −138.20, −180.00, 109.13, 14.04) | sí | no: J1, J3, J4 | 2e-16 | 3e-16 | no |
+| **1** | **frente** | **arriba** | **q5+** | **(14.04, 22.67, −15.70, 0.00, 83.03, 14.04)** | sí | **sí** | 8e-17 | 2e-16 | **SÍ** |
+| 2 | frente | arriba | q5− | (14.04, 22.67, −15.70, 180.00, −83.03, −165.96) | sí | no: J4 | 6e-17 | 2e-16 | no |
+| 3 | frente | abajo | q5+ | (14.04, 88.59, −138.20, 0.00, 139.61, 14.04) | sí | no: J3, J5 | 1e-16 | 3e-16 | no |
+| 4 | frente | abajo | q5− | (14.04, 88.59, −138.20, 180.00, −139.61, −165.96) | sí | no: J3, J4, J5 | 1e-16 | 3e-16 | no |
+| 5 | atrás | arriba | q5+ | (−165.96, −88.59, −15.70, 180.00, 165.71, 14.04) | sí | no: J1, J4, J5 | 1e-16 | 2e-16 | no |
+| 6 | atrás | arriba | q5− | (−165.96, −88.59, −15.70, 0.00, −165.71, −165.96) | sí | no: J1, J5 | 8e-17 | 2e-16 | no |
+| 7 | atrás | abajo | q5+ | (−165.96, −22.67, −138.20, −180.00, 109.13, 14.04) | sí | no: J1, J3, J4 | 2e-16 | 3e-16 | no |
+| 8 | atrás | abajo | q5− | (−165.96, −22.67, −138.20, 0.00, −109.13, −165.96) | sí | no: J1, J3 | 1e-16 | 1e-16 | no |
 
 **Lectura:**
 
 - Las 8 ramas son **reales** y **todas** reproducen $T_d$ por FK con errores de $10^{-16}$: la matemática es correcta.
 - Solo **una** es admisible. Las de "atrás" fallan por **menos de 1°** en la junta 1 ($|-165.96| > 165$); las de codo
   abajo fallan porque $q_3 = -138.2° < -110°$.
-- **Veredicto: ALCANZABLE, 1 de 8 ramas admisibles.** Se selecciona la rama 2: es la única admisible y está lejos de
-  singularidades ($q_5 = 83°$, $\sigma_{\min}(J) > 0.01$).
+- **Veredicto: ALCANZABLE, 1 de 8 ramas admisibles.** Se selecciona la rama 1 con el criterio de
+  [02 §6](02_A_pieper.md): es admisible, está lejos de singularidades ($\sigma_{\min}(J) = 0.117 \ge 0.01$), tiene
+  37° de margen al límite más cercano ($q_5 = 83°$ frente a 120°) y es la de menor desplazamiento (en este caso, la
+  única que queda).
 
 ## 6. Validación por FK (criterio B)
 
-Se reinyecta $q^{(2)} = (14.036, 22.667, -15.700, 0, 83.034, 14.036)°$ en la FK:
+Se reinyecta $q^{(1)} = (14.036, 22.667, -15.700, 0, 83.034, 14.036)°$ en la FK:
 
 $$
-T(q^{(2)}) = \begin{bmatrix}-1&0&0&0.400\\0&1&0&0.100\\0&0&-1&0.350\\0&0&0&1\end{bmatrix}
+T(q^{(1)}) = \begin{bmatrix}-1&0&0&0.400\\0&1&0&0.100\\0&0&-1&0.350\\0&0&0&1\end{bmatrix}
 \quad\Rightarrow\quad e_p = 7.9\times10^{-17}\ \text{m},\ e_R = 2.0\times10^{-16}\ \text{rad} < 10^{-6}\ \checkmark
 $$
 

@@ -48,8 +48,19 @@ class LspbTrajectory:
         return self.cruise_velocity / self.tb
 
     def sample(self, t: float) -> tuple[Vector, Vector, Vector]:
-        """Posicion, velocidad y aceleracion en el instante t (saturado a [0, tf])."""
-        t = min(max(float(t), 0.0), self.tf)
+        """Posicion, velocidad y aceleracion en el instante t.
+
+        Dentro de [0, tf] se usan las tres formulas del LSPB. En los extremos se toma el valor del
+        tramo interior (convencion unilateral): en t = 0 la aceleracion es +a (arranque) y en t = tf
+        es -a (frenado). Fuera del movimiento el robot esta EN REPOSO: t < 0 da (q0, 0, 0) y
+        t > tf da (qf, 0, 0).
+        """
+        t = float(t)
+        zero = np.zeros_like(self.q0)
+        if t < 0.0:
+            return self.q0.copy(), zero, zero.copy()
+        if t > self.tf:
+            return self.qf.copy(), zero, zero.copy()
         v, a = self.cruise_velocity, self.blend_acceleration
         if t < self.tb:
             return self.q0 + 0.5 * a * t * t, a * t, a.copy()
@@ -64,7 +75,9 @@ class LspbTrajectory:
         return tuple(np.array([s[k] for s in samples]) for k in range(3))
 
     def phase(self, t: float) -> str:
-        """'acelera', 'crucero' o 'frena'."""
+        """'acelera', 'crucero', 'frena' o 'reposo' (antes de 0 o despues de tf)."""
+        if t < 0.0 or t > self.tf:
+            return "reposo"
         if t < self.tb:
             return "acelera"
         return "crucero" if t <= self.tf - self.tb else "frena"

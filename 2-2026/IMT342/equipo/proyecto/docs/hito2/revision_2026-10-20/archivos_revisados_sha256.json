@@ -1,0 +1,26 @@
+{
+  "fecha_UTC": "2026-10-20T15:56:14.705699+00:00",
+  "nota": "Archivos locales contrastados al cerrar la revisión. Hay otra sesión editando el proyecto. Las comprobaciones se ejecutaron sobre copias temporales.",
+  "sha256": {
+    "hito2/Hito2_IRB120_pipeline.ipynb": "09149d090edfa7082d9fdaed1762a5189cfa6b31097b7df23367aabbb9e8d417",
+    "hito2/build_pipeline_notebook.py": "1865392e595feb7eccf74a94bd97a778b8cb189e024cdebec33bdb1324e3c32a",
+    "hito2/irb120/pieper.py": "effce3c3ae8f9569ddbc99fbbe383ed64a4d0362809e70e1b4f74d01f1955dcd",
+    "hito2/irb120/validation.py": "471d0129db92449e3f2589f22da3d26c6999e8ef6779c8671413bee9640e5a7b",
+    "hito2/irb120/lspb.py": "1a9d6b280ef52fe83a4b3ce0f649adbf031cf82572e7bdf1534a33a2e087b2c1",
+    "hito2/irb120/jacobian.py": "a28195757e03eaae3382d2a08c12730558e465c410f80212fec1d20c9d77c22b",
+    "hito2/irb120/dh.py": "35c0c07ffd0c8c30c442cf1fc7c3fd838f300e9e48361023876d078368d8f997",
+    "hito2/irb120/dynamics.py": "fc304619cd482e1eab3dd0a157f8ff8e52cd9147f8aaa2541e774cd3f33dfe84",
+    "hito2/irb120/dynamics_1r.py": "1ee2454b8199f5276f34c00cad06d2b3a1dc5d71584375d5603c7d51dd83ce33",
+    "docs/hito2/informe_ieee/informe_hito2_ieee.tex": "f371b5f4261f54532a8f0889dd5bce185b674b9533acfbc7dd854616882d0a54",
+    "docs/hito2/informe_ieee/informe_hito2_ieee.pdf": "8024fa1c78ff6e57c93d43e611acb45e50ae937962e6e6b8cb5dbd222d6af246",
+    "archivos que hay que presentar/hito_2_rubrica.tex": "cd3bcdad9de00afa537237e13057319ed366b60e8e2ce09cd6d57e09f08b7254",
+    "docs/hito2/guia_hito2.md": "dd70ee50edea9a5b00419ad59d6beab15df5a32d9fdfb6abb681b35c32c16c04",
+    "docs/hito2/metodo_y_resultados.md": "ea031eecc7354df312f0b521fd1425ff4d1753c54a21344891fe1fde39e1768f",
+    "docs/hito2/informe_ieee/README.md": "a2b35e2e0e73611ec45c4948bb42b4faffea72fb7c25f4f2e290400f92615e8e",
+    "hito2/explicacion/09_guia_de_estudio_del_codigo.md": "73ee8a75d0bcbc4421b904350e4db2f2840b5e37a3fa09c15b05f443c8fbe9e9",
+    "hito2/explicacion/06_D_singularidades.md": "9ff05c6acb4859932e9e2589d2adbbbc17cc5891dbfc73a990285b7ff6bc6576",
+    "hito2/explicacion/07_E_dinamica_1R.md": "0da564b6b370014578f655e6b204993e0a6b562cc138be6ad8ba5ec07ac09be6",
+    "hito2/README.md": "9807953282b5d9f6f0260741d10fed74767d7ef349d2398bc1d3df7b705c1e69",
+    "README.md": "1ad5f97c42f2d580d773eeeb5b80d6598bf1feaa27763b7a395174fea52dff5d"
+  }
+}

@@ -80,3 +80,26 @@ def matrix_to_rpy_deg(rotation: NDArray[np.float64]) -> tuple[float, float, floa
         roll = np.arctan2(rotation[2, 1], rotation[2, 2])
         yaw = np.arctan2(rotation[1, 0], rotation[0, 0])
     return tuple(float(v) for v in np.rad2deg([roll, pitch, yaw]))
+
+
+def assert_rigid_transform(transform, tol: float = 1.0e-6) -> NDArray[np.float64]:
+    """Verifica que `transform` sea una pose rigida valida (SE(3)) y la devuelve como arreglo.
+
+    Exige: forma 4x4, valores finitos, ultima fila [0, 0, 0, 1], R^T R = I y det(R) = +1
+    (con tolerancia `tol`). Lanza ValueError con el motivo si alguna condicion falla.
+    """
+    matrix = np.asarray(transform, dtype=float)
+    if matrix.shape != (4, 4):
+        raise ValueError(f"La pose debe ser una matriz 4x4 (se recibio {matrix.shape}).")
+    if not np.all(np.isfinite(matrix)):
+        raise ValueError("La pose contiene valores no finitos (nan o inf).")
+    if not np.allclose(matrix[3], [0.0, 0.0, 0.0, 1.0], atol=tol):
+        raise ValueError(f"La ultima fila de la pose debe ser [0, 0, 0, 1] (es {matrix[3]}).")
+    rotation = matrix[:3, :3]
+    orthogonality = float(np.abs(rotation.T @ rotation - np.eye(3)).max())
+    if orthogonality > tol:
+        raise ValueError(f"R no es ortonormal: max|R^T R - I| = {orthogonality:.2e}.")
+    determinant = float(np.linalg.det(rotation))
+    if abs(determinant - 1.0) > tol:
+        raise ValueError(f"det(R) = {determinant:.6f}; una rotacion propia exige det(R) = +1.")
+    return matrix

@@ -28,9 +28,10 @@ $$
 \boxed{\tau = \underbrace{J\,\ddot\theta}_{\text{inercial}} + \underbrace{m g \ell_c\sin\theta}_{\text{gravitacional}}}
 $$
 
-**¿Por qué no aparece $\dot\theta$?** Porque $J$ no depende de $\theta$: en un solo grado de libertad,
-$\partial T/\partial\theta = 0$ y no hay términos de Coriolis ni centrífugos. Esos términos aparecen solo en cadenas
-de varios eslabones, donde la inercia que "ve" una junta cambia con la postura de las otras. Tampoco se modela
+**¿Por qué no aparece $\dot\theta$?** Porque en **este** modelo 1R la inercia $J$ es **constante** (no depende de
+$\theta$): $\partial T/\partial\theta = 0$ y no aparece ningún término cuadrático en la velocidad. Ojo: no es una
+propiedad de "todo sistema de 1 GDL". Si la inercia dependiera de la coordenada, $M(q)$, aparecería el término
+$\tfrac12 M'(q)\dot q^2$. En cadenas de varios eslabones esos términos son los de Coriolis y centrífugos. Tampoco se modela
 fricción.
 
 ## 2. Cómo se reduce el IRB 120 a un 1R
@@ -90,8 +91,23 @@ valida $m$, $\ell_c$, $J$ y $\varphi_0$, incluido el signo. Más pruebas:
 - `test_components_add_up_and_cruise_torque_is_pure_gravity`: con $\ddot q = 0$, $\tau = \tau_g \ne 0$.
 
 Lo que el 1R **no** captura: el movimiento simultáneo de las juntas 3 a 6 durante el LSPB, que cambia $\ell_c$ y $J$,
-y el acoplamiento dinámico entre juntas. En el notebook se comparará $\tau_{1R}(t)$ con el $\tau_2(t)$ del modelo
-completo para cuantificar ese error.
+y el acoplamiento dinámico entre juntas. El notebook (sección 8) compara $\tau_{1R}(t)$ con el $\tau_2(t)$ del
+modelo completo a lo largo de toda la trayectoria. Para la pose de ejemplo, el error RMS es de 0.64 N·m, el 4.5 % del
+RMS de $\tau_2$. Si para otra pose el error superara el 15 %, el notebook lo advierte: significa que las juntas 3 a 6
+se mueven demasiado para el supuesto de cuerpo congelado.
+
+**Alcance de la validación.** El modelo completo usa los **mismos** parámetros CAD. La comparación mide cuánto se pierde
+al reducir el modelo a 1R, **no** cuánto se parece al robot real: no hay mediciones de torque en hardware.
+
+**Frenado frente a sostén.** El pico del ejemplo, $-20.55$ N·m, ocurre en $t_f^-$ (último instante del frenado,
+$\ddot q_2 = -a$). Una vez detenido ($t_f^+$, $\ddot q = 0$), el motor solo sostiene el brazo:
+$\tau = \tau_g = -18.71$ N·m. El notebook dibuja 0.25 s de sostén después de $t_f$ y la tabla del informe muestra las
+dos filas.
+
+**Dato aproximado de la pinza.** La masa de la pinza (0.115 kg) sale de la hoja de datos SMC, pero la ubicación de su
+centro de masa (0.040 m sobre la brida) es una aproximación del equipo. Su efecto es despreciable: moverla entre 0 y
+0.080 m cambia $g_2$ en unos 0.06 N·m, menos del 1 %. El TCP a 0.150 m es el punto de trabajo elegido por el equipo;
+su posible extensión (dedos o útil) no se incluye en la masa.
 
 ## 5. Evaluación sobre el LSPB
 
@@ -129,7 +145,7 @@ Como $\varphi_0$ es constante, $\ddot\theta = \ddot q_2$. Código:
 
 ## Preguntas de defensa
 
-1. *¿Por qué $\dot q$ no aparece en $\tau$?* En 1 GDL, $J$ es constante: no hay Coriolis ni centrífuga.
+1. *¿Por qué $\dot q$ no aparece en $\tau$?* Porque en este 1R la inercia $J$ es constante; con $M(q)$ variable aparecería $\tfrac12 M'(q)\dot q^2$.
 2. *Durante el crucero $\ddot q = 0$. ¿Por qué el torque no es cero?* Por la gravedad: $mg\ell_c\sin\theta$ depende
    de la posición, no de la aceleración.
 3. *¿De dónde sacaste $m$, $\ell_c$ y $J$?* Del CAD por eslabón de Truc y Lam (2020) más la pinza del datasheet SMC,

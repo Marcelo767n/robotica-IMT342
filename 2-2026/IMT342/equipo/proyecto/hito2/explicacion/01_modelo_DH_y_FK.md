@@ -26,7 +26,7 @@ Paso a paso:
 3. $T_x(a)$ avanza a lo largo de la normal común, el nuevo $x_i$.
 4. $R_x(\alpha)$ inclina el nuevo eje $z_i$ respecto del anterior.
 
-En el código esto es `dh_transform(theta, parameter)` ([dh.py:61](../irb120/dh.py#L61)), que copia la matriz de arriba
+En el código esto es `dh_transform(theta, parameter)` ([dh.py:66](../irb120/dh.py#L66)), que copia la matriz de arriba
 elemento por elemento.
 
 ## 2. Tabla DH del IRB 120
@@ -60,7 +60,7 @@ T_0^6(q) = A_1(q_1)\,A_2(q_2)\,A_3(q_3)\,A_4(q_4)\,A_5(q_5)\,A_6(q_6)
 $$
 
 El producto es válido porque cada $A_i$ expresa el marco $i$ dentro del $i-1$: al encadenarlas se pasa del marco 6
-al 0. Código: `forward_kinematics(q)` ([dh.py:99](../irb120/dh.py#L99)), que hace `transform = transform @ dh_transform(...)`
+al 0. Código: `forward_kinematics(q)` ([dh.py:104](../irb120/dh.py#L104)), que hace `transform = transform @ dh_transform(...)`
 seis veces.
 
 ### TCP a 0.150 m
@@ -71,8 +71,18 @@ $$
 T_{TCP}(q) = T_0^6(q)\;T_z(0.150), \qquad p_{TCP} = p_6 + 0.150\,z_6
 $$
 
-Código: `TCP_Z_M = 0.150`, `tcp_transform()` ([dh.py:108](../irb120/dh.py#L108)) y `forward_kinematics_tcp(q)`
-([dh.py:115](../irb120/dh.py#L115)). La orientación del TCP es la misma que la de la brida: solo cambia la posición.
+Código: `TCP_Z_M = 0.150`, `tcp_transform()` ([dh.py:113](../irb120/dh.py#L113)) y `forward_kinematics_tcp(q)`
+([dh.py:130](../irb120/dh.py#L130)). La orientación del TCP es la misma que la de la brida: solo cambia la posición.
+
+### Pose inicial: posición de calibración de ABB
+
+`HOME_Q = 0` ([dh.py](../irb120/dh.py)). Se elige como pose inicial la postura de sincronización de ABB,
+a la que se lleva el robot con `MoveAbsJ` y un jointtarget de ceros para revisar los contadores de revolución. Su
+pose es $T_0 = FK_{TCP}(0)$: TCP en (0.524, 0, 0.630) m, con la herramienta apuntando según $+x$ (roll-pitch-yaw =
+(0°, 90°, 0°)). **Ojo:** en ella $q_5 = 0$, así que es una singularidad de muñeca (ver [06](06_D_singularidades.md)).
+
+**¿Por qué 0.150 m?** Es el punto de trabajo de la herramienta que eligió el equipo. No es un dato del fabricante del
+robot, así que se declara como decisión de diseño.
 
 ## 4. Límites y velocidades del fabricante
 

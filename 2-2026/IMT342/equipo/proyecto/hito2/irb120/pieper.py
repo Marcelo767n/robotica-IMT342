@@ -30,6 +30,7 @@ from irb120.dh import (
     dh_transform,
     tcp_transform,
 )
+from irb120.transforms import assert_rigid_transform
 from irb120.validation import FKCheck, fk_check
 
 Matrix4 = NDArray[np.float64]
@@ -169,7 +170,9 @@ def _wrist_solutions(rotation_3_6: NDArray[np.float64], q4_reference: float):
         ]
     cos_beta = float(rotation_3_6[2, 2])
     solutions = []
-    for wrist, sign in (("q5+", 1.0), ("q5-", -1.0)):
+    # beta = -q5 (por la Ry(-q5) del modelo), asi que el signo de sin(beta) es el OPUESTO al de q5:
+    # sign = -1 da q5 > 0 (rama "q5+") y sign = +1 da q5 < 0 (rama "q5-").
+    for wrist, sign in (("q5+", -1.0), ("q5-", 1.0)):
         beta = atan2(sign * sin_beta, cos_beta)
         alpha = atan2(sign * rotation_3_6[1, 2], sign * rotation_3_6[0, 2])
         gamma = atan2(sign * rotation_3_6[2, 1], -sign * rotation_3_6[2, 0])
@@ -182,9 +185,7 @@ def enumerate_candidates(
     reference_q: np.ndarray | None = None,
 ) -> list[Candidate]:
     """Las 8 ramas de Pieper para la pose de tool0, en orden fijo (brazo, codo, muneca)."""
-    target = np.asarray(target_tool0, dtype=float)
-    if target.shape != (4, 4) or not np.all(np.isfinite(target)):
-        raise ValueError("target_tool0 debe ser una matriz 4x4 finita.")
+    target = assert_rigid_transform(target_tool0)  # rechaza matrices que no son poses rigidas
     reference = np.zeros(6) if reference_q is None else np.asarray(reference_q, dtype=float)
     rotation = target[:3, :3]
 
@@ -336,7 +337,7 @@ class PoseReport:
 
 def analyze_pose(target_tcp: Matrix4, reference_q: np.ndarray | None = None) -> PoseReport:
     """Enumera las 8 ramas para una pose del TCP, las verifica por FK y decide si es alcanzable."""
-    target_tcp = np.asarray(target_tcp, dtype=float)
+    target_tcp = assert_rigid_transform(target_tcp)
     target_tool0 = tool0_from_tcp(target_tcp)
     candidates = enumerate_candidates(target_tool0, reference_q)
     checks = tuple(
@@ -350,27 +351,99 @@ def analyze_pose(target_tcp: Matrix4, reference_q: np.ndarray | None = None) -> 
     return PoseReport(target_tcp, target_tool0, center, distance, tuple(candidates), checks)
 
 
+@dataclass(frozen=True)
+class BranchDecision:
+    """Las metricas de una rama para decidir cual se usa en la trayectoria."""
+
+    candidate: Candidate
+    admissible: bool
+    sigma_min: float  # sigma_min(J) en la rama (nan si no es admisible)
+    limit_margin_deg: float  # menor distancia de alguna junta a su limite [deg]
+    weighted_cost: float  # ||W (q - q_ref)||
+    lspb_tf: float  # duracion del LSPB desde q_ref con los limites por defecto [s]
+    status: str  # "ELEGIDA", "apta", o el motivo de descarte
+    rank: int | None  # 1 = la elegida; None si se descarta
+
+
+def limit_margin_deg(q) -> float:
+    """Menor margen articular de la configuracion: min_i min(q_i - lo_i, hi_i - q_i), en grados."""
+    q = np.asarray(q, dtype=float)
+    return float(np.rad2deg(np.min(np.minimum(q - LIMITS_RAD[:, 0], LIMITS_RAD[:, 1] - q))))
+
+
+DEFAULT_WEIGHTS = np.array([1.0, 1.0, 1.0, 0.5, 0.5, 0.5])
+
+
+def rank_candidates(
+    report: PoseReport,
+    reference_q: np.ndarray,
+    weights: np.ndarray | None = None,
+    min_sigma: float = 1.0e-2,
+    min_margin_deg: float = 5.0,
+) -> list[BranchDecision]:
+    """Evalua las 8 ramas y las ordena segun el criterio de seleccion del proyecto.
+
+    Criterio (filtros en orden, luego costo):
+      1. Admisible: real, dentro de limites y verificada por FK (obligatorio).
+      2. Lejos de singularidad: sigma_min(J) >= min_sigma.
+      3. Lejos de los topes: margen articular >= min_margin_deg en las 6 juntas.
+      4. Entre las que pasan 1-3: menor desplazamiento ponderado ||W (q - q_ref)||;
+         desempate por mayor sigma_min.
+    Si ninguna rama admisible pasa 2 y 3, se relaja primero el margen y luego sigma_min
+    (y el estado lo indica), para no quedarse sin solucion cuando la pose si es alcanzable.
+    """
+    from irb120.jacobian import smallest_singular_value  # evita import circular
+    from irb120.lspb import default_limits, plan_lspb
+
+    reference = np.asarray(reference_q, dtype=float)
+    w = DEFAULT_WEIGHTS if weights is None else np.asarray(weights, dtype=float)
+    vmax, amax = default_limits()
+    rows = []
+    for candidate in report.candidates:
+        if not report.accepted(candidate):
+            if not candidate.real:
+                reason = "descartada: no existe (|c| > 1)"
+            elif not candidate.within_limits:
+                reason = "descartada: fuera de limites J" + ",".join(map(str, candidate.out_of_limits))
+            else:
+                reason = "descartada: no pasa la FK"
+            rows.append([candidate, False, np.nan, np.nan, np.nan, np.nan, reason])
+            continue
+        q = np.array(candidate.q)
+        rows.append([
+            candidate, True, smallest_singular_value(q), limit_margin_deg(q),
+            float(np.linalg.norm(w * (q - reference))), plan_lspb(reference, q, vmax, amax).tf, "",
+        ])
+
+    admissible = [r for r in rows if r[1]]
+    for relax_margin, relax_sigma, note in ((False, False, ""), (True, False, " (margen relajado)"),
+                                            (True, True, " (margen y sigma relajados)")):
+        pool = [r for r in admissible
+                if (relax_sigma or r[2] >= min_sigma) and (relax_margin or r[3] >= min_margin_deg)]
+        if pool or not admissible:
+            break
+    for r in admissible:
+        if r not in pool:
+            r[6] = ("descartada: cerca de singularidad (sigma_min < %.3g)" % min_sigma if r[2] < min_sigma
+                    else "descartada: a menos de %.0f deg de un limite" % min_margin_deg)
+    pool.sort(key=lambda r: (r[4], -r[2]))
+    decisions, rank_of = [], {id(r): i + 1 for i, r in enumerate(pool)}
+    for r in rows:
+        rank = rank_of.get(id(r))
+        status = r[6] or ("ELEGIDA" + note if rank == 1 else f"apta (puesto {rank})")
+        decisions.append(BranchDecision(r[0], r[1], r[2], r[3], r[4], r[5], status, rank))
+    return decisions
+
+
 def select_solution(
     report: PoseReport,
     reference_q: np.ndarray,
     weights: np.ndarray | None = None,
     min_sigma: float = 1.0e-2,
+    min_margin_deg: float = 5.0,
 ) -> Candidate | None:
-    """Elige la rama admisible para la trayectoria.
-
-    Criterio (en este orden):
-    1. Se descartan las ramas con sigma_min(J) < min_sigma (cerca de singularidad),
-       salvo que todas lo esten.
-    2. Se minimiza el desplazamiento articular ponderado ||W (q - q_ref)||: las juntas
-       del brazo (1-3) mueven mas masa que las de la muneca, por eso pesan mas.
-    """
-    from irb120.jacobian import smallest_singular_value  # evita import circular
-
-    options = report.admissible
-    if not options:
-        return None
-    reference = np.asarray(reference_q, dtype=float)
-    w = np.array([1.0, 1.0, 1.0, 0.5, 0.5, 0.5]) if weights is None else np.asarray(weights, dtype=float)
-    regular = [c for c in options if smallest_singular_value(np.array(c.q)) >= min_sigma]
-    pool = regular or options
-    return min(pool, key=lambda c: float(np.linalg.norm(w * (np.array(c.q) - reference))))
+    """La rama elegida por `rank_candidates` (puesto 1), o None si la pose no es alcanzable."""
+    for decision in rank_candidates(report, reference_q, weights, min_sigma, min_margin_deg):
+        if decision.rank == 1:
+            return decision.candidate
+    return None

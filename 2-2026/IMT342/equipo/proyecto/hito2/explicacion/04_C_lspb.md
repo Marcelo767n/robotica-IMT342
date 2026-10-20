@@ -21,6 +21,10 @@ entenderla. Aquí todo está implementado a mano.
 con $V = a\,t_b$ (al terminar el arranque, la velocidad debe ser la de crucero).
 
 Código: `LspbTrajectory.sample(t)` ([lspb.py:50](../irb120/lspb.py#L50)) escribe exactamente esas tres filas.
+**Convención en los extremos:** en $t = 0$ y $t = t_f$ se toma el valor del tramo interior, es decir, $\ddot q(0) = +a$ y
+$\ddot q(t_f) = -a$ (límites unilaterales). **Fuera del movimiento el robot está en reposo:** para $t < 0$ devuelve
+$(q_0, 0, 0)$ y para $t > t_f$ devuelve $(q_f, 0, 0)$. Así, el torque "después de terminar" es solo el de sostén
+(gravedad), no el de frenado (ver [07](07_E_dinamica_1R.md)). `phase(t)` devuelve `"reposo"` fuera de $[0, t_f]$.
 `sample_many(times)` evalúa muchos instantes de una vez para graficar y `phase(t)` dice en qué fase está $t$.
 
 ## 2. Deducción de las ecuaciones (paso a paso)
@@ -91,8 +95,14 @@ $t_f = D_j/v_{\max,j} + t_b$.
 | $v_{\max,i}$ | $0.25 \times$ (250, 250, 250, 320, 320, 420) °/s | Datasheet ABB por eje, por un factor de velocidad del **25 %**, como el *speed override* del controlador. Es un valor conservador para un movimiento de laboratorio o de prueba. |
 | $a_{\max,i}$ | $v_{\max,i} / 0.25\ \text{s}$ | **Supuesto declarado:** ABB **no publica** aceleraciones articulares. Se asume que cada eje puede alcanzar su $v_{\max}$ en una rampa de 0.25 s. |
 
-Los dos factores se pueden cambiar: `default_limits(speed_scale, ramp_time_s)`. En el notebook se mostrará el efecto
-de variarlos sobre $t_f$, $t_b$ y el torque.
+Los dos factores se pueden cambiar con `default_limits(speed_scale, ramp_time_s)` o con `SPEED_SCALE` y
+`RAMP_TIME_S` en la celda de entrada del notebook. En la sección 8 del notebook se muestra cómo cambia el torque
+cuando la misma trayectoria se recorre más rápido: $\tau_{in} \propto \lambda^2$ y $\tau_g$ constante.
+
+**Movimientos cortos (perfil triangular).** Si el desplazamiento de la junta crítica es pequeño
+($D < v_{\max}^2/a_{\max}$, unos 20° para la junta 5 con los límites por defecto), la junta no llega a $v_{\max}$:
+entonces $t_b = t_f/2$, no hay tramo de crucero y $\dot q(t)$ es un triángulo. El código y el notebook lo detectan y
+lo informan (`TRIANGULAR`).
 
 ## 7. Interpretación de las gráficas
 

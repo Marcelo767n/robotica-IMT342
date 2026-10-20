@@ -74,6 +74,42 @@ la IK, no una limitación del robot.
 Resultado esperado: el 100 % de las poses resueltas, el 100 % con el $q$ original recuperado y errores máximos
 < $10^{-9}$ m. Prueba: `test_round_trip_recovers_every_random_configuration`.
 
+## 6. Antes de validar: ¿la entrada es una pose de verdad?
+
+Una matriz 4×4 cualquiera no es necesariamente una pose. `assert_rigid_transform`
+([transforms.py](../irb120/transforms.py)) se ejecuta al inicio de `analyze_pose` y `enumerate_candidates`, y exige:
+
+- forma 4×4 y valores finitos;
+- última fila $[0, 0, 0, 1]$;
+- $R^TR = I$ y $\det R = +1$, con tolerancia $10^{-6}$.
+
+Sin este control, una matriz con $\det R = 4$ (columnas escaladas) se "resolvería" y el error angular saldría casi
+cero, aunque la matriz no representa ninguna orientación. Ahora se rechaza con un mensaje que explica el motivo
+(prueba `test_rejects_matrices_that_are_not_rigid_poses`).
+
+## 7. Verificación externa: DH frente al URDF del Hito 1
+
+Las validaciones anteriores usan **nuestra** FK como patrón. ¿Y si la tabla DH estuviera mal? Se compara con **otro
+modelo del mismo robot construido de forma independiente**: el URDF del Hito 1 (`datos/irb120.urdf`, orígenes de
+juntas del CAD de ROS-Industrial), evaluado con **otro código** (`irb120/urdf_chain.py`), que encadena los `origin` y
+ejes del URDF sin usar DH. En 300 configuraciones aleatorias más el home y $q_f$, las dos FK coinciden en la pose
+completa con diferencias de $10^{-15}$ (notebook §3.1 y `tests/test_urdf_crosscheck.py`).
+
+## Resumen: todas las formas en que se verifica el proyecto
+
+| Qué se verifica | Cómo | Dónde |
+|---|---|---|
+| FK correcta | (1) $q = 0$ contra las cotas del datasheet; (2) contra el URDF independiente del Hito 1 | `test_dh.py`, `test_urdf_crosscheck.py`, notebook §1 y §3.1 |
+| IK correcta | Cada rama real se reinyecta en la FK (IK → FK) | notebook §3, `test_pieper.py` |
+| IK completa | Ida y vuelta FK → IK → FK con 1000 $q$ aleatorios: siempre aparece el $q$ original | notebook §3, `test_validation.py` |
+| El criterio detecta errores | Candidatos fabricados con error en $q_1$ y solo en la orientación ($q_6$) | notebook §3 |
+| Entrada válida | $T_d \in SE(3)$ | `assert_rigid_transform` |
+| LSPB | Fronteras, reposo, continuidad, límites e integral de $\dot q$ = desplazamiento | notebook §5, `test_lspb.py` |
+| Jacobiano | Diferencias finitas de la FK, columnas a mano, $J_v\dot q$ frente a $dp/dt$ | notebook §6, `test_jacobian.py` |
+| Singularidad | Rango por SVD, factorización del $\det$, espacio nulo, pendiente −1 | notebook §7, `test_singularity.py` |
+| Dinámica 1R | $J = M_{22}$ y $\tau_g = g_2$ del modelo completo; error RMS a lo largo del movimiento | notebook §8, `test_dynamics_1r.py` |
+| A mano | Todo el pipeline con calculadora para una pose | `08_ejemplo_resuelto_a_mano.md` |
+
 ## Preguntas de defensa
 
 1. *¿Cómo sabes que tu IK es correcta?* Cada candidato se reinyecta en la FK, que es independiente y no tiene ramas,

@@ -1,3 +1,8 @@
+> ⚠️ **Documento obsoleto.** Describe la versión anterior del Hito 2 (Guía PFI: nodo ROS, TCP de 0.100 m y
+> "pasaporte" de divergencia en q5 = 0). La versión vigente, alineada con la guía oficial de la semana 10, está en
+> [`hito2/explicacion/`](../../hito2/explicacion/README.md), [`hito2/Hito2_IRB120_pipeline.ipynb`](../../hito2/Hito2_IRB120_pipeline.ipynb)
+> y [`informe_ieee/`](informe_ieee/README.md).
+
 # Hito 2: cinemática inversa de Pieper, LSPB y singularidad q5 = 0
 
 > Guía detallada con ejemplos de cada módulo: [guia_hito2.md](guia_hito2.md).
