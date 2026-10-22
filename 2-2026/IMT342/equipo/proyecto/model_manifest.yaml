@@ -1,0 +1,97 @@
+# Gate 0: lo desconocido se conserva como null; no es aprobación del hardware.
+robot_model: ABB_IRB120_3_0_6
+controller_model: null
+robotware_version: null
+# Verificadas en la lista de opciones fotografiada; no es consulta en vivo.
+controller_options_verified:
+  - "689-1 Externally Guided Motion (EGM)"
+  - "623-1 Multitasking"
+  - "616-1 PC Interface"
+  - "UDP UC Driver"
+  - "687-1 Advanced Robot Motion"
+  - "613-1 Collision Detection"
+  - "709-1 DeviceNet Master/Slave"
+  - "617-1 FlexPendant Interface"
+  - "614-1 FTP SFTP and NFS client"
+  - "610-1 Independent Axis"
+  - "612-1 Path Offset"
+  - "611-1 Path Recovery"
+  - "628-1 Sensor Interface"
+  - "885-1 SoftMove"
+  - "608-1 World Zones"
+  - "RobotWare Base"
+ros_distribution: jazzy
+operating_system: Ubuntu_26.04.1_LTS
+kinematics_reference: null
+urdf_source_commit: 19639122be7aeb98a6e96b8aea44530f94885c31
+base_frame: base_link
+tcp_frame: gripper_tcp
+joint_order: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+angle_unit: rad
+length_unit: m
+rpy_convention: "Rz(yaw) * Ry(pitch) * Rx(roll)"
+record_status: partially_verified
+
+audit_date: '2026-10-20'
+robot_serial_observed: '120-101516'
+robot_model_evidence: fotos/equipo/856105511_972111242619279_1826443544156678714_n.jpg
+controller_hypothesis: IRC5_Compact
+controller_hypothesis_status: pending_nameplate_verification
+controller_main_computer_model: null
+controller_system_name_observed: '120-101516'
+controller_system_name_evidence: fotos/flexpendant/855156643_1021735353659224_8600621675227135592_n.jpg
+controller_mechanical_unit_observed: ROB_1
+controller_options_evidence: fotos/flexpendant/853082554_2593180977825989_6769481757691654016_n.jpg
+controller_options_verification_scope: photographed_options_list_not_live_query
+controller_robotware_version_evidence_status: not_shown_in_available_photos
+controller_network_observed:
+  observation_scope: photographed_configuration_not_live_connectivity
+  service:
+    ip: 192.168.125.1
+    netmask: 255.255.255.0
+    gateway: null
+    gateway_display_text: None
+    evidence: fotos/flexpendant/855960479_2029194091093971_8662650587010659671_n.jpg
+  wan:
+    configuration: DHCP
+    ip: null
+    gateway: null
+    address_evidence_status: fields_blank_in_photo_not_zero_or_absence_of_network
+    evidence: fotos/flexpendant/850871225_3669278733235500_3305222871120947565_n.jpg
+  service_port_label: X2 Service 10/100
+  service_port_evidence: fotos/conexiones/850268306_1832902787824998_2294950866819187083_n.jpg
+  linux_ethernet_link_verified: false
+controller_state_snapshot:
+  capture_timestamp: null
+  operation_mode_display: Manual
+  controller_status_display: Guard Stop
+  execution_status_display: Stopped
+  speed_indicator_percent: 100
+  speed_indicator_scope: display_indicator_not_measured_joint_speed
+  evidence: fotos/flexpendant/855156643_1021735353659224_8600621675227135592_n.jpg
+  current_state_verified: false
+controller_backup:
+  backup_verified: false
+  evidence_scope: menu_only_no_completed_backup_evidence
+  evidence: fotos/flexpendant/850334948_3064085187271613_2972342787603937018_n.jpg
+local_pc_inventory_scope: historical_observation_recheck_before_connection
+workspace_commit_at_audit: 19639122be7aeb98a6e96b8aea44530f94885c31
+local_model_source: hito2/irb120/dh.py
+local_urdf_source: hito2/datos/irb120.urdf
+local_urdf_geometric_independence: false
+model_tool0_to_tcp_z_m: 0.150
+previous_ros_tool0_to_tcp_z_m: 0.100
+physical_tcp: null
+controller_base_to_model_base: null
+controller_joint_mapping_verified: false
+frame_scope: local_model_only_not_verified_against_controller
+driver_candidate:
+  repository: https://github.com/PickNikRobotics/abb_ros2
+  audited_branch: rolling
+  audited_commit: e6486f7409073cdb2a10d6878bb50191dd50172b
+  local_compilation_verified: false
+  physical_compatibility_verified: false
+physical_connection_verified: false
+movement_authorized: false
+evidence_directory: docs/conexion_abb/evidencias
+controller_photographic_record: docs/conexion_abb/evidencias/controlador_fotos_2026-10-20.json

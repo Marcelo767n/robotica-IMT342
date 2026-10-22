@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-20",
+  "workspace_commit": "19639122be7aeb98a6e96b8aea44530f94885c31",
+  "note": "Working tree file hashes; these need not equal committed versions.",
+  "sha256": {
+    "hito2/irb120/dh.py": "6af5c24c5d4e4bace33c4f023927f3ad9a2305ea1f47bf66a802ee10ea3f3173",
+    "hito2/irb120/jacobian.py": "a28195757e03eaae3382d2a08c12730558e465c410f80212fec1d20c9d77c22b",
+    "hito2/irb120/transforms.py": "6ed8c0da4fb43aef35c2fee874aeb8601d543262d71448d081a567597439c68a",
+    "hito2/datos/irb120.urdf": "0cf27d2c4524530d889bba7ee133c5583fdd3cdbe381774c7bc818796eb9041c",
+    "ros2_ws/src/irb120_hito1/urdf/irb120.urdf": "0cf27d2c4524530d889bba7ee133c5583fdd3cdbe381774c7bc818796eb9041c",
+    "scripts/abb_lectura_rws.py": "039b8dcc0da9a46347b7af3112fd8a3aea7d4d437696f87ff737cb87f0e67529"
+  }
+}

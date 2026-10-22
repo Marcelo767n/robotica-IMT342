@@ -1,0 +1,59 @@
+{
+  "fecha": "2026-10-20",
+  "descargas": [
+    {
+      "archivo": "abb_ros2_setup.md",
+      "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/rolling/docs/README.md",
+      "sha256": "17e2ce617545c63f9d8879edda94927eb9ac93711a27359def2b4815cd5d01d4",
+      "bytes": 6277
+    },
+    {
+      "archivo": "abb_ros2_RWSQuickStart.md",
+      "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/rolling/docs/RWSQuickStart.md",
+      "sha256": "de8a0f67f6faf83b0abc8235f18ad6c19463a819c31d816609fbf67152bd3f92",
+      "bytes": 4354
+    },
+    {
+      "archivo": "abb_ros2_branches.json",
+      "url": "https://api.github.com/repos/PickNikRobotics/abb_ros2/branches?per_page=100",
+      "sha256": "89b74a9a9b4da25365e3b7cd1154ef17b88839c57fffeec759f8fb78409d15bc",
+      "bytes": 2161
+    },
+    {
+      "archivo": "abb_ros2_tree.json",
+      "url": "https://api.github.com/repos/PickNikRobotics/abb_ros2/git/trees/rolling?recursive=1",
+      "sha256": "94c41811db7762a3fd3fbe5623f01b09fb920498d79a9b904027523d4f8d432b",
+      "bytes": 53765
+    },
+    {
+      "archivo": "irb120_jazzy_README.md",
+      "url": "https://raw.githubusercontent.com/hylander2126/irb120_ros2/main/README.md",
+      "sha256": "e8871aae906df0d8beb1101236fcd50120f7f13df69e16b3cfa83f10e2e694c9",
+      "bytes": 11591
+    },
+    {
+      "archivo": "irb120_jazzy.repos",
+      "url": "https://raw.githubusercontent.com/hylander2126/irb120_ros2/main/irb120_jazzy.repos",
+      "sha256": "d3ac05a71743341798210240045f0b160e6dbb65acc81451fe99a072349aa26f",
+      "bytes": 1035
+    },
+    {
+      "archivo": "irb120_jazzy_commit.json",
+      "url": "https://api.github.com/repos/hylander2126/irb120_ros2/commits/main",
+      "sha256": "d6a0d45fa09656da17f527aaf1abf89532d47f19a21133461a9dcbd87f7ac09e",
+      "bytes": 129999
+    },
+    {
+      "archivo": "rws_rapid_execution.html",
+      "url": "https://developercenter.robotstudio.com/api/rwsApi/rapid_execution_page.html",
+      "sha256": "921b7938a3ee30a0cb1a7585554e92205a5e405d618cdfba3bdaf758ea0b3afc",
+      "bytes": 4010
+    },
+    {
+      "archivo": "abb_driver_README.md",
+      "url": "https://raw.githubusercontent.com/ros-industrial/abb_driver/kinetic-devel/README.md",
+      "sha256": "c318713280f4a3306a28a178b0fed0f92f9420f3dcd4e79511b95d623d7f2dc2",
+      "bytes": 8261
+    }
+  ]
+}

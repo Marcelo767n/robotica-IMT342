@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-20",
+  "review_timezone": "America/La_Paz",
+  "evidence_type": "user_supplied_photos_visually_reviewed",
+  "photo_capture_datetime_verified": false,
+  "physical_controller_connection_tested": false,
+  "movement_authorized": false,
+  "scope_note": "Los datos describen lo legible en las fotos. No certifican el estado actual, la compatibilidad del driver ni una conexión desde Linux.",
+  "robot": {
+    "manufacturer": "ABB",
+    "model": "IRB 120",
+    "variant": "IRB 120-3/0.6",
+    "serial_number": "120-101516",
+    "manufacturing_date": "2018-01-10",
+    "payload_kg": 3,
+    "net_weight_kg": 25,
+    "status": "verified_from_photo",
+    "source": "fotos/equipo/856105511_972111242619279_1826443544156678714_n.jpg",
+    "calibration_note": "La etiqueta de resolvers es de calibración; no representa un vector de posiciones articulares para ROS."
+  },
+  "flexpendant": {
+    "model": "DSQC 679",
+    "article_number": "3HAC028357-001",
+    "revision": "13",
+    "status": "verified_from_photo",
+    "source": "fotos/equipo/856870076_1787827082468806_3733552213891417058_n.png",
+    "note": "La etiqueta identifica el mando, no el computador principal del controlador."
+  },
+  "controller": {
+    "model": null,
+    "revision": null,
+    "model_status": "unverified",
+    "visual_candidate": "IRC5 Compact",
+    "visual_candidate_status": "inferred_from_cabinet_appearance",
+    "visual_candidate_sources": [
+      "fotos/equipo/850210285_1128959306485660_255701484691959323_n.jpg",
+      "fotos/equipo/851841999_1307619194764630_6695385760372191744_n.jpg"
+    ],
+    "robotware_version": null,
+    "robotware_version_status": "not_visible_in_photos",
+    "main_computer_dsqc": null,
+    "main_computer_dsqc_status": "not_visible_in_photos",
+    "system_name": "120-101516",
+    "mechanical_unit": "ROB_1",
+    "identity_status": "verified_from_display_photo",
+    "identity_source": "fotos/flexpendant/855156643_1021735353659224_8600621675227135592_n.jpg"
+  },
+  "controller_options": {
+    "status": "verified_from_photo",
+    "source": "fotos/flexpendant/853082554_2593180977825989_6769481757691654016_n.jpg",
+    "key_options": [
+      {"code": "689-1", "name": "Externally Guided Motion (EGM)", "present": true},
+      {"code": "623-1", "name": "Multitasking", "present": true},
+      {"code": "616-1", "name": "PC Interface", "present": true}
+    ],
+    "other_visible_entries": [
+      "UDPUC Driver",
+      "English",
+      "687-1 Advanced Robot Motion",
+      "613-1 Collision Detection",
+      "709-1 DeviceNet Master/Slave",
+      "617-1 FlexPendant Interface",
+      "614-1 FTP SFTP and NFS Client",
+      "610-1 Independent Axis",
+      "612-1 Path Offset",
+      "611-1 Path Recovery",
+      "628-1 Sensor Interface",
+      "885-1 SoftMove",
+      "608-1 World Zones",
+      "RobotWare Base"
+    ],
+    "complete_inventory_verified": false,
+    "compatibility_note": "La presencia de opciones no verifica la versión requerida de RobotWare, la configuración de EGM ni compatibilidad con un driver concreto."
+  },
+  "network": {
+    "service_port": {
+      "ip_address": "192.168.125.1",
+      "subnet_mask": "255.255.255.0",
+      "prefix_length": 24,
+      "default_gateway": null,
+      "default_gateway_display": "None",
+      "status": "verified_from_display_photo",
+      "source": "fotos/flexpendant/855960479_2029194091093971_8662650587010659671_n.jpg"
+    },
+    "wan": {
+      "configuration": "DHCP",
+      "ip_address": null,
+      "ip_address_status": "display_field_empty",
+      "subnet_mask": "255.255.255.0",
+      "default_gateway": null,
+      "default_gateway_status": "display_field_empty",
+      "status": "verified_from_display_photo",
+      "source": "fotos/flexpendant/850871225_3669278733235500_3305222871120947565_n.jpg",
+      "note": "Un campo vacío en la captura no demuestra por sí solo el estado actual del enlace ni la disponibilidad de un servidor DHCP."
+    },
+    "physical_service_connector": {
+      "label": "X2",
+      "description": "Service 10/100",
+      "appears_unoccupied_in_photo": true,
+      "status": "verified_label_from_photo",
+      "source": "fotos/conexiones/850268306_1832902787824998_2294950866819187083_n.jpg",
+      "note": "El puerto está dentro del gabinete fotografiado; no se deriva autorización de acceso ni manipulación."
+    }
+  },
+  "observed_display_state": {
+    "operation_mode": "Manual",
+    "stop_indicator": "Guard Stop",
+    "execution_indicator": "Stopped",
+    "speed_override_display_percent": 100,
+    "status": "historical_photo_observation_only",
+    "sources": [
+      "fotos/flexpendant/853082554_2593180977825989_6769481757691654016_n.jpg",
+      "fotos/flexpendant/850334948_3064085187271613_2972342787603937018_n.jpg"
+    ],
+    "note": "El porcentaje mostrado no es una medición de velocidad física; las fotos no demuestran el estado actual."
+  },
+  "backup": {
+    "menu_visible": true,
+    "backup_exists": null,
+    "backup_verified_recoverable": false,
+    "status": "menu_only_no_backup_evidence",
+    "source": "fotos/flexpendant/850334948_3064085187271613_2972342787603937018_n.jpg"
+  },
+  "remaining_unknowns": [
+    "Versión completa de RobotWare",
+    "Modelo y revisión exactos del controlador",
+    "Modelo DSQC del computador principal",
+    "Respaldo recuperable y su ubicación",
+    "TCP y base activos",
+    "Credenciales autorizadas de lectura",
+    "Conectividad física y disponibilidad real de RWS",
+    "Compatibilidad y configuración del driver ROS 2 seleccionado"
+  ]
+}

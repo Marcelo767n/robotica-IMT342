@@ -364,22 +364,29 @@ check("B", "ida y vuelta: 1000/1000 poses resueltas y q original recuperado",
 ]
 
 cells += [
-md(r"""### 3.1 Verificación externa: la FK por DH contra el URDF del Hito 1
+md(r"""### 3.1 ¿Y si la propia FK estuviera mal? Dos verificaciones externas
 
-La validación anterior usa nuestra propia FK como "patrón". Para comprobar el patrón, se compara con **otro modelo
-del mismo robot construido de forma independiente**: el URDF del Hito 1 (orígenes de juntas del CAD de
-ROS-Industrial), evaluado con otro código (`irb120/urdf_chain.py`, que encadena los `origin` y ejes del URDF sin usar
-la tabla DH). Si las dos FK coinciden en la pose **completa**, un error en la tabla DH quedaría al descubierto."""),
-code(r"""URDF_PATH = ROOT / "datos" / "irb120.urdf"
+La validación anterior usa nuestra FK como "patrón". Para comprobar el patrón:
+
+| Verificación | Contra qué | Qué demuestra |
+|---|---|---|
+| **Geométrica (independiente)** | Modelo **oficial de ROS-Industrial** (`abb_irb120_support`, `irb120/rosi_model.py`): traslaciones y ejes tomados de los planos de ABB, sin parámetros DH | Que la **tabla DH** describe el robot real: cotas, ejes, signos y offsets. Es otra fuente y otra convención |
+| **De implementación** | URDF del Hito 1 (`datos/irb120.urdf`), evaluado con `irb120/urdf_chain.py` | Que el **código** (matrices DH frente a origins y ejes) es correcto. **No** es una fuente geométrica independiente, porque ese URDF se derivó de la misma tabla DH |"""),
+code(r"""from irb120.rosi_model import rosi_forward_kinematics, SOURCE_URL
+URDF_PATH = ROOT / "datos" / "irb120.urdf"
 def urdf_fk(q):
     return chain_transform(URDF_PATH, {f"joint_{i + 1}": q[i] for i in range(6)})   # base_link -> tool0
 
 rng = np.random.default_rng(1)
 samples = [Q_HOME, np.array(REPORTS["Objetivo"].admissible[0].q)] + \
           [rng.uniform(np.deg2rad(JOINT_LIMITS_DEG[:, 0]), np.deg2rad(JOINT_LIMITS_DEG[:, 1])) for _ in range(300)]
-diffs = np.array([np.abs(forward_kinematics(q) - urdf_fk(q)).max() for q in samples])
-print(f"DH frente a URDF en {len(samples)} configuraciones (home, q_f y 300 aleatorias): max |T_DH - T_URDF| = {diffs.max():.1e}")
-check("B", "la FK por DH coincide con el URDF independiente del Hito 1 (pose completa, < 1e-9)", diffs.max() < 1e-9)"""),
+d_rosi = np.array([np.abs(forward_kinematics(q) - rosi_forward_kinematics(q)).max() for q in samples])
+d_urdf = np.array([np.abs(forward_kinematics(q) - urdf_fk(q)).max() for q in samples])
+print(f"Modelo oficial ROS-Industrial ({SOURCE_URL.split('/')[-1]}):")
+print(f"  max |T_DH - T_ROS-I| en {len(samples)} configuraciones (home, q_f y 300 aleatorias) = {d_rosi.max():.1e}")
+print(f"URDF del Hito 1 (derivado de DH, verifica el código): max |T_DH - T_URDF| = {d_urdf.max():.1e}")
+check("B", "la FK por DH coincide con el modelo OFICIAL de ROS-Industrial (pose completa, < 1e-9)", d_rosi.max() < 1e-9)
+check("B", "la FK por DH coincide con el URDF del Hito 1 (implementación, < 1e-9)", d_urdf.max() < 1e-9)"""),
 ]
 
 # =========================================================================== 4. seleccion

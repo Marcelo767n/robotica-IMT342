@@ -1,0 +1,56 @@
+{
+  "R_escalada": {
+    "rechazado": true,
+    "motivo": "R no es ortonormal: max|R^T R - I| = 3.00e+00."
+  },
+  "ultima_fila": {
+    "rechazado": true,
+    "motivo": "La ultima fila de la pose debe ser [0, 0, 0, 1] (es [0. 0. 0. 2.])."
+  },
+  "reflexion": {
+    "rechazado": true,
+    "motivo": "det(R) = -1.000000; una rotacion propia exige det(R) = +1."
+  },
+  "seleccion": {
+    "rama": 1,
+    "etiqueta": "q5+",
+    "q_deg": [
+      14.036243467926484,
+      22.666726301435947,
+      -15.700285472080493,
+      -5.677593454022373e-15,
+      83.03355917064455,
+      14.036243467926484
+    ]
+  },
+  "fin_movimiento": {
+    "qdd_antes": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "qdd_despues": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "tau_frenado": -20.55177278280786,
+    "tau_sosten": -18.714114521037956
+  },
+  "ejemplo_relajacion": {
+    "objetivo": "HOME",
+    "status": "ELEGIDA (margen y sigma relajados)",
+    "sigma_min": 5.863508452451378e-18,
+    "margen": 70.00000000000003
+  },
+  "entrega_ipynb_mas_irb120": {
+    "falta": "datos/irb120.urdf",
+    "error": "[Errno 2] No such file or directory: '/tmp/hito2_verificacion_correcciones_20261020/entrega_minima/datos/irb120.urdf'"
+  }
+}

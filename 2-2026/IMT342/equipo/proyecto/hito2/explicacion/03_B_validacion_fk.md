@@ -87,19 +87,24 @@ Sin este control, una matriz con $\det R = 4$ (columnas escaladas) se "resolver�
 cero, aunque la matriz no representa ninguna orientación. Ahora se rechaza con un mensaje que explica el motivo
 (prueba `test_rejects_matrices_that_are_not_rigid_poses`).
 
-## 7. Verificación externa: DH frente al URDF del Hito 1
+## 7. ¿Y si la propia FK estuviera mal? Verificaciones externas
 
-Las validaciones anteriores usan **nuestra** FK como patrón. ¿Y si la tabla DH estuviera mal? Se compara con **otro
-modelo del mismo robot construido de forma independiente**: el URDF del Hito 1 (`datos/irb120.urdf`, orígenes de
-juntas del CAD de ROS-Industrial), evaluado con **otro código** (`irb120/urdf_chain.py`), que encadena los `origin` y
-ejes del URDF sin usar DH. En 300 configuraciones aleatorias más el home y $q_f$, las dos FK coinciden en la pose
-completa con diferencias de $10^{-15}$ (notebook §3.1 y `tests/test_urdf_crosscheck.py`).
+Todas las validaciones anteriores usan **nuestra** FK como patrón. Para comprobar el patrón hay dos verificaciones,
+y es importante distinguir **qué prueba cada una**:
+
+| Verificación | Contra qué | Qué demuestra | Resultado |
+|---|---|---|---|
+| **Geométrica (independiente)** | Modelo **oficial de ROS-Industrial** del IRB 120 (`abb_irb120_support`, archivo `irb120_3_58_macro.xacro`), copiado en `irb120/rosi_model.py`. Usa traslaciones fijas y ejes de giro tomados de los planos de ABB, **sin** parámetros DH | Que la **tabla DH** (cotas, ejes, signos, offsets) describe el robot real. Es otra fuente y otra convención | Coinciden en pose completa (posición y orientación de `tool0`) con diferencias de $10^{-16}$–$10^{-15}$; los límites articulares también coinciden |
+| **De implementación** | URDF del Hito 1 (`datos/irb120.urdf`), evaluado con `irb120/urdf_chain.py` | Que el **código** está bien: matrices DH frente a origins y ejes del URDF. **No** es una fuente geométrica independiente, porque ese URDF se construyó a partir de la misma tabla DH | Diferencias de $10^{-15}$ |
+
+Están en el notebook (§3.1) y en `tests/test_urdf_crosscheck.py`. En la defensa hay que presentar como verificación
+independiente **la de ROS-Industrial**, no la del URDF del Hito 1.
 
 ## Resumen: todas las formas en que se verifica el proyecto
 
 | Qué se verifica | Cómo | Dónde |
 |---|---|---|
-| FK correcta | (1) $q = 0$ contra las cotas del datasheet; (2) contra el URDF independiente del Hito 1 | `test_dh.py`, `test_urdf_crosscheck.py`, notebook §1 y §3.1 |
+| FK correcta | (1) $q = 0$ contra las cotas del datasheet; (2) contra el **modelo oficial de ROS-Industrial** (independiente); (3) contra el URDF del Hito 1 (implementación) | `test_dh.py`, `test_urdf_crosscheck.py`, notebook §1 y §3.1 |
 | IK correcta | Cada rama real se reinyecta en la FK (IK → FK) | notebook §3, `test_pieper.py` |
 | IK completa | Ida y vuelta FK → IK → FK con 1000 $q$ aleatorios: siempre aparece el $q$ original | notebook §3, `test_validation.py` |
 | El criterio detecta errores | Candidatos fabricados con error en $q_1$ y solo en la orientación ($q_6$) | notebook §3 |

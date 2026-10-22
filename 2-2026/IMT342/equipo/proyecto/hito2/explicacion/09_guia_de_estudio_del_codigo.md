@@ -39,13 +39,14 @@ hito2/
 │   ├── lspb.py                  5. Trayectoria LSPB (C)
 │   ├── jacobian.py              6. Jacobiano, validación numérica, rango y singularidad (D)
 │   ├── dynamics.py              7. Modelo dinámico COMPLETO de 6 GDL (fuente de datos y validación)
-│   ├── urdf_chain.py            9. Evaluador URDF independiente (verificación externa de la FK)
+│   ├── rosi_model.py            9. Modelo OFICIAL de ROS-Industrial (verificación geométrica independiente de la FK)
+│   ├── urdf_chain.py           10. Evaluador del URDF del Hito 1 (verificación de implementación)
 │   └── dynamics_1r.py           8. Modelo 1R del hombro (E)
 ├── Hito2_IRB120_pipeline.ipynb  ← ENTREGABLE: llama al paquete en orden y grafica
 ├── build_pipeline_notebook.py   ← script que ESCRIBE y EJECUTA el notebook
 ├── analizar_pose.py             ← herramienta de terminal: ¿es alcanzable esta pose?
-├── tests/                       ← 54 pruebas automáticas (pytest)
-├── datos/irb120.urdf            ← URDF del Hito 1 (solo para la verificación cruzada de la FK)
+├── tests/                       ← 56 pruebas automáticas (pytest)
+├── datos/irb120.urdf            ← URDF del Hito 1, derivado de DH (solo verifica la implementación)
 ├── figuras/  resultados/        ← salidas del notebook (las usa el informe IEEE)
 ├── explicacion/                 ← estos documentos
 └── anexos/                      ← versión anterior del hito (no es el entregable)
@@ -264,12 +265,18 @@ centro de masa de cada eslabón en lugar del TCP.
 **Pruebas:** `tests/test_dynamics_1r.py` (4): por ejemplo, $J = M_{22}$ y $\tau_g = g_2$ del modelo completo, y en
 crucero $\tau = \tau_g \neq 0$.
 
-### 3.8b `irb120/urdf_chain.py` y `datos/irb120.urdf`: verificación externa
+### 3.8b Verificaciones externas de la FK: `rosi_model.py` y `urdf_chain.py`
 
-Copia del evaluador del Hito 1. `load_joints(urdf)` lee del XML cada `<joint>` (padre, hijo, `origin xyz/rpy` y
-`axis`). `chain_transform(urdf, {joint: q})` recorre la cadena desde `tool0` hasta `base_link` y multiplica
-`Trasl(xyz)·Rot(rpy)·Rot(eje, q)` por junta. **No usa la tabla DH**: por eso, que su resultado coincida con
-`forward_kinematics` es una verificación independiente de la FK (notebook §3.1 y `tests/test_urdf_crosscheck.py`).
+- **`irb120/rosi_model.py`** guarda la tabla de juntas del **modelo oficial de ROS-Industrial** (`ROSI_JOINTS`: origen
+  y eje de cada junta, copiados del xacro de `abb_irb120_support`, con la URL en `SOURCE_URL`).
+  `rosi_forward_kinematics(q)` multiplica `Trasl(xyz)·Rot(eje, q)` por junta (con `_axis_rotation`, fórmula de
+  Rodrigues) y al final `Ry(90°)` para `tool0`. **Es una fuente geométrica independiente:** si coincide con
+  `forward_kinematics`, la tabla DH es correcta.
+- **`irb120/urdf_chain.py` + `datos/irb120.urdf`** son copias del Hito 1. `load_joints` lee cada `<joint>` del XML
+  y `chain_transform` encadena origins y ejes. Ese URDF **se derivó de nuestra tabla DH**, así que coincidir con él
+  solo prueba que el **código** está bien, no la geometría.
+
+Las dos están en el notebook §3.1 y en `tests/test_urdf_crosscheck.py`.
 
 ### 3.9 `analizar_pose.py`: herramienta de terminal
 
@@ -288,7 +295,7 @@ lo **ejecuta** de principio a fin con `ExecutePreprocessor` y lo guarda ya ejecu
 reconstruir desde cero y se garantiza que corre completo (criterio F). Si quieren cambiar un texto del notebook,
 cámbienlo en este script y vuelvan a ejecutarlo (`python build_pipeline_notebook.py`).
 
-### 3.11 `tests/`: las 54 pruebas
+### 3.11 `tests/`: las 56 pruebas
 
 `python -m pytest -q tests`. Cada archivo `test_X.py` prueba el módulo `X.py`. Una prueba es una función
 `test_...` que llama al código y usa `assert...` para comprobar un resultado conocido: la FK de $q = 0$, que un $q$
@@ -305,7 +312,7 @@ aleatorio se recupera, que el rango cae a 5, etc. Si alguien rompe una fórmula,
 | 1.2 | `T_HOME` = FK(posición de calibración) | — | — |
 | 1.3 | **ENTRADA** `POSE_OBJETIVO` → `T_D` | — | — |
 | 2 | `analyze_pose` de las 2 poses; tablas de 8 ramas; figura de ramas en el plano; **§2.2: las 8 configuraciones en 3D** | 8 ramas por pose; home recuperado; objetivo alcanzable (si no, se detiene con un mensaje) | A |
-| 3 | errores FK de todas las ramas reales; candidatos fabricados con error; ida y vuelta (1000); **§3.1: DH frente a URDF** | todas pasan; los erróneos se rechazan | B |
+| 3 | errores FK de todas las ramas reales; candidatos fabricados con error; ida y vuelta (1000); **§3.1: DH frente al modelo oficial ROS-Industrial y al URDF del Hito 1** | todas pasan; los erróneos se rechazan | B |
 | 4 | `rank_candidates` sobre las 8 ramas → tabla de decisión → `QF` | la elegida reproduce $T_d$ | A |
 | 5 | `plan_lspb`; tabla por junta; 3 gráficas alineadas; uso de límites; **§5.1: movimiento 3D y trayectoria del TCP** | fronteras, reposo, continuidad, límites, $t_b \le t_f/2$ | C |
 | 6 | $J(q_f)$ frente a numérico; columnas a mano; $\dot x(t)$ y rango a lo largo del LSPB | 4 verificaciones | D |

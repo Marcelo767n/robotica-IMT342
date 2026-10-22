@@ -21,7 +21,7 @@ T_0 = FK(HOME_Q) (pose inicial: calibración ABB, q = 0)   y   T_d (pose objetiv
 Todo descansa en el modelo geométrico del robot: tabla DH, cinemática directa y TCP, en
 [01_modelo_DH_y_FK.md](01_modelo_DH_y_FK.md).
 
-El pipeline completo, con gráficas y 33 verificaciones automáticas, está en el notebook
+El pipeline completo, con gráficas y 34 verificaciones automáticas, está en el notebook
 [`../Hito2_IRB120_pipeline.ipynb`](../Hito2_IRB120_pipeline.ipynb). Trabaja con **dos poses**:
 
 - **Pose inicial (elegida por el equipo):** la posición de calibración de ABB, con todos los ejes en 0° (`HOME_Q` en
@@ -41,6 +41,7 @@ El pipeline completo, con gráficas y 33 verificaciones automáticas, está en e
 | [07_E_dinamica_1R.md](07_E_dinamica_1R.md) | **E** (15 %) | `irb120/dynamics_1r.py` (usa `dynamics.py`) | `tests/test_dynamics_1r.py` |
 | [08_ejemplo_resuelto_a_mano.md](08_ejemplo_resuelto_a_mano.md) | A, B, C, D y E con números | Todos | Contrastado con el código |
 | [09_guia_de_estudio_del_codigo.md](09_guia_de_estudio_del_codigo.md) | Defensa (G1–G4) | **Todos los archivos**: qué hace cada función, flujo de datos, notebook sección por sección y autoevaluación | — |
+| [10_guia_defensa.md](10_guia_defensa.md) | **Defensa (G1–G4)** | Plan de estudio para el día, qué mostrar y en qué orden, ecuaciones para la pizarra, preguntas con respuestas modelo y números clave | — |
 
 ## Convenciones (valen para todos los archivos)
 
@@ -58,7 +59,7 @@ Desde `hito2/`:
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-python -m pytest -q tests                      # 54 pruebas
+python -m pytest -q tests                      # 56 pruebas
 python analizar_pose.py 0.40 0.10 0.35 0 180 0  # x y z [m]  roll pitch yaw [grados]
 ```
 

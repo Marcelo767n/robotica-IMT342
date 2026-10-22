@@ -1,6 +1,6 @@
 # Trazabilidad del Hito 1 corregido
 
-Fuente de requisitos: [Guía oficial PFI](../../documentosGuia/Guia_PFI.pdf),
+Fuente de requisitos: [Guía oficial PFI](../../referencias/bibliografia/Guia_PFI.pdf),
 sección 4, y worksheet de validación URDF.
 
 | Requisito | Implementación | Verificación |

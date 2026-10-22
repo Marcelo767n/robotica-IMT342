@@ -1,5 +1,7 @@
 # Evaluación del Hito 2 frente a la rúbrica oficial
 
+> **Revisión inicial, anterior a las correcciones.** La comprobación de la versión corregida está en [Verificación de correcciones](verificacion_correcciones_hito2_2026-10-20.md).
+
 **Fecha:** 20 de octubre de 2026. **Alcance:** Hito 2 de la semana 10, ABB IRB 120. Se revisó la entrega en Python, el notebook integrado, sus generadores, módulos, pruebas, explicaciones y el informe IEEE; se contrastó también el material anterior de ROS y los anexos para identificar inconsistencias de entrega.
 
 **Evaluación estimada del producto: 73/80 puntos, equivalente a 91.25/100 en la parte grupal.** El proyecto está bien desarrollado y cumple el núcleo técnico. Las mejoras pendientes son concretas; no hace falta rehacer el pipeline.
@@ -12,7 +14,7 @@ Otra sesión estaba editando los archivos durante la revisión. Se trabajó sobr
 
 ## 1. Documentos oficiales descargados
 
-Se descargó todo el contenido del [directorio oficial de GitHub](https://github.com/berquiroga/planificacion-UCB/tree/main/2-2026/IMT342/Semana_10/hito_2) en [archivos que hay que presentar](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/archivos que hay que presentar>).
+Se descargó todo el contenido del [directorio oficial de GitHub](https://github.com/berquiroga/planificacion-UCB/tree/main/2-2026/IMT342/Semana_10/hito_2) en [archivos que hay que presentar](<../../archivos que hay que presentar>).
 
 | Documento | Formatos descargados | Uso en esta revisión |
 |---|---|---|
@@ -40,7 +42,7 @@ Los ocho archivos coinciden en tamaño y SHA de objeto Git con GitHub. Su proced
 
 ### A. IK / Pieper — 14/15
 
-**Evidencia:** [pieper.py](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/irb120/pieper.py>), notebook integrado, secciones 2 y 4, y [explicación de Pieper](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/explicacion/02_A_pieper.md>).
+**Evidencia:** [pieper.py](../../hito2/irb120/pieper.py), notebook integrado, secciones 2 y 4, y [explicación de Pieper](../../hito2/explicacion/02_A_pieper.md).
 
 | Exigencia | Resultado observado |
 |---|---|
@@ -59,7 +61,7 @@ No se exige que las ocho ramas sean admisibles. Para el ejemplo se obtienen **oc
 
 ### B. Validación por FK — 9/10
 
-**Evidencia:** [validation.py](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/irb120/validation.py>), `analyze_pose`, notebook sección 3 y pruebas de validación.
+**Evidencia:** [validation.py](../../hito2/irb120/validation.py), `analyze_pose`, notebook sección 3 y pruebas de validación.
 
 | Exigencia | Resultado observado |
 |---|---|
@@ -75,7 +77,7 @@ No se exige que las ocho ramas sean admisibles. Para el ejemplo se obtienen **oc
 
 ### C. Trayectoria LSPB — 14/15
 
-**Evidencia:** [lspb.py](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/irb120/lspb.py>), notebook sección 5 y figuras `C_lspb_perfiles` y `C_uso_limites`.
+**Evidencia:** [lspb.py](../../hito2/irb120/lspb.py), notebook sección 5 y figuras `C_lspb_perfiles` y `C_uso_limites`.
 
 | Exigencia | Resultado observado |
 |---|---|
@@ -94,7 +96,7 @@ Dentro del movimiento puede usarse una convención unilateral para los valores e
 
 ### D. Jacobiano y singularidades — 18/20
 
-**Evidencia:** [jacobian.py](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/irb120/jacobian.py>), notebook secciones 6 y 7 y [explicación de singularidades](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/explicacion/06_D_singularidades.md>).
+**Evidencia:** [jacobian.py](../../hito2/irb120/jacobian.py), notebook secciones 6 y 7 y [explicación de singularidades](../../hito2/explicacion/06_D_singularidades.md).
 
 | Exigencia | Resultado observado |
 |---|---|
@@ -117,7 +119,7 @@ El resultado de rango 5 en la postura cero es coherente: el LSPB articular puede
 
 ### E. Dinámica y torque — 14/15
 
-**Evidencia:** [dynamics_1r.py](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/irb120/dynamics_1r.py>), [dynamics.py](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/irb120/dynamics.py>), notebook sección 8 y explicación correspondiente.
+**Evidencia:** [dynamics_1r.py](../../hito2/irb120/dynamics_1r.py), [dynamics.py](../../hito2/irb120/dynamics.py), notebook sección 8 y explicación correspondiente.
 
 | Exigencia | Resultado observado |
 |---|---|
@@ -139,7 +141,7 @@ Se cotejaron masas, centros de masa e inercias con la **ecuación 18** del artí
 
 ### F. Integración, IEEE y reproducibilidad — 4/5
 
-**Evidencia:** [notebook integrado](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/Hito2_IRB120_pipeline.ipynb>), [generador](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/build_pipeline_notebook.py>), [fuente IEEE](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/docs/hito2/informe_ieee/informe_hito2_ieee.tex>) y PDF actual.
+**Evidencia:** [notebook integrado](../../hito2/Hito2_IRB120_pipeline.ipynb), [generador](../../hito2/build_pipeline_notebook.py), [fuente IEEE](informe_ieee/informe_hito2_ieee.tex) y PDF actual.
 
 | Exigencia | Resultado observado |
 |---|---|
@@ -225,4 +227,4 @@ ROS, RViz y Gazebo **no son requeridos por la guía oficial de esta semana**. Ta
 
 Las pruebas exitosas no cubren automáticamente toda entrada posible ni sustituyen la comprensión del equipo. Los resultados sobre el robot son de modelos computacionales; no se midieron torques en hardware.
 
-[Evidencias, registros y huellas de archivos revisados](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/docs/hito2/revision_2026-10-20>). En `ejecucion_notebook.txt` se conserva la ejecución de la primera copia; la regeneración posterior y la compilación actualizadas están registradas por separado. Los hallazgos se contrastaron con los archivos vigentes al cierre.
+[Evidencias, registros y huellas de archivos revisados](revision_2026-10-20). En `ejecucion_notebook.txt` se conserva la ejecución de la primera copia; la regeneración posterior y la compilación actualizadas están registradas por separado. Los hallazgos se contrastaron con los archivos vigentes al cierre.

@@ -1,0 +1,99 @@
+{
+  "fecha": "2026-10-20",
+  "descargas": [
+    {
+      "archivo": "irc5_compact_manual.pdf",
+      "url": "https://library.e.abb.com/public/d79c9f86b46343cab47bc9c2d69b1914/3HAC047138%20PM%20IRC5%20Compact-en.pdf",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "archivo": "robotstudio_manual.pdf",
+      "url": "https://library.e.abb.com/public/3c5f83f09b25420bae42e70b3df5bce9/3HAC032104%20OM%20RobotStudio-en.pdf",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "archivo": "robotstudio_2026_1_release_notes.pdf",
+      "url": "https://library.e.abb.com/public/c428a5ec678f47fbba35e86865fe7295/RobotStudio%202026.1%20Release%20Notes.pdf",
+      "sha256": "4650d0a8ecc14bb237e3e976ab35b6c339a2ffdb4e4e4a134048d22576d9548c",
+      "bytes": 354650
+    },
+    {
+      "archivo": "abb_librws_README.md",
+      "url": "https://raw.githubusercontent.com/ros-industrial/abb_librws/master/README.md",
+      "sha256": "caca9744b44cf0db8372ac619defd9d774f7bcc80948a75bd806190d86488626",
+      "bytes": 8243
+    },
+    {
+      "archivo": "abb_libegm_README.md",
+      "url": "https://raw.githubusercontent.com/ros-industrial/abb_libegm/master/README.md",
+      "sha256": "943a7469ec476779e58097365e970c6b6602f91b909302112ff774166f9f202b",
+      "bytes": 9641
+    },
+    {
+      "archivo": "abb_robot_driver_README.md",
+      "url": "https://raw.githubusercontent.com/ros-industrial/abb_robot_driver/master/README.md",
+      "sha256": "f8dd593fe781bcc4bae1641a6627281d686d5e028e0811a3b5c74401e994f0fc",
+      "bytes": 7035
+    },
+    {
+      "archivo": "abb_ros2_README.md",
+      "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/rolling/README.md",
+      "sha256": "5a7f84d6cefb24cf7c67564c0592171b21fc92d08d0772cffe8972001786c457",
+      "bytes": 1659
+    },
+    {
+      "archivo": "rws_jointtarget.html",
+      "url": "https://developercenter.robotstudio.com/api/rwsApi/ms_mechunit_jointtarget_page.html",
+      "sha256": "64bbb41f7995dff219ad314ea0265470d7c2da3acda49a0aa387b9aa76915069",
+      "bytes": 6148
+    },
+    {
+      "archivo": "rws_intro.html",
+      "url": "https://developercenter.robotstudio.com/api/rwsApi/",
+      "sha256": "40579fcc00dbb92b0f5ba74b7e99374b79a57370a90a1bedb1b6b28907f26d26",
+      "bytes": 51460
+    },
+    {
+      "archivo": "rws_ctrlstate.html",
+      "url": "https://developercenter.robotstudio.com/api/rwsApi/panel_ctrlstate_get_page.html",
+      "sha256": "22eee345b65661ca9e8bfb94274b5532ae9c6951c9882b9f81f06b0450f737a7",
+      "bytes": 6288
+    },
+    {
+      "archivo": "rws_system.html",
+      "url": "https://developercenter.robotstudio.com/api/rwsApi/rwsystem_get_system.html",
+      "sha256": "18d9f609b90e36f1f65d893101c6cb30d5cbf75d3fb832e9c1263c6394390dfa",
+      "bytes": 15148
+    }
+  ],
+  "drivers_consultados": [
+    {
+      "repo": "ros-industrial/abb_robot_driver",
+      "branch": "master",
+      "sha": "d1678957d3792e6aa54582ff894db62b6a51dac0",
+      "fecha_commit": "2025-05-27T18:17:22Z"
+    },
+    {
+      "repo": "ros-industrial/abb_driver",
+      "error": "HTTP Error 422: Unprocessable Entity"
+    },
+    {
+      "repo": "ros-industrial/abb_librws",
+      "branch": "master",
+      "sha": "9ba08371482f3975f364011db9b1368fa0fc6b32",
+      "fecha_commit": "2023-02-22T08:04:43Z"
+    },
+    {
+      "repo": "ros-industrial/abb_libegm",
+      "branch": "master",
+      "sha": "2c9350abfb67131cae796805fed8cd6eeb2ab7f9",
+      "fecha_commit": "2023-02-22T08:02:46Z"
+    },
+    {
+      "repo": "PickNikRobotics/abb_ros2",
+      "branch": "rolling",
+      "sha": "e6486f7409073cdb2a10d6878bb50191dd50172b",
+      "fecha_commit": "2026-09-08T22:42:52Z"
+    }
+  ]
+}

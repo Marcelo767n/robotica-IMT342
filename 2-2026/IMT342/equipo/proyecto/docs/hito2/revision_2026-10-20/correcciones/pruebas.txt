@@ -1,0 +1,6 @@
+Revisión posterior a las correcciones, 20 de octubre de 2026.
+Pruebas del paquete Python, ejecutadas en copia temporal con el entorno .venv del proyecto:
+54 passed in 2.36s
+Notebook original reejecutado de principio a fin en kernel nuevo: 29 celdas de código, 33/33 verificaciones, 22.4 s.
+LaTeX compilado dos veces en copia temporal: 6 páginas, sin errores, sin Overfull ni referencias indefinidas.
+Las seis páginas se renderizaron y revisaron visualmente.

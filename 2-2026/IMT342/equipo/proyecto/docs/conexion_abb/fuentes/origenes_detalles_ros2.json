@@ -1,0 +1,38 @@
+[
+  {
+    "archivo": "abb_ros2_ci.yaml",
+    "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/e6486f7409073cdb2a10d6878bb50191dd50172b/.github/workflows/build_and_test.yaml",
+    "sha256": "b93a13ad0ccbe49bf7577ca1b2e16e5a5875c883e46c03e6b5405897a5b73099",
+    "bytes": 3490
+  },
+  {
+    "archivo": "abb_ros2_RobotStudioSetup.md",
+    "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/e6486f7409073cdb2a10d6878bb50191dd50172b/docs/RobotStudioSetup.md",
+    "sha256": "078cc9fc74b07d4f77499332ed9bb702c230691fec7c6a22f5ebdefefcbda2b6",
+    "bytes": 10262
+  },
+  {
+    "archivo": "abb_ros2_NetworkingConfiguration.md",
+    "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/e6486f7409073cdb2a10d6878bb50191dd50172b/docs/NetworkingConfiguration.md",
+    "sha256": "5b13db41e38b3e77dbab4f463294d54140bede50414e55ffb2b87461520ca538",
+    "bytes": 4396
+  },
+  {
+    "archivo": "abb_ros2_hardware.cpp",
+    "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/e6486f7409073cdb2a10d6878bb50191dd50172b/abb_hardware_interface/src/abb_hardware_interface.cpp",
+    "sha256": "9646dc59c01e2c1000334cea2f4ce50c6bc0e3a524d659ee76e363d10f994882",
+    "bytes": 12284
+  },
+  {
+    "archivo": "abb_ros2_rws_client_node.cpp",
+    "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/e6486f7409073cdb2a10d6878bb50191dd50172b/abb_rws_client/src/rws_client_node.cpp",
+    "sha256": "7ad8f3e8b3760cf61b4fae0b71bdf24c98d0a79737f315d7891050f67e711b64",
+    "bytes": 1002
+  },
+  {
+    "archivo": "abb_ros2_dependencies.repos",
+    "url": "https://raw.githubusercontent.com/PickNikRobotics/abb_ros2/e6486f7409073cdb2a10d6878bb50191dd50172b/abb.repos",
+    "sha256": "e3505eb287391ad2ee4bfcb4af9bbfc618c3e6985fea595319be89a821e25244",
+    "bytes": 460
+  }
+]

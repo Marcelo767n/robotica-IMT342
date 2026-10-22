@@ -13,7 +13,7 @@ entrega).
 
 ```text
 hito2/
-├── 🎓 Hito2_IRB120_pipeline.ipynb      ENTREGABLE 1: notebook integrado, ya ejecutado (33 verificaciones)
+├── 🎓 Hito2_IRB120_pipeline.ipynb      ENTREGABLE 1: notebook integrado, ya ejecutado (34 verificaciones)
 ├── 🎓 figuras/                          figuras que exporta el notebook (PDF/PNG); las usa el informe
 │     A_ramas_brazo, A_ocho_ramas_3d, A_conteo_ramas        (criterio A)
 │     B_errores_fk                                          (B)
@@ -23,12 +23,12 @@ hito2/
 ├── 🎓 resultados/                       valores y tablas LaTeX que exporta el notebook (los lee el informe)
 ├── ⚙️ irb120/                           paquete Python: TODA la matemática
 │     dh.py · transforms.py · pieper.py · validation.py · lspb.py · jacobian.py
-│     dynamics.py · dynamics_1r.py · urdf_chain.py
+│     dynamics.py · dynamics_1r.py · rosi_model.py (modelo oficial ROS-I, verificación) · urdf_chain.py
 ├── ⚙️ build_pipeline_notebook.py        escribe y ejecuta el notebook desde cero
 ├── ⚙️ analizar_pose.py                  CLI: ¿es alcanzable esta pose? (8 ramas + rama elegida)
 ├── ⚙️ requirements.txt                  dependencias (Python 3, NumPy, Matplotlib, Jupyter, pytest)
-├── ✅ tests/                            54 pruebas automáticas (pytest)
-├── ✅ datos/irb120.urdf                 URDF del Hito 1, solo para verificar la FK de forma independiente
+├── ✅ tests/                            56 pruebas automáticas (pytest)
+├── ✅ datos/irb120.urdf                 URDF del Hito 1 (derivado de DH): verifica la implementación de la FK
 ├── 📖 explicacion/                      un .md por criterio (01–08) + guía de estudio del código (09)
 ├── 📖 README.md                         este archivo
 └── 🗄️ anexos/                           notebooks de la versión anterior del hito (no son la entrega)
@@ -48,7 +48,7 @@ Desde esta carpeta (`hito2/`):
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-python -m pytest -q tests                        # 54 pruebas
+python -m pytest -q tests                        # 56 pruebas
 jupyter lab Hito2_IRB120_pipeline.ipynb          # editar POSE_OBJETIVO (sección 1.3) y Restart & Run All
 python build_pipeline_notebook.py                # o regenerarlo y ejecutarlo sin abrir Jupyter
 python analizar_pose.py 0.40 0.10 0.35 0 180 0    # x y z [m]  roll pitch yaw [grados]
@@ -80,7 +80,8 @@ la versión anterior del hito: se conserva por el Hito 1 y como integración opc
 colisiones con el CAD), pero **ya no es igual** a este código. Usa un TCP de 0.100 m (aquí es 0.150 m) y no tiene la
 enumeración de 8 ramas, la validación de entradas, el criterio de selección ni el modelo 1R. No hay que copiar código
 entre los dos. Del Hito 1 solo se reutiliza el URDF (`datos/irb120.urdf`) y su evaluador (`irb120/urdf_chain.py`),
-para verificar la FK.
+para verificar la implementación de la FK. La verificación geométrica independiente usa el modelo oficial de
+ROS-Industrial (`irb120/rosi_model.py`).
 
 ## Qué son `build/`, `install/` y `_local_setup_util_ps1.py`
 

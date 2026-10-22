@@ -5,6 +5,11 @@ ros2_ws/log/
 /install/
 /log/
 /tmp/
+/archivo/hito1/generacion/**/*.png
+/archivo/hito1/generacion/**/*.jpg
+/archivo/hito1/generacion/**/*.pptx
+/archivo/hito1/generacion/**/.codex-finalizer/
+/archivo/hito1/generacion/pdfs/manual_text.txt
 **/__pycache__/
 **/.pytest_cache/
 *.pyc

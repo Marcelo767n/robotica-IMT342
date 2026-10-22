@@ -1,0 +1,12 @@
+{
+  "fecha_UTC": "2026-10-20T16:22:28.682469+00:00",
+  "cambios_desde_copia": [],
+  "sha256": {
+    "hito2/build_pipeline_notebook.py": "f67698078063412214c3a5497a7bbf206b96aa2f9d9bbe2b56e9f7b55cff34d2",
+    "hito2/Hito2_IRB120_pipeline.ipynb": "796b6da9e7b921a1f0315355f7df1f97a636e998301cd0874f5cd3bab77ff4a6",
+    "hito2/irb120/pieper.py": "9ffd1dbe9b24c371a8a90a29d07532936cd408d014fcd52578b3fd3b600237c1",
+    "hito2/irb120/transforms.py": "6ed8c0da4fb43aef35c2fee874aeb8601d543262d71448d081a567597439c68a",
+    "hito2/irb120/lspb.py": "96801e2363ea3c0bc0d8f33cda5d39be621f02800b706ea76a86de53a46c0c96",
+    "docs/hito2/informe_ieee/informe_hito2_ieee.pdf": "da39d57f78e2cc784f379cb518e80355970f58773534db950f657e2d5ebe58b5"
+  }
+}

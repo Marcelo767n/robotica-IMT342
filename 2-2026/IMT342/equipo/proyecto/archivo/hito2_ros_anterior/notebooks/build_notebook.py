@@ -1,4 +1,4 @@
-"""Genera notebooks/hito2_singularidad_q5.ipynb. Uso: python build_notebook.py"""
+"""Genera el notebook histórico hito2_singularidad_q5.ipynb junto a este archivo. Uso: python build_notebook.py"""
 from pathlib import Path
 import nbformat as nbf
 
@@ -22,7 +22,11 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
-SRC = Path.cwd().resolve().parent / "ros2_ws" / "src"
+PROJECT_ROOT = next((p for p in (Path.cwd().resolve(), *Path.cwd().resolve().parents)
+                     if (p / "ros2_ws" / "src").is_dir()), None)
+if PROJECT_ROOT is None:
+    raise RuntimeError("Abra este notebook dentro del proyecto que contiene ros2_ws/src")
+SRC = PROJECT_ROOT / "ros2_ws" / "src"
 for package in ("irb120_hito1", "irb120_hito2"):
     sys.path.insert(0, str(SRC / package))
 

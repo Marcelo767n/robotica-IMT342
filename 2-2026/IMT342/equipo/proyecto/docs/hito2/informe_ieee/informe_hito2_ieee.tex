@@ -139,8 +139,10 @@ clasifica como \emph{real}, \emph{dentro de límites} (buscando el representante
 Cada rama real se reinyecta en la FK y se mide $e_p = \lVert\mathbf{p}(\mathbf{q}^{(k)}) - \mathbf{p}_d\rVert$ y el
 error angular geodésico $e_R = \angle(R_d^TR(\mathbf{q}^{(k)}))$. Se acepta si $e_p < 10^{-6}$~m y
 $e_R < 10^{-6}$~rad; la tolerancia en posición es diez veces menor que la repetibilidad del robot (0.01~mm). Antes de
-todo, se verifica que $T_d \in SE(3)$ (última fila $[0,0,0,1]$, $R^TR = I$, $\det R = 1$). Como verificación externa
-de la propia FK, se compara con el URDF del Hito~1, evaluado con un código independiente que no usa la tabla DH.
+todo, se verifica que $T_d \in SE(3)$ (última fila $[0,0,0,1]$, $R^TR = I$, $\det R = 1$). Para verificar la propia FK
+se usan dos comparaciones: (i) con el modelo cinemático oficial de ROS-Industrial~\cite{rosi}, construido con
+traslaciones y ejes de los planos de ABB, sin parámetros DH, que es una fuente geométrica independiente; y (ii) con el
+URDF del Hito~1, que se derivó de la misma tabla DH y por eso solo comprueba la implementación.
 
 \textbf{Criterio de selección (8 ramas $\to$ 1).} Se aplican filtros en orden: (1) rama admisible; (2)
 $\sigma_{\min}(J) \ge 0.01$, que acota la amplificación de velocidad $\lVert\dot{\mathbf{q}}\rVert \le
@@ -193,8 +195,8 @@ Para la pose objetivo, $\mathbf{p}_W = \PWObj$~m y $D = \DObj$~m, dentro de $[0.
 $c = \CObj$. De las 8 ramas, \NReales{} son reales y \NAdm{} admisibles (Tabla~\ref{tab:ik}); para cada rama no
 admisible la tabla indica qué juntas violan sus límites. % REVISAR si cambia la pose: comentar la causa principal.
 Las \NRamasReales{} ramas reales de las dos poses reproducen su pose con $e_p \le \MaxEp$~m y
-$e_R \le \MaxEr$~rad, y la FK por DH coincide con el URDF independiente del Hito~1 en 302 configuraciones
-(diferencias del orden de $10^{-15}$). El criterio rechaza un candidato con error de $0.01$~rad solo en $q_6$, que tiene
+$e_R \le \MaxEr$~rad, y la FK por DH coincide en pose completa con el modelo oficial de ROS-Industrial (y con el URDF del Hito~1) en
+302 configuraciones, con diferencias del orden de $10^{-15}$. El criterio rechaza un candidato con error de $0.01$~rad solo en $q_6$, que tiene
 $e_p = 0$, y la prueba de ida y vuelta con 1000 configuraciones aleatorias recupera el $\mathbf{q}$ original en el
 100\,\% de los casos. Desde $T_0$, Pieper recupera exactamente $\mathbf{q} = \mathbf{0}$, con la muñeca marcada como
 singular. La Fig.~\ref{fig:ramas} muestra la geometría de las ramas del brazo y la Fig.~\ref{fig:ramas3d} el robot
@@ -409,6 +411,8 @@ doi: 10.3906/elk-1909-131.
 \bibitem{abbcal} ABB Robotics Tech Community, ``Calibrate an IRB140'' (actualización de contadores de revolución con
 \texttt{MoveAbsJ} a un \textit{jointtarget} de ceros), 2014. [En línea]. Disponible:
 \url{https://tech-community.robotics.abb.com/t/calibrate-an-irb140/4976}
+\bibitem{rosi} ROS-Industrial, ``abb\_irb120\_support: irb120\_3\_58\_macro.xacro,'' paquete \textit{abb}, rama
+kinetic-devel. [En línea]. Disponible: \url{https://github.com/ros-industrial/abb/tree/kinetic-devel/abb_irb120_support}
 \bibitem{guia} B. Quiroga, ``Guía oficial y rúbrica de evaluación: Hito 2,'' IMT-342 Robótica, Universidad Católica
 Boliviana, Tarija, 2026.
 \end{thebibliography}

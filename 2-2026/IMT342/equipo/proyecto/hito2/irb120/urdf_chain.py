@@ -1,7 +1,8 @@
-"""Evaluador independiente de cadenas URDF (copiado del paquete del Hito 1, irb120_hito1/kinematics).
+"""Evaluador de cadenas URDF (copiado del paquete del Hito 1, irb120_hito1/kinematics).
 
-Se usa solo para VERIFICAR la cinematica directa DH contra otro modelo del mismo robot
-(el URDF del Hito 1, con los meshes CAD de ROS-Industrial): otra fuente y otra implementacion.
+OJO: el URDF del Hito 1 (datos/irb120.urdf) se construyo A PARTIR de la tabla DH. Compararlo con la FK verifica la
+IMPLEMENTACION (otro codigo: origins + ejes en lugar de matrices DH), no la geometria. La verificacion geometrica
+independiente es la del modelo oficial de ROS-Industrial (irb120/rosi_model.py).
 """
 
 from dataclasses import dataclass

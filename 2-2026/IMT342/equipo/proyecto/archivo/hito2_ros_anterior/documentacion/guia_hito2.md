@@ -1,7 +1,7 @@
 > ⚠️ **Documento obsoleto.** Describe la versión anterior del Hito 2 (Guía PFI: nodo ROS, TCP de 0.100 m y
 > "pasaporte" de divergencia en q5 = 0). La versión vigente, alineada con la guía oficial de la semana 10, está en
-> [`hito2/explicacion/`](../../hito2/explicacion/README.md), [`hito2/Hito2_IRB120_pipeline.ipynb`](../../hito2/Hito2_IRB120_pipeline.ipynb)
-> y [`informe_ieee/`](informe_ieee/README.md).
+> [`hito2/explicacion/`](../../../hito2/explicacion/README.md), [`hito2/Hito2_IRB120_pipeline.ipynb`](../../../hito2/Hito2_IRB120_pipeline.ipynb)
+> y [`informe_ieee/`](../../../docs/hito2/informe_ieee/README.md).
 
 # Guía del Hito 2: cinemática inversa, trayectorias y singularidad
 
@@ -15,7 +15,7 @@ salidas de ejemplo son las que imprime el código real (ABB IRB 120, ROS 2 Jazzy
 | Nodo ROS en Python que reciba una pose | `ik_trajectory_node` (`geometry_msgs/PoseStamped`) | `nodes/ik_trajectory_node.py` |
 | Ejecutar Pieper (sin MoveIt) | Solver analítico, hasta 8 soluciones | `kinematics/pieper.py` |
 | Generar trayectoria LSPB | LSPB sincronizado con límites | `trajectory/lspb.py` |
-| Notebook: divergencia de velocidades y torques en q5 = 0 | Notebook ejecutado con gráficas y aserciones | `notebooks/hito2_singularidad_q5.ipynb` |
+| Notebook: divergencia de velocidades y torques en q5 = 0 | Notebook ejecutado con gráficas y aserciones | `archivo/hito2_ros_anterior/notebooks/hito2_singularidad_q5.ipynb` |
 | Extra aplicado | Jacobiano, dinámica, autocolisión con el CAD real | `jacobian.py`, `dynamics.py`, `collision.py` |
 
 Reglas "anti-caja negra" respetadas: no se usa MoveIt ni un resolvedor numérico; la IK es
@@ -293,7 +293,7 @@ pinza hacia abajo. `rpy_to_matrix` usa la convención ROS `Rz(yaw)·Ry(pitch)·R
 
 ## 10. Notebook del pasaporte
 
-`notebooks/hito2_singularidad_q5.ipynb` (ya ejecutado, con salidas):
+`archivo/hito2_ros_anterior/notebooks/hito2_singularidad_q5.ipynb` (ya ejecutado, con salidas):
 
 1. Verifica `det J = −sin q5 · det Jp_brazo` en posturas aleatorias (error ~1e-17).
 2. Barre `q5 → 1e-6`: `σmin(J)`, `cond(J)` y `‖q̇‖` (pendiente log-log medida: −0.97).
@@ -307,11 +307,11 @@ Para reproducirlo:
 
 ```bash
 python3 -m venv --system-site-packages .venv-notebooks
-.venv-notebooks/bin/pip install -r notebooks/requirements.txt
-.venv-notebooks/bin/jupyter lab notebooks/hito2_singularidad_q5.ipynb
+.venv-notebooks/bin/pip install -r archivo/hito2_ros_anterior/notebooks/requirements.txt
+.venv-notebooks/bin/jupyter lab archivo/hito2_ros_anterior/notebooks/hito2_singularidad_q5.ipynb
 ```
 
-`notebooks/build_notebook.py` regenera el `.ipynb` desde cero.
+`archivo/hito2_ros_anterior/notebooks/build_notebook.py` regenera el `.ipynb` desde cero.
 
 ## 11. Pruebas y verificación
 

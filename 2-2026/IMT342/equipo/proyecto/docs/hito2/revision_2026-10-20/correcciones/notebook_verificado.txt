@@ -1,0 +1,338 @@
+CELDA 1
+Paquete irb120 cargado desde /tmp/hito2_verificacion_correcciones_20261020/hito2
+Entorno: Python 3.12.3, NumPy 2.5.4, Matplotlib 3.11.2
+
+CELDA 3
+Tabla DH  (theta_i = q_i + offset)
+ i   d [m]   a [m]  alpha [deg]  offset [deg]
+ 1   0.290   0.000        -90.0           0.0
+ 2   0.000   0.270          0.0         -90.0
+ 3   0.000   0.070        -90.0           0.0
+ 4   0.302   0.000         90.0           0.0
+ 5   0.000   0.000        -90.0           0.0
+ 6   0.072   0.000          0.0         180.0
+
+TCP: 0.150 m sobre z6 de la brida
+ eje  min [deg]  max [deg]  vmax [deg/s]
+   1       -165        165           250
+   2       -110        110           250
+   3       -110         70           250
+   4       -160        160           320
+   5       -120        120           320
+   6       -400        400           420
+
+FK en q = 0 (brida): [0.374 0.    0.63 ] m   -> datasheet: (0.374, 0, 0.630)
+  ✔ [Modelo] FK(q=0) reproduce la geometría del datasheet
+
+CELDA 5
+Pose inicial T_0 (TCP):
+ [[-0.    -0.     1.     0.524]
+ [-0.     1.     0.     0.   ]
+ [-1.    -0.    -0.     0.63 ]
+ [ 0.     0.     0.     1.   ]]
+Posición [m]: [0.524 0.    0.63 ]   roll-pitch-yaw [deg]: [-0. 90.  0.]
+
+CELDA 7
+Pose objetivo T_d (TCP):
+ [[-1.    0.    0.    0.4 ]
+ [ 0.    1.    0.    0.1 ]
+ [-0.    0.   -1.    0.35]
+ [ 0.    0.    0.    1.  ]]
+
+CELDA 9
+
+=== Inicial ===  p_W = [ 0.302 -0.     0.63 ] m,  |S-W| = 0.4548 m (alcanzable si está en [0.040, 0.580])
+ k  brazo   codo muñeca  real      límites         q1      q2      q3      q4      q5      q6   e_p [m] e_R [rad]  adm.
+ 1 frente arriba    q5+    sí           sí       0.00    0.00   -0.00    0.00    0.00    0.00   2.2e-16   4.4e-16  SÍ  (muñeca singular)
+ 2 frente arriba    q5-    sí        no J4       0.00    0.00   -0.00 -180.00    0.00 -180.00   2.2e-16   5.1e-16  no  (muñeca singular)
+ 3 frente  abajo    q5+    sí        no J3       0.00   83.23 -153.90    0.00   70.67    0.00   1.6e-16   4.4e-17  no
+ 4 frente  abajo    q5-    sí      no J3,4       0.00   83.23 -153.90 -180.00  -70.67 -180.00   1.6e-16   5.9e-17  no
+ 5  atras arriba    q5+    sí      no J1,4    -180.00  -83.23   -0.00  180.00   96.77    0.00   4.5e-17   2.8e-17  no
+ 6  atras arriba    q5-    sí        no J1    -180.00  -83.23   -0.00   -0.00  -96.77 -180.00   2.6e-17   7.2e-17  no
+ 7  atras  abajo    q5+    sí    no J1,3,4    -180.00    0.00 -153.90  180.00   26.10    0.00   3.2e-17   1.9e-16  no
+ 8  atras  abajo    q5-    sí      no J1,3    -180.00    0.00 -153.90   -0.00  -26.10 -180.00   4.0e-17   3.9e-17  no
+→ ALCANZABLE: 1 de 8 ramas son admisibles.
+
+=== Objetivo ===  p_W = [0.4   0.1   0.572] m,  |S-W| = 0.4995 m (alcanzable si está en [0.040, 0.580])
+ k  brazo   codo muñeca  real      límites         q1      q2      q3      q4      q5      q6   e_p [m] e_R [rad]  adm.
+ 1 frente arriba    q5+    sí           sí      14.04   22.67  -15.70   -0.00   83.03   14.04   7.9e-17   2.0e-16  SÍ
+ 2 frente arriba    q5-    sí        no J4      14.04   22.67  -15.70  180.00  -83.03 -165.96   6.2e-17   1.9e-16  no
+ 3 frente  abajo    q5+    sí      no J3,5      14.04   88.59 -138.20   -0.00  139.61   14.04   1.4e-16   2.6e-16  no
+ 4 frente  abajo    q5-    sí    no J3,4,5      14.04   88.59 -138.20  180.00 -139.61 -165.96   1.2e-16   2.6e-16  no
+ 5  atras arriba    q5+    sí    no J1,4,5    -165.96  -88.59  -15.70  180.00  165.71   14.04   1.2e-16   2.1e-16  no
+ 6  atras arriba    q5-    sí      no J1,5    -165.96  -88.59  -15.70   -0.00 -165.71 -165.96   7.9e-17   1.9e-16  no
+ 7  atras  abajo    q5+    sí    no J1,3,4    -165.96  -22.67 -138.20 -180.00  109.13   14.04   1.7e-16   2.7e-16  no
+ 8  atras  abajo    q5-    sí      no J1,3    -165.96  -22.67 -138.20    0.00 -109.13 -165.96   1.3e-16   1.4e-16  no
+→ ALCANZABLE: 1 de 8 ramas son admisibles.
+
+CELDA 10
+Verificaciones de la etapa A:
+  ✔ [A] pose Inicial: se enumeran las 8 ramas
+  ✔ [A] pose Objetivo: se enumeran las 8 ramas
+  ✔ [A] Pieper recupera la posición de calibración q = 0 a partir de T_0
+  ✔ [A] la pose objetivo es alcanzable (al menos una rama admisible)
+
+CELDA 12
+/tmp/ipykernel_32130/2878939212.py:22: UserWarning: linestyle is redundantly defined by the 'linestyle' keyword argument and the fmt string "-o" (-> linestyle='-'). The keyword argument will take precedence.
+  ax.plot(pts[:, 0], pts[:, 1], "-o", color=styles[(c.arm, c.elbow)], lw=2.5 if admissible_arm else 1.2,
+
+CELDA 15
+
+CELDA 17
+    pose  k    e_p [m]  e_R [rad]  ||T-Td||_F  acepta
+ Inicial  1   2.22e-16   4.44e-16    6.66e-16  sí
+ Inicial  2   2.22e-16   5.07e-16    7.51e-16  sí
+ Inicial  3   1.57e-16   4.40e-17    1.69e-16  sí
+ Inicial  4   1.57e-16   5.86e-17    1.78e-16  sí
+ Inicial  5   4.50e-17   2.84e-17    1.68e-16  sí
+ Inicial  6   2.64e-17   7.17e-17    1.89e-16  sí
+ Inicial  7   3.24e-17   1.87e-16    3.47e-16  sí
+ Inicial  8   4.03e-17   3.90e-17    2.32e-16  sí
+Objetivo  1   7.85e-17   1.99e-16    3.14e-16  sí
+Objetivo  2   6.21e-17   1.95e-16    3.04e-16  sí
+Objetivo  3   1.42e-16   2.65e-16    4.18e-16  sí
+Objetivo  4   1.25e-16   2.58e-16    4.07e-16  sí
+Objetivo  5   1.24e-16   2.06e-16    3.36e-16  sí
+Objetivo  6   7.85e-17   1.88e-16    3.01e-16  sí
+Objetivo  7   1.67e-16   2.72e-16    4.36e-16  sí
+Objetivo  8   1.31e-16   1.38e-16    2.63e-16  sí
+
+Verificaciones de la etapa B:
+  ✔ [B] las 16 ramas reales reproducen su pose (posición y orientación) bajo tolerancia
+
+CELDA 19
+error en q1 = 1e-3 rad      : e_p = 4.12e-04 m, e_R = 1.00e-03 rad -> RECHAZA
+  ✔ [B] se rechaza el candidato con error en q1 = 1e-3 rad
+error solo en q6 = 1e-2 rad : e_p = 7.85e-17 m, e_R = 1.00e-02 rad -> RECHAZA
+  ✔ [B] se rechaza el candidato con error solo en q6 = 1e-2 rad
+
+Ida y vuelta con 1000 q aleatorios en límites: resueltas 1000, q original recuperado 1000, peor e_p = 5.8e-16 m, peor e_R = 4.0e-13 rad
+  ✔ [B] ida y vuelta: 1000/1000 poses resueltas y q original recuperado
+
+CELDA 21
+DH frente a URDF en 302 configuraciones (home, q_f y 300 aleatorias): max |T_DH - T_URDF| = 1.1e-15
+  ✔ [B] la FK por DH coincide con el URDF independiente del Hito 1 (pose completa, < 1e-9)
+
+CELDA 23
+ k                 rama  adm.  σ_min(J) margen [°]  ||W(q-q0)|| t_f LSPB [s]  decisión
+ 1    frente/arriba/q5+    sí    0.1167       37.0       0.9120       1.2879  ELEGIDA
+ 2    frente/arriba/q5-    no         —          —            —            —  descartada: fuera de limites J4
+ 3     frente/abajo/q5+    no         —          —            —            —  descartada: fuera de limites J3,5
+ 4     frente/abajo/q5-    no         —          —            —            —  descartada: fuera de limites J3,4,5
+ 5     atras/arriba/q5+    no         —          —            —            —  descartada: fuera de limites J1,4,5
+ 6     atras/arriba/q5-    no         —          —            —            —  descartada: fuera de limites J1,5
+ 7      atras/abajo/q5+    no         —          —            —            —  descartada: fuera de limites J1,3,4
+ 8      atras/abajo/q5-    no         —          —            —            —  descartada: fuera de limites J1,3
+
+q0 (pose inicial)  = [0. 0. 0. 0. 0. 0.] deg
+qf (pose objetivo) = [ 14.036  22.667 -15.7    -0.     83.034  14.036] deg   (rama 1: frente/arriba/q5+)
+Justificación: admisible, σ_min = 0.117 ≥ 0.01, margen a límites = 37.0° ≥ 5°, y menor desplazamiento ponderado (0.912) entre las aptas.
+  ✔ [A] se evaluaron las 8 ramas y se eligió exactamente una
+  ✔ [A] la configuración elegida es admisible y reproduce T_d
+
+CELDA 25
+t_f = 1.2879 s,   t_b = 0.2500 s,   crucero = 0.7879 s
+
+junta   D [deg]  V [deg/s]  a [deg/s2]  |V|/vmax  |a|/amax
+    1    14.036     13.523      54.094     0.216     0.216
+    2    22.667     21.839      87.354     0.349     0.349
+    3   -15.700    -15.127     -60.507     0.242     0.242
+    4    -0.000     -0.000      -0.000     0.000     0.000
+    5    83.034     80.000     320.000     1.000     1.000
+    6    14.036     13.523      54.094     0.129     0.129
+
+Junta crítica (fija t_f): J5
+
+Verificaciones de la etapa C:
+  ✔ [C] q(0) = q0 y q(tf) = qf (error 0.0e+00)
+  ✔ [C] reposo en las fronteras: q̇(0) = q̇(tf) = 0
+  ✔ [C] q y q̇ continuas en t_b y t_f - t_b (saltos 2.8e-09, 5.6e-09)
+  ✔ [C] se respetan vmax y amax en las 6 juntas
+  ✔ [C] t_b ≤ t_f/2 (existe el perfil LSPB)
+
+CELDA 26
+
+CELDA 27
+
+CELDA 30
+El TCP recorre 0.354 m (distancia en línea recta: 0.322 m).
+
+CELDA 32
+J(q_f) =
+ [[-0.1     0.0582 -0.1835 -0.0534 -0.2154 -0.    ]
+ [ 0.4     0.0146 -0.0459  0.2138 -0.0538 -0.    ]
+ [ 0.     -0.4123 -0.3083  0.     -0.     -0.    ]
+ [ 0.     -0.2425 -0.2425  0.963  -0.2425 -0.    ]
+ [ 0.      0.9701  0.9701  0.2407  0.9701  0.    ]
+ [ 1.      0.      0.     -0.1213 -0.     -1.    ]]
+max |J - J_numérico| = 1.40e-10
+
+Columnas en la pose inicial q = 0 (comparar con explicacion/05):
+  J1 = v [-0.     0.524  0.   ]  ω [0. 0. 1.]
+  J2 = v [ 0.34   0.    -0.524]  ω [0. 1. 0.]
+  J3 = v [ 0.07   0.    -0.524]  ω [0. 1. 0.]
+  J4 = v [ 0. -0. -0.]  ω [ 1.  0. -0.]
+  J5 = v [-0.     0.    -0.222]  ω [0. 1. 0.]
+  J6 = v [ 0. -0. -0.]  ω [ 1.  0. -0.]
+
+Verificaciones de la etapa D (Jacobiano):
+  ✔ [D] J analítico = J por diferencias finitas de la FK (< 1e-8)
+  ✔ [D] columna 1 en q = 0 hecha a mano: (0, 0.524, 0 | 0, 0, 1)
+  ✔ [D] columna 2 en q = 0 hecha a mano: (0.340, 0, -0.524 | 0, 1, 0)
+  rango J en la pose inicial: 5   (columnas 4 y 6 iguales: q5 = 0)
+  rango J en la pose objetivo: 6
+
+Interpretación de columnas en q_f: brazo de palanca ||J_v,i|| [m por rad] y eje z_{i-1}
+  junta 1: ||J_v|| = 0.412 m/rad,  z = [0. 0. 1.]
+  junta 2: ||J_v|| = 0.417 m/rad,  z = [-0.243  0.97   0.   ]
+  junta 3: ||J_v|| = 0.362 m/rad,  z = [-0.243  0.97   0.   ]
+  junta 4: ||J_v|| = 0.220 m/rad,  z = [ 0.963  0.241 -0.121]
+  junta 5: ||J_v|| = 0.222 m/rad,  z = [-0.243  0.97  -0.   ]
+  junta 6: ||J_v|| = 0.000 m/rad,  z = [-0.  0. -1.]
+
+CELDA 34
+max |J_v q̇ - dp/dt| = 1.97e-10 m/s
+  ✔ [D] v = J_v(q) q̇ coincide con la derivada numérica de p(q(t)) (< 1e-5 m/s)
+Rango de J a lo largo de la trayectoria: mínimo 5; vale 5 en t = [0.     0.0011] s y 6 en el resto
+
+CELDA 37
+ q5 [deg] rango  sigma_1  sigma_5    sigma_6    cond(J)       det J  det teórico  Pieper-singular
+    45.00     6   1.7885   0.1594   1.01e-01   1.76e+01   -1.20e-02    -1.20e-02  False
+    30.00     6   1.7945   0.1586   7.30e-02   2.46e+01   -8.47e-03    -8.47e-03  False
+    20.00     6   1.7991   0.1584   5.04e-02   3.57e+01   -5.79e-03    -5.79e-03  False
+    10.00     6   1.8046   0.1586   2.58e-02   6.99e+01   -2.94e-03    -2.94e-03  False
+     5.00     6   1.8079   0.1589   1.30e-02   1.39e+02   -1.48e-03    -1.48e-03  False
+     3.00     6   1.8092   0.1590   7.82e-03   2.31e+02   -8.86e-04    -8.86e-04  False
+     1.00     6   1.8106   0.1591   2.61e-03   6.93e+02   -2.96e-04    -2.96e-04  False
+     0.30     6   1.8112   0.1591   7.84e-04   2.31e+03   -8.87e-05    -8.87e-05  False
+     0.10     6   1.8113   0.1591   2.61e-04   6.93e+03   -2.96e-05    -2.96e-05  False
+     0.03     6   1.8113   0.1592   7.84e-05   2.31e+04   -8.87e-06    -8.87e-06  False
+     0.01     6   1.8114   0.1592   2.62e-05   6.93e+04   -2.96e-06    -2.96e-06  False
+     0.00     5   1.8114   0.1592   1.37e-17   1.33e+17    0.00e+00    -0.00e+00  True
+
+Verificaciones de la etapa D (singularidad):
+  ✔ [D] cada pose de la secuencia se resuelve por Pieper y pasa la FK
+  ✔ [D] rango = 6 para q5 ≠ 0 y rango = 5 en q5 = 0
+  ✔ [D] det J coincide con la factorización -sin(q5)·det(J_brazo)
+  ✔ [D] Pieper marca la muñeca singular en q5 = 0
+
+CELDA 38
+
+CELDA 40
+Movimiento nulo v6 (q̇ normalizado): [-0.     -0.      0.      0.7071 -0.     -0.7071]
+  -> q̇4 = -q̇6 y el brazo quieto: los dos motores giran opuestos y se cancelan.
+Twist perdido u6 = [v_W; ω] (referencia en W): [ 0.5658 -0.6587 -0.4413  0.0597 -0.1336  0.1727]
+Parte angular de u6 (normalizada): [ 0.2636 -0.5901  0.7631]   z3 × z4: [ 0.2636 -0.5901  0.7631]
+|cos(ángulo)| entre ambas = 1.000000
+Twist del TCP con q̇ = v6: [-0. -0. -0. -0. -0. -0.]
+  ✔ [D] movimiento nulo: q̇4 = -q̇6 y q̇1..q̇3 = 0
+  ✔ [D] la rotación perdida es alrededor de z3 × z4
+
+CELDA 42
+Pendiente log-log de ||q̇|| frente a sin(q5): -1.000  (teoría: -1)
+ q5 [deg] ||q̇|| [rad/s]  q̇4 [rad/s]  q̇6 [rad/s]        rho
+    30.00           13.7          8.6         -9.3        1.5
+     1.00          382.7        270.8       -270.4       48.5
+     0.10         3824.3       2704.4      -2704.0      484.2
+     0.01        38240.5      27040.3     -27039.9     4841.6
+Twist de magnitud 1 en u6: supera la velocidad máxima de algún eje (rho > 1) desde q5 ≈ 45.0°
+Twist de magnitud 0.1 en u6: supera la velocidad máxima de algún eje (rho > 1) desde q5 ≈ 3.0°
+  ✔ [D] amplificación ||q̇|| ∝ 1/sin(q5) (pendiente -1 ± 0.02)
+  ✔ [D] torque estático en la dirección perdida tiende a 0
+
+CELDA 44
+q3 singular = δ - 90° = -76.950°
+ q3 [deg]  |S-W| [m] rango    sigma_6
+  -56.950    0.57124     6   3.62e-02
+  -66.950    0.57781     6   1.86e-02
+  -71.950    0.57946     6   9.34e-03
+  -74.950    0.57992     6   3.74e-03
+  -75.950    0.57998     6   1.87e-03
+  -76.650    0.58000     6   5.62e-04
+  -76.850    0.58001     6   1.87e-04
+  -76.950    0.58001     5   3.46e-18
+  ✔ [D] singularidad de codo: rango 5 con el brazo estirado y 6 fuera de ella
+
+CELDA 46
+m = 12.210 kg,  lc = 0.2491 m,  Ic = 0.4479 kg m²,  J = Ic + m lc² = 1.2053 kg m²
+phi0 = -163.815°  (theta = q2 + phi0),  m g lc = 29.832 N·m
+
+Sensibilidad a la postura congelada de las juntas 3-6:
+  q_ref =         q0: lc = 0.2420 m, J = 1.1486 kg m², phi0 = -161.924°
+  q_ref =  (q0+qf)/2: lc = 0.2491 m, J = 1.2053 kg m², phi0 = -163.815°
+  q_ref =         qf: lc = 0.2554 m, J = 1.2554 kg m², phi0 = -165.913°
+
+Validación contra el Lagrangiano completo de 6 GDL en q_ref: |J - M22| = 0.0e+00,  |m g lc sinθ - g2| = 1.4e-14
+  ✔ [E] J = M22(q_ref) y τ_g = g2(q_ref) del modelo completo
+
+CELDA 47
+  instante     fase  q2 [deg] theta [deg]   tau_in     tau_g  tau [N m]
+    0.0000  acelera     0.000    -163.815    1.838    -8.316     -6.478
+    0.1250  acelera     0.682    -163.132    1.838    -8.656     -6.819
+    0.6440  crucero    11.333    -152.481    0.000   -13.784    -13.784
+    1.1629    frena    21.984    -141.830   -1.838   -18.436    -20.274
+    1.2879    frena    22.667    -141.148   -1.838   -18.714    -20.552
+Al terminar: en t_f⁻ (último instante del frenado) τ = -20.552 N·m; en t_f⁺ (robot detenido, q̈ = 0) τ = τ_g = -18.714 N·m: el motor deja de frenar pero sigue sosteniendo el brazo.
+
+Pico |τ| = 20.552 N·m en t = 1.288 s (frena)
+|τ_in| máx = 1.838 N·m   |τ_g| máx = 18.714 N·m
+En crucero: τ_in = 0, pero |τ| va de 9.67 a 17.58 N·m
+  ✔ [E] en crucero τ_in = 0 pero τ ≠ 0 (velocidad constante no implica torque cero)
+
+CELDA 49
+Error RMS 1R frente al completo: 0.637 N·m (4.5 % del RMS de τ2); máx 1.174 N·m
+→ La reducción 1R es una buena aproximación para este movimiento (error RMS < 15 %).
+
+CELDA 51
+  escala 0.10: max|τ_in| =  0.294 N·m, max|τ_g| = 18.714 N·m
+  escala 0.25: max|τ_in| =  1.838 N·m, max|τ_g| = 18.714 N·m
+  escala 0.50: max|τ_in| =  7.351 N·m, max|τ_g| = 18.714 N·m
+  escala 0.75: max|τ_in| = 16.539 N·m, max|τ_g| = 18.714 N·m
+  escala 1.00: max|τ_in| = 29.403 N·m, max|τ_g| = 18.714 N·m
+  ✔ [E] τ_g no depende de la velocidad y τ_in escala con el cuadrado de la velocidad
+
+CELDA 53
+ etapa  verificación
+Modelo  ✔ FK(q=0) reproduce la geometría del datasheet
+     A  ✔ pose Inicial: se enumeran las 8 ramas
+     A  ✔ pose Objetivo: se enumeran las 8 ramas
+     A  ✔ Pieper recupera la posición de calibración q = 0 a partir de T_0
+     A  ✔ la pose objetivo es alcanzable (al menos una rama admisible)
+     B  ✔ las 16 ramas reales reproducen su pose (posición y orientación) bajo tolerancia
+     B  ✔ se rechaza el candidato con error en q1 = 1e-3 rad
+     B  ✔ se rechaza el candidato con error solo en q6 = 1e-2 rad
+     B  ✔ ida y vuelta: 1000/1000 poses resueltas y q original recuperado
+     B  ✔ la FK por DH coincide con el URDF independiente del Hito 1 (pose completa, < 1e-9)
+     A  ✔ se evaluaron las 8 ramas y se eligió exactamente una
+     A  ✔ la configuración elegida es admisible y reproduce T_d
+     C  ✔ q(0) = q0 y q(tf) = qf (error 0.0e+00)
+     C  ✔ reposo en las fronteras: q̇(0) = q̇(tf) = 0
+     C  ✔ q y q̇ continuas en t_b y t_f - t_b (saltos 2.8e-09, 5.6e-09)
+     C  ✔ se respetan vmax y amax en las 6 juntas
+     C  ✔ t_b ≤ t_f/2 (existe el perfil LSPB)
+     D  ✔ J analítico = J por diferencias finitas de la FK (< 1e-8)
+     D  ✔ columna 1 en q = 0 hecha a mano: (0, 0.524, 0 | 0, 0, 1)
+     D  ✔ columna 2 en q = 0 hecha a mano: (0.340, 0, -0.524 | 0, 1, 0)
+     D  ✔ v = J_v(q) q̇ coincide con la derivada numérica de p(q(t)) (< 1e-5 m/s)
+     D  ✔ cada pose de la secuencia se resuelve por Pieper y pasa la FK
+     D  ✔ rango = 6 para q5 ≠ 0 y rango = 5 en q5 = 0
+     D  ✔ det J coincide con la factorización -sin(q5)·det(J_brazo)
+     D  ✔ Pieper marca la muñeca singular en q5 = 0
+     D  ✔ movimiento nulo: q̇4 = -q̇6 y q̇1..q̇3 = 0
+     D  ✔ la rotación perdida es alrededor de z3 × z4
+     D  ✔ amplificación ||q̇|| ∝ 1/sin(q5) (pendiente -1 ± 0.02)
+     D  ✔ torque estático en la dirección perdida tiende a 0
+     D  ✔ singularidad de codo: rango 5 con el brazo estirado y 6 fuera de ella
+     E  ✔ J = M22(q_ref) y τ_g = g2(q_ref) del modelo completo
+     E  ✔ en crucero τ_in = 0 pero τ ≠ 0 (velocidad constante no implica torque cero)
+     E  ✔ τ_g no depende de la velocidad y τ_in escala con el cuadrado de la velocidad
+
+33/33 verificaciones aprobadas
+
+Resumen: pose objetivo [0.4  0.1  0.35] m -> rama 1 (frente/arriba/q5+), qf = [ 14.036  22.667 -15.7    -0.     83.034  14.036] deg
+LSPB: t_f = 1.2879 s, t_b = 0.2500 s;  pico |τ2| (1R) = 20.552 N·m
+Pico de torque en t = 1.288 s, fase 'frena', rango J = 6 (sigma_min = 0.117);  en t = 0: rango J = 5, |τ| = 6.48 N·m
+Figuras guardadas en: /tmp/hito2_verificacion_correcciones_20261020/hito2/figuras
+
+CELDA 55
+Escrito en /tmp/hito2_verificacion_correcciones_20261020/hito2/resultados : ['tabla_lspb.tex', 'tabla_ramas.tex', 'tabla_torque.tex', 'valores.tex']

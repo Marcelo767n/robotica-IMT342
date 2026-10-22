@@ -134,5 +134,5 @@ meshes `collision` del CAD vive en `irb120_hito2/kinematics/collision.py`.
 ## Fuentes
 
 - A. Bahani et al., “The Inverse Kinematics Evaluation of 6-DOF Robots…”,
-  2023: [paper local](../../documentosGuia/IJMERR-V12N2-121.pdf).
+  2023: [paper local](../../referencias/bibliografia/IJMERR-V12N2-121.pdf).
 - ABB, *Product specification IRB 120*, 3HAC035960-001 Rev. S.

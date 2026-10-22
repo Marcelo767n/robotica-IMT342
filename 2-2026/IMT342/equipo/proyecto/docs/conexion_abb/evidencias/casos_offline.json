@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-20",
+  "scope": "own_model_only_no_controller_connection",
+  "model_source": "hito2/irb120/jacobian.py",
+  "base": "base_link",
+  "tcp": "gripper_tcp",
+  "tcp_offset_m": 0.15,
+  "cases": [
+    {
+      "case_id": "G2_R1",
+      "case_type": "regular",
+      "q_deg": [
+        30,
+        -20,
+        15,
+        40,
+        -35,
+        60
+      ],
+      "q_rad": [
+        0.5235987755982988,
+        -0.3490658503988659,
+        0.2617993877991494,
+        0.6981317007977318,
+        -0.6108652381980153,
+        1.0471975511965976
+      ],
+      "offline_rank_threshold": 1e-08,
+      "offline_rank_observed": 6,
+      "singular_values_local_model": [
+        1.8402690250272025,
+        1.4581254112054918,
+        1.1088805208665689,
+        0.23142242639774652,
+        0.1628059900470706,
+        0.08662784987955471
+      ],
+      "physical_test_executed": false,
+      "reference_comparison_executed": false
+    },
+    {
+      "case_id": "G2_R2",
+      "case_type": "regular",
+      "q_deg": [
+        10,
+        20,
+        -10,
+        -30,
+        45,
+        60
+      ],
+      "q_rad": [
+        0.17453292519943295,
+        0.3490658503988659,
+        -0.17453292519943295,
+        -0.5235987755982988,
+        0.7853981633974483,
+        1.0471975511965976
+      ],
+      "offline_rank_threshold": 1e-08,
+      "offline_rank_observed": 6,
+      "singular_values_local_model": [
+        1.8274246528575002,
+        1.5022379538445698,
+        1.0600126654713444,
+        0.3193980631703531,
+        0.1970529288174284,
+        0.11951207051087694
+      ],
+      "physical_test_executed": false,
+      "reference_comparison_executed": false
+    },
+    {
+      "case_id": "G2_S1",
+      "case_type": "near_wrist_singularity",
+      "q_deg": [
+        30,
+        -20,
+        15,
+        40,
+        0.1,
+        60
+      ],
+      "q_rad": [
+        0.5235987755982988,
+        -0.3490658503988659,
+        0.2617993877991494,
+        0.6981317007977318,
+        0.0017453292519943296,
+        1.0471975511965976
+      ],
+      "offline_rank_threshold": 1e-08,
+      "offline_rank_observed": 6,
+      "singular_values_local_model": [
+        1.8112964414373451,
+        1.4216320950995325,
+        1.2015662469234318,
+        0.22951489596625604,
+        0.15914640731015184,
+        0.0002614857116860922
+      ],
+      "physical_test_executed": false,
+      "reference_comparison_executed": false
+    }
+  ]
+}

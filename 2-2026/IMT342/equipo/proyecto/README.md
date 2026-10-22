@@ -1,116 +1,77 @@
-# Proyecto Final IMT-342 - Hitos 1 y 2
+# Proyecto ABB IRB 120 · IMT-342
 
-Gemelo digital cinemático del **ABB IRB 120-3/0.6** y validación
-independiente de su cinemática directa. El proyecto sigue la Guía PFI y cumple
-el pasaporte del Hito 1: el error entre el modelo DH analítico y la cadena URDF
-es menor a `1e-6 m`.
+Modelo cinemático, simulación ROS 2 y preparación de la integración con el brazo ABB IRB120-3/0.6. La prioridad actual es completar el inventario del controlador y obtener lectura real de estado antes de preparar movimiento. Actualización documental: **20 de octubre de 2026**.
 
-## Estado
+## Empezar aquí
 
-- Paquete ROS 2 Jazzy compilado correctamente.
-- URDF/Xacro reducido a seis juntas revolutas y seis marcos móviles.
-- Un único `origin` por grado de libertad: los visuales son meshes STL ya colocados en el marco de su eslabón, sin `origin` propio.
-- Pinza neumática acoplada a `tool0` con dos juntas fijas (`gripper_mount`, `gripper_tcp_joint`); el TCP queda a 0.100 m de la brida.
-- Meshes `visual` y `collision` del CAD real del IRB 120 (ROS-Industrial, Apache-2.0); sin masas ni inercias en el URDF.
-- Movimiento manual y demostración automática.
-- Validación DH contra URDF en vivo y verificación offline.
-- Treinta y nueve pruebas automatizadas aprobadas entre ambos paquetes.
-- La pose `[x, y, z]` del TF que muestra RViz se compara en vivo con la función DH analítica.
-- Solo la pinza es un modelo paramétrico propio (`scripts/generate_meshes.py`) mientras no haya su CAD.
+| Necesito… | Abrir |
+|---|---|
+| Saber qué conocemos del brazo y cómo conectarlo | [Conexión ABB: decisión, requisitos y procedimiento](docs/conexion_abb/README.md) |
+| Ver las fotos y qué demuestra cada una | [Catálogo de evidencia fotográfica](fotos/README.md) |
+| Preparar la semana 12 y los Hitos 3/4 integrados | [Estado y plan Hitos 3/4](docs/hitos_3_4/README.md) |
+| Trabajar en la entrega del Hito 2 | [Paquete y notebook vigentes](hito2/README.md) · [Informe IEEE](docs/hito2/informe_ieee/README.md) |
+| Abrir el material del docente | [Guías, plantillas y rúbricas](<archivos que hay que presentar/README.md>) |
+| Encontrar las entregas del equipo | [Índice de entregables](entregables/README.md) |
+| Usar la simulación del Hito 1 | [Instrucciones ROS](docs/hito1/README.md) |
+| Entender dónde se trasladaron los archivos | [Mapa y registro de organización](docs/organizacion/README.md) |
 
-## Estructura
+## Estado comprobado y pendientes
+
+| Elemento | Estado |
+|---|---|
+| Manipulador | IRB120-3/0.6, serie 120-101516; placa fotografiada |
+| Opciones del controlador | **689-1 EGM, 616-1 PC Interface y 623-1 Multitasking** visibles en FlexPendant |
+| Red de servicio | **192.168.125.1/24**, sin gateway; pantalla fotografiada |
+| Puerto | Etiqueta **X2 Service 10/100** legible; no se realizó conexión desde Linux |
+| RobotWare completo | **Pendiente**: las fotos todavía no muestran su versión |
+| Controlador exacto y revisión | Pendientes de placa; IRC5 Compact es identificación visual provisional |
+| Integración física | **No verificada**; diagnóstico de lectura preparado y probado offline |
+| Driver ROS 2 | `PickNikRobotics/abb_ros2`, candidato condicionado a versión y adaptación al IRB 120 |
+| Entorno Linux | Ubuntu 26.04.1 y Jazzy observados; compatibilidad del driver por comprobar |
+
+La guía docente distingue G0 inventario, G1 lectura sin movimiento, G2 validación FK/IK/J, G3 movimiento con GO del laboratorio y G4 tarea repetible. El estado `Manual / Guard Stop / Stopped` corresponde al momento de las fotos. La captura de Backup and Restore muestra el menú, no un respaldo realizado.
+
+## Carpetas
 
 ```text
-.
-├── documentosGuia/                 # Guía PFI y papers fuente
-├── docs/hito1/                      # Modelo, trazabilidad, resultados y evidencia
-├── output/                          # PDF y presentación finales
-├── ros2_ws/src/irb120_hito1/
-│   ├── irb120_hito1/kinematics/     # DH y evaluador URDF independiente
-│   ├── irb120_hito1/nodes/          # Estados, movimiento y validación
-│   ├── urdf/                        # Xacro modular y URDF expandido
-│   ├── launch/                      # Lanzamiento integral
-│   ├── config/ y rviz/              # Parámetros y vista
-│   └── test/                        # Pruebas del pasaporte
-└── scripts/check_proyecto.sh           # Comprobación automática opcional
+proyecto/
+├── README.md
+├── model_manifest.yaml            # Versiones, modelos, evidencias y pendientes
+├── hito2/                         # Código, notebook, figuras y resultados actuales
+├── ros2_ws/                       # Paquetes ROS existentes
+├── scripts/                       # Diagnóstico ABB y utilidades
+├── docs/
+│   ├── conexion_abb/              # Conexión, inventario y evidencias
+│   ├── hito1/                     # Modelo y uso de la simulación
+│   ├── hito2/                     # Informe IEEE y revisiones
+│   ├── hitos_3_4/                 # Plan ECI-3/4
+│   └── organizacion/              # Traslados y verificaciones
+├── fotos/
+│   ├── equipo/                    # Robot, placas y gabinete
+│   ├── flexpendant/               # Opciones y pantallas
+│   └── conexiones/                # Puertos y cableado
+├── archivos que hay que presentar/
+│   ├── hito_2/                    # Documentos originales del docente
+│   └── actualizacion_semana_12/   # Guías y rúbrica de Hitos 3/4
+├── entregables/                   # Índice del equipo y finales de Hito 1
+├── referencias/                   # Bibliografía y repositorios
+└── archivo/                       # Versiones y generación histórica
 ```
 
-## Construcción manual, sin usar el script
+## Modelos y unidades
 
-Desde una terminal nueva:
+Hito 2 usa TCP a **0.150 m** de `tool0`; el modelo ROS anterior usa **0.100 m**. El TCP físico sigue pendiente. Hay que alinear base, herramienta, orden, signos y offsets articulares antes de comparar contra el controlador. [Manifiesto](model_manifest.yaml).
+
+El acuerdo entre DH y un URDF derivado del mismo DH comprueba implementaciones de la cadena, pero no aporta por sí mismo una fuente geométrica independiente del robot ni validación física ABB. Para el Hito 2, la verificación geométrica independiente de la FK se hace contra el **modelo oficial de ROS-Industrial** (`abb_irb120_support`): coinciden en pose completa hasta 1e-15 (ver `hito2/irb120/rosi_model.py`).
+
+## Primera herramienta disponible
+
+Desde la raíz, este comando guarda únicamente información de la PC:
 
 ```bash
-cd <ruta-del-repo>/2-2026/IMT342/equipo/proyecto
-source /opt/ros/jazzy/setup.bash
-cd ros2_ws
-colcon build --symlink-install --packages-select irb120_hito1
-source install/setup.bash
+python3 scripts/abb_lectura_rws.py --output docs/conexion_abb/evidencias/inventario_pc.json
 ```
 
-No ejecutes los nodos ROS con el `python3` de Miniconda. En esta computadora
-entra en conflicto con `rclpy` de Jazzy. Los comandos `ros2 ...` usan el entorno
-correcto después de ejecutar los dos `source` anteriores.
+La futura prueba contra el controlador se describe en la [guía de conexión](docs/conexion_abb/README.md), después de verificar RobotWare, enlace Ethernet y acceso supervisado. El script no arranca RAPID, motores ni EGM. Sus ocho pruebas offline están registradas; no equivalen a una prueba sobre el brazo.
 
-## Demostración recomendada para la defensa
-
-Para abrir RViz y mover automáticamente los seis ejes:
-
-```bash
-ros2 launch irb120_hito1 display.launch.py demo_motion:=true use_slider_gui:=false
-```
-
-La terminal debe mostrar repetidamente `APROBADO | DH vs URDF`.
-Detén todo con `Ctrl+C`.
-
-Para abrir el modelo quieto y enviar una postura manual:
-
-```bash
-ros2 launch irb120_hito1 display.launch.py
-```
-
-Este lanzamiento abre RViz y un panel gráfico con deslizadores para J1-J6,
-además de botones para pose cero y las configuraciones de prueba A/B.
-Para omitir el panel use `use_slider_gui:=false`.
-
-En una segunda terminal repite los dos `source` y ejecuta:
-
-```bash
-ros2 topic pub --once /irb120/joint_commands_deg std_msgs/msg/Float64MultiArray \
-  "{data: [30.0, -20.0, 15.0, 40.0, -35.0, 60.0]}"
-```
-
-Los seis valores son grados para `joint_1` a `joint_6`.
-
-## Verificación
-
-```bash
-colcon test --packages-select irb120_hito1 --event-handlers console_direct+
-colcon test-result --verbose
-ros2 run irb120_hito1 verify_model
-ros2 topic echo /irb120/fk_position_error_m
-```
-
-## Hito 2
-
-**Entrega del Hito 2 (Python puro, sin ROS): carpeta [`hito2/`](hito2/README.md)**: paquete `irb120/`, un
-notebook integrado (`Hito2_IRB120_pipeline.ipynb`) y 54 pruebas. El informe IEEE está en
-[`docs/hito2/informe_ieee/`](docs/hito2/informe_ieee/README.md) y la explicación de cada módulo en
-[`hito2/explicacion/`](hito2/explicacion/README.md).
-
-El paquete ROS `irb120_hito2` y los documentos `docs/hito2/guia_hito2.md` y `metodo_y_resultados.md` corresponden a
-la **versión anterior** del hito (nodo ROS, TCP de 0.100 m y "pasaporte"). Se conservan como referencia y no son la
-entrega.
-
-## Documentos
-
-- [Modelo cinemático](docs/hito1/modelo_cinematico.md)
-- [Trazabilidad](docs/hito1/trazabilidad.md)
-- [Resultados](docs/hito1/resultados.md)
-- [Guion de defensa](docs/hito1/guion_defensa.md)
-- [Manual completo corregido en PDF](output/pdf/Guia_Practica_Hito1_IRB120_6_Juntas_CORREGIDA.pdf)
-- [Presentación final para la defensa](output/presentation/Defensa_Hito1_IRB120_6_Juntas_FINAL.pptx)
-
-## Geometría CAD
-
-El brazo usa el CAD real del ABB IRB 120 de ROS-Industrial (Apache-2.0), importado con
-`scripts/import_cad.py` a los marcos del URDF; ver `ros2_ws/src/irb120_hito1/meshes/NOTICE.md`.
+Los [documentos del docente](<archivos que hay que presentar/README.md>) son referencias. Las [versiones anteriores](archivo/README.md) son antecedentes. Los entornos virtuales y directorios de compilación permanecen en sus ubicaciones y están excluidos de Git.

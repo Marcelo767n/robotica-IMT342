@@ -1,0 +1,78 @@
+{
+  "fecha": "2026-10-20",
+  "commit_arbol": "b6cf05633565f8cb2529193e9ea118425565efaf",
+  "archivos": [
+    {
+      "archivo": "w12_s01_checklist_seguridad.pdf",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_checklist_seguridad.pdf",
+      "git_sha": "60257bdd6bb28d64e66542b2e690bf0765922ca6",
+      "bytes": 224397
+    },
+    {
+      "archivo": "w12_s01_checklist_seguridad.tex",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_checklist_seguridad.tex",
+      "git_sha": "567d10bd2fa84911cfa5474012bc0a8bddbb4859",
+      "bytes": 6116
+    },
+    {
+      "archivo": "w12_s01_gate0_ficha.pdf",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_gate0_ficha.pdf",
+      "git_sha": "cd2adc543ac34928a630a240f7cd7ab86178ae70",
+      "bytes": 159951
+    },
+    {
+      "archivo": "w12_s01_gate0_ficha.tex",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_gate0_ficha.tex",
+      "git_sha": "189f1b31c84f995ea98a4e7939947f29e0ba5117",
+      "bytes": 4762
+    },
+    {
+      "archivo": "w12_s01_guia_autonoma_bitacora.pdf",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_guia_autonoma_bitacora.pdf",
+      "git_sha": "e62420ffb8fd7d517ed7d6e804b527815b80c557",
+      "bytes": 274377
+    },
+    {
+      "archivo": "w12_s01_guia_autonoma_bitacora.tex",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_guia_autonoma_bitacora.tex",
+      "git_sha": "e2d8cfe78a4de8b81498490bc6c95b644b490b41",
+      "bytes": 7444
+    },
+    {
+      "archivo": "w12_s01_protocolo_validacion.pdf",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_protocolo_validacion.pdf",
+      "git_sha": "b2241790147b03d16845b1c30bb6da997e77115a",
+      "bytes": 382749
+    },
+    {
+      "archivo": "w12_s01_protocolo_validacion.tex",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_protocolo_validacion.tex",
+      "git_sha": "7e3b43b6ebf8cd01691036f111ceefd4d02a987f",
+      "bytes": 9283
+    },
+    {
+      "archivo": "w12_s01_rubrica_hito_3.pdf",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_rubrica_hito_3.pdf",
+      "git_sha": "a5c4b3a67b1c6347793040c14b93c8d2f41c6261",
+      "bytes": 229600
+    },
+    {
+      "archivo": "w12_s01_rubrica_hito_3.tex",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_rubrica_hito_3.tex",
+      "git_sha": "3ae216e30c27f2ff6a3ab7257f58ed80be2d1fff",
+      "bytes": 5915
+    },
+    {
+      "archivo": "w12_s01_slides.pdf",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_slides.pdf",
+      "git_sha": "c87c7e483ca4a943f845efc111b7f0e228de1c82",
+      "bytes": 387113
+    },
+    {
+      "archivo": "w12_s01_slides.tex",
+      "origen": "2-2026/IMT342/Semana_12/sesion_01/w12_s01_slides.tex",
+      "git_sha": "f05b4eb5241d901cdab494efe6c748e2361aae5d",
+      "bytes": 27657
+    }
+  ]
+}

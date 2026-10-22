@@ -51,7 +51,7 @@ T_{i-1}^i =
 ```
 
 Esta es exactamente la matriz que construye `dh_transform()` en
-[`dh.py:45-69`](irb120/dh.py). No es una fórmula "mágica": es el producto algebraico de las
+[`dh.py:45-69`](../irb120/dh.py). No es una fórmula "mágica": es el producto algebraico de las
 cuatro rotaciones/traslaciones elementales, y por eso **cualquier** manipulador serial con
 articulaciones rotoides usa esta misma matriz, solo cambian los parámetros `(d, a, α, θ_offset)`.
 
@@ -71,7 +71,7 @@ Los parámetros (en metros, transcritos de Bahani et al. 2023, tabla I) son:
 Los *offsets* en las filas 2 y 6 existen porque el **cero mecánico** del robot (postura "home"
 ABB) no coincide con el cero matemático de la convención DH; se suman internamente en
 `dh_transform(theta_rad, parameter)` (`theta = theta_rad + parameter.theta_offset_rad`,
-[`dh.py:47`](irb120/dh.py)) para no tener que pedirle al usuario que los recuerde.
+[`dh.py:47`](../irb120/dh.py)) para no tener que pedirle al usuario que los recuerde.
 
 **Dato clave para toda la cinemática inversa (Pieper):** las filas 4 y 5 tienen `a4 = a5 = 0` y
 `d5 = 0`. Esto significa que **los ejes de las juntas 4, 5 y 6 se cortan en un único punto**
@@ -87,10 +87,10 @@ T_0^6(q) = T_0^1(q1) · T_1^2(q2) · ... · T_5^6(q6)
 Esto es simplemente la composición de cambios de marco: la posición/orientación de un punto fijo
 en el marco 6, expresada en el marco 0, se obtiene aplicando sucesivamente cada cambio de marco.
 Es exactamente lo que hace `forward_kinematics()` acumulando el producto en un bucle
-(`transform = transform @ dh_transform(...)`, [`dh.py:83-89`](irb120/dh.py)).
+(`transform = transform @ dh_transform(...)`, [`dh.py:83-89`](../irb120/dh.py)).
 
 El TCP de la pinza está a `0.100 m` por delante de `tool0` sobre su eje Z (`tcp_transform()`,
-[`dh.py:92-96`](irb120/dh.py)): `T_tool0^tcp = Tz(0.100)`. Por eso
+[`dh.py:92-96`](../irb120/dh.py)): `T_tool0^tcp = Tz(0.100)`. Por eso
 `forward_kinematics_tcp(q) = forward_kinematics(q) · Tz(0.100)`.
 
 ### 1.4 Métricas de error
@@ -108,7 +108,7 @@ El TCP de la pinza está a `0.100 m` por delante de `tool0` sobre su eje Z (`tcp
   donde `φ` es el ángulo del eje-ángulo equivalente a `R_rel`, es decir, el ángulo mínimo que
   hay que rotar para llevar una orientación a la otra. Usar `atan2` en vez de `acos(cosφ)` evita
   la pérdida de precisión cerca de `φ = 0` (donde `acos` tiene derivada infinita). Esto es
-  exactamente `rotation_error_rad()` ([`dh.py:109-121`](irb120/dh.py)).
+  exactamente `rotation_error_rad()` ([`dh.py:109-121`](../irb120/dh.py)).
 
 ---
 
@@ -142,7 +142,7 @@ Esto es simplemente "retroceder" desde la brida una distancia `d6` en la direcci
 apunta su propio eje Z. Como `a4 = a5 = d5 = 0` (§1.2), el origen del marco 4 **no depende del
 ángulo `θ4`** — la traslación de DH ocurre *antes* de aplicar la rotación de la siguiente junta,
 así que si `a=0`, girar esa junta no mueve el origen siguiente. Por eso `p_wc` depende
-únicamente de `q1, q2, q3`: ahí está el desacople. Código: [`pieper.py:150`](irb120/pieper.py).
+únicamente de `q1, q2, q3`: ahí está el desacople. Código: [`pieper.py:150`](../irb120/pieper.py).
 
 ### 2.3 Paso 1 — Posición: `q1`, `q2`, `q3` (hasta 4 soluciones: 2 brazo × 2 codo)
 
@@ -183,7 +183,7 @@ cos_term = (D² − L2² − L3²) / (2·L2·L3)
 
 que es `−cos(ángulo en el codo)`. Si `|cos_term| > 1` el triángulo no se puede cerrar con esos
 lados: el punto está **fuera del alcance** del brazo y no hay solución (chequeo
-[`pieper.py:98-99`](irb120/pieper.py)) — es la condición de **espacio de trabajo** expresada en
+[`pieper.py:98-99`](../irb120/pieper.py)) — es la condición de **espacio de trabajo** expresada en
 una sola desigualdad.
 
 Por la convención de ejes DH usada aquí, el ángulo articular `q3` no coincide exactamente con el
@@ -214,7 +214,7 @@ q2 = atan2(r, h) − atan2(L3·sin η, L2 + L3·cos η)
 
 El primer término es la dirección de `S` a `W` medida desde la vertical; el segundo es el
 ángulo entre `SW` y `SE` obtenido por geometría del triángulo (tangente de componente
-perpendicular sobre paralela). Código: [`pieper.py:86-109`](irb120/pieper.py).
+perpendicular sobre paralela). Código: [`pieper.py:86-109`](../irb120/pieper.py).
 
 Combinando 2 soluciones de brazo × 2 de codo: **hasta 4 soluciones de posición**.
 
@@ -253,7 +253,7 @@ de donde:
   `θ` negativo) y `ψ = atan2(R21, −R20)` (mismo criterio de signo).
 
 Trasladado a nuestro caso (`φ=q4`, `θ=−q5`, `ψ=q6+π`), esto es exactamente
-`_wrist_solutions()` ([`pieper.py:119-133`](irb120/pieper.py)): `sin_beta = hypot(R[0,2],R[1,2])`,
+`_wrist_solutions()` ([`pieper.py:119-133`](../irb120/pieper.py)): `sin_beta = hypot(R[0,2],R[1,2])`,
 `beta = atan2(±sin_beta, R[2,2])`, `q5 = −beta`, `q4 = atan2(±R12, ±R02)`,
 `q6 = atan2(±R21, ∓R20) − π`.
 
@@ -261,7 +261,7 @@ Trasladado a nuestro caso (`φ=q4`, `θ=−q5`, `ψ=q6+π`), esto es exactamente
 Z: `R = Rz(φ)·Rz(ψ) = Rz(φ+ψ)`, y solo la **suma** `φ+ψ` es observable —no hay forma de separar
 cuánto giró cada eje si están alineados—. El código recupera `total = φ+ψ = atan2(R10,R00)` y,
 para no dejar `q4` indefinido, **conserva el `q4` de referencia** y pone todo el resto en `q6`:
-`q6 = total − q4_ref − π` ([`pieper.py:123-125`](irb120/pieper.py)). Esta es la raíz matemática de
+`q6 = total − q4_ref − π` ([`pieper.py:123-125`](../irb120/pieper.py)). Esta es la raíz matemática de
 la singularidad de muñeca que se analiza a fondo en la sección 3.
 
 ### 2.5 Filtrado, verificación y conteo final de soluciones
@@ -283,7 +283,7 @@ de tener mal.
 8 soluciones**, antes de descartar por límites/alcance. Las soluciones finales se ordenan por
 distancia euclídea en el espacio articular a una postura de referencia (para elegir, en
 operación real, el movimiento más pequeño posible) y se eliminan duplicados numéricos
-(`np.allclose`, [`pieper.py:171-176`](irb120/pieper.py)).
+(`np.allclose`, [`pieper.py:171-176`](../irb120/pieper.py)).
 
 ### 2.6 Validación empírica
 
@@ -324,7 +324,7 @@ Jᵢ = [ z_{i-1} × (p_e − o_{i-1}) ]
 
 exactamente lo que construye `geometric_jacobian()`
 (`jacobian[:3,index] = cross(axis, point-origin); jacobian[3:,index] = axis`,
-[`jacobian.py:41-47`](irb120/jacobian.py)), usando los marcos obtenidos de la cadena DH
+[`jacobian.py:41-47`](../irb120/jacobian.py)), usando los marcos obtenidos de la cadena DH
 (`joint_frames`).
 
 `reference` elige qué punto `p_e` se usa: el TCP de la pinza, `tool0`, o el centro de muñeca
@@ -373,7 +373,7 @@ det J(q) = ± sin(q5) · det(Jp_brazo(q1,q2,q3))
 ```
 
 Esta es la fórmula central de la singularidad, verificada en código por
-`determinant()`/`arm_position_determinant()` ([`jacobian.py:50-67`](irb120/jacobian.py)) y por el
+`determinant()`/`arm_position_determinant()` ([`jacobian.py:50-67`](../irb120/jacobian.py)) y por el
 test `test_determinant_factorizes_as_sin_q5_times_arm_determinant` (error numérico ~1e-17 en
 posturas aleatorias, según el notebook del pasaporte).
 
@@ -390,7 +390,7 @@ espacio de twists que ningún `q̇` puede producir, y existen combinaciones de `
 al acercarse a la singularidad — es la medida estándar en robótica de "qué tan cerca" se está de
 perder un grado de libertad; `smallest_singular_value` es `σ_min`, que tiende a 0.
 `SingularityError` se lanza cuando `σ_min < 1e-9`
-(`solve_with_jacobian()`, [`jacobian.py:70-82`](irb120/jacobian.py)): es la forma de que el
+(`solve_with_jacobian()`, [`jacobian.py:70-82`](../irb120/jacobian.py)): es la forma de que el
 código "falle ruidosamente" en vez de devolver un número sin sentido (`J⁻¹` con `det J ≈ 0`
 amplifica errores numéricos arbitrariamente).
 
@@ -440,7 +440,7 @@ tf−tb < t ≤ tf:      q(t) = qf − ½ a (tf − t)²                 (frena 
 q0 + ½ V tb + V(t − tb) = q0 + V(t − tb/2)
 ```
 
-que es exactamente la expresión que usa `sample()` ([`lspb.py:50`](irb120/lspb.py)).
+que es exactamente la expresión que usa `sample()` ([`lspb.py:50`](../irb120/lspb.py)).
 
 **Desplazamiento total = área bajo el perfil trapezoidal de velocidad.** El perfil de velocidad
 sube de 0 a `V` en `tb`, se mantiene en `V` durante `tf−2tb`, y baja de `V` a 0 en `tb` — un
@@ -454,7 +454,7 @@ V = D / (tf − tb)          y          a = V / tb
 ```
 
 que son exactamente `cruise_velocity` y `blend_acceleration`
-([`lspb.py:36-41`](irb120/lspb.py)).
+([`lspb.py:36-41`](../irb120/lspb.py)).
 
 ### 4.3 Tiempo mínimo factible (bisección)
 
@@ -471,12 +471,12 @@ tramo de mezcla debe ser menor o igual a la mitad del tiempo total) es
 tb = [ tf − √(tf² − 4K) ] / 2
 ```
 
-— exactamente `blend_time()` ([`lspb.py:72-73`](irb120/lspb.py)). Para que exista una raíz real
+— exactamente `blend_time()` ([`lspb.py:72-73`](../irb120/lspb.py)). Para que exista una raíz real
 se necesita `tf² ≥ 4K`; y para que `V ≤ vmax` se necesita `tf − tb ≥ D/vmax =: Dv`
 (`cruise_term`). Ambas condiciones son **monótonas crecientes en `tf`**: dar más tiempo total
 nunca puede volver infactible un movimiento que ya era factible con menos tiempo (siempre se
 puede "ir más lento"). Esa monotonía es justo lo que permite usar **bisección** para encontrar
-el menor `tf` factible (`feasible()`, [`lspb.py:75-87`](irb120/lspb.py)): se duplica un límite
+el menor `tf` factible (`feasible()`, [`lspb.py:75-87`](../irb120/lspb.py)): se duplica un límite
 superior hasta que sea factible, y se bisecta 100 veces entre el límite infactible y el factible.
 
 ### 4.4 Sincronización entre juntas
@@ -532,7 +532,7 @@ T = ½ q̇ᵀ · [ Σᵢ ( mᵢ·Jvᵢᵀ·Jvᵢ + Jwᵢᵀ·R_i·Iᵢ·R_iᵀ·
 
 donde `R_i·Iᵢ·R_iᵀ` rota el tensor de inercia del eslabón (dado en su propio marco) a la base —
 es exactamente `inertia_base = rotation @ link.inertia_kg_m2 @ rotation.T` en
-`mass_matrix()` ([`dynamics.py:95-100`](irb120/dynamics.py)). El resultado se simetriza
+`mass_matrix()` ([`dynamics.py:95-100`](../irb120/dynamics.py)). El resultado se simetriza
 (`0.5·(M+Mᵀ)`) para eliminar asimetrías puramente numéricas: `M` es simétrica y definida positiva
 por construcción física (es una forma cuadrática de energía, siempre ≥ 0, y > 0 salvo reposo
 total), propiedad que verifica `test_mass_matrix_is_symmetric_positive_definite`.
@@ -549,7 +549,7 @@ g(q) = ∂U/∂q,   componente j:  Σᵢ mᵢ·g· ∂hᵢ/∂qⱼ
 Pero `∂hᵢ/∂qⱼ` es exactamente la fila Z del Jacobiano lineal del centro de masa `i`
 (`Jvᵢ[2,:]`, porque `ḣᵢ = Jvᵢ[2,:]·q̇` relaciona la velocidad articular con la velocidad vertical
 del centro de masa). Por eso `gravity_vector()` es
-`Σᵢ mᵢ·g·Jvᵢ[2,:]` ([`dynamics.py:103-107`](irb120/dynamics.py)) — no es una fórmula aparte, es
+`Σᵢ mᵢ·g·Jvᵢ[2,:]` ([`dynamics.py:103-107`](../irb120/dynamics.py)) — no es una fórmula aparte, es
 la misma Jacobiana de posición reutilizada.
 
 ### 5.4 Términos de Coriolis/centrífugos `c(q, q̇)`
@@ -570,7 +570,7 @@ c(q, q̇) = Ṁ(q) q̇ − ½ ∇_q(q̇ᵀ M(q) q̇)
 
 El código no deriva `M(q)` simbólicamente (sería un álgebra enorme con 6 eslabones); en su lugar
 usa **diferencias centrales** para `∂M/∂qₖ` con paso `1e-6`
-(`coriolis_vector()`, [`dynamics.py:110-126`](irb120/dynamics.py)): el error de una diferencia
+(`coriolis_vector()`, [`dynamics.py:110-126`](../irb120/dynamics.py)): el error de una diferencia
 central es `O(paso²) ≈ 1e-12`, muy por debajo de la precisión necesaria, y evita escribir a mano
 las derivadas de una matriz 6×6 que depende de 6 variables. Con `∂M/∂qₖ` para cada `k`, se forma
 `Ṁq̇ = Σₖ q̇ₖ·(∂M/∂qₖ)·q̇` y el gradiente `[q̇ᵀ(∂M/∂q₁)q̇, ..., q̇ᵀ(∂M/∂q₆)q̇]`, que es
@@ -595,7 +595,7 @@ masa es la inercia en el centro de masa más un término que depende de la masa 
 Para combinar dos cuerpos (muñeca + pinza) en uno solo:
 
 1. Nuevo centro de masa combinado: promedio ponderado por masa de ambos centros de masa
-   (`_with_gripper`, [`dynamics.py:64-71`](irb120/dynamics.py)).
+   (`_with_gripper`, [`dynamics.py:64-71`](../irb120/dynamics.py)).
 2. Se traslada la inercia de **cada** cuerpo (muñeca, pinza) desde su propio centro de masa
    hasta el nuevo centro de masa combinado, usando el teorema de ejes paralelos una vez por
    cuerpo (`_parallel_axis()` llamada dos veces).
@@ -607,7 +607,7 @@ igual que él) — razonable para una pinza neumática pequeña comparada con el
 
 ### 5.6 Por qué el torque diverge cuadráticamente (`1/sin²q5`) cerca de la singularidad
 
-`cartesian_demand()` ([`dynamics.py:142-155`](irb120/dynamics.py)) encadena:
+`cartesian_demand()` ([`dynamics.py:142-155`](../irb120/dynamics.py)) encadena:
 
 ```
 q̇ = J⁻¹ v                    (diverge ~ 1/|sin q5|, §3.5)
@@ -740,7 +740,7 @@ Rz(θ)·Tz(d) =
 | 0     0        0        1    |
 ```
 
-que es la matriz implementada en `dh_transform()` ([`dh.py:45-69`](irb120/dh.py)).
+que es la matriz implementada en `dh_transform()` ([`dh.py:45-69`](../irb120/dh.py)).
 
 ## Anexo B — Referencias citadas en el código
 
@@ -767,5 +767,5 @@ que es la matriz implementada en `dh_transform()` ([`dh.py:45-69`](irb120/dh.py)
 | `notebooks/03_singularidad_q5.ipynb` | evidencia de §3, §5 y §6 (el "pasaporte") |
 
 Documentación complementaria (uso, API, ejemplos ejecutables) en
-[`docs/hito2/guia_hito2.md`](../docs/hito2/guia_hito2.md) y
-[`docs/hito2/metodo_y_resultados.md`](../docs/hito2/metodo_y_resultados.md).
+[`docs/hito2/guia_hito2.md`](../../archivo/hito2_ros_anterior/documentacion/guia_hito2.md) y
+[`docs/hito2/metodo_y_resultados.md`](../../archivo/hito2_ros_anterior/documentacion/metodo_y_resultados.md).

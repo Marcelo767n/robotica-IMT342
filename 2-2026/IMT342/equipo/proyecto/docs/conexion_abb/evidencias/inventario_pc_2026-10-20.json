@@ -1,0 +1,171 @@
+{
+  "observed_at_utc": "2026-10-20T21:29:25.215601+00:00",
+  "local_inventory": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-desconocido-with-glibc2.43",
+    "python": "3.12.3",
+    "interfaces": [
+      {
+        "name": "docker0",
+        "wireless": false,
+        "operstate": "down",
+        "carrier": "0"
+      },
+      {
+        "name": "lo",
+        "wireless": false,
+        "operstate": "unknown",
+        "carrier": "1"
+      },
+      {
+        "name": "wlo1",
+        "wireless": true,
+        "operstate": "up",
+        "carrier": "1"
+      }
+    ],
+    "addresses": [
+      {
+        "ifindex": 1,
+        "ifname": "lo",
+        "flags": [
+          "LOOPBACK",
+          "UP",
+          "LOWER_UP"
+        ],
+        "mtu": 65536,
+        "qdisc": "noqueue",
+        "operstate": "UNKNOWN",
+        "group": "default",
+        "txqlen": 1000,
+        "link_type": "loopback",
+        "address": "00:00:00:00:00:00",
+        "broadcast": "00:00:00:00:00:00",
+        "addr_info": [
+          {
+            "family": "inet",
+            "local": "127.0.0.1",
+            "prefixlen": 8,
+            "scope": "host",
+            "label": "lo",
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          },
+          {
+            "family": "inet6",
+            "local": "::1",
+            "prefixlen": 128,
+            "scope": "host",
+            "noprefixroute": true,
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          }
+        ]
+      },
+      {
+        "ifindex": 2,
+        "ifname": "wlo1",
+        "flags": [
+          "BROADCAST",
+          "MULTICAST",
+          "UP",
+          "LOWER_UP"
+        ],
+        "mtu": 1500,
+        "qdisc": "noqueue",
+        "operstate": "UP",
+        "group": "default",
+        "txqlen": 1000,
+        "link_type": "ether",
+        "address": "d8:80:83:2c:a4:8d",
+        "broadcast": "ff:ff:ff:ff:ff:ff",
+        "altnames": [
+          "wlp1s0",
+          "wlxd880832ca48d"
+        ],
+        "addr_info": [
+          {
+            "family": "inet",
+            "local": "172.22.24.210",
+            "prefixlen": 21,
+            "broadcast": "172.22.31.255",
+            "scope": "global",
+            "dynamic": true,
+            "noprefixroute": true,
+            "label": "wlo1",
+            "valid_life_time": 8462,
+            "preferred_life_time": 8462
+          },
+          {
+            "family": "inet6",
+            "local": "fe80::b8a:2945:8ed9:8b00",
+            "prefixlen": 64,
+            "scope": "link",
+            "noprefixroute": true,
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          }
+        ]
+      },
+      {
+        "ifindex": 3,
+        "ifname": "docker0",
+        "flags": [
+          "NO-CARRIER",
+          "BROADCAST",
+          "MULTICAST",
+          "UP"
+        ],
+        "mtu": 1500,
+        "qdisc": "noqueue",
+        "operstate": "DOWN",
+        "group": "default",
+        "link_type": "ether",
+        "address": "46:e0:9b:c2:35:91",
+        "broadcast": "ff:ff:ff:ff:ff:ff",
+        "addr_info": [
+          {
+            "family": "inet",
+            "local": "172.17.0.1",
+            "prefixlen": 16,
+            "broadcast": "172.17.255.255",
+            "scope": "global",
+            "label": "docker0",
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          }
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "dst": "default",
+        "gateway": "172.22.24.1",
+        "dev": "wlo1",
+        "protocol": "dhcp",
+        "prefsrc": "172.22.24.210",
+        "metric": 600,
+        "flags": []
+      },
+      {
+        "dst": "172.17.0.0/16",
+        "dev": "docker0",
+        "protocol": "kernel",
+        "scope": "link",
+        "prefsrc": "172.17.0.1",
+        "flags": [
+          "linkdown"
+        ]
+      },
+      {
+        "dst": "172.22.24.0/21",
+        "dev": "wlo1",
+        "protocol": "kernel",
+        "scope": "link",
+        "prefsrc": "172.22.24.210",
+        "metric": 600,
+        "flags": []
+      }
+    ]
+  },
+  "controller_probe": null
+}

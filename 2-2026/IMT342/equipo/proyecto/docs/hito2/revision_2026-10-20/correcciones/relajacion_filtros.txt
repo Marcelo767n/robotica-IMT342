@@ -1,0 +1,13 @@
+ k                 rama  adm.  σ_min(J) margen [°]  ||W(q-q0)|| t_f LSPB [s]  decisión
+ 1    frente/arriba/q5+    sí    0.0000       70.0       0.0000       0.0000  ELEGIDA (margen y sigma relajados)
+ 2    frente/arriba/q5-    no         —          —            —            —  descartada: fuera de limites J4
+ 3     frente/abajo/q5+    no         —          —            —            —  descartada: fuera de limites J3
+ 4     frente/abajo/q5-    no         —          —            —            —  descartada: fuera de limites J3,4
+ 5     atras/arriba/q5+    no         —          —            —            —  descartada: fuera de limites J1,4
+ 6     atras/arriba/q5-    no         —          —            —            —  descartada: fuera de limites J1
+ 7      atras/abajo/q5+    no         —          —            —            —  descartada: fuera de limites J1,3,4
+ 8      atras/abajo/q5-    no         —          —            —            —  descartada: fuera de limites J1,3
+
+q0 (pose inicial)  = [0. 0. 0. 0. 0. 0.] deg
+qf (pose objetivo) = [ 0.  0. -0.  0.  0.  0.] deg   (rama 1: frente/arriba/q5+)
+Justificación: admisible, σ_min = 0.000 ≥ 0.01, margen a límites = 70.0° ≥ 5°, y menor desplazamiento ponderado (0.000) entre las aptas.
