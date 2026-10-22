@@ -81,8 +81,18 @@ local_model_source: hito2/irb120/dh.py
 local_urdf_source: hito2/datos/irb120.urdf
 local_urdf_geometric_independence: false
 model_tool0_to_tcp_z_m: 0.150
+# 2026-10-22: irb120_hito1 alineado al Hito 2; xacro y dh.py leen la misma fuente.
+ros_tool0_to_tcp_z_m: 0.150
+ros_tcp_source: ros2_ws/src/irb120_hito1/config/tcp.yaml
+# Valor histórico del paquete ROS antes de la alineación; ya no se usa.
 previous_ros_tool0_to_tcp_z_m: 0.100
+# 0.150 es convención del modelo, no medición: el tooldata real sigue sin leerse.
+tcp_verified_on_robot: false
 physical_tcp: null
+# Comparación FK offline del modelo propio (Hito 1) contra ROS-Industrial en tool0.
+offline_fk_reference: "hito2/irb120/rosi_model.py (ROS-Industrial abb_irb120_support irb120_3_58_macro.xacro, kinetic-devel)"
+offline_fk_evidence: docs/conexion_abb/evidencias/fk_hito1_vs_rosi.csv
+offline_fk_evidence_script: scripts/comparar_fk_hito1_rosi.py
 controller_base_to_model_base: null
 controller_joint_mapping_verified: false
 frame_scope: local_model_only_not_verified_against_controller

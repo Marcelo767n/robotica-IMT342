@@ -9,7 +9,7 @@ asi que la cara de montaje de la pinza debe quedar en z = 0 y los dedos hacia +Z
 
 Uso:
     python3 scripts/import_gripper_cad.py MHZ2-16D.stl --scale 0.001 \\
-        [--rpy-deg R P Y] [--offset X Y Z] [--tcp-z 0.100]
+        [--rpy-deg R P Y] [--offset X Y Z]
 
 Escribe meshes/visual/gripper_link.stl y meshes/collision/gripper_link.stl (la misma malla)
 e imprime el cuadro delimitador resultante para comprobar la orientacion y el TCP.
@@ -71,7 +71,7 @@ def main() -> None:
         write_stl(PACKAGE / "meshes" / kind / "gripper_link.stl", moved)
     points = moved.reshape(-1, 3)
     print(f"{len(triangles)} triangulos | bbox min {points.min(0).round(4)} max {points.max(0).round(4)} m")
-    print("Compruebe: cara de montaje en z=0, dedos hacia +Z; ajuste gripper_tcp_z en el xacro si hace falta.")
+    print("Compruebe: cara de montaje en z=0, dedos hacia +Z; ajuste tool0_to_tcp_z_m en config/tcp.yaml si hace falta.")
 
 
 if __name__ == "__main__":

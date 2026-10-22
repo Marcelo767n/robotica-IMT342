@@ -37,13 +37,15 @@ setup(
     maintainer_email="equipo.imt342@example.com",
     description="Gemelo digital y cinematica directa del ABB IRB 120 para el Hito 1.",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    # colcon detecta pytest por extras_require (tests_require ya no existe en setuptools).
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "fk_validator = irb120_hito1.nodes.fk_validator:main",
             "joint_state_source = irb120_hito1.nodes.joint_state_source:main",
             "motion_demo = irb120_hito1.nodes.motion_demo:main",
             "slider_gui = irb120_hito1.nodes.slider_gui:main",
+            "control_panel = irb120_hito1.nodes.slider_gui:main",
             "verify_model = irb120_hito1.verify_model:main",
         ],
     },

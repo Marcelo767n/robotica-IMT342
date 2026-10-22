@@ -2,22 +2,30 @@
 
 ## Alcance del Hito 1
 
-El URDF contiene únicamente la cadena cinemática del brazo: seis juntas
-revolutas (`joint_1` a `joint_6`) y seis marcos móviles (`link_1` a `link_5` y
-`tool0`). `base_link` es el marco de referencia base y no se cuenta como una
-junta. Cada junta tiene un único `origin`; los visuales son meshes STL ya
+La cadena cinemática del brazo tiene seis juntas revolutas (`joint_1` a
+`joint_6`) y seis marcos móviles (`link_1` a `link_5` y `tool0`). `base_link`
+es el marco de referencia base y no se cuenta como una junta. Cada junta
+revoluta tiene un único `origin`; los `visual` y `collision` son meshes STL ya
 expresados en el marco de su eslabón, sin `origin` propio.
 
-La pinza neumática (entregable de la Guía PFI) se acopla a `tool0` con dos
-juntas **fijas**, que no son grados de libertad: `gripper_mount` (sin `origin`,
-el marco de `gripper_link` coincide con `tool0`) y `gripper_tcp_joint`, cuyo
-único offset es `Tz(0.100 m)` hasta el punto de agarre `gripper_tcp`. Así:
+Además del brazo, el URDF incluye la pinza neumática (entregable de la Guía
+PFI), acoplada a `tool0` con dos juntas **fijas**, que no son grados de
+libertad: `gripper_mount` (sin `origin`, el marco de `gripper_link` coincide con
+`tool0`) y `gripper_tcp_joint`, cuyo único offset es una traslación sobre Z de
+`tool0` hasta el punto de agarre `gripper_tcp`. En total el URDF tiene 9 links
+y 8 juntas (6 revolutas + 2 fijas). Así:
 
 \[
-T_{TCP}(q)=T_{DH}(q)\,T_z(0.100)
+T_{TCP}(q)=T_{DH}(q)\,T_z(z_{TCP}),\qquad z_{TCP}=0.150\ \text{m}
 \]
 
-Los bloques `collision` usan los meshes simplificados del CAD; no hay masas ni inercias.
+El valor de \(z_{TCP}\) se define solo en `config/tcp.yaml`, compartido por el Xacro, la
+DH, el validador y el Hito 2. Es una convención del modelo: no está medido en la pinza
+real (`verified_on_robot: false`).
+
+La geometría de la pinza es un modelo paramétrico propio, no el CAD de la pinza
+real. Los bloques `collision` usan meshes simplificados del CAD; no hay masas ni
+inercias.
 
 ## Tabla DH clásica
 
@@ -77,10 +85,13 @@ O_1R_z(q_1)O_2R_z(q_2)\cdots O_6R_z(q_6)=T_{DH}(q)
 ## Por qué los visuales no tienen `origin`
 
 Solo los `origin` de `<joint>` pertenecen a la cinemática y provienen de DH
-(uno por grado de libertad). Los STL de `meshes/` ya están dibujados en el marco
-de cada eslabón (por ejemplo, el cilindro de `link_1` va de `z=0` a `z=0.290 m`
-dentro del propio archivo), de modo que `<visual>` solo referencia el mesh y no
-añade traslaciones ni rotaciones. Los antiguos valores de masa `4.248 kg`, centro
+(uno por grado de libertad; el séptimo `origin` es el offset fijo del TCP). Los
+STL de `meshes/` se re-expresaron en el marco de cada eslabón con
+`scripts/import_cad.py`, de modo que `<visual>` y `<collision>` solo referencian
+el mesh y no añaden traslaciones ni rotaciones. La prueba
+`test_cad_meshes_fit_the_kinematic_skeleton` comprueba, con tolerancia de 1 cm,
+que el origen de la junta siguiente cae dentro de la caja envolvente del mesh de
+`link_1`, `link_2` y `link_4`. Los antiguos valores de masa `4.248 kg`, centro
 de masa e inercias pertenecen a un modelo dinámico y se retiraron.
 
 ## Cálculo del error
@@ -118,7 +129,8 @@ y acerca `tool0` al eje de la base. Sirve para detectar signos y offsets
 incorrectos y para estudiar la proximidad a la base.
 
 La validación de Hito 1 comprueba la pose. La comprobación de colisión con los
-meshes `collision` del CAD vive en `irb120_hito2/kinematics/collision.py`.
+meshes `collision` del CAD vive en `irb120_hito2/kinematics/collision.py`
+(paquete del Hito 2).
 
 ## Límites articulares
 

@@ -1,8 +1,16 @@
 <?xml version="1.0"?>
 <robot name="irb120_hito1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!--
+    tcp_config: YAML con tool0_to_tcp_z_m. Es la fuente única del TCP; el mismo
+    archivo lo lee kinematics/dh.py. Para otra herramienta:
+      xacro irb120.urdf.xacro tcp_config:=/ruta/otra_pinza.yaml
+  -->
+  <xacro:arg name="tcp_config" default="$(find irb120_hito1)/config/tcp.yaml"/>
+  <xacro:property name="tcp" value="${xacro.load_yaml('$(arg tcp_config)')}"/>
+
   <xacro:include filename="$(find irb120_hito1)/urdf/materials.xacro"/>
   <xacro:include filename="$(find irb120_hito1)/urdf/irb120.macro.xacro"/>
 
   <xacro:irb120_materials/>
-  <xacro:irb120_robot/>
+  <xacro:irb120_robot gripper_tcp_z="${tcp['tool0_to_tcp_z_m']}"/>
 </robot>

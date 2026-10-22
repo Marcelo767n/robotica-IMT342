@@ -20,6 +20,6 @@ python3 scripts/import_gripper_cad.py MHZ2-16D.stl --scale 0.001 [--rpy-deg R P 
 ```
 
 El script lo lleva al marco `tool0` (cara de montaje en z = 0, dedos hacia +Z) y reemplaza
-`visual/gripper_link.stl` y `collision/gripper_link.stl`. Luego ajustar `gripper_tcp_z` en
-`urdf/irb120.macro.xacro` y en `GRIPPER_TCP_Z_M` de `kinematics/dh.py` si el centro de agarre
-cambia, y regenerar el URDF y correr `bash scripts/check_proyecto.sh`.
+`visual/gripper_link.stl` y `collision/gripper_link.stl`. Si el centro de agarre cambia,
+ajustar solo `tool0_to_tcp_z_m` en `config/tcp.yaml` (fuente única que leen el xacro y
+`kinematics/dh.py`), regenerar el URDF y correr `bash scripts/check_proyecto.sh`.

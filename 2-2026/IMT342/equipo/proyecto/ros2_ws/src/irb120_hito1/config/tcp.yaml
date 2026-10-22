@@ -1,0 +1,13 @@
+# Fuente unica del TCP del modelo propio (tool0 -> gripper_tcp).
+#
+# La leen el xacro (urdf/irb120.urdf.xacro, argumento tcp_config) y
+# kinematics/dh.py (GRIPPER_TCP_Z_M), y por tanto fk_validator y verify_model.
+# Cambiar el TCP solo aqui y regenerar urdf/irb120.urdf con xacro.
+#
+# El valor 0.150 m se adopta para coincidir con el Hito 2 (hito2/irb120/dh.py,
+# TCP_Z_M). NO esta medido en el robot ni leido del controlador: el TCP fisico
+# (tooldata de la pinza en el IRC5) sigue desconocido. Ver model_manifest.yaml
+# (physical_tcp: null).
+tool0_to_tcp_z_m: 0.150
+verified_on_robot: false
+source: "Convencion del modelo Hito 2 (hito2/irb120/dh.py); no es una medicion fisica"

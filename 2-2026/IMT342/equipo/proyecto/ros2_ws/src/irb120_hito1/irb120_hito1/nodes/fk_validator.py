@@ -12,16 +12,18 @@ from std_msgs.msg import Float64
 from tf2_ros import Buffer, TransformException, TransformListener
 
 from irb120_hito1.kinematics.dh import (
+    GRIPPER_TCP_Z_M,
     JOINT_NAMES,
+    TCP_VERIFIED_ON_ROBOT,
     forward_kinematics,
     forward_kinematics_tcp,
     position_error_m,
     rotation_error_rad,
 )
-from irb120_hito1.kinematics.urdf_chain import chain_transform
+from irb120_hito1.kinematics.urdf_chain import chain_transform, load_joints
 
 
-def _transform_to_matrix(transform) -> np.ndarray:
+def transform_to_matrix(transform) -> np.ndarray:
     """Convert a geometry_msgs TransformStamped into a 4x4 matrix."""
     t, q = transform.transform.translation, transform.transform.rotation
     x, y, z, w = q.x, q.y, q.z, q.w
@@ -50,6 +52,8 @@ class ForwardKinematicsValidator(Node):
         self.declare_parameter("target_frame", "tool0")
         self.declare_parameter("position_tolerance_m", 1.0e-6)
         self.declare_parameter("urdf_path", "")
+        # Por defecto, el TCP de config/tcp.yaml (fuente unica, compartida con el xacro).
+        self.declare_parameter("tool0_to_tcp_z_m", GRIPPER_TCP_Z_M)
 
         self._base_frame = str(self.get_parameter("base_frame").value)
         self._target_frame = str(self.get_parameter("target_frame").value)
@@ -61,6 +65,8 @@ class ForwardKinematicsValidator(Node):
             raise ValueError("target_frame debe ser tool0 o gripper_tcp.")
         if not self._urdf_path.is_file():
             raise FileNotFoundError(f"No se encontro el URDF expandido: {self._urdf_path}")
+        self._tcp_z_m = float(self.get_parameter("tool0_to_tcp_z_m").value)
+        self._check_tcp_consistency()
 
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self)
@@ -75,13 +81,29 @@ class ForwardKinematicsValidator(Node):
         self.create_subscription(JointState, "/joint_states", self._joint_callback, 20)
         self._error_publisher = self.create_publisher(Float64, "/irb120/fk_position_error_m", 10)
 
+    def _check_tcp_consistency(self) -> None:
+        """Compare the analytic TCP with gripper_tcp_joint in the loaded URDF.
+
+        Un URDF expandido con otro tcp.yaml daria un error constante igual a la
+        diferencia de TCP; se avisa al arrancar para no confundirlo con la DH.
+        """
+        tcp_joint = load_joints(self._urdf_path).get("gripper_tcp")
+        urdf_tcp_z_m = None if tcp_joint is None else float(tcp_joint.xyz[2])
+        if urdf_tcp_z_m is None or abs(urdf_tcp_z_m - self._tcp_z_m) > 1.0e-12:
+            self.get_logger().error(
+                f"TCP incoherente: DH={self._tcp_z_m:.4f} m, URDF={urdf_tcp_z_m} m. "
+                "Regenere urdf/irb120.urdf con xacro desde config/tcp.yaml."
+            )
+        verified = "verificado" if TCP_VERIFIED_ON_ROBOT else "NO verificado en el robot"
+        self.get_logger().info(f"TCP tool0->gripper_tcp = {self._tcp_z_m:.4f} m ({verified}).")
+
     def _joint_callback(self, message: JointState) -> None:
         received = dict(zip(message.name, message.position))
         if any(name not in received for name in JOINT_NAMES):
             return
         joint_vector = [float(received[name]) for name in JOINT_NAMES]
         if self._target_frame == "gripper_tcp":
-            analytic = forward_kinematics_tcp(joint_vector)
+            analytic = forward_kinematics_tcp(joint_vector, self._tcp_z_m)
         else:
             analytic = forward_kinematics(joint_vector)
         joint_map = dict(zip(JOINT_NAMES, joint_vector, strict=True))
@@ -132,7 +154,7 @@ class ForwardKinematicsValidator(Node):
         except TransformException:
             return  # TF aun no disponible; se reintenta con la muestra siguiente.
         self._pending_tf_sample = None
-        self._last_tf_error_m = position_error_m(analytic, _transform_to_matrix(transform))
+        self._last_tf_error_m = position_error_m(analytic, transform_to_matrix(transform))
         tf_message = Float64()
         tf_message.data = self._last_tf_error_m
         self._tf_error_publisher.publish(tf_message)

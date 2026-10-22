@@ -19,7 +19,7 @@ setup(
     maintainer_email="equipo.imt342@example.com",
     description="Cinematica inversa de Pieper y trayectorias LSPB del ABB IRB 120 (Hito 2).",
     license="Apache-2.0",
-    tests_require=["pytest"],
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "ik_trajectory_node = irb120_hito2.nodes.ik_trajectory_node:main",

@@ -30,7 +30,7 @@ Con **RobotWare 6.12.01.00 reportado**, si se comprueban interfaz RWS accesible 
 | Estado al tomar las fotos | `Manual`, `Guard Stop`, `Stopped`; indicador `Speed 100%` | Es una observación de las capturas, no el estado actual. El 100% no mide velocidad articular real |
 | Backup | Se fotografió el menú de backup | `fotos/flexpendant/850334948_3064085187271613_2972342787603937018_n.jpg`; no demuestra que exista una copia realizada |
 | Software propio | Modelo numérico en `hito2/`, paquetes de simulación en `ros2_ws/src/` | No se encontró driver físico integrado en esos paquetes |
-| TCP de los modelos | Hito 2: 0.150 m; descripción ROS anterior: 0.100 m | Diferencia que debe resolverse antes de comparar poses o planificar |
+| TCP de los modelos | Hito 1 (ROS) y Hito 2: 0.150 m desde 2026-10-22 (antes ROS: 0.100 m); fuente única `ros2_ws/src/irb120_hito1/config/tcp.yaml` | Alineado entre modelos, pero no verificado en el robot: el tooldata físico sigue pendiente |
 
 La foto completa de opciones también muestra RobotWare Base, 687-1 Advanced Robot Motion, 613-1 Collision Detection, 709-1 DeviceNet Master/Slave, 617-1 FlexPendant Interface, 614-1 FTP SFTP and NFS client, 610-1 Independent Axis, 612-1 Path Offset, 611-1 Path Recovery, 628-1 Sensor Interface, 885-1 SoftMove y 608-1 World Zones. La presencia de estas opciones no confirma que RWS/EGM estén configurados ni que exista una sesión activa. El menú de backup tampoco sustituye la comprobación de una copia y su fecha con el operador.
 

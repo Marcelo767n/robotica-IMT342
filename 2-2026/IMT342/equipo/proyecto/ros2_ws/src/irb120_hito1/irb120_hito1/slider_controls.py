@@ -17,8 +17,8 @@ JOINT_SLIDERS = (
     SliderSpec("joint_1", "J1 - Base", -165.0, 165.0),
     SliderSpec("joint_2", "J2 - Hombro", -110.0, 110.0),
     SliderSpec("joint_3", "J3 - Codo", -110.0, 70.0),
-    SliderSpec("joint_4", "J4 - Giro de muneca", -160.0, 160.0),
-    SliderSpec("joint_5", "J5 - Inclinacion de muneca", -120.0, 120.0),
+    SliderSpec("joint_4", "J4 - Giro de muñeca", -160.0, 160.0),
+    SliderSpec("joint_5", "J5 - Inclinación de muñeca", -120.0, 120.0),
     SliderSpec("joint_6", "J6 - Flange", -400.0, 400.0),
 )
 

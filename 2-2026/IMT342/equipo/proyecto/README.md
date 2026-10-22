@@ -60,7 +60,7 @@ proyecto/
 
 ## Modelos y unidades
 
-Hito 2 usa TCP a **0.150 m** de `tool0`; el modelo ROS anterior usa **0.100 m**. El TCP físico sigue pendiente. Hay que alinear base, herramienta, orden, signos y offsets articulares antes de comparar contra el controlador. [Manifiesto](model_manifest.yaml).
+Hito 1 (ROS) y Hito 2 usan TCP a **0.150 m** de `tool0` (antes el paquete ROS usaba 0.100 m); en `irb120_hito1` la fuente única es `config/tcp.yaml`. Es un valor de modelo: el TCP físico sigue pendiente. Hay que alinear base, herramienta, orden, signos y offsets articulares antes de comparar contra el controlador. [Manifiesto](model_manifest.yaml).
 
 El acuerdo entre DH y un URDF derivado del mismo DH comprueba implementaciones de la cadena, pero no aporta por sí mismo una fuente geométrica independiente del robot ni validación física ABB. Para el Hito 2, la verificación geométrica independiente de la FK se hace contra el **modelo oficial de ROS-Industrial** (`abb_irb120_support`): coinciden en pose completa hasta 1e-15 (ver `hito2/irb120/rosi_model.py`).
 

@@ -14,9 +14,11 @@
 
     La sexta fila puede cerrarse sin una junta fija porque a6=alpha6=0 y
     Tz(d6) conmuta con Rz(q6). Así, tool0 es directamente el hijo de joint_6.
+
+    gripper_tcp_z no tiene valor por defecto aquí: lo entrega irb120.urdf.xacro
+    desde config/tcp.yaml, la misma fuente que lee kinematics/dh.py.
   -->
-  <xacro:property name="gripper_tcp_z" value="0.100"/>
-  <xacro:macro name="irb120_robot" params="prefix:=''">
+  <xacro:macro name="irb120_robot" params="gripper_tcp_z prefix:=''">
     <link name="${prefix}base_link">
       <visual>
         <geometry><mesh filename="package://irb120_hito1/meshes/visual/base_link.stl"/></geometry>
@@ -150,7 +152,8 @@
       <child link="${prefix}gripper_link"/>
     </joint>
 
-    <!-- TCP: centro de agarre entre los dedos, 0.100 m sobre la brida. -->
+    <!-- TCP: punto sobre el eje Z de tool0, gripper_tcp_z sobre la brida
+         (config/tcp.yaml; valor de modelo, no verificado en el robot). -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}gripper_tcp_joint" type="fixed">
       <parent link="${prefix}gripper_link"/>

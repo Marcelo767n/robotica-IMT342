@@ -170,11 +170,12 @@
     <parent link="tool0"/>
     <child link="gripper_link"/>
   </joint>
-  <!-- TCP: centro de agarre entre los dedos, 0.100 m sobre la brida. -->
+  <!-- TCP: punto sobre el eje Z de tool0, gripper_tcp_z sobre la brida
+         (config/tcp.yaml; valor de modelo, no verificado en el robot). -->
   <link name="gripper_tcp"/>
   <joint name="gripper_tcp_joint" type="fixed">
     <parent link="gripper_link"/>
     <child link="gripper_tcp"/>
-    <origin xyz="0 0 0.1"/>
+    <origin xyz="0 0 0.15"/>
   </joint>
 </robot>
