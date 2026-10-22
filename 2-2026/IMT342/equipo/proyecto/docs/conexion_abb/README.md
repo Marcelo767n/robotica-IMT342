@@ -1,14 +1,14 @@
 # Conexión del ABB IRB 120 desde Linux: decisión y preparación
 
-Revisión: 20 de octubre de 2026, incorporando las nuevas fotos del FlexPendant y de conexiones. **Estado: inventario parcial confirmado por fotos; ninguna conexión de la PC al controlador físico verificada.** El objetivo inmediato es confirmar RobotWare y preparar la primera lectura. La disponibilidad actual de cable/adaptador debe comprobarse antes de esa prueba. Los drivers no se instalaron ni ejecutaron contra el brazo.
+Revisión: 22 de octubre de 2026, incorporando las fotos y la versión transcrita del FlexPendant. **Estado: inventario parcial confirmado por fotos; ninguna conexión de la PC al controlador físico verificada.** RobotWare **6.12.01.00** fue reportado por el usuario desde System properties. El objetivo inmediato es preparar la primera lectura. La disponibilidad actual de cable/adaptador debe comprobarse antes de esa prueba. Los drivers no se instalaron ni ejecutaron contra el brazo.
 
 ## Recomendación
 
 Elegir como **arquitectura candidata principal ROS 2 + `abb_ros2` + RWS/EGM**. Su adopción queda condicionada a la versión de RobotWare, configuración del controlador, adaptación al IRB 120 y prueba de compilación de una revisión fija. Para la **primera conexión**, empezar por **Ethernet + RWS de lectura**, antes de activar el hardware de `ros2_control`. Son etapas compatibles de la misma arquitectura, no métodos excluyentes.
 
-Las nuevas fotos **confirman 689-1 EGM, 616-1 PC Interface y 623-1 Multitasking** en la lista de opciones del controlador, además de UDP UC Driver. Esto elimina la incertidumbre sobre su presencia en esa captura y refuerza la ruta EGM. La **versión completa de RobotWare sigue desconocida**, igual que el modelo/revisión exactos del gabinete y del computador principal; por eso la compatibilidad del driver aún no está demostrada. Ningún paquete descargado añade licencias al controlador.
+Las nuevas fotos **confirman 689-1 EGM, 616-1 PC Interface y 623-1 Multitasking** en la lista de opciones del controlador, además de UDP UC Driver. Esto elimina la incertidumbre sobre su presencia en esa captura y refuerza la ruta EGM. El usuario reportó **RobotWare 6.12.01.00** el 22/10 desde System properties: cumple el mínimo documentado de `abb_libegm` y pertenece a RW6. El modelo/revisión exactos del gabinete y del computador principal siguen pendientes; la operación del driver todavía requiere pruebas. Ningún paquete descargado añade licencias al controlador.
 
-Si se confirma **RobotWare 6.07.01 o superior dentro de la rama 6**, interfaz RWS accesible y configuración RAPID apropiada, esta ruta es la mejor candidata para conservar el trabajo existente en ROS 2; la opción EGM ya está documentada en las fotos. Si RobotWare o la configuración no cumplen los requisitos del driver, mantener la lectura de estado si está disponible y evaluar la alternativa RAPID/sockets con el docente. No actualizar RobotWare para resolverlo sin un estudio del sistema del laboratorio.
+Con **RobotWare 6.12.01.00 reportado**, si se comprueban interfaz RWS accesible y configuración RAPID apropiada, esta ruta es la mejor candidata para conservar el trabajo existente en ROS 2; la opción EGM ya está documentada en las fotos. Si RobotWare o la configuración no cumplen los requisitos del driver, mantener la lectura de estado si está disponible y evaluar la alternativa RAPID/sockets con el docente. No actualizar RobotWare para resolverlo sin un estudio del sistema del laboratorio.
 
 ## Lo que se identificó en las fotos y el proyecto
 
@@ -60,7 +60,7 @@ También encontré **`hylander2126/irb120_ros2`**, una adaptación comunitaria e
 | Método | Qué permite | Condición crítica | Decisión para este proyecto |
 |---|---|---|---|
 | RWS 1.0 desde Python/C++ en Linux | Identidad, versión, opciones reportadas, estados y articulaciones por HTTP | RobotWare 6 compatible, red y cuenta UAS autorizada | Primera prueba G1; no necesita ROS ni una sesión EGM para consultar articulaciones |
-| ROS 2 `abb_ros2` + EGM/RWS | Estados y comandos con `ros2_control`; integración posterior con MoveIt | EGM 689-1 confirmado en foto; falta verificar RW ≥6.07.01 dentro de RW6 y adaptar URDF/configuración | Principal candidata; opción presente, compatibilidad y operación aún sin verificar |
+| ROS 2 `abb_ros2` + EGM/RWS | Estados y comandos con `ros2_control`; integración posterior con MoveIt | EGM 689-1 confirmado en foto; RW6.12.01.00 reportado cumple mínimo; adaptar URDF/configuración | Principal candidata; opción presente, compatibilidad y operación aún sin verificar |
 | ROS 2 con puente RWS de lectura | Publicar estados reales en ROS sin control de trayectoria | Mismos requisitos RWS y conversión/orden articular comprobados | Etapa intermedia para incorporar estados antes del control; no cumple por sí sola control físico |
 | ROS 1 `abb_robot_driver` | RWS y EGM con `ros_control` | Requisitos del driver; es ROS 1/catkin | Referencia técnica, no instalación directa en Jazzy |
 | ROS 1 `abb_driver` clásico | Trayectorias mediante RAPID y protocolo SimpleMessage | Programa RAPID y opciones de comunicación compatibles con la versión concreta | Alternativa heredada; añade adaptación a ROS 2 o cambio de entorno |
@@ -106,7 +106,7 @@ EGM usa UDP y la sesión parte de RAPID en el controlador; la PC responde al int
 
 ## Cómo será la primera conexión, cuando haya cable y acceso supervisado
 
-1. **Completar la identificación sin moverlo.** FlexPendant: ABB → System Info → System properties. Falta fotografiar **RobotWare completo** y la placa del gabinete/computador. Conservar las capturas de opciones y red ya obtenidas, con su fecha si se conoce. No cambiar opciones, calibración ni programas.
+1. **Completar la identificación sin moverlo.** FlexPendant: ABB → System Info → System properties. RobotWare ya fue transcrito como **6.12.01.00**; conviene conservar una foto del campo y contrastarlo mediante RWS. Falta la placa del gabinete/computador. Conservar las capturas de opciones y red ya obtenidas, con su fecha si se conoce. No cambiar opciones, calibración ni programas.
 2. **Preparar el enlace directo.** Cable Ethernet y puerto/adaptador Linux. La foto de conexiones identifica la etiqueta **`X2 Service 10/100`**; el operador debe confirmar el acceso externo adecuado y su correspondencia con el manual de esa revisión. Esta guía no requiere abrir el gabinete ni reconectar cableado interno. El puerto de servicio IRC5 tiene una red de mantenimiento y DHCP: probar primero asignación automática. No conectarlo a la red institucional como si fuera un puerto de internet.
 3. **Comprobar direcciones y ruta.** La pantalla fotografiada confirma servicio `192.168.125.1`, máscara `255.255.255.0` y gateway `None`; comprobar que esa configuración siga vigente. Si hace falta dirección estática de la PC, el manual contempla `192.168.125.2/24` en ese enlace aislado: esa dirección de PC sigue siendo una propuesta, no una configuración ya realizada. No fijar una puerta de enlace en ese adaptador ni alterar el Wi-Fi. La WAN en DHCP es una interfaz distinta; su IP no se ve en la captura.
 4. **Ejecutar G1-A:** verificar enlace, IP y que la ruta a la IP ABB use la interfaz Ethernet correcta. Si la ruta sale por Wi-Fi, detener el diagnóstico y corregir el enlace. No buscar el robot en toda la red universitaria.
@@ -151,7 +151,7 @@ El inventario local anterior registró Ubuntu 26.04.1 y ROS Jazzy. El objetivo d
 
 Antes de adoptar un driver real: revisar dependencias/credenciales, adaptar URDF y `ros2_control` al IRB 120, confirmar nombres y límites de juntas, base/TCP, y verificar apagado de EGM. No usar una estación Pack-and-Go IRB1200 como configuración física IRB120. Los paquetes de simulación del proyecto y el modelo DH pueden reutilizarse, pero su acuerdo numérico no constituye validación de geometría ABB independiente cuando el URDF procede del mismo DH.
 
-Los entregables y pendientes concretos están en `plan_semana_12.md`, `gate0_inventario.csv` y el `model_manifest.yaml` de la raíz. Las métricas de validación física permanecen vacías. La próxima decisión depende de **RobotWare completo + revisión de controlador + driver que el docente pretenda usar**. Las opciones principales ya están documentadas; aún falta comprobar su configuración y los permisos RWS/UAS. Cable/adaptador se requiere para la futura prueba; su disponibilidad actual debe confirmarse.
+Los entregables y pendientes concretos están en `plan_semana_12.md`, `gate0_inventario.csv` y el `model_manifest.yaml` de la raíz. Las métricas de validación física permanecen vacías. La versión reportada satisface el requisito documental. La próxima decisión depende de **prueba RWS + revisión de controlador + driver que el docente pretenda usar**. Las opciones principales ya están documentadas; aún falta comprobar su configuración y los permisos RWS/UAS. Cable/adaptador se requiere para la futura prueba; su disponibilidad actual debe confirmarse.
 
 ## Material del docente actualizado
 
@@ -162,3 +162,7 @@ La rúbrica propuesta distribuye: auditoría/compatibilidad 20%; modelos propios
 La guía limita el trabajo autónomo a investigación/software y exige supervisión/protocolo para conectarse físicamente. No se ejecutaron conexiones al brazo ni cambios de red, programas o motores durante esta revisión.
 
 Las fuentes archivadas y los errores de descarga están registrados en `fuentes/origenes*.json`. Un archivo que figura con error de descarga no se presenta como un manual local disponible.
+
+## Registro del 22 de octubre de 2026
+
+El usuario transcribió `Name: 120-101516`, `Serial no: 120-101516`, `RobotWare version: 6.12.01.00`. Fuente: `evidencias/robotware_reportado_2026-10-22.json`; no se presenta como consulta RWS ni foto recibida de la versión. Indicó que todavía no dispone de cable o acceso supervisado. Próximo paso: disponer de enlace Ethernet y realizar G1 de lectura.

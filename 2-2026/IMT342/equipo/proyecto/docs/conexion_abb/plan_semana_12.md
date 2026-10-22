@@ -79,3 +79,7 @@ El antecedente de ajedrez debe solicitarse al docente/laboratorio: no apareció 
 - **Revisión requerida:** docente/laboratorio para compatibilidad y acceso; GO específico antes de movimiento.
 
 Para nuevas pruebas registrar hipótesis → prueba → resultado → interpretación → siguiente acción, con hora, responsables, software, condiciones y enlace de evidencia. No transformar este registro en una declaración de hardware funcional.
+
+## Actualización del 22/10/2026 (posterior a la bitácora inicial)
+
+RobotWare **6.12.01.00** reportado por el usuario desde System properties, con Name y Serial no `120-101516`. La incertidumbre de versión queda resuelta por transcripción y pendiente de contraste RWS; las referencias a versión pendiente en la bitácora del 20/10 son históricas. Cumple el mínimo documental EGM ≥6.07.01 dentro de RW6. Se mantiene pendiente la identificación exacta del controlador, configuración RAPID/EGM, permisos y operación del driver. El usuario aún no tiene cable o acceso supervisado: preparar enlace Ethernet es el próximo paso, seguido de G1 de lectura. Evidencia: `evidencias/robotware_reportado_2026-10-22.json`.

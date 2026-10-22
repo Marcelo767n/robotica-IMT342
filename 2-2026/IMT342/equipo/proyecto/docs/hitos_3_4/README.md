@@ -4,6 +4,7 @@ Prioridad: demostrar comunicación y lectura real del ABB IRB 120 de forma repro
 
 ## Documentos de trabajo
 
+- [Requisitos ECI-3/4 resumidos desde W12-S01](REQUISITOS_ECI34.md): rúbrica, gates y entregables.
 - [Investigación y procedimiento de conexión](../conexion_abb/README.md).
 - [Plan semanal, hipótesis, rúbrica y pruebas](../conexion_abb/plan_semana_12.md).
 - [Inventario Gate 0](../conexion_abb/gate0_inventario.csv).
@@ -15,7 +16,7 @@ Prioridad: demostrar comunicación y lectura real del ABB IRB 120 de forma repro
 
 | Gate | Evidencia disponible | Pendiente |
 |---|---|---|
-| G0 · inventario | Robot, EGM/PC Interface/Multitasking y red de servicio fotografiados | RobotWare completo, revisión del controlador, operador/protocolo y compatibilidad del driver |
+| G0 · inventario | Robot, EGM/PC Interface/Multitasking y red fotografiados; RobotWare 6.12.01.00 transcrito el 22/10 | Revisión del controlador, operador/protocolo y compatibilidad del driver |
 | G1 · lectura | Diagnóstico GET y pruebas offline documentadas | Cable/adaptador, ruta Ethernet, cuenta UAS y comparación con FlexPendant |
 | G2 · modelos | FK/IK/J propios y tres casos numéricos preparados | Referencia independiente, base/TCP común, unidades y comparación reproducible |
 | G3 · movimiento | Sin evidencia de ejecución desde el proyecto | G1/G2 y autorización expresa GO del laboratorio |

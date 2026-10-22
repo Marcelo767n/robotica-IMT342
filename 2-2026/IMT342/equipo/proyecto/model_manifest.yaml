@@ -1,7 +1,7 @@
 # Gate 0: lo desconocido se conserva como null; no es aprobación del hardware.
 robot_model: ABB_IRB120_3_0_6
 controller_model: null
-robotware_version: null
+robotware_version: '6.12.01.00'
 # Verificadas en la lista de opciones fotografiada; no es consulta en vivo.
 controller_options_verified:
   - "689-1 Externally Guided Motion (EGM)"
@@ -43,7 +43,8 @@ controller_system_name_evidence: fotos/flexpendant/855156643_1021735353659224_86
 controller_mechanical_unit_observed: ROB_1
 controller_options_evidence: fotos/flexpendant/853082554_2593180977825989_6769481757691654016_n.jpg
 controller_options_verification_scope: photographed_options_list_not_live_query
-controller_robotware_version_evidence_status: not_shown_in_available_photos
+controller_robotware_version_evidence_status: reported_by_user_from_FlexPendant_2026_10_22
+controller_robotware_version_evidence: docs/conexion_abb/evidencias/robotware_reportado_2026-10-22.json
 controller_network_observed:
   observation_scope: photographed_configuration_not_live_connectivity
   service:

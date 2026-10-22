@@ -39,6 +39,6 @@ Catálogo revisado el **20 de octubre de 2026**. Se conservan los 14 archivos or
 
 ## Datos que siguen pendientes
 
-La **versión completa de RobotWare**, el **modelo y revisión exactos del controlador**, el **DSQC del computador principal**, la existencia de un **respaldo recuperable**, el **TCP/base activos** y las **credenciales autorizadas de lectura** siguen sin verificarse. Las opciones presentes favorecen investigar RWS/EGM, pero la compatibilidad final del driver depende también de RobotWare y de su configuración.
+El usuario reportó **RobotWare 6.12.01.00** por transcripción el 22/10/2026; esa versión no aparece en las fotos de este catálogo. El **modelo y revisión exactos del controlador**, el **DSQC del computador principal**, la existencia de un **respaldo recuperable**, el **TCP/base activos** y las **credenciales autorizadas de lectura** siguen sin verificarse. Las opciones presentes favorecen investigar RWS/EGM, pero la compatibilidad final del driver depende también de RobotWare y de su configuración.
 
 Registro estructurado: [evidencia del controlador](../docs/conexion_abb/evidencias/controlador_fotos_2026-10-20.json). Guía de conexión: [documentación ABB](../docs/conexion_abb/README.md).

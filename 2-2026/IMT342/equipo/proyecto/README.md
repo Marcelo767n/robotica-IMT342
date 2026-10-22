@@ -1,6 +1,6 @@
 # Proyecto ABB IRB 120 · IMT-342
 
-Modelo cinemático, simulación ROS 2 y preparación de la integración con el brazo ABB IRB120-3/0.6. La prioridad actual es completar el inventario del controlador y obtener lectura real de estado antes de preparar movimiento. Actualización documental: **20 de octubre de 2026**.
+Modelo cinemático, simulación ROS 2 y preparación de la integración con el brazo ABB IRB120-3/0.6. La prioridad actual es completar el inventario del controlador y obtener lectura real de estado antes de preparar movimiento. Actualización documental: **22 de octubre de 2026**.
 
 ## Empezar aquí
 
@@ -23,7 +23,7 @@ Modelo cinemático, simulación ROS 2 y preparación de la integración con el b
 | Opciones del controlador | **689-1 EGM, 616-1 PC Interface y 623-1 Multitasking** visibles en FlexPendant |
 | Red de servicio | **192.168.125.1/24**, sin gateway; pantalla fotografiada |
 | Puerto | Etiqueta **X2 Service 10/100** legible; no se realizó conexión desde Linux |
-| RobotWare completo | **Pendiente**: las fotos todavía no muestran su versión |
+| RobotWare completo | **6.12.01.00**, transcrito por el usuario desde System properties el 22/10; lectura RWS pendiente |
 | Controlador exacto y revisión | Pendientes de placa; IRC5 Compact es identificación visual provisional |
 | Integración física | **No verificada**; diagnóstico de lectura preparado y probado offline |
 | Driver ROS 2 | `PickNikRobotics/abb_ros2`, candidato condicionado a versión y adaptación al IRB 120 |
@@ -72,6 +72,6 @@ Desde la raíz, este comando guarda únicamente información de la PC:
 python3 scripts/abb_lectura_rws.py --output docs/conexion_abb/evidencias/inventario_pc.json
 ```
 
-La futura prueba contra el controlador se describe en la [guía de conexión](docs/conexion_abb/README.md), después de verificar RobotWare, enlace Ethernet y acceso supervisado. El script no arranca RAPID, motores ni EGM. Sus ocho pruebas offline están registradas; no equivalen a una prueba sobre el brazo.
+La futura prueba contra el controlador se describe en la [guía de conexión](docs/conexion_abb/README.md), después de comprobar enlace Ethernet y acceso supervisado; contrastar RobotWare con la respuesta del controlador. El script no arranca RAPID, motores ni EGM. Sus ocho pruebas offline están registradas; no equivalen a una prueba sobre el brazo.
 
 Los [documentos del docente](<archivos que hay que presentar/README.md>) son referencias. Las [versiones anteriores](archivo/README.md) son antecedentes. Los entornos virtuales y directorios de compilación permanecen en sus ubicaciones y están excluidos de Git.

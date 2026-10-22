@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-22",
+  "source": "user_transcription_of_FlexPendant_System_Info_System_properties",
+  "name": "120-101516",
+  "serial_no": "120-101516",
+  "robotware_version": "6.12.01.00",
+  "photo_of_version_received": false,
+  "rws_response_verified": false,
+  "physical_connection_verified": false,
+  "movement_authorized": false,
+  "interpretation": "Meets documented abb_libegm minimum 6.07.01 and RW6 family used by RWS1 libraries; full driver operation remains unverified"
+}
