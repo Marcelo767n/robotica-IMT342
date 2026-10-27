@@ -33,6 +33,11 @@ Si te falta tiempo, prioriza **2, 3 y 4**: son G2, G3 y G4.
 
 ## 2. Qué mostrar en la demo y en qué orden (8–10 min)
 
+> **Apoyo visual:** `hito2/presentacion/Hito2_en_vivo.html` (doble clic; funciona sin internet) recorre lo mismo por
+> criterio de la rúbrica, con el robot en 3D, la animación y los controles deslizantes. Se puede usar en lugar del
+> notebook para mostrar y, si el docente pide "el código", se abre el notebook o el paquete `irb120/`. Ver
+> `presentacion/README.md`.
+
 Abrir `hito2/Hito2_IRB120_pipeline.ipynb` (ya ejecutado; no hace falta correrlo para mostrarlo).
 
 | Min | Sección del notebook | Qué mostrar | Qué decir (una frase) |

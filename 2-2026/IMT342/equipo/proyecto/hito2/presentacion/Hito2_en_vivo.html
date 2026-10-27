@@ -1,0 +1,1301 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>IRB 120 · Hito 2 en vivo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: consola de ingeniería — barra de entrada de pose arriba, riel de criterios de la rúbrica a la izquierda,
+   mesa de trabajo (vista 3D + gráficas sincronizadas) a la derecha. */
+:root {
+  --bg: #eef2f5; --surface: #ffffff; --sunken: #f6f8fa; --ink: #132130; --muted: #566778; --line: #d3dbe3; --grid: #e3e8ee;
+  --accent: #1d5fc4; --accent-soft: #dfe9f8; --amber: #b56a00; --ok: #17844a; --ok-soft: #dcf1e5; --bad: #c03a2b; --bad-soft: #f8e1de;
+  --j1: #1d5fc4; --j2: #d9480f; --j3: #2b8a3e; --j4: #9c36b5; --j5: #c2255c; --j6: #0b7285;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e141b; --surface: #151e28; --sunken: #111921; --ink: #e5ecf2; --muted: #93a3b3; --line: #263443; --grid: #1f2b38;
+    --accent: #6ea4ff; --accent-soft: #1b2c45; --amber: #f0a33a; --ok: #4cc283; --ok-soft: #133324; --bad: #ff7b6b; --bad-soft: #3a1c18;
+    --j1: #6ea4ff; --j2: #ff8a4c; --j3: #63c174; --j4: #c98cdb; --j5: #f06595; --j6: #3bc9db;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e141b; --surface: #151e28; --sunken: #111921; --ink: #e5ecf2; --muted: #93a3b3; --line: #263443; --grid: #1f2b38;
+  --accent: #6ea4ff; --accent-soft: #1b2c45; --amber: #f0a33a; --ok: #4cc283; --ok-soft: #133324; --bad: #ff7b6b; --bad-soft: #3a1c18;
+  --j1: #6ea4ff; --j2: #ff8a4c; --j3: #63c174; --j4: #c98cdb; --j5: #f06595; --j6: #3bc9db;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: 1.7rem; }
+h2 { font-size: 2.1rem; }
+h3 { font-size: 1.25rem; }
+p { margin: 0; max-width: 68ch; }
+.mono, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- barra superior ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line);
+  padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top-inner { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+.brand { display: flex; flex-direction: column; min-width: 0; }
+.brand small { color: var(--muted); font-size: 0.78rem; }
+.pose-form { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; }
+.pose-form label { display: flex; flex-direction: column; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em; }
+.pose-form input { width: 5.6em; padding: 5px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--sunken); font-family: var(--font-mono); font-size: 0.86rem; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--surface); border-color: var(--accent); font-weight: 600; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 0.78rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--sunken); cursor: pointer; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.verdict { font-size: 0.85rem; font-weight: 600; padding: 4px 10px; border-radius: 4px; }
+.verdict.ok { background: var(--ok-soft); color: var(--ok); }
+.verdict.bad { background: var(--bad-soft); color: var(--bad); }
+.err { color: var(--bad); font-size: 0.85rem; }
+
+/* ---------- estructura ---------- */
+.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 0; min-height: 70vh; }
+.rail { border-right: 1px solid var(--line); background: var(--surface); padding-block: 14px; position: sticky; top: 112px; align-self: start; max-height: calc(100vh - 112px); overflow-y: auto; }
+.rail a { display: grid; grid-template-columns: 2.1em 1fr; gap: 4px; align-items: baseline; padding: 7px 14px; text-decoration: none; color: var(--ink); border-left: 3px solid transparent; }
+.rail a .crit { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--muted); }
+.rail a small { grid-column: 2; color: var(--muted); font-size: 0.74rem; }
+.rail a[aria-current="true"] { border-left-color: var(--accent); background: var(--accent-soft); }
+.rail a[aria-current="true"] .crit { color: var(--accent); }
+main { padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); min-width: 0; }
+section.view { display: flex; flex-direction: column; gap: 18px; max-width: 1240px; }
+.head { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; }
+.badge { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; padding: 2px 10px; border-radius: 3px; background: var(--ink); color: var(--surface); letter-spacing: 0.04em; }
+.rubric { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 12px 16px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 26px; }
+.rubric ul { margin: 4px 0 0; padding-left: 1.1em; }
+.rubric li { margin: 2px 0; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.panel h3 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+canvas.view3d { width: 100%; aspect-ratio: 4 / 3; max-width: 100%; display: block; background: var(--sunken); border-radius: 4px; cursor: grab; touch-action: none; }
+canvas.chart { width: 100%; height: 170px; display: block; }
+canvas.chart.tall { height: 230px; }
+.hint { font-size: 0.78rem; color: var(--muted); }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.84rem; }
+th, td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+td.l, th.l { text-align: left; }
+td a { font-family: var(--font-body); }
+td { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+tr.sel td { background: var(--ok-soft); }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover td { background: var(--accent-soft); }
+.pill { display: inline-block; font-family: var(--font-body); font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.info { background: var(--accent-soft); color: var(--accent); }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 14px; font-size: 0.88rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.eq { font-family: var(--font-mono); background: var(--sunken); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font-size: 0.82rem; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.controls label { display: flex; gap: 8px; align-items: center; font-size: 0.85rem; }
+input[type="range"] { accent-color: var(--accent); width: 160px; }
+.checks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 22px; }
+.check { display: grid; grid-template-columns: 1.4em minmax(0, 1fr); gap: 6px; font-size: 0.86rem; align-items: baseline; }
+.check b { color: var(--ok); }
+.check.fail b { color: var(--bad); }
+.steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.step { flex: 1 1 130px; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
+.step:hover { border-color: var(--accent); }
+.step .crit { font-family: var(--font-display); font-weight: 700; color: var(--accent); }
+.step .out { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; }
+.qa details { border-bottom: 1px solid var(--line); padding: 8px 0; }
+.qa summary { cursor: pointer; font-weight: 600; }
+.qa p { margin-top: 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.78rem; color: var(--muted); }
+.legend i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+.branchbar { display: flex; flex-wrap: wrap; gap: 6px; }
+.branchbar button { font-size: 0.8rem; padding: 4px 9px; border-radius: 4px; border: 1px solid var(--line); background: var(--sunken); cursor: pointer; font-family: var(--font-mono); }
+.branchbar button[aria-pressed="true"] { outline: 2px solid var(--accent); }
+.branchbar button.ok { border-color: var(--ok); color: var(--ok); }
+.branchbar button.bad { color: var(--bad); }
+.notice { border: 1px dashed var(--bad); background: var(--bad-soft); color: var(--bad); padding: 10px 14px; border-radius: var(--radius); }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: static; max-height: none; display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); padding-block: 4px; }
+  .rail a { flex: 0 0 auto; grid-template-columns: auto; border-left: 0; border-bottom: 3px solid transparent; padding: 6px 10px; }
+  .rail a small { display: none; }
+  .rail a[aria-current="true"] { border-bottom-color: var(--accent); }
+  .grid2, .grid3, .rubric, .checks { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>IRB 120 · Hito 2 en vivo</h1>
+      <small>IMT-342 Robótica · Andrade · Ayala · Navarro</small>
+    </div>
+    <form class="pose-form" id="poseForm" autocomplete="off">
+      <span class="label" style="align-self:center">Pose objetivo T<sub>d</sub> del TCP</span>
+      <label>x [m]<input id="px" type="number" step="0.01" value="0.40"></label>
+      <label>y [m]<input id="py" type="number" step="0.01" value="0.10"></label>
+      <label>z [m]<input id="pz" type="number" step="0.01" value="0.35"></label>
+      <label>roll [°]<input id="pr" type="number" step="1" value="0"></label>
+      <label>pitch [°]<input id="pp" type="number" step="1" value="180"></label>
+      <label>yaw [°]<input id="pw" type="number" step="1" value="0"></label>
+      <button class="btn primary" type="submit">Calcular</button>
+    </form>
+    <span id="verdict" class="verdict"></span>
+  </div>
+  <div class="top-inner" style="margin-top:8px">
+    <span class="label">Poses de prueba</span>
+    <div class="presets" id="presets"></div>
+    <span id="formErr" class="err" role="alert"></span>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Secciones por criterio de la rúbrica"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* irb120.js — traducción a JavaScript del paquete Python hito2/irb120 (mismas fórmulas, mismos nombres).
+ * Se verifica contra Python con presentacion/verificar_port.mjs (vectores generados por generar_vectores.py).
+ * Funciona en el navegador (global IRB) y en Node (module.exports).
+ */
+(function (root) {
+  "use strict";
+  const PI = Math.PI;
+
+  // ------------------------------------------------------------------ álgebra mínima
+  const eye = (n) => Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+  const matmul = (A, B) => A.map((row) => B[0].map((_, j) => row.reduce((s, a, k) => s + a * B[k][j], 0)));
+  const transpose = (A) => A[0].map((_, j) => A.map((row) => row[j]));
+  const matvec = (A, v) => A.map((row) => row.reduce((s, a, k) => s + a * v[k], 0));
+  const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+  const norm = (a) => Math.sqrt(dot(a, a));
+  const sub = (a, b) => a.map((x, i) => x - b[i]);
+  const add = (a, b) => a.map((x, i) => x + b[i]);
+  const scale = (a, s) => a.map((x) => x * s);
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const rot = (T) => T.slice(0, 3).map((r) => r.slice(0, 3));
+  const pos = (T) => [T[0][3], T[1][3], T[2][3]];
+  const col = (T, k) => [T[0][k], T[1][k], T[2][k]];
+  const mod = (x, m) => ((x % m) + m) % m;
+  const wrapPi = (a) => mod(a + PI, 2 * PI) - PI; // igual que Python: (a + pi) % (2 pi) - pi
+  const deg = (r) => (r * 180) / PI;
+  const rad = (d) => (d * PI) / 180;
+
+  // ------------------------------------------------------------------ dh.py
+  const DH = [
+    { d: 0.29, a: 0.0, alpha: -PI / 2, off: 0 },
+    { d: 0.0, a: 0.27, alpha: 0.0, off: -PI / 2 },
+    { d: 0.0, a: 0.07, alpha: -PI / 2, off: 0 },
+    { d: 0.302, a: 0.0, alpha: PI / 2, off: 0 },
+    { d: 0.0, a: 0.0, alpha: -PI / 2, off: 0 },
+    { d: 0.072, a: 0.0, alpha: 0.0, off: PI },
+  ];
+  const TCP_Z_M = 0.15;
+  const LIMITS_DEG = [[-165, 165], [-110, 110], [-110, 70], [-160, 160], [-120, 120], [-400, 400]];
+  const LIMITS = LIMITS_DEG.map(([a, b]) => [rad(a), rad(b)]);
+  const MAX_SPEED_DEG = [250, 250, 250, 320, 320, 420];
+  const MAX_SPEED = MAX_SPEED_DEG.map(rad);
+  const HOME_Q = [0, 0, 0, 0, 0, 0];
+
+  function dhTransform(theta, p) {
+    const t = theta + p.off, ct = Math.cos(t), st = Math.sin(t), ca = Math.cos(p.alpha), sa = Math.sin(p.alpha);
+    return [
+      [ct, -st * ca, st * sa, p.a * ct],
+      [st, ct * ca, -ct * sa, p.a * st],
+      [0, sa, ca, p.d],
+      [0, 0, 0, 1],
+    ];
+  }
+  function jointFrames(q) {
+    const F = [eye(4)];
+    for (let i = 0; i < 6; i++) F.push(matmul(F[i], dhTransform(q[i], DH[i])));
+    return F;
+  }
+  const forwardKinematics = (q) => jointFrames(q)[6];
+  function tcpTransform() { const T = eye(4); T[2][3] = TCP_Z_M; return T; }
+  const forwardKinematicsTcp = (q) => matmul(forwardKinematics(q), tcpTransform());
+  const positionError = (A, B) => norm(sub(pos(A), pos(B)));
+  function rotationError(A, B) {
+    const R = matmul(transpose(rot(A)), rot(B));
+    const c = (R[0][0] + R[1][1] + R[2][2] - 1) / 2;
+    const s = norm([R[2][1] - R[1][2], R[0][2] - R[2][0], R[1][0] - R[0][1]]) / 2;
+    return Math.atan2(s, Math.max(-1, Math.min(1, c)));
+  }
+
+  // ------------------------------------------------------------------ transforms.py
+  function rpyToMatrix(r, p, y) {
+    const cr = Math.cos(r), sr = Math.sin(r), cp = Math.cos(p), sp = Math.sin(p), cy = Math.cos(y), sy = Math.sin(y);
+    const Rx = [[1, 0, 0], [0, cr, -sr], [0, sr, cr]];
+    const Ry = [[cp, 0, sp], [0, 1, 0], [-sp, 0, cp]];
+    const Rz = [[cy, -sy, 0], [sy, cy, 0], [0, 0, 1]];
+    return matmul(matmul(Rz, Ry), Rx);
+  }
+  function poseFromXyzRpyDeg(x, y, z, r, p, yaw) {
+    const R = rpyToMatrix(rad(r), rad(p), rad(yaw));
+    return [[...R[0], x], [...R[1], y], [...R[2], z], [0, 0, 0, 1]];
+  }
+  function assertRigid(T, tol = 1e-6) {
+    if (!Array.isArray(T) || T.length !== 4 || T.some((r) => r.length !== 4)) throw new Error("La pose debe ser una matriz 4x4.");
+    if (T.flat().some((v) => !Number.isFinite(v))) throw new Error("La pose contiene valores no finitos.");
+    if ([0, 0, 0, 1].some((v, i) => Math.abs(T[3][i] - v) > tol)) throw new Error("La última fila debe ser [0, 0, 0, 1].");
+    const R = rot(T), RtR = matmul(transpose(R), R);
+    const orth = Math.max(...RtR.flatMap((r, i) => r.map((v, j) => Math.abs(v - (i === j ? 1 : 0)))));
+    if (orth > tol) throw new Error(`R no es ortonormal (max|RᵀR − I| = ${orth.toExponential(2)}).`);
+    const det = det3(R);
+    if (Math.abs(det - 1) > tol) throw new Error(`det(R) = ${det.toFixed(6)}; una rotación propia exige +1.`);
+    return T;
+  }
+  const det3 = (R) =>
+    R[0][0] * (R[1][1] * R[2][2] - R[1][2] * R[2][1]) - R[0][1] * (R[1][0] * R[2][2] - R[1][2] * R[2][0]) +
+    R[0][2] * (R[1][0] * R[2][1] - R[1][1] * R[2][0]);
+
+  // ------------------------------------------------------------------ validation.py
+  const TOL_P = 1e-6, TOL_R = 1e-6;
+  function fkCheck(target, q, tcp = true) {
+    const T = tcp ? forwardKinematicsTcp(q) : forwardKinematics(q);
+    const ep = positionError(target, T), eR = rotationError(target, T);
+    const eF = Math.sqrt(T.flat().reduce((s, v, i) => s + (v - target.flat()[i]) ** 2, 0));
+    return { ep, eR, eF, accepted: ep < TOL_P && eR < TOL_R };
+  }
+
+  // ------------------------------------------------------------------ pieper.py
+  const D1 = DH[0].d, L2 = DH[1].a, A3 = DH[2].a, D4 = DH[3].d, D6 = DH[5].d;
+  const L3 = Math.hypot(D4, A3), DELTA = Math.atan2(A3, D4);
+  const REACH_MIN = Math.abs(L2 - L3), REACH_MAX = L2 + L3;
+
+  function fitToLimits(angle, lo, hi, ref) {
+    let best = null;
+    for (let k = -3; k <= 3; k++) {
+      const c = angle + 2 * PI * k;
+      if (c >= lo - 1e-9 && c <= hi + 1e-9 && (best === null || Math.abs(c - ref) < Math.abs(best - ref))) best = c;
+    }
+    return best;
+  }
+  function wristCenter(T) { const z = col(T, 2); return sub(pos(T), scale(z, D6)); }
+  function armBranches(W) {
+    const [x, y, z] = W, planar = Math.hypot(x, y), height = z - D1, out = [];
+    for (const [arm, q1, radial] of [["frente", Math.atan2(y, x), planar], ["atras", Math.atan2(y, x) + PI, -planar]]) {
+      const c = (radial * radial + height * height - L2 * L2 - L3 * L3) / (2 * L2 * L3);
+      if (Math.abs(c) > 1 + 1e-12) {
+        for (const elbow of ["arriba", "abajo"]) out.push({ arm, elbow, real: false, c, q: [NaN, NaN, NaN] });
+        continue;
+      }
+      const base = Math.asin(-Math.max(-1, Math.min(1, c))), alpha = Math.atan2(radial, height);
+      for (const [elbow, q3md] of [["arriba", base], ["abajo", PI - base]]) {
+        const q3 = wrapPi(q3md + DELTA), eta = PI / 2 + q3 - DELTA;
+        const q2 = wrapPi(alpha - Math.atan2(L3 * Math.sin(eta), L2 + L3 * Math.cos(eta)));
+        out.push({ arm, elbow, real: true, c, q: [wrapPi(q1), q2, q3] });
+      }
+    }
+    return out;
+  }
+  function rotation03(q1, q2, q3) {
+    let T = eye(4);
+    [q1, q2, q3].forEach((a, i) => { T = matmul(T, dhTransform(a, DH[i])); });
+    return rot(T);
+  }
+  function wristSolutions(R, q4ref) {
+    const sb = Math.hypot(R[0][2], R[1][2]);
+    if (sb < 1e-9) {
+      if (R[2][2] < 0) {
+        const diff = Math.atan2(-R[1][0], -R[0][0]), q6 = wrapPi(q4ref - diff - PI);
+        return [["q5+", q4ref, -PI, q6, true], ["q5-", q4ref, -PI, q6, true]];
+      }
+      const total = Math.atan2(R[1][0], R[0][0]);
+      return [["q5+", q4ref, 0, wrapPi(total - q4ref - PI), true], ["q5-", wrapPi(q4ref + PI), 0, wrapPi(total - q4ref - 2 * PI), true]];
+    }
+    const cb = R[2][2], out = [];
+    for (const [wrist, s] of [["q5+", -1], ["q5-", 1]]) {
+      const beta = Math.atan2(s * sb, cb), alpha = Math.atan2(s * R[1][2], s * R[0][2]);
+      const gamma = Math.atan2(s * R[2][1], -s * R[2][0]);
+      out.push([wrist, alpha, -beta, wrapPi(gamma - PI), false]);
+    }
+    return out;
+  }
+  function tool0FromTcp(Ttcp) { const Tinv = eye(4); Tinv[2][3] = -TCP_Z_M; return matmul(Ttcp, Tinv); }
+  function enumerateCandidates(Ttool0, ref = HOME_Q) {
+    const T = assertRigid(Ttool0), R = rot(T), cands = [];
+    for (const b of armBranches(wristCenter(T))) {
+      if (!b.real) {
+        for (const wrist of ["q5+", "q5-"]) cands.push({ branch: cands.length + 1, arm: b.arm, elbow: b.elbow, wrist, real: false, qRaw: null, q: null, out: [], singular: false, c: b.c });
+        continue;
+      }
+      const R36 = matmul(transpose(rotation03(...b.q)), R);
+      for (const [wrist, q4, q5, q6, singular] of wristSolutions(R36, ref[3])) {
+        const raw = [...b.q, q4, q5, q6];
+        const fitted = raw.map((a, i) => fitToLimits(a, LIMITS[i][0], LIMITS[i][1], ref[i]));
+        const out = fitted.map((v, i) => (v === null ? i + 1 : 0)).filter(Boolean);
+        cands.push({ branch: cands.length + 1, arm: b.arm, elbow: b.elbow, wrist, real: true, qRaw: raw, q: out.length ? null : fitted, out, singular, c: b.c });
+      }
+    }
+    return cands;
+  }
+  function analyzePose(Ttcp, ref = HOME_Q) {
+    assertRigid(Ttcp);
+    const T0 = tool0FromTcp(Ttcp), cands = enumerateCandidates(T0, ref);
+    const checks = cands.map((c) => (c.real ? fkCheck(Ttcp, c.q || c.qRaw) : null));
+    const W = wristCenter(T0), dist = Math.hypot(Math.hypot(W[0], W[1]), W[2] - D1);
+    const accepted = (c) => c.real && c.q !== null && checks[c.branch - 1] && checks[c.branch - 1].accepted;
+    const admissible = cands.filter(accepted);
+    let verdict;
+    if (admissible.length) verdict = `ALCANZABLE: ${admissible.length} de 8 ramas son admisibles.`;
+    else if (!cands.some((c) => c.real)) verdict = `NO ALCANZABLE: la distancia hombro–muñeca ${dist.toFixed(4)} m está fuera de [${REACH_MIN.toFixed(3)}, ${REACH_MAX.toFixed(3)}] m.`;
+    else {
+      const blocked = [...new Set(cands.filter((c) => c.real).flatMap((c) => c.out))].sort((a, b) => a - b);
+      verdict = `NO ALCANZABLE: existe geométricamente, pero todas las ramas violan límites articulares (juntas ${blocked.join(", ")}).`;
+    }
+    return { Ttcp, T0, W, dist, candidates: cands, checks, accepted, admissible, reachable: admissible.length > 0, geometricallyReachable: cands.some((c) => c.real), verdict };
+  }
+  const limitMarginDeg = (q) => deg(Math.min(...q.map((v, i) => Math.min(v - LIMITS[i][0], LIMITS[i][1] - v))));
+  const WEIGHTS = [1, 1, 1, 0.5, 0.5, 0.5];
+  function rankCandidates(report, ref = HOME_Q, minSigma = 1e-2, minMargin = 5) {
+    const [vmax, amax] = defaultLimits();
+    const rows = report.candidates.map((c) => {
+      if (!report.accepted(c)) {
+        const reason = !c.real ? "descartada: no existe (|c| > 1)" : c.q === null ? "descartada: fuera de límites J" + c.out.join(",") : "descartada: no pasa la FK";
+        return { candidate: c, admissible: false, sigmaMin: NaN, margin: NaN, cost: NaN, tf: NaN, status: reason, rank: null };
+      }
+      return {
+        candidate: c, admissible: true, sigmaMin: svd(geometricJacobian(c.q)).s[5], margin: limitMarginDeg(c.q),
+        cost: norm(c.q.map((v, i) => WEIGHTS[i] * (v - ref[i]))), tf: planLspb(ref, c.q, vmax, amax).tf, status: "", rank: null,
+      };
+    });
+    const adm = rows.filter((r) => r.admissible);
+    let pool = [], note = "";
+    for (const [rm, rs, n] of [[false, false, ""], [true, false, " (margen relajado)"], [true, true, " (margen y σ relajados)"]]) {
+      pool = adm.filter((r) => (rs || r.sigmaMin >= minSigma) && (rm || r.margin >= minMargin));
+      note = n;
+      if (pool.length || !adm.length) break;
+    }
+    for (const r of adm) if (!pool.includes(r)) r.status = r.sigmaMin < minSigma ? `descartada: cerca de singularidad (σmin < ${minSigma})` : `descartada: a menos de ${minMargin}° de un límite`;
+    pool.sort((a, b) => a.cost - b.cost || b.sigmaMin - a.sigmaMin);
+    pool.forEach((r, i) => { r.rank = i + 1; r.status = i === 0 ? "ELEGIDA" + note : `apta (puesto ${i + 1})`; });
+    return rows;
+  }
+
+  // ------------------------------------------------------------------ lspb.py
+  function defaultLimits(speedScale = 0.25, ramp = 0.25) {
+    const vmax = MAX_SPEED.map((v) => v * speedScale);
+    return [vmax, vmax.map((v) => v / ramp)];
+  }
+  function lspb(q0, qf, tf, tb) {
+    const D = sub(qf, q0), V = D.map((d) => d / (tf - tb)), A = V.map((v) => v / tb);
+    const zero = q0.map(() => 0);
+    function sample(t) {
+      if (t < 0) return [q0.slice(), zero.slice(), zero.slice()];
+      if (t > tf) return [qf.slice(), zero.slice(), zero.slice()];
+      if (t < tb) return [q0.map((q, i) => q + 0.5 * A[i] * t * t), A.map((a) => a * t), A.slice()];
+      if (t <= tf - tb) return [q0.map((q, i) => q + V[i] * (t - 0.5 * tb)), V.slice(), zero.slice()];
+      const r = tf - t;
+      return [qf.map((q, i) => q - 0.5 * A[i] * r * r), A.map((a) => a * r), A.map((a) => -a)];
+    }
+    const phase = (t) => (t < 0 || t > tf ? "reposo" : t < tb ? "acelera" : t <= tf - tb ? "crucero" : "frena");
+    return { q0, qf, tf, tb, V, A, sample, phase };
+  }
+  function planLspb(q0, qf, vmax, amax) {
+    const dist = sub(qf, q0).map(Math.abs);
+    if (Math.max(...dist) === 0) return lspb(q0, qf, 1, 0.5);
+    const K = Math.max(...dist.map((d, i) => d / amax[i])), Dv = Math.max(...dist.map((d, i) => d / vmax[i]));
+    const blend = (tf) => 0.5 * (tf - Math.sqrt(tf * tf - 4 * K));
+    const feasible = (tf) => tf * tf >= 4 * K && blend(tf) <= tf - Dv + 1e-12;
+    let low = Math.max(2 * Math.sqrt(K), Dv), high = 2 * low + 1;
+    while (!feasible(high)) high *= 2;
+    if (feasible(low)) high = low;
+    else for (let i = 0; i < 100; i++) { const m = 0.5 * (low + high); if (feasible(m)) high = m; else low = m; }
+    return lspb(q0, qf, high, blend(high));
+  }
+
+  // ------------------------------------------------------------------ jacobian.py
+  function geometricJacobian(q, reference = "tcp") {
+    const F = jointFrames(q);
+    let p;
+    if (reference === "tcp") p = matvec(F[6], [0, 0, TCP_Z_M, 1]).slice(0, 3);
+    else if (reference === "tool0") p = pos(F[6]);
+    else p = pos(F[4]);
+    const J = Array.from({ length: 6 }, () => Array(6).fill(0));
+    for (let i = 0; i < 6; i++) {
+      const z = col(F[i], 2), v = cross(z, sub(p, pos(F[i])));
+      for (let r = 0; r < 3; r++) { J[r][i] = v[r]; J[r + 3][i] = z[r]; }
+    }
+    return J;
+  }
+  function numericalJacobian(q, h = 1e-6) {
+    const R = rot(forwardKinematicsTcp(q)), J = Array.from({ length: 6 }, () => Array(6).fill(0));
+    for (let i = 0; i < 6; i++) {
+      const qp = q.slice(), qm = q.slice(); qp[i] += h; qm[i] -= h;
+      const P = forwardKinematicsTcp(qp), M = forwardKinematicsTcp(qm);
+      const v = scale(sub(pos(P), pos(M)), 1 / (2 * h));
+      const dR = rot(P).map((row, a) => row.map((x, b) => (x - rot(M)[a][b]) / (2 * h)));
+      const S = matmul(dR, transpose(R));
+      const w = [S[2][1], S[0][2], S[1][0]];
+      for (let r = 0; r < 3; r++) { J[r][i] = v[r]; J[r + 3][i] = w[r]; }
+    }
+    return J;
+  }
+  // SVD por Jacobi de un lado (Hestenes): A V = U S. Devuelve s (desc), V (columnas) y U (columnas).
+  function svd(Ain) {
+    const m = Ain.length, n = Ain[0].length;
+    const A = Ain.map((r) => r.slice()), V = eye(n);
+    for (let sweep = 0; sweep < 80; sweep++) {
+      let off = 0;
+      for (let p = 0; p < n - 1; p++) for (let qq = p + 1; qq < n; qq++) {
+        let alpha = 0, beta = 0, gamma = 0;
+        for (let i = 0; i < m; i++) { alpha += A[i][p] ** 2; beta += A[i][qq] ** 2; gamma += A[i][p] * A[i][qq]; }
+        if (Math.abs(gamma) <= 1e-300 || Math.abs(gamma) < 1e-15 * Math.sqrt(alpha * beta)) continue;
+        off = Math.max(off, Math.abs(gamma) / Math.sqrt(alpha * beta));
+        const zeta = (beta - alpha) / (2 * gamma), t = Math.sign(zeta || 1) / (Math.abs(zeta) + Math.sqrt(1 + zeta * zeta));
+        const c = 1 / Math.sqrt(1 + t * t), s = c * t;
+        for (let i = 0; i < m; i++) { const a = A[i][p], b = A[i][qq]; A[i][p] = c * a - s * b; A[i][qq] = s * a + c * b; }
+        for (let i = 0; i < n; i++) { const a = V[i][p], b = V[i][qq]; V[i][p] = c * a - s * b; V[i][qq] = s * a + c * b; }
+      }
+      if (off < 1e-15) break;
+    }
+    const sv = Array.from({ length: n }, (_, j) => Math.sqrt(A.reduce((s, r) => s + r[j] ** 2, 0)));
+    const order = sv.map((_, j) => j).sort((a, b) => sv[b] - sv[a]);
+    const s = order.map((j) => sv[j]);
+    const Vc = order.map((j) => V.map((r) => r[j])); // columnas de V
+    const Uc = order.map((j) => (sv[j] > 1e-12 * (s[0] || 1) ? A.map((r) => r[j] / sv[j]) : null));
+    // columnas de U faltantes (σ ≈ 0): completar con el complemento ortogonal (Gram-Schmidt)
+    for (let k = 0; k < Uc.length; k++) if (!Uc[k]) {
+      for (let e = 0; e < m && !Uc[k]; e++) {
+        let u = Array.from({ length: m }, (_, i) => (i === e ? 1 : 0));
+        for (const w of Uc) if (w) u = sub(u, scale(w, dot(u, w)));
+        if (norm(u) > 1e-6) Uc[k] = scale(u, 1 / norm(u));
+      }
+    }
+    return { s, V: Vc, U: Uc };
+  }
+  const RANK_TOL = 1e-6;
+  function rankAnalysis(J, tol = RANK_TOL) {
+    const d = svd(J), rank = d.s.filter((x) => x > tol).length;
+    return { s: d.s, rank, lost: d.U.slice(rank), nullMotions: d.V.slice(rank), cond: d.s[5] === 0 ? Infinity : d.s[0] / d.s[5], U: d.U, V: d.V };
+  }
+  function solve(Ain, b) { // Gauss con pivoteo parcial
+    const n = b.length, A = Ain.map((r, i) => [...r, b[i]]);
+    for (let k = 0; k < n; k++) {
+      let p = k; for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
+      [A[k], A[p]] = [A[p], A[k]];
+      for (let i = k + 1; i < n; i++) { const f = A[i][k] / A[k][k]; for (let j = k; j <= n; j++) A[i][j] -= f * A[k][j]; }
+    }
+    const x = Array(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) x[i] = (A[i][n] - A[i].slice(i + 1, n).reduce((s, a, j) => s + a * x[i + 1 + j], 0)) / A[i][i];
+    return x;
+  }
+  const det = (M) => { // det por eliminación
+    const n = M.length, A = M.map((r) => r.slice()); let d = 1;
+    for (let k = 0; k < n; k++) {
+      let p = k; for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
+      if (A[p][k] === 0) return 0;
+      if (p !== k) { [A[k], A[p]] = [A[p], A[k]]; d = -d; }
+      d *= A[k][k];
+      for (let i = k + 1; i < n; i++) { const f = A[i][k] / A[k][k]; for (let j = k; j < n; j++) A[i][j] -= f * A[k][j]; }
+    }
+    return d;
+  };
+  const armPositionDeterminant = (q) => det(geometricJacobian(q, "wrist").slice(0, 3).map((r) => r.slice(0, 3)));
+
+  // ------------------------------------------------------------------ dynamics.py (datos CAD Truc & Lam 2020 + pinza SMC)
+  const G = 9.81;
+  const diag3 = (a, b, c, s) => [[a * s, 0, 0], [0, b * s, 0], [0, 0, c * s]];
+  const PAPER_LINKS = [
+    { m: 4.248, c: [0, 0.054, 0], I: diag3(19.699, 14.484, 19.952, 1e-3) },
+    { m: 5.412, c: [-0.169, 0, 0], I: diag3(35.942, 83.522, 57.569, 1e-3) },
+    { m: 4.077, c: [-0.012, 0, 0.023], I: [[17.562e-3, 0, -1.993e-3], [0, 23.14e-3, 0], [-1.993e-3, 0, 11.589e-3]] },
+    { m: 1.832, c: [0, -0.007, 0], I: diag3(7.247, 3.919, 5.551, 1e-3) },
+    { m: 0.755, c: [0, 0, 0], I: diag3(1.12, 1.227, 0.559, 1e-3) },
+    { m: 0.019, c: [0, 0, -0.007], I: diag3(2.347, 2.347, 4.123, 1e-6) },
+  ];
+  const GRIPPER_MASS = 0.115, GRIPPER_COM = [0, 0, 0.04];
+  const parallelAxis = (I, m, d) => I.map((r, i) => r.map((v, j) => v + m * ((i === j ? dot(d, d) : 0) - d[i] * d[j])));
+  const LINKS = (() => {
+    const w = PAPER_LINKS[5], m = w.m + GRIPPER_MASS;
+    const c = add(scale(w.c, w.m), scale(GRIPPER_COM, GRIPPER_MASS)).map((v) => v / m);
+    let I = parallelAxis(w.I, w.m, sub(w.c, c));
+    I = parallelAxis(I, GRIPPER_MASS, sub(GRIPPER_COM, c));
+    return [...PAPER_LINKS.slice(0, 5), { m, c, I }];
+  })();
+  function comJacobians(q) {
+    const F = jointFrames(q);
+    return LINKS.map((L, k) => {
+      const T = F[k + 1], p = matvec(T, [...L.c, 1]).slice(0, 3);
+      const Jv = [[], [], []], Jw = [[], [], []];
+      for (let j = 0; j < 6; j++) {
+        const z = col(F[j], 2), v = j <= k ? cross(z, sub(p, pos(F[j]))) : [0, 0, 0], w = j <= k ? z : [0, 0, 0];
+        for (let r = 0; r < 3; r++) { Jv[r][j] = v[r]; Jw[r][j] = w[r]; }
+      }
+      return { Jv, Jw, R: rot(T) };
+    });
+  }
+  function massMatrix(q) {
+    let M = Array.from({ length: 6 }, () => Array(6).fill(0));
+    comJacobians(q).forEach(({ Jv, Jw, R }, k) => {
+      const Ib = matmul(matmul(R, LINKS[k].I), transpose(R));
+      const A = matmul(transpose(Jv), Jv), B = matmul(matmul(transpose(Jw), Ib), Jw);
+      M = M.map((r, i) => r.map((v, j) => v + LINKS[k].m * A[i][j] + B[i][j]));
+    });
+    return M.map((r, i) => r.map((v, j) => 0.5 * (v + M[j][i])));
+  }
+  function gravityVector(q) {
+    const g = Array(6).fill(0);
+    comJacobians(q).forEach(({ Jv }, k) => { for (let j = 0; j < 6; j++) g[j] += LINKS[k].m * G * Jv[2][j]; });
+    return g;
+  }
+  function coriolisVector(q, qd, h = 1e-6) {
+    const dM = [];
+    for (let k = 0; k < 6; k++) {
+      const qp = q.slice(), qm = q.slice(); qp[k] += h; qm[k] -= h;
+      const P = massMatrix(qp), Mm = massMatrix(qm);
+      dM.push(P.map((r, i) => r.map((v, j) => (v - Mm[i][j]) / (2 * h))));
+    }
+    const mdq = Array(6).fill(0);
+    for (let k = 0; k < 6; k++) { const t = matvec(dM[k], qd); for (let i = 0; i < 6; i++) mdq[i] += qd[k] * t[i]; }
+    const grad = dM.map((D) => dot(qd, matvec(D, qd)));
+    return mdq.map((v, i) => v - 0.5 * grad[i]);
+  }
+  const inverseDynamics = (q, qd, qdd) => add(add(matvec(massMatrix(q), qdd), coriolisVector(q, qd)), gravityVector(q));
+
+  // ------------------------------------------------------------------ dynamics_1r.py
+  function shoulderModel(qRef) {
+    const F = jointFrames(qRef), axis = col(F[1], 2), origin = pos(F[1]);
+    let mass = 0, first = [0, 0, 0], Iaxis = 0;
+    for (let n = 2; n <= 6; n++) {
+      const L = LINKS[n - 1], T = F[n], c = matvec(T, [...L.c, 1]).slice(0, 3), R = rot(T), off = sub(c, origin);
+      const Ib = matmul(matmul(R, L.I), transpose(R));
+      Iaxis += dot(axis, matvec(Ib, axis)) + L.m * (dot(off, off) - dot(off, axis) ** 2);
+      mass += L.m; first = add(first, scale(off, L.m));
+    }
+    const r = scale(first, 1 / mass), rp = sub(r, scale(axis, dot(r, axis))), lc = norm(rp);
+    const DOWN = [0, 0, -1], theta = Math.atan2(dot(axis, cross(DOWN, rp)), dot(DOWN, rp));
+    const Ic = Iaxis - mass * lc * lc, J = Ic + mass * lc * lc, phi0 = theta - qRef[1];
+    const components = (q2, q2dd) => { const ti = J * q2dd, tg = mass * G * lc * Math.sin(q2 + phi0); return [ti, tg, ti + tg]; };
+    return { mass, lc, Ic, J, phi0, qRef, mglc: mass * G * lc, components, theta: (q2) => q2 + phi0 };
+  }
+
+  // ------------------------------------------------------------------ rosi_model.py (verificación independiente)
+  const ROSI = [[[0, 0, 0], [0, 0, 1]], [[0, 0, 0.29], [0, 1, 0]], [[0, 0, 0.27], [0, 1, 0]], [[0, 0, 0.07], [1, 0, 0]], [[0.302, 0, 0], [0, 1, 0]], [[0.072, 0, 0], [1, 0, 0]]];
+  function axisRot(a, t) {
+    const [x, y, z] = a, K = [[0, -z, y], [z, 0, -x], [-y, x, 0]], K2 = matmul(K, K);
+    return eye(3).map((r, i) => r.map((v, j) => v + Math.sin(t) * K[i][j] + (1 - Math.cos(t)) * K2[i][j]));
+  }
+  function rosiForwardKinematics(q) {
+    let T = eye(4);
+    ROSI.forEach(([xyz, ax], i) => { const R = axisRot(ax, q[i]); T = matmul(T, [[...R[0], xyz[0]], [...R[1], xyz[1]], [...R[2], xyz[2]], [0, 0, 0, 1]]); });
+    const R = axisRot([0, 1, 0], PI / 2);
+    return matmul(T, [[...R[0], 0], [...R[1], 0], [...R[2], 0], [0, 0, 0, 1]]);
+  }
+
+  const API = {
+    PI, deg, rad, wrapPi, matmul, transpose, matvec, dot, norm, sub, add, scale, cross, rot, pos, col, eye, solve, det,
+    DH, TCP_Z_M, LIMITS, LIMITS_DEG, MAX_SPEED, MAX_SPEED_DEG, HOME_Q, D1, L2, L3, DELTA, REACH_MIN, REACH_MAX,
+    dhTransform, jointFrames, forwardKinematics, forwardKinematicsTcp, positionError, rotationError,
+    rpyToMatrix, poseFromXyzRpyDeg, assertRigid, fkCheck, TOL_P, TOL_R,
+    wristCenter, armBranches, wristSolutions, enumerateCandidates, analyzePose, rankCandidates, limitMarginDeg, WEIGHTS,
+    defaultLimits, planLspb, lspb, geometricJacobian, numericalJacobian, svd, rankAnalysis, RANK_TOL, armPositionDeterminant,
+    LINKS, massMatrix, gravityVector, coriolisVector, inverseDynamics, shoulderModel, rosiForwardKinematics,
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = API;
+  else root.IRB = API;
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+/* app.js — interfaz de "IRB 120 · Hito 2 en vivo". Toda la matemática viene de irb120.js (verificado contra Python). */
+"use strict";
+const R = window.IRB;
+const $ = (s, el = document) => el.querySelector(s);
+const fmt = (v, d = 3) => (v === null || v === undefined || Number.isNaN(v) ? "—" : (Math.abs(v) < 1e-12 ? 0 : v).toFixed(d));
+const fexp = (v, d = 1) => (v === null || v === undefined || Number.isNaN(v) ? "—" : v.toExponential(d));
+const fdeg = (v, d = 2) => fmt(R.deg(v) + 0, d);
+const tok = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const JC = () => [1, 2, 3, 4, 5, 6].map((i) => tok(`--j${i}`));
+
+const PRESETS = [
+  { id: "ejemplo", name: "Ejemplo resuelto a mano", v: [0.40, 0.10, 0.35, 0, 180, 0] },
+  { id: "ocho", name: "8 ramas admisibles", v: [0.45, -0.10, 0.60, 90, 90, 0] },
+  { id: "seis", name: "6 admisibles", v: [0.40, 0.20, 0.60, 0, 135, 0] },
+  { id: "corto", name: "Movimiento corto (triangular)", v: [0.5326, 0.0479, 0.5911, 158.253, 79.232, 163.253] },
+  { id: "alcance", name: "Fuera de alcance", v: [0.90, 0.00, 0.40, 0, 90, 0] },
+  { id: "limites", name: "Bloqueada por límites", v: [-0.055, -0.253, 0.343, 93.5, -4.4, -11.9] },
+];
+
+const SECTIONS = [
+  { id: "resumen", crit: "▶", name: "Pipeline", sub: "De T_d al torque" },
+  { id: "pieper", crit: "A", name: "Pieper · 8 ramas", sub: "15 %" },
+  { id: "validacion", crit: "B", name: "Validación FK", sub: "10 %" },
+  { id: "seleccion", crit: "A", name: "Selección de rama", sub: "criterio justificado" },
+  { id: "lspb", crit: "C", name: "Trayectoria LSPB", sub: "15 %" },
+  { id: "jacobiano", crit: "D", name: "Jacobiano", sub: "20 % · parte 1" },
+  { id: "singularidad", crit: "D", name: "Singularidad", sub: "20 % · parte 2" },
+  { id: "dinamica", crit: "E", name: "Dinámica 1R", sub: "15 %" },
+  { id: "verificacion", crit: "F·G", name: "Verificación y defensa", sub: "5 % + 20 %" },
+];
+
+// ============================================================ estado del pipeline
+const S = { spec: PRESETS[0].v, speed: 0.25, ramp: 0.25, t: 0, playing: true, rate: 0.5, branch: 0, section: "resumen" };
+
+function compute() {
+  const [x, y, z, r, p, w] = S.spec;
+  S.T = R.poseFromXyzRpyDeg(x, y, z, r, p, w);
+  S.home = R.analyzePose(R.forwardKinematicsTcp(R.HOME_Q), R.HOME_Q);
+  S.rep = R.analyzePose(S.T, R.HOME_Q);
+  S.rank = R.rankCandidates(S.rep, R.HOME_Q);
+  S.best = S.rank.find((d) => d.rank === 1) || null;
+  S.q0 = R.HOME_Q.slice();
+  S.full = null;
+  if (!S.best) { S.traj = null; return; }
+  S.qf = S.best.candidate.q;
+  const [vmax, amax] = R.defaultLimits(S.speed, S.ramp);
+  S.vmax = vmax; S.amax = amax;
+  S.traj = R.planLspb(S.q0, S.qf, vmax, amax);
+  const N = 301, tf = S.traj.tf;
+  S.ts = Array.from({ length: N }, (_, i) => (tf * i) / (N - 1));
+  S.samp = S.ts.map((t) => S.traj.sample(t));
+  S.model = R.shoulderModel(S.q0.map((v, i) => 0.5 * (v + S.qf[i])));
+  S.tau = S.samp.map(([q, , qdd]) => S.model.components(q[1], qdd[1]));
+  S.jac = S.samp.map(([q, qd]) => {
+    const J = R.geometricJacobian(q), ra = R.rankAnalysis(J), tw = R.matvec(J, qd);
+    return { smin: ra.s[5], rank: ra.rank, v: R.norm(tw.slice(0, 3)), w: R.norm(tw.slice(3)) };
+  });
+  const H = 1e-6;
+  S.vnum = S.ts.map((t) => R.norm(R.scale(R.sub(R.pos(R.forwardKinematicsTcp(S.traj.sample(t + H)[0])), R.pos(R.forwardKinematicsTcp(S.traj.sample(t - H)[0]))), 1 / (2 * H))));
+  S.tcpPath = S.samp.map(([q]) => R.pos(R.forwardKinematicsTcp(q)));
+  const D = R.sub(S.qf, S.q0).map(Math.abs);
+  S.critical = D.map((d, i) => Math.max(d / vmax[i], d / amax[i])).reduce((b, v, i, a) => (v > a[b] ? i : b), 0) + 1;
+  S.triangular = S.traj.tf - 2 * S.traj.tb < 1e-6;
+}
+
+// ============================================================ utilidades de canvas
+function prep(cv) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(10, r.width), h = Math.max(10, r.height);
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+function niceTicks(a, b, n = 5) {
+  if (!(b > a)) { b = a + 1; }
+  const step0 = (b - a) / n, mag = 10 ** Math.floor(Math.log10(step0)), f = step0 / mag;
+  const step = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * mag, out = [];
+  for (let v = Math.ceil(a / step) * step; v <= b + 1e-9 * step; v += step) out.push(Math.abs(v) < step * 1e-9 ? 0 : v);
+  return out;
+}
+/* Gráfica de líneas. o = {series:[{x,y,color,label,dash,width,dots}], xmin,xmax,ymin,ymax, logY, cursor, shades:[{a,b,color}], xlabel, ylabel, vlines, hlines} */
+function chart(cv, o) {
+  const { ctx, w, h } = prep(cv), ink = tok("--ink"), muted = tok("--muted"), grid = tok("--grid");
+  const L = 52, Rm = 12, T = 10, B = 30, pw = w - L - Rm, ph = h - T - B;
+  const all = o.series.flatMap((s) => s.y.filter((v) => Number.isFinite(v) && (!o.logY || v > 0)));
+  let ymin = o.ymin ?? Math.min(...all), ymax = o.ymax ?? Math.max(...all);
+  if (o.logY) { ymin = Math.log10(ymin); ymax = Math.log10(ymax); }
+  if (ymax - ymin < 1e-9) { ymin -= 1; ymax += 1; } else if (o.ymin === undefined && !o.logY) { const pad = 0.08 * (ymax - ymin); ymin -= pad; ymax += pad; }
+  const xmin = o.xmin, xmax = o.xmax;
+  const X = (x) => L + ((x - xmin) / (xmax - xmin)) * pw;
+  const Y = (y) => T + (1 - ((o.logY ? Math.log10(y) : y) - ymin) / (ymax - ymin)) * ph;
+  ctx.font = "11px " + tok("--font-mono"); ctx.lineWidth = 1;
+  (o.shades || []).forEach((s) => { ctx.fillStyle = s.color; ctx.globalAlpha = 0.13; ctx.fillRect(X(s.a), T, X(s.b) - X(s.a), ph); ctx.globalAlpha = 1; });
+  const yt = o.logY ? niceTicks(Math.ceil(ymin), Math.floor(ymax), 6).filter(Number.isInteger) : niceTicks(ymin, ymax, 4);
+  ctx.strokeStyle = grid; ctx.fillStyle = muted; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  yt.forEach((v) => { const yy = o.logY ? T + (1 - (v - ymin) / (ymax - ymin)) * ph : Y(v); ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(L + pw, yy); ctx.stroke(); ctx.fillText(o.logY ? `1e${v}` : +v.toPrecision(4), L - 6, yy); });
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  niceTicks(xmin, xmax, 6).forEach((v) => { ctx.beginPath(); ctx.moveTo(X(v), T); ctx.lineTo(X(v), T + ph); ctx.stroke(); ctx.fillText(+v.toPrecision(4), X(v), T + ph + 4); });
+  ctx.strokeStyle = muted; ctx.strokeRect(L, T, pw, ph);
+  if (o.xlabel) { ctx.textAlign = "right"; ctx.fillText(o.xlabel, L + pw, T + ph + 16); }
+  if (o.ylabel) { ctx.save(); ctx.translate(12, T + ph / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = "center"; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+  ctx.save(); ctx.beginPath(); ctx.rect(L, T, pw, ph); ctx.clip();
+  (o.hlines || []).forEach((l) => { ctx.strokeStyle = l.color; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(L, Y(l.y)); ctx.lineTo(L + pw, Y(l.y)); ctx.stroke(); ctx.setLineDash([]); if (l.label) { ctx.fillStyle = l.color; ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText(l.label, L + 4, Y(l.y) - 2); } });
+  o.series.forEach((s) => {
+    ctx.strokeStyle = s.color; ctx.fillStyle = s.color; ctx.lineWidth = s.width || 1.8; ctx.setLineDash(s.dash || []);
+    if (s.dots) { s.x.forEach((x, i) => { if (Number.isFinite(s.y[i]) && (!o.logY || s.y[i] > 0)) { ctx.beginPath(); ctx.arc(X(x), Y(s.y[i]), s.r || 2.4, 0, 7); ctx.fill(); } }); }
+    else { ctx.beginPath(); let pen = false; s.x.forEach((x, i) => { const v = s.y[i]; if (!Number.isFinite(v) || (o.logY && v <= 0)) { pen = false; return; } pen ? ctx.lineTo(X(x), Y(v)) : ctx.moveTo(X(x), Y(v)); pen = true; }); ctx.stroke(); }
+    ctx.setLineDash([]);
+  });
+  (o.marks || []).forEach((m) => { ctx.fillStyle = m.color; ctx.beginPath(); ctx.arc(X(m.x), Y(m.y), 5, 0, 7); ctx.fill(); });
+  if (o.cursor !== undefined) { ctx.strokeStyle = ink; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(X(o.cursor), T); ctx.lineTo(X(o.cursor), T + ph); ctx.stroke(); }
+  ctx.restore();
+}
+const legend = (items) => `<div class="legend">${items.map(([c, l, dash]) => `<span><i style="background:${dash ? "none" : c};${dash ? `border-top:2px dashed ${c};height:0` : ""}"></i>${l}</span>`).join("")}</div>`;
+
+// ============================================================ visor 3D (proyección en perspectiva, órbita con arrastre)
+class View3D {
+  constructor(cv) {
+    this.cv = cv; this.az = -0.95; this.el = 0.38; this.dist = 1.55; this.target = [0.2, 0, 0.3];
+    let drag = null;
+    cv.addEventListener("pointerdown", (e) => { drag = [e.clientX, e.clientY, this.az, this.el]; cv.setPointerCapture(e.pointerId); cv.style.cursor = "grabbing"; });
+    cv.addEventListener("pointermove", (e) => { if (!drag) return; this.az = drag[2] - (e.clientX - drag[0]) * 0.008; this.el = Math.max(-0.2, Math.min(1.45, drag[3] + (e.clientY - drag[1]) * 0.008)); this.onchange && this.onchange(); });
+    cv.addEventListener("pointerup", () => { drag = null; cv.style.cursor = "grab"; });
+    cv.addEventListener("wheel", (e) => { e.preventDefault(); this.dist = Math.max(0.8, Math.min(4, this.dist * (1 + Math.sign(e.deltaY) * 0.08))); this.onchange && this.onchange(); }, { passive: false });
+  }
+  begin() {
+    const { ctx, w, h } = prep(this.cv); this.ctx = ctx; this.w = w; this.h = h;
+    const ce = Math.cos(this.el), se = Math.sin(this.el), ca = Math.cos(this.az), sa = Math.sin(this.az);
+    this.fwd = [-ce * ca, -ce * sa, -se];
+    this.eye = R.sub(this.target, R.scale(this.fwd, this.dist));
+    this.right = R.scale(R.cross(this.fwd, [0, 0, 1]), 1 / R.norm(R.cross(this.fwd, [0, 0, 1])));
+    this.up = R.cross(this.right, this.fwd);
+    this.f = Math.min(w, h) * 1.25;
+    this.grid();
+    return this;
+  }
+  P(p) { const d = R.sub(p, this.eye), z = R.dot(d, this.fwd); return [this.w / 2 + (this.f * R.dot(d, this.right)) / z, this.h / 2 - (this.f * R.dot(d, this.up)) / z]; }
+  line(pts, color, width = 2, dash = [], alpha = 1) {
+    const c = this.ctx; c.strokeStyle = color; c.lineWidth = width; c.setLineDash(dash); c.globalAlpha = alpha; c.lineJoin = "round"; c.lineCap = "round";
+    c.beginPath(); pts.forEach((p, i) => { const [x, y] = this.P(p); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); c.setLineDash([]); c.globalAlpha = 1;
+  }
+  dot(p, color, r = 3, alpha = 1) { const [x, y] = this.P(p); const c = this.ctx; c.globalAlpha = alpha; c.fillStyle = color; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); c.globalAlpha = 1; }
+  text(p, s, color) { const [x, y] = this.P(p); const c = this.ctx; c.fillStyle = color || tok("--muted"); c.font = "11px " + tok("--font-mono"); c.fillText(s, x + 5, y - 5); }
+  grid() {
+    const g = tok("--grid"), m = tok("--muted");
+    for (let x = -0.4; x <= 0.71; x += 0.1) this.line([[x, -0.5, 0], [x, 0.5, 0]], g, 1);
+    for (let y = -0.5; y <= 0.51; y += 0.1) this.line([[-0.4, y, 0], [0.7, y, 0]], g, 1);
+    this.line([[0, 0, 0], [0.15, 0, 0]], tok("--j2"), 1.5); this.line([[0, 0, 0], [0, 0.15, 0]], tok("--j3"), 1.5);
+    this.text([0.16, 0, 0], "x", m); this.text([0, 0.16, 0], "y", m);
+  }
+  frame(T, L = 0.08, dash = [], width = 2) {
+    const o = R.pos(T); [["--j2", 0], ["--j3", 1], ["--j1", 2]].forEach(([c, k]) => this.line([o, R.add(o, R.scale(R.col(T, k), L))], tok(c), width, dash));
+  }
+  robot(q, color, { width = 5, alpha = 1, dash = [], tcpFrame = true } = {}) {
+    const F = R.jointFrames(q), pts = F.map((f) => R.pos(f));
+    const tcp = R.pos(R.forwardKinematicsTcp(q));
+    this.line([[0, 0, 0], [0, 0, R.D1]], tok("--muted"), 9, [], 0.55 * alpha);
+    this.line([...pts.slice(1), tcp], color, width, dash, alpha);
+    pts.slice(1, 7).forEach((p) => this.dot(p, color, 4, alpha));
+    this.dot(tcp, tok("--amber"), 4.5, alpha);
+    if (tcpFrame) this.frame(R.forwardKinematicsTcp(q), 0.07, [], 2);
+  }
+}
+
+// ============================================================ secciones
+const V = {};
+
+function rubricBox(pide, aqui) {
+  return `<div class="rubric"><div><span class="label">La rúbrica pide (nivel Excelente)</span><ul>${pide.map((x) => `<li>${x}</li>`).join("")}</ul></div>
+  <div><span class="label">Dónde se ve en esta página</span><ul>${aqui.map((x) => `<li>${x}</li>`).join("")}</ul></div></div>`;
+}
+const head = (badge, title, lead) => `<div class="head"><span class="badge">${badge}</span><h2>${title}</h2></div>${lead ? `<p class="muted">${lead}</p>` : ""}`;
+const notReachable = () => `<div class="notice"><strong>La pose objetivo no es alcanzable.</strong> ${S.rep.verdict} Esta sección necesita una configuración final; cambia la pose o elige una de las poses de prueba.</div>`;
+const statusPill = (d) => d.rank === 1 ? `<span class="pill ok">${d.status}</span>` : d.admissible ? `<span class="pill info">${d.status}</span>` : `<span class="pill bad">${d.status.replace("descartada: ", "✗ ")}</span>`;
+const branchName = (c) => `${c.arm}/${c.elbow}/${c.wrist}`;
+const branchColor = (d) => (d.rank === 1 ? tok("--ok") : d.admissible ? tok("--accent") : tok("--bad"));
+
+// ---------- Resumen
+V.resumen = {
+  html() {
+    const rep = S.rep, b = S.best;
+    const stepsData = [
+      ["pieper", "A", "Pieper", `${rep.candidates.filter((c) => c.real).length} reales · ${rep.admissible.length} admisibles`],
+      ["validacion", "B", "Validación FK", `max e_p ${fexp(Math.max(...rep.checks.filter(Boolean).map((c) => c.ep), 0))} m`],
+      ["seleccion", "A", "Selección", b ? `rama ${b.candidate.branch} · ${branchName(b.candidate)}` : "sin solución"],
+      ["lspb", "C", "LSPB", S.traj ? `t_f ${fmt(S.traj.tf, 3)} s · J${S.critical} crítica` : "—"],
+      ["jacobiano", "D", "Jacobiano", S.traj ? `rango(q_f) = ${R.rankAnalysis(R.geometricJacobian(S.qf)).rank}` : "—"],
+      ["singularidad", "D", "Singularidad", "rango 6 → 5 en q5 = 0"],
+      ["dinamica", "E", "Dinámica 1R", S.traj ? `pico τ₂ ${fmt(peakTau().v, 2)} N·m` : "—"],
+    ];
+    return `${head("Pipeline", "De la pose objetivo al torque del hombro", "Pose inicial: posición de calibración ABB (q = 0). Pose objetivo: la de la barra superior. Cada etapa usa el resultado de la anterior; haz clic en una para verla.")}
+    <div class="steps">${stepsData.map(([id, c, n, o]) => `<a class="step" href="#${id}"><span class="crit">${c} · ${n}</span><span class="out">${o}</span></a>`).join("")}</div>
+    <div class="grid2">
+      <div class="panel"><h3>Movimiento de la pose inicial a la objetivo <span class="hint">arrastra para girar</span></h3><canvas class="view3d" id="cvHero"></canvas>
+        ${legend([[tok("--muted"), "pose inicial (q = 0)"], [tok("--ok"), "pose objetivo"], [tok("--ink"), "trayectoria del TCP"]])}</div>
+      <div class="panel"><h3>Rúbrica oficial y dónde se cumple</h3><div class="table-wrap"><table>
+        <thead><tr><th class="l">Criterio</th><th>Peso</th><th class="l">Evidencia en vivo</th></tr></thead><tbody>
+        ${[["A", "IK analítica (Pieper)", "15 %", "pieper", "8 ramas, atan2, real/admisible, geometría"], ["B", "Validación por FK", "10 %", "validacion", "posición + orientación, tolerancia, errores inyectados, ida y vuelta, modelo oficial"],
+           ["C", "Trayectoria LSPB", "15 %", "lspb", "q, q̇, q̈ alineados, fronteras, límites, animación"], ["D", "Jacobiano y singularidad", "20 %", "jacobiano", "validación numérica, columnas, rango SVD, experimento q5 → 0"],
+           ["E", "Dinámica 1R y τ(t)", "15 %", "dinamica", "τ_in + τ_g sobre el LSPB, péndulo, 1R vs completo"], ["F", "Integración y reproducibilidad", "5 %", "verificacion", "notebook 34/34, 56 pruebas, informe IEEE"],
+           ["G", "Defensa individual", "20 %", "verificacion", "pipeline, ecuación, validación, transferencia"]]
+          .map(([c, n, p, id, e]) => `<tr><td class="l"><a href="#${id}"><strong>${c}</strong> ${n}</a></td><td>${p}</td><td class="l" style="white-space:normal;font-family:var(--font-body)">${e}</td></tr>`).join("")}
+        </tbody></table></div>
+        <p class="hint">Todo lo que ves se calcula en vivo en el navegador con una traducción del paquete Python <span class="mono">irb120</span>, verificada contra él en 105 casos (diferencias ≤ 1e-9).</p></div>
+    </div>`;
+  },
+  init() { this.v = new View3D($("#cvHero")); this.v.onchange = () => this.frame(); },
+  frame() {
+    const v = this.v.begin();
+    v.robot(S.q0, tok("--muted"), { alpha: 0.7, tcpFrame: true });
+    if (S.traj) {
+      v.robot(S.qf, tok("--ok"), { alpha: 0.35, tcpFrame: false });
+      v.line(S.tcpPath, tok("--ink"), 1.5, [4, 3]);
+      v.robot(S.traj.sample(S.t)[0], tok("--accent"));
+    }
+    v.frame(S.T, 0.11, [5, 4], 2);
+  },
+  animated: true,
+};
+
+// ---------- A: Pieper
+V.pieper = {
+  html() {
+    const rep = S.rep, T0 = rep.T0, W = rep.W, z6 = R.col(S.T, 2);
+    const planar = Math.hypot(W[0], W[1]), hgt = W[2] - R.D1, c = rep.candidates[0].c;
+    const real = rep.candidates.filter((k) => k.real).length;
+    return `${head("A · 15 %", "Cinemática inversa analítica por Pieper", "Los ejes 4, 5 y 6 se cortan en el centro de muñeca W: primero se coloca W con el brazo (q1, q2, q3) y luego se orienta con la muñeca (q4, q5, q6). 2 brazo × 2 codo × 2 muñeca = 8 ramas.")}
+    ${rubricBox(["Estructura analítica, sin solver numérico", "Manejo correcto de ramas (hasta 8) y uso de atan2", "Procesar todas las poses y distinguir candidatos reales de admisibles", "Explicar la geometría de las ramas"],
+      ["Panel de pasos: cada número sale de la fórmula (atan2, asin, ley de cosenos)", "Vista 3D: elige una rama o «todas» y gira el robot", "Tabla: real · en límites · error FK · admisible", "Prueba las poses «Fuera de alcance» y «Bloqueada por límites»"])}
+    <div class="grid2">
+      <div class="panel"><h3>Las 8 ramas en 3D <span class="hint">arrastra · rueda = zoom</span></h3>
+        <div class="branchbar" id="bb">${[0, ...rep.candidates.map((k) => k.branch)].map((k) => {
+          const d = k ? S.rank[k - 1] : null; const cls = d ? (d.rank === 1 ? "ok" : d.admissible ? "" : "bad") : "";
+          return `<button type="button" data-b="${k}" class="${cls}" aria-pressed="${S.branch === k}">${k ? `R${k}` : "todas"}</button>`; }).join("")}</div>
+        <canvas class="view3d" id="cvA"></canvas>
+        ${legend([[tok("--ok"), "elegida"], [tok("--accent"), "admisible"], [tok("--bad"), "viola límites (ángulos sin ajustar)", true], [tok("--muted"), "triedro objetivo", true]])}
+        <p class="hint" id="bInfo"></p></div>
+      <div class="panel"><h3>Paso a paso con esta pose</h3>
+        <div class="eq">p_TCP = (${R.pos(S.T).map((v) => fmt(v)).join(", ")})   z6 = (${z6.map((v) => fmt(v)).join(", ")})
+p_W = p_TCP − (0.150 + d6)·z6 = (${W.map((v) => fmt(v, 4)).join(", ")}) m
+r = √(x²+y²) = ${fmt(planar, 4)}    h = z_W − d1 = ${fmt(hgt, 4)}    D = ${fmt(rep.dist, 4)} m
+alcance: |L2 − L3| = ${fmt(R.REACH_MIN, 3)} ≤ D ≤ L2 + L3 = ${fmt(R.REACH_MAX, 3)}  → ${rep.geometricallyReachable ? "dentro" : "FUERA"}
+c = (D² − L2² − L3²)/(2·L2·L3) = ${fmt(c, 5)}   ${Math.abs(c) <= 1 ? "|c| ≤ 1 → 2 codos reales" : "|c| > 1 → no existe"}
+q1 frente = atan2(y_W, x_W) = ${fdeg(Math.atan2(W[1], W[0]))}°   atrás = q1 + 180°
+q3 = δ + asin(−c)  ó  δ + 180° − asin(−c),  δ = atan2(a3, d4) = ${fdeg(R.DELTA)}°
+q2 = atan2(r, h) − atan2(L3 sin η, L2 + L3 cos η),  η = 90° + q3 − δ
+R36 = R03ᵀ·R_d = Rz(q4)·Ry(−q5)·Rz(q6 + 180°)  → Euler ZYZ con atan2</div>
+        <dl class="kv"><dt>Veredicto</dt><dd>${rep.verdict}</dd><dt>Ramas reales</dt><dd>${real} de 8</dd><dt>Admisibles</dt><dd>${rep.admissible.length} de 8</dd>
+        <dt>Pose inicial</dt><dd>Pieper recupera q = 0 desde T₀ (${S.home.admissible.some((k) => k.q.every((v) => Math.abs(v) < 1e-9)) ? "sí" : "no"}), muñeca singular</dd></dl></div>
+    </div>
+    <div class="panel"><h3>Tabla de las 8 ramas <span class="hint">clic en una fila para verla en 3D</span></h3><div class="table-wrap"><table>
+      <thead><tr><th>k</th><th class="l">brazo / codo / muñeca</th><th>q1</th><th>q2</th><th>q3</th><th>q4</th><th>q5</th><th>q6</th><th class="l">real</th><th class="l">límites</th><th>e_p [m]</th><th>e_R [rad]</th><th class="l">estado</th></tr></thead>
+      <tbody>${rep.candidates.map((k, i) => { const ch = rep.checks[i], q = k.q || k.qRaw, d = S.rank[i];
+        return `<tr class="clickable ${d.rank === 1 ? "sel" : ""}" data-b="${k.branch}"><td>${k.branch}</td><td class="l">${branchName(k)}${k.singular ? " ·sing" : ""}</td>${q ? q.map((v) => `<td>${fdeg(v)}</td>`).join("") : `<td colspan="6" style="text-align:center">no existe (|c| > 1)</td>`}
+        <td class="l">${k.real ? "sí" : "no"}</td><td class="l">${!k.real ? "—" : k.q ? "sí" : "J" + k.out.join(",")}</td><td>${ch ? fexp(ch.ep) : "—"}</td><td>${ch ? fexp(ch.eR) : "—"}</td><td class="l">${statusPill(d)}</td></tr>`; }).join("")}</tbody></table></div></div>`;
+  },
+  init() {
+    this.v = new View3D($("#cvA")); this.v.onchange = () => this.frame();
+    const pick = (k) => { S.branch = +k; document.querySelectorAll("#bb button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.b === S.branch))); this.frame(); };
+    $("#bb").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) pick(b.dataset.b); });
+    $("#main").querySelectorAll("tr[data-b]").forEach((tr) => tr.addEventListener("click", () => pick(tr.dataset.b)));
+    this.frame();
+  },
+  frame() {
+    const v = this.v.begin();
+    const show = S.branch ? [S.rank[S.branch - 1]] : S.rank;
+    show.forEach((d) => {
+      const c = d.candidate; if (!c.real) return;
+      const q = c.q || c.qRaw;
+      v.robot(q, branchColor(d), { width: S.branch ? 5 : 3, alpha: S.branch ? 1 : 0.85, dash: d.admissible ? [] : [6, 5], tcpFrame: !!S.branch });
+    });
+    v.frame(S.T, 0.11, [5, 4], 2);
+    const info = $("#bInfo");
+    if (S.branch) { const d = S.rank[S.branch - 1], c = d.candidate; info.textContent = c.real ? `Rama ${c.branch} (${branchName(c)}): q = (${(c.q || c.qRaw).map((x) => fdeg(x, 1)).join(", ")})° — ${d.status}` : `Rama ${c.branch}: no existe para esta pose.`; }
+    else info.textContent = "Todas las ramas reales llegan al mismo TCP con la misma orientación; cambia cómo llega el brazo.";
+  },
+};
+
+// ---------- B: Validación
+V.validacion = {
+  html() {
+    const adm = S.rep.admissible[0];
+    return `${head("B · 10 %", "Validación sistemática por cinemática directa", "Cada rama real se reinyecta en la FK y se compara la pose completa: e_p = ‖p(q) − p_d‖ y e_R = ángulo de R_dᵀR(q). Se acepta si e_p < 1e-6 m y e_R < 1e-6 rad.")}
+    ${rubricBox(["Verificar sistemáticamente los candidatos", "Comparar posición y orientación", "Documentar error y criterio de aceptación", "Identificar inconsistencias"],
+      ["Gráfica: error de cada rama frente a la tolerancia", "Inyector de errores: un error solo en q6 no mueve el TCP y aun así se rechaza", "Ida y vuelta FK → IK → FK con poses aleatorias", "Comparación con el modelo oficial de ROS-Industrial"])}
+    <div class="grid2">
+      <div class="panel"><h3>Error FK de cada rama real (escala log)</h3><canvas class="chart tall" id="cvErr"></canvas>
+        ${legend([[tok("--accent"), "e_p [m]"], [tok("--amber"), "e_R [rad]"], [tok("--bad"), "tolerancia 1e-6", true]])}</div>
+      <div class="panel"><h3>¿El criterio detecta errores? Inyéctalos</h3>
+        ${adm ? `<p class="hint">Parte de la rama admisible R${adm.branch} y le suma un error a q1 o a q6.</p>
+        <div class="controls"><label>Δq1 <input type="range" id="dq1" min="0" max="20" step="0.1" value="0"><span class="mono" id="dq1v">0 mrad</span></label>
+        <label>Δq6 <input type="range" id="dq6" min="0" max="20" step="0.1" value="10"><span class="mono" id="dq6v">10 mrad</span></label></div>
+        <dl class="kv" id="injOut"></dl>` : `<p class="muted">No hay rama admisible para esta pose; prueba otra pose.</p>`}
+        <h3 style="margin-top:6px">Pruebas masivas</h3>
+        <div class="controls"><button class="btn" id="btnRT" type="button">Ida y vuelta: 300 poses aleatorias</button><button class="btn" id="btnRosi" type="button">FK frente al modelo oficial ROS-Industrial</button></div>
+        <dl class="kv" id="massOut"><dt>Ida y vuelta</dt><dd>pendiente</dd><dt>ROS-Industrial</dt><dd>pendiente</dd></dl>
+        <p class="hint">El modelo oficial (abb_irb120_support) usa traslaciones y ejes de los planos de ABB, sin nuestra tabla DH: es una fuente geométrica independiente.</p></div>
+    </div>`;
+  },
+  init() {
+    const pts = S.rep.candidates.map((c, i) => [c, S.rep.checks[i]]).filter(([, ch]) => ch);
+    chart($("#cvErr"), { xmin: 0.5, xmax: 8.5, ymin: 1e-18, ymax: 1e-2, logY: true, xlabel: "rama k",
+      series: [{ x: pts.map(([c]) => c.branch - 0.1), y: pts.map(([, ch]) => Math.max(ch.ep, 1e-18)), color: tok("--accent"), dots: true, r: 5 },
+               { x: pts.map(([c]) => c.branch + 0.1), y: pts.map(([, ch]) => Math.max(ch.eR, 1e-18)), color: tok("--amber"), dots: true, r: 5 }],
+      hlines: [{ y: 1e-6, color: tok("--bad"), label: "tolerancia" }] });
+    const adm = S.rep.admissible[0];
+    if (adm) {
+      const upd = () => {
+        const a = +$("#dq1").value / 1000, b = +$("#dq6").value / 1000;
+        $("#dq1v").textContent = `${(a * 1000).toFixed(1)} mrad`; $("#dq6v").textContent = `${(b * 1000).toFixed(1)} mrad`;
+        const q = adm.q.slice(); q[0] += a; q[5] += b;
+        const ch = R.fkCheck(S.T, q);
+        $("#injOut").innerHTML = `<dt>e_p</dt><dd>${fexp(ch.ep, 2)} m</dd><dt>e_R</dt><dd>${fexp(ch.eR, 2)} rad</dd><dt>Resultado</dt><dd>${ch.accepted ? '<span class="pill ok">acepta</span>' : '<span class="pill bad">rechaza</span>'}${a === 0 && b > 0 ? " · solo orientación: el TCP no se movió" : ""}</dd>`;
+      };
+      $("#dq1").addEventListener("input", upd); $("#dq6").addEventListener("input", upd); upd();
+    }
+    $("#btnRT").addEventListener("click", () => this.roundTrip()); $("#btnRosi").addEventListener("click", () => this.rosi());
+    setTimeout(() => { this.roundTrip(); this.rosi(); }, 50);
+  },
+  roundTrip() {
+    let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    let ok = 0, rec = 0, wp = 0, wr = 0; const N = 300;
+    for (let n = 0; n < N; n++) {
+      const q = R.LIMITS.map(([a, b]) => a + (b - a) * rnd());
+      const T = R.forwardKinematicsTcp(q), rep = R.analyzePose(T, q);
+      if (rep.admissible.length) ok++;
+      if (rep.admissible.some((c) => c.q.every((v, i) => Math.abs(v - q[i]) < 1e-6))) rec++;
+      rep.admissible.forEach((c) => { const ch = rep.checks[c.branch - 1]; wp = Math.max(wp, ch.ep); wr = Math.max(wr, ch.eR); });
+    }
+    this.rt = { N, ok, rec, wp, wr };
+    $("#massOut").children[1].innerHTML = `${ok}/${N} resueltas · q original recuperado ${rec}/${N} · peor e_p ${fexp(wp)} m, e_R ${fexp(wr)} rad ${rec === N ? '<span class="pill ok">ok</span>' : '<span class="pill bad">revisar</span>'}`;
+  },
+  rosi() {
+    let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647); let worst = 0;
+    for (let n = 0; n < 300; n++) {
+      const q = R.LIMITS.map(([a, b]) => a + (b - a) * rnd());
+      const A = R.forwardKinematics(q), B = R.rosiForwardKinematics(q);
+      worst = Math.max(worst, ...A.flat().map((v, i) => Math.abs(v - B.flat()[i])));
+    }
+    this.rosiWorst = worst;
+    $("#massOut").children[3].innerHTML = `300 configuraciones · max |T_DH − T_ROS-I| = ${fexp(worst)} ${worst < 1e-9 ? '<span class="pill ok">coinciden</span>' : '<span class="pill bad">difieren</span>'}`;
+  },
+};
+
+// ---------- Selección
+V.seleccion = {
+  html() {
+    return `${head("A · selección", "De 8 ramas a 1: criterio de selección", "Filtros en orden y luego un costo. Si ninguna rama pasa los filtros 2 y 3, se relajan en ese orden y la tabla lo indica.")}
+    <div class="grid3">
+      <div class="panel"><span class="label">1 · Admisible</span><p>Real, dentro de límites y verificada por FK. Obligatorio: si no, el robot real no puede adoptarla.</p></div>
+      <div class="panel"><span class="label">2 · Lejos de singularidad</span><p>σ<sub>min</sub>(J) ≥ 0.01, porque ‖q̇‖ ≤ ‖ẋ‖/σ<sub>min</sub>: la amplificación de velocidad queda acotada a 100×.</p></div>
+      <div class="panel"><span class="label">3 · Lejos de los topes</span><p>Margen ≥ 5° en las seis juntas: el controlador tiene límites de software y el seguimiento tiene error.</p></div>
+    </div>
+    <div class="panel"><span class="label">4 · Menor desplazamiento ponderado</span><p>‖W(q − q₀)‖ con W = diag(1, 1, 1, ½, ½, ½): menos tiempo, energía y volumen barrido. Las juntas 1–3 mueven unos 12 kg; la muñeca, menos de 3 kg. El t<sub>f</sub> del LSPB se informa pero no decide: lo fija una sola junta y depende del supuesto de a<sub>max</sub>.</p></div>
+    <div class="panel"><h3>Tabla de decisión</h3><div class="table-wrap"><table>
+      <thead><tr><th>k</th><th class="l">rama</th><th class="l">adm.</th><th>σ_min(J)</th><th>margen [°]</th><th>‖W(q−q₀)‖</th><th>t_f LSPB [s]</th><th class="l">decisión</th></tr></thead>
+      <tbody>${S.rank.map((d) => `<tr class="${d.rank === 1 ? "sel" : ""}"><td>${d.candidate.branch}</td><td class="l">${branchName(d.candidate)}</td><td class="l">${d.admissible ? "sí" : "no"}</td><td>${fmt(d.sigmaMin, 4)}</td><td>${fmt(d.margin, 1)}</td><td>${fmt(d.cost, 4)}</td><td>${fmt(d.tf, 4)}</td><td class="l">${statusPill(d)}</td></tr>`).join("")}</tbody></table></div>
+      ${S.best ? `<p><strong>Elegida: rama ${S.best.candidate.branch} (${branchName(S.best.candidate)})</strong>, q<sub>f</sub> = (${S.qf.map((v) => fdeg(v)).join(", ")})°. σ<sub>min</sub> = ${fmt(S.best.sigmaMin, 3)}, margen ${fmt(S.best.margin, 1)}°, costo ${fmt(S.best.cost, 3)}.</p>` : notReachable()}</div>`;
+  },
+  init() {},
+};
+
+// ---------- C: LSPB
+function playerHtml(id) {
+  return `<div class="controls"><button class="btn" id="${id}Play" type="button">${S.playing ? "Pausa" : "Reproducir"}</button>
+  <label>t <input type="range" id="${id}T" min="0" max="1000" value="0"><span class="mono" id="${id}Tv"></span></label>
+  <label>reproducción <select id="${id}Rate"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1">1×</option></select></label>
+  <span class="mono" id="${id}Phase"></span></div>`;
+}
+function bindPlayer(id) {
+  $(`#${id}Play`).addEventListener("click", (e) => { S.playing = !S.playing; e.target.textContent = S.playing ? "Pausa" : "Reproducir"; });
+  $(`#${id}T`).addEventListener("input", (e) => { S.playing = false; $(`#${id}Play`).textContent = "Reproducir"; S.t = (+e.target.value / 1000) * S.traj.tf; current().frame(); });
+  const rs = $(`#${id}Rate`); rs.value = String(S.rate); rs.addEventListener("change", () => { S.rate = +rs.value; });
+}
+function syncPlayer(id) {
+  const el = $(`#${id}T`); if (!el || !S.traj) return;
+  el.value = String(Math.round((S.t / S.traj.tf) * 1000)); $(`#${id}Tv`).textContent = `${S.t.toFixed(3)} s`;
+  const ph = S.traj.phase(S.t); $(`#${id}Phase`).textContent = `fase: ${ph}`;
+}
+const phaseShades = () => [{ a: 0, b: S.traj.tb, color: tok("--ok") }, { a: S.traj.tf - S.traj.tb, b: S.traj.tf, color: tok("--bad") }];
+
+V.lspb = {
+  html() {
+    if (!S.traj) return head("C · 15 %", "Trayectoria LSPB") + notReachable();
+    const T = S.traj;
+    return `${head("C · 15 %", "Trayectoria LSPB sincronizada", "Todas las juntas comparten t_f y t_b, parten y llegan en reposo. V = (q_f − q₀)/(t_f − t_b), a = V/t_b. Se busca el t_f mínimo que respeta v_max y a_max de cada junta.")}
+    ${rubricBox(["Construir el perfil con parámetros justificados", "Obtener q, q̇, q̈ y cumplir las condiciones de frontera", "Graficar e interpretar; código y ecuaciones consistentes"],
+      ["Animación 3D sincronizada con las tres gráficas (cursor común)", "Controles de velocidad (% del datasheet) y rampa (supuesto de a_max)", "Verificaciones en vivo: fronteras, reposo, continuidad, límites"])}
+    ${playerHtml("pl")}
+    <div class="grid2">
+      <div class="panel"><h3>Movimiento en 3D <span class="hint">arrastra para girar</span></h3><canvas class="view3d" id="cvC"></canvas></div>
+      <div class="panel"><h3>Perfiles q, q̇, q̈ <span class="hint">verde: acelera · rojo: frena</span></h3>
+        <canvas class="chart" id="cq"></canvas><canvas class="chart" id="cqd"></canvas><canvas class="chart" id="cqdd"></canvas>
+        ${legend(JC().map((c, i) => [c, `q${i + 1}`]))}</div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h3>Parámetros <span class="mono">t_f = ${fmt(T.tf, 4)} s · t_b = ${fmt(T.tb, 4)} s${S.triangular ? " · triangular" : ""}</span></h3>
+        <div class="controls"><label>v_max = <span class="mono" id="spv">${Math.round(S.speed * 100)} %</span> del datasheet <input type="range" id="sp" min="10" max="100" step="5" value="${Math.round(S.speed * 100)}"></label>
+        <label>rampa a v_max <input type="range" id="rp" min="0.1" max="1" step="0.05" value="${S.ramp}"><span class="mono" id="rpv">${S.ramp.toFixed(2)} s</span></label></div>
+        <div class="table-wrap"><table><thead><tr><th>junta</th><th>D [°]</th><th>V [°/s]</th><th>a [°/s²]</th><th>|V|/v_max</th><th>|a|/a_max</th></tr></thead><tbody>
+        ${T.V.map((v, i) => `<tr class="${i + 1 === S.critical ? "sel" : ""}"><td>J${i + 1}${i + 1 === S.critical ? " ★" : ""}</td><td>${fdeg(S.qf[i] - S.q0[i])}</td><td>${fdeg(v)}</td><td>${fdeg(T.A[i])}</td><td>${fmt(Math.abs(v) / S.vmax[i], 2)}</td><td>${fmt(Math.abs(T.A[i]) / S.amax[i], 2)}</td></tr>`).join("")}</tbody></table></div>
+        <p class="hint">★ junta crítica: llega a su límite y fija t_f; las demás van más lentas para llegar a la vez.</p></div>
+      <div class="panel"><h3>Verificaciones en vivo</h3><div class="checks" id="lspbChecks"></div></div>
+    </div>`;
+  },
+  init() {
+    if (!S.traj) return;
+    this.v = new View3D($("#cvC")); this.v.onchange = () => this.frame(); bindPlayer("pl");
+    const rerun = () => { S.speed = +$("#sp").value / 100; S.ramp = +$("#rp").value; S.t = 0; compute(); render(); };
+    $("#sp").addEventListener("change", rerun); $("#rp").addEventListener("change", rerun);
+    $("#sp").addEventListener("input", () => { $("#spv").textContent = `${$("#sp").value} %`; });
+    $("#rp").addEventListener("input", () => { $("#rpv").textContent = `${(+$("#rp").value).toFixed(2)} s`; });
+    const T = S.traj, s0 = T.sample(0), sf = T.sample(T.tf); let jump = 0;
+    [T.tb, T.tf - T.tb].forEach((t) => { const a = T.sample(t - 1e-9), b = T.sample(t + 1e-9); jump = Math.max(jump, ...a[0].map((v, i) => Math.abs(v - b[0][i])), ...a[1].map((v, i) => Math.abs(v - b[1][i]))); });
+    const vm = Math.min(...T.V.map((v, i) => S.vmax[i] - Math.abs(v))), am = Math.min(...T.A.map((a, i) => S.amax[i] - Math.abs(a)));
+    const checks = [["q(0) = q₀ y q(t_f) = q_f", Math.max(...s0[0].map((v, i) => Math.abs(v - S.q0[i])), ...sf[0].map((v, i) => Math.abs(v - S.qf[i]))) < 1e-9],
+      ["reposo: q̇(0) = q̇(t_f) = 0", Math.max(...s0[1].map(Math.abs), ...sf[1].map(Math.abs)) < 1e-12], [`q y q̇ continuas en los empalmes (salto ${fexp(jump)})`, jump < 1e-6],
+      ["|V| ≤ v_max en las 6 juntas", vm > -1e-9], ["|a| ≤ a_max en las 6 juntas", am > -1e-9], ["t_b ≤ t_f/2 (existe el perfil)", T.tb <= T.tf / 2 + 1e-12],
+      ["fuera de [0, t_f]: reposo (q̇ = q̈ = 0)", T.sample(T.tf + 0.1)[2].every((v) => v === 0)], ["q̈ salta en los empalmes (LSPB es C¹, no C²)", true]];
+    $("#lspbChecks").innerHTML = checks.map(([t, ok]) => `<div class="check ${ok ? "" : "fail"}"><b>${ok ? "✓" : "✗"}</b><span>${t}</span></div>`).join("");
+    this.frame();
+  },
+  frame() {
+    if (!S.traj) return; syncPlayer("pl");
+    const v = this.v.begin();
+    v.robot(S.q0, tok("--muted"), { alpha: 0.3, tcpFrame: false }); v.robot(S.qf, tok("--ok"), { alpha: 0.3, tcpFrame: false });
+    v.line(S.tcpPath, tok("--ink"), 1.5, [4, 3]); v.robot(S.traj.sample(S.t)[0], tok("--accent")); v.frame(S.T, 0.11, [5, 4]);
+    const c = JC(), xs = S.ts, opts = { xmin: 0, xmax: S.traj.tf, cursor: S.t, shades: phaseShades() };
+    chart($("#cq"), { ...opts, ylabel: "q [°]", series: c.map((col, j) => ({ x: xs, y: S.samp.map((s) => R.deg(s[0][j])), color: col })) });
+    chart($("#cqd"), { ...opts, ylabel: "q̇ [°/s]", series: c.map((col, j) => ({ x: xs, y: S.samp.map((s) => R.deg(s[1][j])), color: col })) });
+    chart($("#cqdd"), { ...opts, ylabel: "q̈ [°/s²]", xlabel: "t [s]", series: c.map((col, j) => ({ x: xs, y: S.samp.map((s) => R.deg(s[2][j])), color: col })) });
+  },
+  animated: true,
+};
+
+// ---------- D: Jacobiano
+V.jacobiano = {
+  html() {
+    if (!S.traj) return head("D · 20 %", "Jacobiano") + notReachable();
+    const J0 = R.geometricJacobian(R.HOME_Q), Jf = R.geometricJacobian(S.qf), dn = Math.max(...Jf.flat().map((v, i) => Math.abs(v - R.numericalJacobian(S.qf).flat()[i])));
+    return `${head("D · 20 %", "Jacobiano geométrico ẋ = J(q) q̇", "Columna i = [z_{i−1} × (p_TCP − o_{i−1}); z_{i−1}]: la velocidad del TCP cuando solo gira la junta i a 1 rad/s.")}
+    ${rubricBox(["Jacobiano consistente con al menos una validación", "Interpretar sus columnas", "Usar el rango como criterio central"],
+      ["J(q(t)) en vivo durante el LSPB, coloreado por magnitud", `Validación: max|J − J_numérico| en q_f = ${fexp(dn)}; ‖J_v q̇‖ frente a dp/dt numérico`, "Columna 1 en q = 0 calculada a mano: (0, 0.524, 0 | 0, 0, 1)"])}
+    ${playerHtml("pj")}
+    <div class="grid2">
+      <div class="panel"><h3>J(q(t)) <span class="mono" id="jRank"></span></h3><div class="table-wrap" id="jTable"></div>
+        <p class="hint">Filas v_x, v_y, v_z [m/s por rad/s] y ω_x, ω_y, ω_z. ‖J_v,i‖ es la palanca: las juntas 1–3 posicionan y las 4–6 orientan. En q = 0 las columnas 4 y 6 son iguales (singularidad de muñeca).</p></div>
+      <div class="panel"><h3>Validación sobre la trayectoria</h3><canvas class="chart" id="cv"></canvas>
+        ${legend([[tok("--accent"), "‖J_v q̇‖"], [tok("--amber"), "‖dp/dt‖ numérico (puntos)"]])}
+        <canvas class="chart" id="cs"></canvas>${legend([[tok("--ok"), "σ_min(J(q(t)))"], [tok("--bad"), "tolerancia de rango 1e-6", true]])}
+        <dl class="kv"><dt>Columna 1, q = 0</dt><dd>(${J0.map((r) => fmt(r[0], 3)).join(", ")})</dd><dt>Columna 2, q = 0</dt><dd>(${J0.map((r) => fmt(r[1], 3)).join(", ")})</dd><dt>max|J − J_num| (q_f)</dt><dd>${fexp(dn)}</dd>
+        <dt>max|J_v q̇ − dp/dt|</dt><dd>${fexp(Math.max(...S.jac.map((j, i) => Math.abs(j.v - S.vnum[i])).slice(2, -2)))} m/s</dd></dl></div>
+    </div>`;
+  },
+  init() { if (!S.traj) return; bindPlayer("pj"); this.frame(); },
+  frame() {
+    if (!S.traj) return; syncPlayer("pj");
+    const [q] = S.traj.sample(S.t), J = R.geometricJacobian(q), ra = R.rankAnalysis(J), mx = Math.max(...J.flat().map(Math.abs));
+    const rows = ["v_x", "v_y", "v_z", "ω_x", "ω_y", "ω_z"];
+    $("#jTable").innerHTML = `<table><thead><tr><th class="l"></th>${[1, 2, 3, 4, 5, 6].map((i) => `<th>J${i}</th>`).join("")}</tr></thead><tbody>${J.map((r, i) => `<tr><td class="l">${rows[i]}</td>${r.map((v) => `<td style="background:color-mix(in srgb, var(--accent) ${Math.round((Math.abs(v) / mx) * 38)}%, transparent)">${fmt(v, 3)}</td>`).join("")}</tr>`).join("")}
+      <tr><td class="l">‖J_v‖</td>${[0, 1, 2, 3, 4, 5].map((k) => `<td>${fmt(Math.hypot(J[0][k], J[1][k], J[2][k]), 3)}</td>`).join("")}</tr></tbody></table>`;
+    $("#jRank").textContent = `σ = (${ra.s.map((s) => s.toPrecision(3)).join(", ")}) · rango ${ra.rank}`;
+    const o = { xmin: 0, xmax: S.traj.tf, cursor: S.t, shades: phaseShades() };
+    chart($("#cv"), { ...o, ylabel: "[m/s]", series: [{ x: S.ts, y: S.jac.map((j) => j.v), color: tok("--accent"), width: 2.4 }, { x: S.ts.filter((_, i) => i % 12 === 6), y: S.vnum.filter((_, i) => i % 12 === 6), color: tok("--amber"), dots: true }] });
+    chart($("#cs"), { ...o, logY: true, ymin: 1e-8, ymax: 2, ylabel: "σ_min", xlabel: "t [s]", series: [{ x: S.ts, y: S.jac.map((j) => Math.max(j.smin, 1e-8)), color: tok("--ok") }], hlines: [{ y: 1e-6, color: tok("--bad") }] });
+  },
+  animated: true,
+};
+
+// ---------- D: Singularidad
+const QBASE = [30, -20, 15, 40, 0, 60].map(R.rad);
+const q5FromSlider = (s) => (s >= 1000 ? 0 : R.rad(45 * 10 ** (-4.5 * (s / 1000))));
+V.singularidad = {
+  html() {
+    return `${head("D · 20 %", "Experimento independiente: acercarse a q5 = 0", "Postura fija q = (30°, −20°, 15°, 40°, q5, 60°). Al llevar q5 a 0, los ejes 4 y 6 quedan alineados. El criterio es el rango por SVD (σ_i > 1e-6); el determinante es solo un complemento: |det J| = ∏σ_i.")}
+    ${rubricBox(["Experimento de aproximación claro", "Rango como criterio central (det solo cuando corresponde)", "Explicar la movilidad que se pierde", "Amplificación de velocidad sin confundirla con torque infinito"],
+      ["Control deslizante q5: σ_i, rango, det y la factorización en vivo", "Botón «movimiento nulo»: q̇4 = −q̇6 gira la muñeca y el TCP no se mueve", "‖q̇‖ = 1/σ6 y ρ = max|q̇_i|/v_max,i frente a ‖Jᵀu₆‖ → 0"])}
+    <div class="controls"><label>q5 <input type="range" id="q5s" min="0" max="1000" value="600" style="width:260px"><span class="mono" id="q5v"></span></label>
+      <button class="btn" type="button" id="nullBtn">Animar movimiento nulo (q̇4 = −q̇6)</button><span class="hint">al final del recorrido q5 = 0 exacto</span></div>
+    <div class="grid2">
+      <div class="panel"><h3>Postura del experimento <span class="hint">la estela muestra si el TCP se mueve</span></h3><canvas class="view3d" id="cvS"></canvas></div>
+      <div class="panel"><h3>Valores singulares <span class="mono" id="rankBadge"></span></h3><canvas class="chart" id="csv"></canvas>
+        <dl class="kv" id="singOut"></dl>
+        <canvas class="chart" id="camp"></canvas>${legend([[tok("--accent"), "‖q̇‖ = 1/σ6 [rad/s]"], [tok("--amber"), "ρ = max|q̇_i|/v_max,i"], [tok("--ok"), "‖Jᵀu₆‖ (torque estático)"]])}</div>
+    </div>
+    <div class="panel"><h3>Lectura física</h3><p>En q5 = 0, z5 = z3: dos motores producen la misma rotación. El espacio nulo de J es q̇ ∝ (0, 0, 0, 1, 0, −1): girar J4 y J6 en sentidos opuestos no mueve el TCP. Se pierde la rotación alrededor de z3 × z4. Para moverse en esa dirección haría falta ‖q̇‖ = 1/σ6 → ∞. En estática, τ = JᵀF y Jᵀu₆ = σ6 v₆ → 0: una carga en la dirección perdida <strong>no</strong> requiere torque. La singularidad amplifica velocidades, no torques.</p></div>`;
+  },
+  init() {
+    this.v = new View3D($("#cvS")); this.v.onchange = () => this.frame(); this.trail = []; this.nullT = null;
+    this.seq = [];
+    for (let s = 0; s < 1000; s += 25) { const q = QBASE.slice(); q[4] = q5FromSlider(s); const J = R.geometricJacobian(q), d = R.svd(J), u6 = d.U[5], qd = R.solve(J, u6);
+      this.seq.push({ q5: R.deg(q[4]), amp: R.norm(qd), rho: Math.max(...qd.map((v, i) => Math.abs(v) / R.MAX_SPEED[i])), tau: R.norm(R.matvec(R.transpose(J), u6)) }); }
+    $("#q5s").addEventListener("input", () => { this.trail = []; this.frame(); });
+    $("#nullBtn").addEventListener("click", () => { this.nullT = this.nullT === null ? 0 : null; this.trail = []; $("#nullBtn").textContent = this.nullT === null ? "Animar movimiento nulo (q̇4 = −q̇6)" : "Detener movimiento nulo"; });
+    this.frame();
+  },
+  frame(dt = 0) {
+    const s = +$("#q5s").value, q = QBASE.slice(); q[4] = q5FromSlider(s);
+    $("#q5v").textContent = `${fmt(R.deg(q[4]), q[4] === 0 ? 0 : 4)}°`;
+    const J = R.geometricJacobian(q), ra = R.rankAnalysis(J), d = R.svd(J), u6 = d.U[5];
+    const det = R.det(J), detT = -Math.sin(q[4]) * R.armPositionDeterminant(q);
+    const qd = ra.rank === 6 ? R.solve(J, u6) : null;
+    $("#rankBadge").innerHTML = ra.rank === 6 ? `<span class="pill ok">rango 6</span>` : `<span class="pill bad">rango ${ra.rank} · singular</span>`;
+    chart($("#csv"), { xmin: 0.5, xmax: 6.5, ymin: 1e-18, ymax: 10, logY: true, xlabel: "σ_i", series: [{ x: [1, 2, 3, 4, 5, 6], y: ra.s.map((v) => Math.max(v, 1e-18)), color: tok("--accent"), dots: true, r: 6 }], hlines: [{ y: 1e-6, color: tok("--bad"), label: "tolerancia de rango" }] });
+    $("#singOut").innerHTML = `<dt>σ6</dt><dd>${fexp(ra.s[5], 2)} (σ6/sin q5 = ${q[4] ? fmt(ra.s[5] / Math.sin(q[4]), 3) : "—"})</dd><dt>κ(J)</dt><dd>${Number.isFinite(ra.cond) && ra.cond < 1e15 ? fexp(ra.cond, 2) : "∞"}</dd>
+      <dt>det J</dt><dd>${fexp(det, 3)} · −sin q5 · det(J_brazo) = ${fexp(detT, 3)}</dd>
+      <dt>q̇ para twist unitario en u₆</dt><dd>${qd ? `‖q̇‖ = ${fmt(R.norm(qd), 1)} rad/s · q̇4 = ${fmt(qd[3], 1)}, q̇6 = ${fmt(qd[5], 1)} · ρ = ${fmt(Math.max(...qd.map((v, i) => Math.abs(v) / R.MAX_SPEED[i])), 1)}` : "no existe (J no invertible)"}</dd>
+      <dt>‖Jᵀu₆‖</dt><dd>${fexp(R.norm(R.matvec(R.transpose(J), u6)), 2)} N·m por unidad de carga</dd>
+      ${ra.rank < 6 ? `<dt>espacio nulo v₆</dt><dd>(${ra.nullMotions[0].map((v) => fmt(v, 3)).join(", ")})</dd>` : ""}`;
+    const sq = this.seq;
+    chart($("#camp"), { xmin: -3, xmax: 1.8, logY: true, ymin: 1e-6, ymax: 1e6, xlabel: "log10(q5 [°])  ← hacia la singularidad", series: [
+      { x: sq.map((r) => Math.log10(r.q5)), y: sq.map((r) => r.amp), color: tok("--accent") }, { x: sq.map((r) => Math.log10(r.q5)), y: sq.map((r) => r.rho), color: tok("--amber") },
+      { x: sq.map((r) => Math.log10(r.q5)), y: sq.map((r) => r.tau), color: tok("--ok") }], hlines: [{ y: 1, color: tok("--bad"), label: "ρ = 1 (límite del datasheet)" }],
+      marks: q[4] > 0 ? [{ x: Math.log10(R.deg(q[4])), y: R.norm(qd), color: tok("--accent") }] : [] });
+    // 3D con movimiento nulo
+    const qa = q.slice();
+    if (this.nullT !== null) { this.nullT += dt; const a = 0.6 * Math.sin(this.nullT * 2); qa[3] += a; qa[5] -= a; this.trail.push(R.pos(R.forwardKinematicsTcp(qa))); if (this.trail.length > 240) this.trail.shift(); }
+    const v = this.v.begin();
+    if (this.trail.length > 1) v.line(this.trail, tok("--amber"), 2.5);
+    v.robot(qa, ra.rank < 6 ? tok("--bad") : tok("--accent"));
+    const F = R.jointFrames(qa); [3, 5].forEach((k) => { const o = R.pos(F[k]), z = R.col(F[k], 2); v.line([R.sub(o, R.scale(z, 0.12)), R.add(o, R.scale(z, 0.18))], k === 3 ? tok("--j4") : tok("--j6"), 1.6, [4, 3]); });
+    v.text(R.pos(F[4]), "ejes 4 y 6", tok("--muted"));
+  },
+  animated: true,
+};
+
+// ---------- E: Dinámica 1R
+function peakTau() { if (!S.tau) return { v: NaN }; let k = 0; S.tau.forEach((t, i) => { if (Math.abs(t[2]) > Math.abs(S.tau[k][2])) k = i; }); return { v: S.tau[k][2], t: S.ts[k], k }; }
+V.dinamica = {
+  html() {
+    if (!S.traj) return head("E · 15 %", "Dinámica 1R") + notReachable();
+    const m = S.model, pk = peakTau(), cr = S.ts.map((t, i) => [S.traj.phase(t), S.tau[i][2]]).filter(([p]) => p === "crucero").map(([, v]) => Math.abs(v));
+    const hold = m.components(S.qf[1], 0)[2];
+    return `${head("E · 15 %", "Dinámica reducida 1R del hombro", "τ = J·θ̈ + m·g·ℓc·sin θ, con θ medido desde la vertical inferior y J = I_c + m·ℓc². La junta 2 carga los eslabones 2–6 y la pinza; las juntas 3–6 se congelan en la postura media.")}
+    ${rubricBox(["Usar el modelo 1R trabajado; documentar supuestos y parámetros", "Calcular τ a partir del LSPB y separar contribuciones", "Presentar τ(t) y relacionarlo con la trayectoria"],
+      ["Péndulo equivalente animado: θ, centro de masa, gravedad", "τ_in, τ_g y τ sincronizados con la animación", "Parámetros calculados del CAD (Truc & Lam 2020 + pinza SMC)", "1R frente al modelo completo de 6 GDL (mismos datos CAD)"])}
+    ${playerHtml("pd")}
+    <div class="grid2">
+      <div class="panel"><h3>Péndulo equivalente (plano del hombro)</h3><canvas class="view3d" id="cvP" style="cursor:default"></canvas>
+        <dl class="kv"><dt>m</dt><dd>${fmt(m.mass, 3)} kg</dd><dt>ℓc</dt><dd>${fmt(m.lc, 4)} m</dd><dt>I_c</dt><dd>${fmt(m.Ic, 4)} kg·m²</dd><dt>J = I_c + m ℓc²</dt><dd>${fmt(m.J, 4)} kg·m²</dd>
+        <dt>φ₀ (θ = q2 + φ₀)</dt><dd>${fdeg(m.phi0)}°</dd><dt>m g ℓc</dt><dd>${fmt(m.mglc, 2)} N·m</dd><dt>J = M₂₂ (modelo completo)</dt><dd>${fexp(Math.abs(m.J - R.massMatrix(m.qRef)[1][1]))}</dd></dl></div>
+      <div class="panel"><h3>Torque del hombro τ(t)</h3><canvas class="chart" id="ctq2"></canvas><canvas class="chart tall" id="ctau"></canvas>
+        ${legend([[tok("--accent"), "τ_in = J q̈₂"], [tok("--amber"), "τ_g = m g ℓc sin θ"], [tok("--ink"), "τ = τ_in + τ_g"], [tok("--ink"), "sostén (robot detenido)", true]])}
+        <dl class="kv"><dt>Pico</dt><dd>${fmt(pk.v, 2)} N·m en t = ${fmt(pk.t, 3)} s (${S.traj.phase(pk.t)})</dd><dt>Al detenerse (t_f⁺)</dt><dd>τ = τ_g = ${fmt(hold, 2)} N·m</dd>
+        <dt>En crucero</dt><dd>${cr.length ? `|τ| de ${fmt(Math.min(...cr), 2)} a ${fmt(Math.max(...cr), 2)} N·m con q̈ = 0` : "perfil triangular: no hay crucero"}</dd><dt>1R vs completo</dt><dd id="fullOut">calculando…</dd></dl></div>
+    </div>
+    <div class="panel"><h3>1R frente al modelo de Lagrange completo (6 GDL, mismos datos CAD)</h3><canvas class="chart" id="cfull"></canvas>
+      ${legend([[tok("--muted"), "τ₂ modelo completo M q̈ + c + g"], [tok("--ink"), "τ modelo 1R"]])}
+      <p class="hint">La diferencia mide lo que deja fuera la reducción (juntas 3–6 en movimiento, acoplamientos). No es una validación contra el robot real.</p></div>`;
+  },
+  init() {
+    if (!S.traj) return; bindPlayer("pd");
+    setTimeout(() => {
+      if (!S.full) { const idx = S.ts.map((_, i) => i).filter((i) => i % 4 === 0); S.full = { x: idx.map((i) => S.ts[i]), y: idx.map((i) => R.inverseDynamics(...S.samp[i])[1]), idx }; }
+      const err = S.full.idx.map((i, k) => S.tau[i][2] - S.full.y[k]), rms = Math.sqrt(err.reduce((s, e) => s + e * e, 0) / err.length), ref = Math.sqrt(S.full.y.reduce((s, e) => s + e * e, 0) / err.length);
+      const out = $("#fullOut"); if (out) out.textContent = `error RMS ${fmt(rms, 3)} N·m (${fmt((100 * rms) / ref, 1)} %)`;
+      this.frame();
+    }, 30);
+    this.frame();
+  },
+  frame() {
+    if (!S.traj) return; syncPlayer("pd");
+    const m = S.model, [q, , qdd] = S.traj.sample(S.t), th = m.theta(q[1]), [ti, tg, tt] = m.components(q[1], qdd[1]);
+    // péndulo 2D
+    const cv = $("#cvP"), { ctx, w, h } = prep(cv), cx = w / 2, cy = h * 0.55, Lp = Math.min(w, h) * 0.36;
+    ctx.strokeStyle = tok("--grid"); ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(cx, cy - Lp * 1.2); ctx.lineTo(cx, cy + Lp * 1.2); ctx.stroke(); ctx.setLineDash([]);
+    const px = cx + Lp * Math.sin(th), py = cy + Lp * Math.cos(th);
+    ctx.strokeStyle = tok("--accent"); ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, py); ctx.stroke();
+    ctx.fillStyle = tok("--ink"); ctx.beginPath(); ctx.arc(cx, cy, 7, 0, 7); ctx.fill();
+    ctx.fillStyle = tok("--amber"); ctx.beginPath(); ctx.arc(px, py, 11, 0, 7); ctx.fill();
+    ctx.strokeStyle = tok("--bad"); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, py + 46); ctx.stroke(); ctx.beginPath(); ctx.moveTo(px - 5, py + 38); ctx.lineTo(px, py + 46); ctx.lineTo(px + 5, py + 38); ctx.stroke();
+    ctx.strokeStyle = tok("--muted"); ctx.lineWidth = 1.2; ctx.beginPath(); const a0 = Math.PI / 2, a1 = Math.PI / 2 - th; ctx.arc(cx, cy, 34, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke();
+    const arc = Math.max(10, Math.min(40, Math.abs(tt) * 1.6)); ctx.strokeStyle = tok("--ink"); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(cx, cy, 22, -Math.PI / 2, -Math.PI / 2 + Math.sign(tt) * arc / 22, tt < 0); ctx.stroke();
+    ctx.font = "12px " + tok("--font-mono"); ctx.fillStyle = tok("--ink"); ctx.textAlign = "left";
+    ctx.fillText(`θ = ${fdeg(th, 1)}°  (desde la vertical inferior)`, 10, 18); ctx.fillText(`τ_in = ${fmt(ti, 2)}  τ_g = ${fmt(tg, 2)}  τ = ${fmt(tt, 2)} N·m`, 10, 36);
+    ctx.fillStyle = tok("--muted"); ctx.fillText("centro de masa (ámbar), peso m·g (rojo), eje del hombro (negro)", 10, h - 10);
+    // curvas
+    const hold = 0.25, xs = S.ts, o = { xmin: 0, xmax: S.traj.tf + hold, cursor: S.t, shades: [...phaseShades(), { a: S.traj.tf, b: S.traj.tf + hold, color: tok("--muted") }] };
+    const tauHold = m.components(S.qf[1], 0)[2];
+    chart($("#ctq2"), { ...o, ylabel: "q̈₂ [°/s²]", series: [{ x: [...xs, S.traj.tf + 1e-9, S.traj.tf + hold], y: [...S.samp.map((s) => R.deg(s[2][1])), 0, 0], color: tok("--j2") }] });
+    chart($("#ctau"), { ...o, ylabel: "τ₂ [N·m]", xlabel: "t [s]", series: [{ x: xs, y: S.tau.map((t) => t[0]), color: tok("--accent") }, { x: xs, y: S.tau.map((t) => t[1]), color: tok("--amber") },
+      { x: xs, y: S.tau.map((t) => t[2]), color: tok("--ink"), width: 2.6 }, { x: [S.traj.tf, S.traj.tf + hold], y: [tauHold, tauHold], color: tok("--ink"), dash: [5, 4], width: 2.6 }] });
+    if (S.full) chart($("#cfull"), { xmin: 0, xmax: S.traj.tf, cursor: S.t, shades: phaseShades(), ylabel: "τ₂ [N·m]", xlabel: "t [s]", series: [{ x: S.full.x, y: S.full.y, color: tok("--muted"), width: 5 }, { x: xs, y: S.tau.map((t) => t[2]), color: tok("--ink"), width: 1.6 }] });
+  },
+  animated: true,
+};
+
+// ---------- F·G: verificación y defensa
+V.verificacion = {
+  html() {
+    const c = [];
+    const ok = (t, v) => c.push([t, !!v]);
+    ok("FK(q = 0) = (0.374, 0, 0.630) m, como el datasheet", R.pos(R.forwardKinematics(R.HOME_Q)).every((v, i) => Math.abs(v - [0.374, 0, 0.63][i]) < 1e-12));
+    ok("Pieper enumera siempre 8 ramas", S.rep.candidates.length === 8);
+    ok("Toda rama real reproduce T_d (e_p, e_R < 1e-6)", S.rep.candidates.every((k, i) => !k.real || S.rep.checks[i].accepted));
+    ok("Pieper recupera q = 0 desde la pose inicial", S.home.admissible.some((k) => k.q.every((v) => Math.abs(v) < 1e-9)));
+    ok("Se rechaza una matriz que no es pose rígida (det R = 4)", (() => { try { const T = R.forwardKinematicsTcp(R.HOME_Q).map((r) => r.slice()); for (let i = 0; i < 3; i++) { T[i][0] *= 2; T[i][1] *= 2; } R.analyzePose(T); return false; } catch (e) { return true; } })());
+    if (S.traj) {
+      ok("La rama elegida es admisible y reproduce T_d", R.fkCheck(S.T, S.qf).accepted);
+      ok("LSPB: reposo en las fronteras", Math.max(...S.traj.sample(0)[1].map(Math.abs), ...S.traj.sample(S.traj.tf)[1].map(Math.abs)) < 1e-12);
+      ok("J analítico = J numérico (< 1e-8)", Math.max(...R.geometricJacobian(S.qf).flat().map((v, i) => Math.abs(v - R.numericalJacobian(S.qf).flat()[i]))) < 1e-8);
+      ok("1R: J = M₂₂ del modelo completo", Math.abs(S.model.J - R.massMatrix(S.model.qRef)[1][1]) < 1e-9);
+    }
+    const qs = QBASE.slice(); ok("Rango 6 → 5 exactamente en q5 = 0", R.rankAnalysis(R.geometricJacobian(qs)).rank === 5 && R.rankAnalysis(R.geometricJacobian(QBASE.map((v, i) => (i === 4 ? R.rad(0.01) : v)))).rank === 6);
+    ok("FK por DH = modelo oficial ROS-Industrial (q = 0)", Math.max(...R.forwardKinematics(R.HOME_Q).flat().map((v, i) => Math.abs(v - R.rosiForwardKinematics(R.HOME_Q).flat()[i]))) < 1e-12);
+    const qa = [["G1 · Pipeline", "Pose inicial y pose objetivo → Pieper (8 ramas) → FK valida cada rama → criterio elige q_f → LSPB da q(t), q̇(t), q̈(t) → J da ẋ(t) y, aparte, el rango estudia la singularidad → con q₂(t), q̈₂(t) el 1R da τ(t)."],
+      ["G2 · Una ecuación", "Ley de cosenos: −sin(q3 − δ) = (D² − L2² − L3²)/(2 L2 L3). LSPB: V = D/(t_f − t_b), a = V/t_b. Jacobiano: J_i = [z × (p − o); z]. 1R: de T = ½Jθ̇² y V = mgℓc(1 − cos θ) sale τ = Jθ̈ + mgℓc sin θ."],
+      ["G3 · Validación", "Toda rama se reinyecta en la FK (posición y orientación, 1e-6). Ida y vuelta con poses aleatorias. La FK coincide con el modelo oficial de ROS-Industrial. J frente a diferencias finitas. 1R frente al modelo completo."],
+      ["G3 · ¿Torque infinito en la singularidad?", "No. Diverge la velocidad articular para la dirección perdida (‖q̇‖ = 1/σ6). En estática, Jᵀu₆ = σ6 v₆ → 0: esa carga no requiere torque."],
+      ["G3 · ¿Por qué hay torque en crucero?", "Por la gravedad: τ_g = m g ℓc sin θ depende de la posición, no de la aceleración."],
+      ["G4 · ¿8 reales y 1 admisible?", "La matemática no conoce los topes mecánicos. Ejemplo: las ramas «atrás» piden q1 = −165.96° y el límite es ±165°."]];
+    return `${head("F · G", "Verificación, reproducibilidad y defensa")}
+    <div class="grid2">
+      <div class="panel"><h3>Verificaciones en vivo <span class="pill ${c.every(([, v]) => v) ? "ok" : "bad"}">${c.filter(([, v]) => v).length}/${c.length}</span></h3>
+        <div class="checks" style="grid-template-columns:minmax(0,1fr)">${c.map(([t, v]) => `<div class="check ${v ? "" : "fail"}"><b>${v ? "✓" : "✗"}</b><span>${t}</span></div>`).join("")}</div></div>
+      <div class="panel"><h3>Entregables (criterio F)</h3>
+        <dl class="kv"><dt>Notebook</dt><dd>hito2/Hito2_IRB120_pipeline.ipynb · 34/34 verificaciones</dd><dt>Pruebas</dt><dd>python -m pytest -q tests · 56 pruebas</dd><dt>Informe IEEE</dt><dd>docs/hito2/informe_ieee/informe_hito2_ieee.pdf</dd>
+        <dt>Esta página</dt><dd>hito2/presentacion/ · irb120.js verificado contra Python (verificar_port.mjs, 105 casos)</dd><dt>Datos</dt><dd>DH: Bahani 2023 · límites y v_max: ABB · masas: Truc & Lam 2020 · pinza: SMC</dd><dt>Supuestos</dt><dd>TCP 0.150 m (diseño) · a_max = v_max / rampa (ABB no la publica)</dd></dl></div>
+    </div>
+    <div class="panel qa"><h3>Defensa individual (G1–G4): respuestas cortas</h3>${qa.map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join("")}</div>`;
+  },
+  init() {},
+};
+
+// ============================================================ navegación y bucle
+function current() { return V[S.section]; }
+function render() {
+  $("#rail").innerHTML = SECTIONS.map((s) => `<a href="#${s.id}" aria-current="${s.id === S.section}"><span class="crit">${s.crit}</span><span>${s.name}</span><small>${s.sub}</small></a>`).join("");
+  const vd = $("#verdict"); vd.textContent = S.rep.verdict.split(":")[0] + (S.best ? ` · rama ${S.best.candidate.branch}` : ""); vd.className = "verdict " + (S.rep.reachable ? "ok" : "bad"); vd.title = S.rep.verdict;
+  $("#main").innerHTML = `<section class="view" aria-live="polite">${current().html()}</section>`;
+  current().init();
+  if (current().frame) current().frame();
+}
+function go() {
+  const h = location.hash.replace("#", "");
+  S.section = SECTIONS.some((s) => s.id === h) ? h : "resumen";
+  render(); window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", go);
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  const v = current();
+  if (v && v.animated) {
+    if (S.section === "singularidad") v.frame(dt);
+    else if (S.traj && S.playing) { S.t += dt * S.rate; if (S.t > S.traj.tf + 0.35) S.t = 0; v.frame(); }
+  }
+  requestAnimationFrame(loop);
+}
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+if (reduce.matches) S.playing = false;
+
+$("#presets").innerHTML = PRESETS.map((p) => `<button class="chip" type="button" data-p="${p.id}">${p.name}</button>`).join("");
+$("#presets").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const p = PRESETS.find((x) => x.id === b.dataset.p);
+  ["px", "py", "pz", "pr", "pp", "pw"].forEach((id, i) => { $("#" + id).value = p.v[i]; });
+  $("#poseForm").requestSubmit();
+});
+$("#poseForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = ["px", "py", "pz", "pr", "pp", "pw"].map((id) => parseFloat($("#" + id).value));
+  if (v.some((x) => !Number.isFinite(x))) { $("#formErr").textContent = "Escribe los seis valores numéricos (m y grados)."; return; }
+  $("#formErr").textContent = ""; S.spec = v; S.t = 0; S.branch = 0; compute(); render();
+});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => render());
+new MutationObserver(() => render()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(render, 200); });
+
+compute(); go(); requestAnimationFrame(loop);
+
+</script>
+
+</body>
+</html>

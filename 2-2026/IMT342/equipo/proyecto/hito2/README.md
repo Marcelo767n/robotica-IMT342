@@ -21,6 +21,7 @@ hito2/
 │     D_twist_trayectoria, D_singularidad_rango, D_amplificacion   (D)
 │     E_torque_1R, E_1R_vs_completo, E_efecto_velocidad      (E)
 ├── 🎓 resultados/                       valores y tablas LaTeX que exporta el notebook (los lee el informe)
+├── 🎓 presentacion/                    página interactiva para la defensa (Hito2_en_vivo.html, sin internet)
 ├── ⚙️ irb120/                           paquete Python: TODA la matemática
 │     dh.py · transforms.py · pieper.py · validation.py · lspb.py · jacobian.py
 │     dynamics.py · dynamics_1r.py · rosi_model.py (modelo oficial ROS-I, verificación) · urdf_chain.py
