@@ -117,6 +117,8 @@ Referencia de red: [manual oficial RobotStudio, 3HAC032104](https://library.e.ab
 
 ### Herramienta preparada para G1
 
+**Para el día de laboratorio, seguir la [guía paso a paso](GUIA_G1_DIA_LABORATORIO.md)**: comandos, salida esperada y qué hacer ante cada fallo.
+
 Desde la carpeta raíz del proyecto:
 
 ```bash
@@ -143,7 +145,7 @@ El diagnóstico solo permite seis recursos GET predefinidos, comprueba identidad
 | Identidad RWS y ejes válidos | Evidencia de lectura; falta contrastar con el equipo físico |
 | RWS correcto, EGM sin paquetes | Revisar por separado EGM, RAPID y destino UDP; RWS no prueba EGM |
 
-Pruebas offline: `python3 -m unittest discover -s scripts/tests -v`. Ocho pruebas pasan con respuestas simuladas; **no son pruebas de hardware**.
+Pruebas offline: `python3 -m unittest discover -s scripts/tests -t scripts/tests -v` (con Python 3.14 hace falta `-t`). Pasan 18 con respuestas simuladas: 8 del lector RWS y 10 de la verificación de enlace `scripts/g1_verificar_enlace.py`; **no son pruebas de hardware**.
 
 ## Trabajo de esta semana y límites de la recomendación
 
@@ -166,3 +168,44 @@ Las fuentes archivadas y los errores de descarga están registrados en `fuentes/
 ## Registro del 22 de octubre de 2026
 
 El usuario transcribió `Name: 120-101516`, `Serial no: 120-101516`, `RobotWare version: 6.12.01.00`. Fuente: `evidencias/robotware_reportado_2026-10-22.json`; no se presenta como consulta RWS ni foto recibida de la versión. Indicó que todavía no dispone de cable o acceso supervisado. Próximo paso: disponer de enlace Ethernet y realizar G1 de lectura.
+
+## Registro del 29 de octubre de 2026
+
+El usuario informó que ya dispone de cable Ethernet y adaptador. En esta PC el adaptador figura como `enx00e04c36006d` (Realtek RTL8152, 10/100), **sin cable enchufado** (`carrier=0`). La verificación de enlace `scripts/g1_verificar_enlace.py` lo detecta y avisa que falta el cable; no envió paquetes. El perfil NetworkManager preexistente `Conexión cableada 1` (DHCP, autoconexión, sin `never-default`) quedó sin modificar: la guía usa perfiles propios. Sigue sin enlace verificado con el controlador ni lectura real. Próximo paso: la sesión supervisada de la [guía G1](GUIA_G1_DIA_LABORATORIO.md).
+
+### Avance del mismo día: G1-A completado
+
+Con el cable en **X2 Service**, la PC recibió **`192.168.125.203/24` por DHCP del propio controlador** (primera evidencia de que el puerto de servicio entrega dirección), la ruta hacia `192.168.125.1` salió por Ethernet con el Wi-Fi como ruta predeterminada, y el ping dio **3/3 respuestas, 0 % de pérdida, 0,8 ms**. Una consulta GET sin credenciales a `/rw/system` devolvió **HTTP 401**: RWS responde y exige autenticación. Registro: [`evidencias/g1a_enlace_2026-10-29.json`](evidencias/g1a_enlace_2026-10-29.json). **Pendiente G1-B:** usuario y contraseña UAS del operador, lectura de los seis ejes y contraste con el FlexPendant. No se movió nada ni se leyó ninguna articulación.
+
+### G1-B logrado: primera lectura RWS real (29 de octubre de 2026)
+
+Con la cuenta de fábrica documentada por ABB, `abb_lectura_rws.py` terminó en `rws_joint_snapshot_observed` (solo GET, sin movimiento). Registro limpio: [`evidencias/g1_rws_2026-10-29_sanitizado.json`](evidencias/g1_rws_2026-10-29_sanitizado.json).
+
+| Dato leído del controlador | Valor |
+|---|---|
+| Sistema (`name`) | **120-101516**, coincide con la serie de la placa |
+| RobotWare | **6.12.01.00** (`rwversion` 6.12.1014, fecha 2021-05-12): confirma por RWS lo que se había transcrito del FlexPendant |
+| Opciones | 689-1 EGM, 616-1 PC Interface, 623-1 Multitasking, UDPUC Driver, **IRB 120-3/0.6** y *Drive System … IRC5 Compact* |
+| Estado de motores | `motoroff` |
+| Modo de operación | **`AUTO`** (las fotos del 20/10 mostraban Manual: el estado cambió) |
+| RAPID | `stopped`, ciclo `forever` |
+| Unidad mecánica | `ROB_1`, `Activated` |
+| Ejes [°] | 55.301, 16.946, 0.643, −45.428, −63.668, 9.132 (todos dentro de los límites) |
+
+El modelo del Hito 2 predice para esos ejes `tool0` = (208.05, 381.23, 557.26) mm, cuaternión (w x y z) = (0.7395, −0.4894, 0.1664, 0.4312). **Todavía no está contrastado con el FlexPendant**, así que la identidad del controlador físico sigue marcada como pendiente de contraste. **Corrección (dos lecturas separadas por 23 min 52 s):** el campo `starttm` de `/rw/system` avanzó 23 min 57 s, así que sigue el reloj del controlador y **no** es la hora de arranque, pese a su nombre. Ese reloj va unos **1 h 03 min por delante de UTC**. No usar sus marcas de tiempo como evidencia.
+
+### G1-B contrastado con el FlexPendant (29 de octubre de 2026)
+
+La pantalla Jogging del FlexPendant muestra los ejes **55.30, 16.95, 0.64, −45.43, −63.67, 9.13 °**, que coinciden con la lectura RWS (55.3011, 16.9464, 0.6433, −45.4282, −63.6680, 9.1318 °): diferencia máxima **0.004 °**, dentro de la resolución de la pantalla y muy por debajo de la tolerancia propuesta de 0.1 °. Esto vincula la lectura de `192.168.125.1` con el controlador cuyo FlexPendant se tiene en la mano. La pantalla también confirma `ROB_1`, **`tool0`, `wobj0` y `load0`**. Registro: [`evidencias/g1b_contraste_flexpendant_2026-10-29.json`](evidencias/g1b_contraste_flexpendant_2026-10-29.json). El usuario indicó que **no había operador presente**. En pantalla figuraba el aviso `90216 Enabling device active in Auto mode`. **Pendiente:** posición cartesiana de `tool0` para validar la tabla DH contra el robot.
+
+### G2 parcial: el modelo DH coincide con el controlador en una postura (29 de octubre de 2026)
+
+Con el panel en modo *Linear* (`tool0`, `wobj0`, `load0`), el FlexPendant muestra **X 208.05, Y 381.23, Z 557.26 mm** y el cuaternión **q1..q4 = 0.73949, −0.48944, 0.16639, 0.43119**. La FK del Hito 2, evaluada con los ejes leídos por RWS, predice exactamente esos valores: **diferencia de 0.01 mm y 0.0004 °**, el límite de resolución de la pantalla. Una postura así habría detectado cualquier inversión de signo, 1 ° de offset en una articulación o 1 mm de error en `d1`, `a2`, `a3`, `d4` o `d6`. Registro: [`evidencias/g2_fk_vs_controlador_pose1_2026-10-29.json`](evidencias/g2_fk_vs_controlador_pose1_2026-10-29.json). **Límites:** es una sola postura, se comparó `tool0` y no el TCP de 0.150 m, y no valida dinámica, LSPB ni singularidades. Más posturas darían una validación más sólida.
+
+### Puente de estado ROS 2 preparado (29 de octubre de 2026)
+
+`scripts/abb_rws_joint_bridge.py` publica los ejes reales como `sensor_msgs/JointState` en `/irb120/real/joint_states`, solo con GET. Probado de punta a punta con ROS 2 Jazzy contra un controlador **simulado** (15 mensajes a 5,01 Hz); **aún no se ejecutó con el robot**. Jazzy exige Python 3.12 y esta PC usa 3.14, así que se creó un entorno `~/ros_py312` fuera del repositorio; `ros2` y `colcon` siguen sin funcionar. Guía: [`GUIA_PUENTE_ROS2.md`](GUIA_PUENTE_ROS2.md). Las pruebas offline suman 36.
+
+### Gemelo en RViz y resumen del día (29 de octubre de 2026)
+
+`scripts/gemelo_rviz.sh` levanta `robot_state_publisher`, RViz y el puente para ver el modelo moverse con los ejes del robot real. Probado contra un controlador **simulado** en movimiento: las transformadas de ROS coinciden con la FK del Hito 2 (0,0000 mm en 76 comparaciones) y RViz arranca sin errores; **falta confirmarlo con el robot real**. Balance completo, con lo medido, lo simulado, lo pendiente y los errores del día: [`RESUMEN_LOGROS_2026-10-29.md`](RESUMEN_LOGROS_2026-10-29.md). Pruebas offline: 42.

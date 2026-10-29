@@ -1,0 +1,48 @@
+{
+  "fecha": "2026-10-29",
+  "gate": "G1-B: contraste de ejes RWS vs FlexPendant (cumplido)",
+  "origen_flexpendant": "foto de la pantalla Jogging tomada por el usuario; el usuario indico que no habia operador presente",
+  "contexto_pantalla": {
+    "mechanical_unit": "ROB_1",
+    "motion_mode": "Axis 1 - 3",
+    "tool": "tool0",
+    "work_object": "wobj0",
+    "payload": "load0",
+    "joystick_lock": "None",
+    "increment": "None",
+    "aviso_visible": "Error Not Acknowledged: 90216 Enabling device active in Auto mode"
+  },
+  "ejes_rws_deg": [
+    55.3010673522949,
+    16.9463996887207,
+    0.643334805965424,
+    -45.4281921386719,
+    -63.6680183410645,
+    9.13182830810547
+  ],
+  "ejes_flexpendant_deg": [
+    55.3,
+    16.95,
+    0.64,
+    -45.43,
+    -63.67,
+    9.13
+  ],
+  "diferencia_deg": [
+    0.0010673522949034009,
+    -0.003600311279299717,
+    0.0033348059654240148,
+    0.001807861328096294,
+    0.0019816589354988423,
+    0.0018283081054697448
+  ],
+  "max_abs_diferencia_deg": 0.003600311279299717,
+  "tolerancia_propuesta_deg": 0.1,
+  "resolucion_pantalla_deg": 0.01,
+  "resultado": "coinciden dentro de la resolucion de la pantalla (0.01 deg) y muy por debajo de la tolerancia propuesta",
+  "no_demuestra": [
+    "posicion cartesiana del modelo DH vs robot (falta x, y, z de tool0 en Linear o robtarget por RWS)",
+    "EGM",
+    "TCP fisico"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "fecha": "2026-10-29",
+  "gate": "G2 parcial: FK del modelo DH frente a la posicion cartesiana del controlador (una postura)",
+  "origen_flexpendant": "foto de la pantalla Jogging en modo Linear, tomada por el usuario",
+  "contexto_pantalla": {
+    "posiciones_en": "WorkObject",
+    "tool": "tool0",
+    "work_object": "wobj0",
+    "payload": "load0",
+    "coordinate_system": "Base"
+  },
+  "ejes_deg_rws": [
+    55.3010673522949,
+    16.9463996887207,
+    0.643334805965424,
+    -45.4281921386719,
+    -63.6680183410645,
+    9.13182830810547
+  ],
+  "flexpendant": {
+    "xyz_mm": [
+      208.05,
+      381.23,
+      557.26
+    ],
+    "cuaternion_q1_q4": [
+      0.73949,
+      -0.48944,
+      0.16639,
+      0.43119
+    ]
+  },
+  "modelo_dh_tool0": {
+    "xyz_mm": [
+      208.05,
+      381.23,
+      557.26
+    ],
+    "cuaternion_wxyz": [
+      0.73949,
+      -0.48944,
+      0.16639,
+      0.43119
+    ]
+  },
+  "diferencia": {
+    "posicion_mm": 0.01,
+    "orientacion_deg": 0.0004,
+    "limite": "resolucion de la pantalla (0.01 mm y 5 decimales del cuaternion)"
+  },
+  "sensibilidad_de_la_postura": "Habria detectado inversion de signo de cualquier articulacion, 1 deg de offset en cualquiera y 1 mm de error en d1, a2, a3, d4 o d6.",
+  "limites": [
+    "una sola postura: no descarta errores que se compensen ni zonas sin explorar",
+    "no valida el TCP de 0.150 m (se comparo tool0)",
+    "no valida dinamica, LSPB ni singularidades"
+  ]
+}

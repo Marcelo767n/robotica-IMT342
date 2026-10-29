@@ -17,3 +17,5 @@ ros2_ws/log/
 .venv/
 hito2/.venv/
 .ipynb_checkpoints/
+# Lectura RWS original (incluye MAC e IP de la PC): subir solo la version _sanitizado
+docs/conexion_abb/evidencias/g1_rws_2026-10-29.json

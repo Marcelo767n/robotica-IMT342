@@ -1,0 +1,432 @@
+{
+  "observed_at_utc": "2026-10-29T21:35:16.287203+00:00",
+  "nota_sanitizacion": "Se quitaron direcciones MAC, IP del Wi-Fi y rutas de la PC del archivo original; controller_probe esta intacto.",
+  "local_inventory": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-desconocido-with-glibc2.43",
+    "python": "3.14.4",
+    "interfaces": [
+      {
+        "name": "docker0",
+        "wireless": false,
+        "operstate": "down",
+        "carrier": "0"
+      },
+      {
+        "name": "enx00e04c36006d",
+        "wireless": false,
+        "operstate": "up",
+        "carrier": "1"
+      },
+      {
+        "name": "lo",
+        "wireless": false,
+        "operstate": "unknown",
+        "carrier": "1"
+      },
+      {
+        "name": "wlo1",
+        "wireless": true,
+        "operstate": "up",
+        "carrier": "1"
+      }
+    ],
+    "enlace_robot": {
+      "interfaz": "enx00e04c36006d (USB-Ethernet Realtek RTL8152)",
+      "ip_pc": "192.168.125.203/24 (DHCP del controlador)",
+      "ruta_192.168.125.0/24": "por la interfaz Ethernet",
+      "ruta_predeterminada": "Wi-Fi (sin cambios)"
+    }
+  },
+  "controller_probe": {
+    "transport": "RWS 1.0 / HTTP Digest",
+    "base_url": "http://192.168.125.1",
+    "mechunit": "ROB_1",
+    "mode": "read_only",
+    "movement_authorized": false,
+    "state": "rws_joint_snapshot_observed",
+    "resources": [
+      {
+        "path": "/rw/system",
+        "http_status": 200,
+        "records": [
+          {
+            "_type": "sys-system-li",
+            "_title": "system",
+            "major": "6",
+            "minor": "12",
+            "build": "1014",
+            "revision": "01",
+            "sub-revision": "00",
+            "buildtag": "",
+            "robapi-compatibility-revision": "0",
+            "title": "RobotWare",
+            "type": "RobotWare",
+            "description": "Controller Software",
+            "date": "2021-05-12",
+            "mctimestamp": "#08:57:17/May 12 2021#",
+            "name": "120-101516",
+            "rwversion": "6.12.1014",
+            "sysid": "{2e4101e3-9025-4fd8-90a2-83301c130aa3}",
+            "starttm": "2026-10-29 T 22:38:32",
+            "rwversionname": "6.12.01.00"
+          },
+          {
+            "_type": "sys-options-li",
+            "_title": "options",
+            "_links": {
+              "self": {
+                "href": "options?json=1"
+              }
+            },
+            "options": [
+              {
+                "_type": "sys-option-li",
+                "_title": "0",
+                "option": "UDPUC Driver"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "1",
+                "option": "English"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "2",
+                "option": "687-1 Advanced Robot Motion"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "3",
+                "option": "613-1 Collision Detection"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "4",
+                "option": "709-1 DeviceNet Master/Slave"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "5",
+                "option": "689-1 Externally Guided Motion (EGM)"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "6",
+                "option": "617-1 FlexPendant Interface"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "7",
+                "option": "614-1 FTP SFTP and NFS client"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "8",
+                "option": "610-1 Independent Axis"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "9",
+                "option": "623-1 Multitasking"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "10",
+                "option": "612-1 Path Offset"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "11",
+                "option": "611-1 Path Recovery"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "12",
+                "option": "616-1 PC Interface"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "13",
+                "option": "628-1 Sensor Interface"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "14",
+                "option": "885-1 SoftMove"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "15",
+                "option": "608-1 World Zones"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "16",
+                "option": "RobotWare Base"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "17",
+                "option": "Axis Calibration"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "18",
+                "option": "Pendelum Calibration"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "19",
+                "option": "Motor Commutation"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "20",
+                "option": "Service Info System"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "21",
+                "option": "Drive System IRB 120/140/260/360/910SC/1200/1400/1520/1600/1660ID IRC5 Compact"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "22",
+                "option": "IRB 120-3/0.6"
+              },
+              {
+                "_type": "sys-option-li",
+                "_title": "23",
+                "option": "StateMachine Core"
+              }
+            ]
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "0",
+            "option": "UDPUC Driver"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "1",
+            "option": "English"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "2",
+            "option": "687-1 Advanced Robot Motion"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "3",
+            "option": "613-1 Collision Detection"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "4",
+            "option": "709-1 DeviceNet Master/Slave"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "5",
+            "option": "689-1 Externally Guided Motion (EGM)"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "6",
+            "option": "617-1 FlexPendant Interface"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "7",
+            "option": "614-1 FTP SFTP and NFS client"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "8",
+            "option": "610-1 Independent Axis"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "9",
+            "option": "623-1 Multitasking"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "10",
+            "option": "612-1 Path Offset"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "11",
+            "option": "611-1 Path Recovery"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "12",
+            "option": "616-1 PC Interface"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "13",
+            "option": "628-1 Sensor Interface"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "14",
+            "option": "885-1 SoftMove"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "15",
+            "option": "608-1 World Zones"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "16",
+            "option": "RobotWare Base"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "17",
+            "option": "Axis Calibration"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "18",
+            "option": "Pendelum Calibration"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "19",
+            "option": "Motor Commutation"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "20",
+            "option": "Service Info System"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "21",
+            "option": "Drive System IRB 120/140/260/360/910SC/1200/1400/1520/1600/1660ID IRC5 Compact"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "22",
+            "option": "IRB 120-3/0.6"
+          },
+          {
+            "_type": "sys-option-li",
+            "_title": "23",
+            "option": "StateMachine Core"
+          },
+          {
+            "_type": "sys-license-li",
+            "_title": "license",
+            "self": {
+              "href": "license?json=1"
+            }
+          },
+          {
+            "_links": {
+              "self": {
+                "href": "products"
+              }
+            },
+            "_type": "sys-products-li",
+            "_title": "products"
+          }
+        ]
+      },
+      {
+        "path": "/rw/panel/ctrlstate",
+        "http_status": 200,
+        "records": [
+          {
+            "_type": "pnl-ctrlstate",
+            "_title": "ctrlstate",
+            "ctrlstate": "motoroff"
+          }
+        ]
+      },
+      {
+        "path": "/rw/panel/opmode",
+        "http_status": 200,
+        "records": [
+          {
+            "_type": "pnl-opmode",
+            "_title": "opmode",
+            "opmode": "AUTO"
+          }
+        ]
+      },
+      {
+        "path": "/rw/rapid/execution",
+        "http_status": 200,
+        "records": [
+          {
+            "_type": "rap-execution",
+            "_title": "execution",
+            "ctrlexecstate": "stopped",
+            "cycle": "forever"
+          }
+        ]
+      },
+      {
+        "path": "/rw/motionsystem/mechunits",
+        "http_status": 200,
+        "records": [
+          {
+            "_type": "ms-mechunit-li",
+            "_title": "ROB_1",
+            "_links": {
+              "self": {
+                "href": "mechunits/ROB_1?json=1"
+              }
+            },
+            "mode": "Activated",
+            "activation-allowed": "True",
+            "drive-module": "0"
+          }
+        ]
+      },
+      {
+        "path": "/rw/motionsystem/mechunits/ROB_1/jointtarget",
+        "http_status": 200,
+        "records": [
+          {
+            "_type": "ms-jointtarget",
+            "_title": "ROB_1",
+            "rax_1": "55.3010673522949",
+            "rax_2": "16.9463996887207",
+            "rax_3": "0.643334805965424",
+            "rax_4": "-45.4281921386719",
+            "rax_5": "-63.6680183410645",
+            "rax_6": "9.13182830810547",
+            "eax_a": "0",
+            "eax_b": "0",
+            "eax_c": "0",
+            "eax_d": "0",
+            "eax_e": "0",
+            "eax_f": "0"
+          }
+        ]
+      }
+    ],
+    "joint_snapshot": {
+      "rax_1_to_6": [
+        55.3010673522949,
+        16.9463996887207,
+        0.643334805965424,
+        -45.4281921386719,
+        -63.6680183410645,
+        9.13182830810547
+      ],
+      "unit": "deg (convención jointtarget/robax de RAPID)",
+      "origin": "controller_http_response",
+      "physical_controller_identity_confirmed": false,
+      "note": "Contrastar identidad y valores con el FlexPendant; no implica movimiento ni trayectoria aceptada."
+    }
+  }
+}

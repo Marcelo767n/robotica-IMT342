@@ -1,0 +1,35 @@
+{
+  "fecha": "2026-10-29",
+  "gate": "G1-A completado; G1-B pendiente de credenciales UAS",
+  "enlace": {
+    "puerto_controlador": "X2 Service 10/100 (cable azul visible en foto)",
+    "adaptador_pc": "Realtek RTL8152 USB-Ethernet",
+    "ip_pc_asignada_por_dhcp_del_controlador": "192.168.125.203/24",
+    "gateway": null,
+    "ruta_hacia_192.168.125.1": "por la interfaz Ethernet; la ruta predeterminada sigue por Wi-Fi"
+  },
+  "ping_192.168.125.1": {
+    "enviados": 3,
+    "recibidos": 3,
+    "perdida_pct": 0,
+    "rtt_ms": {
+      "min": 0.761,
+      "avg": 0.826,
+      "max": 0.94
+    }
+  },
+  "rws_sin_credenciales": {
+    "recurso": "/rw/system",
+    "metodo": "GET",
+    "http_status": 401,
+    "estado_script": "http_reachable_authentication_or_permission_pending",
+    "movimiento_autorizado": false
+  },
+  "interpretacion": "El puerto de servicio entrega IP por DHCP y el servicio RWS responde pidiendo autenticacion. No se leyeron articulaciones: faltan usuario y contrasena UAS del operador.",
+  "no_demuestra": [
+    "identidad del robot fisico 120-101516",
+    "lectura de ejes",
+    "funcionamiento de EGM",
+    "version de RobotWare por RWS"
+  ]
+}
