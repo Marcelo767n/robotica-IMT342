@@ -1,5 +1,7 @@
 # Puente de estado RWS → ROS 2 (solo lectura)
 
+**Prueba preparada el 30/10:** para abrir juntos RViz y un panel con los ángulos RWS, ROS y del gemelo TF, usar la [prueba de comunicación en vivo](PRUEBA_COMUNICACION_EN_VIVO.md). Incluye frecuencia, detección de datos antiguos y registro CSV con un solo comando.
+
 Segunda etapa de la comunicación, después de G1. **No mueve el robot**: cada ciclo hace una consulta GET de los seis ejes y los publica como `sensor_msgs/JointState`. El nodo no tiene suscriptores, servicios ni acciones, así que nada de ROS llega al controlador (una prueba lo verifica).
 
 ## Qué se comprobó y qué no

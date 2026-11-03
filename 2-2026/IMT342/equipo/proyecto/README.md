@@ -4,6 +4,8 @@ Modelo cinemático, simulación ROS 2 y preparación de la integración con el b
 
 ## Empezar aquí
 
+**Prueba de comunicación preparada para el laboratorio (30/10):** [FlexPendant → robot → RViz y panel de ángulos](docs/conexion_abb/PRUEBA_COMUNICACION_EN_VIVO.md).
+
 | Necesito… | Abrir |
 |---|---|
 | Saber qué conocemos del brazo y cómo conectarlo | [Conexión ABB: decisión, requisitos y procedimiento](docs/conexion_abb/README.md) |

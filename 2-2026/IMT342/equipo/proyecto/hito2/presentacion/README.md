@@ -1,5 +1,27 @@
 # Presentación interactiva del Hito 2 (`IRB 120 · Hito 2 en vivo`)
 
+## Archivos para presentar: ya reunidos aquí
+
+Carpeta en Linux:
+
+```text
+/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/presentacion
+```
+
+| Qué necesitas | Archivo de esta carpeta |
+|---|---|
+| Notebook que contiene todo el código | [Hito2_IRB120_todo_en_uno.ipynb](Hito2_IRB120_todo_en_uno.ipynb) |
+| Página interactiva para explicar | [Hito2_en_vivo.html](Hito2_en_vivo.html) |
+| Informe IEEE para entregar | [informe_hito2_ieee.pdf](informe_hito2_ieee.pdf) |
+| URDF para la comparación adicional del notebook | [datos/irb120.urdf](datos/irb120.urdf) |
+| Guía para estudiar la rúbrica y las preguntas | [ESTUDIAR_HITO2_HOY.md](../explicacion/ESTUDIAR_HITO2_HOY.md) |
+
+Las copias del notebook, PDF y URDF se reunieron aquí el 30/10/2026 y se comprobaron contra sus originales. Para la defensa usa la HTML; para mostrar y ejecutar el código abre el notebook **todo en uno** en Jupyter o VS Code. No necesita la carpeta `irb120/`. Ejecutarlo desde esta carpeta permite encontrar `datos/irb120.urdf`; genera sus figuras en `figuras_todo_en_uno/`.
+
+Abre la HTML local con el navegador y el notebook con un editor de notebooks. Cambiar la pose en la HTML no modifica automáticamente el notebook ni el PDF. Las fuentes de la presentación se conservan debajo; los archivos que debes abrir están en la tabla anterior.
+
+## Descripción de la página interactiva
+
 Página web que **calcula todo el pipeline en vivo** y lo muestra por criterio de la rúbrica. El docente escribe una pose
 (x, y, z, roll, pitch, yaw) y ve las 8 ramas en 3D, la validación, la selección, el LSPB animado, el Jacobiano, la
 singularidad y el torque.

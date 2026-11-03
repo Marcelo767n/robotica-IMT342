@@ -17,6 +17,7 @@ import argparse
 import getpass
 import importlib.util
 import ipaddress
+import json
 import math
 from pathlib import Path
 import re
@@ -78,12 +79,13 @@ def outside_limits(axes_deg, margin_deg=1.0):
             if not lo - margin_deg <= v <= hi + margin_deg]
 
 
-def run(args, password):
+def run(args, password, health_check=None):
     import rclpy
     import requests
     from requests.auth import HTTPDigestAuth
     from rclpy.node import Node
     from sensor_msgs.msg import JointState
+    from std_msgs.msg import String
 
     base = build_base_url(args.host, args.port)
 
@@ -91,6 +93,7 @@ def run(args, password):
         def __init__(self):
             super().__init__("abb_rws_joint_bridge")
             self.publisher = self.create_publisher(JointState, args.topic, 10)
+            self.telemetry = self.create_publisher(String, args.topic.rstrip("/") + "/rws", 10)
             self.session = requests.Session()
             self.session.trust_env = False  # nunca por un proxy del entorno
             self.session.auth = HTTPDigestAuth(args.user, password)
@@ -98,13 +101,20 @@ def run(args, password):
             self.failures = 0
             self.last_report = 0.0
             self.create_timer(1.0 / args.rate, self.tick)
+            if health_check is not None:
+                self.create_timer(0.5, health_check)
             self.get_logger().info(f"Leyendo {base} ({args.mechunit}) a {args.rate:g} Hz -> {args.topic}. SOLO LECTURA.")
 
         def tick(self):
+            started = time.monotonic()
             try:
                 axes = fetch_joints_deg(self.session, base, args.mechunit, timeout=min(1.5, 0.8 / args.rate + 0.5))
             except (BridgeError, requests.RequestException) as exc:
                 self.failures += 1
+                event = String()
+                event.data = json.dumps({"ok": False, "error": f"{type(exc).__name__}: {exc}",
+                                         "failures": self.failures})
+                self.telemetry.publish(event)
                 if self.failures in (1, 10) or self.failures % 50 == 0:
                     self.get_logger().warning(f"Lectura fallida ({self.failures} seguidas): {type(exc).__name__}: {exc}")
                 return
@@ -114,6 +124,14 @@ def run(args, password):
             msg = JointState()
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.name, msg.position = joint_state_fields(axes)
+            event = String()
+            event.data = json.dumps({"ok": True, "seq": self.published + 1,
+                                     "source": base, "mechunit": args.mechunit,
+                                     "stamp": {"sec": msg.header.stamp.sec,
+                                               "nanosec": msg.header.stamp.nanosec},
+                                     "axes_deg": axes,
+                                     "request_ms": (time.monotonic() - started) * 1000.0})
+            self.telemetry.publish(event)
             self.publisher.publish(msg)
             self.published += 1
             bad = outside_limits(axes)
@@ -130,7 +148,7 @@ def run(args, password):
     node = Bridge()
     try:
         rclpy.spin(node)
-    except (KeyboardInterrupt, SystemExit):
+    except (KeyboardInterrupt, SystemExit, rclpy.executors.ExternalShutdownException):
         pass
     finally:
         node.session.close()
