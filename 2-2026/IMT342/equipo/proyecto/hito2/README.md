@@ -1,5 +1,7 @@
 # Hito 2 — Pipeline del ABB IRB 120 en Python puro (sin ROS)
 
+**Entrega para la defensa:** el notebook principal es `Hito2_IRB120_todo_en_uno.ipynb`, que incluye todo el código. La carpeta [`../entregables/hito2/`](../entregables/hito2/README.md) reúne el notebook, la HTML interactiva, el informe y el URDF. `Hito2_IRB120_pipeline.ipynb` es la versión modular alternativa.
+
 Pipeline completo de la guía oficial del Hito 2 (IMT-342), con **dos poses**: la pose inicial (posición de
 calibración ABB, todos los ejes en 0°, constante `HOME_Q`) y la pose objetivo que da el docente:
 `T_d → Pieper (8 ramas) → validación FK → LSPB → Jacobiano / singularidad → dinámica 1R → τ(t)`.
@@ -13,7 +15,8 @@ entrega).
 
 ```text
 hito2/
-├── 🎓 Hito2_IRB120_pipeline.ipynb      ENTREGABLE 1: notebook integrado, ya ejecutado (34 verificaciones)
+├── 🎓 Hito2_IRB120_todo_en_uno.ipynb   ENTREGA: notebook con todo el código incorporado
+├── ⚙️ Hito2_IRB120_pipeline.ipynb      notebook modular alternativo (34 verificaciones)
 ├── 🎓 figuras/                          figuras que exporta el notebook (PDF/PNG); las usa el informe
 │     A_ramas_brazo, A_ocho_ramas_3d, A_conteo_ramas        (criterio A)
 │     B_errores_fk                                          (B)
@@ -21,6 +24,7 @@ hito2/
 │     D_twist_trayectoria, D_singularidad_rango, D_amplificacion   (D)
 │     E_torque_1R, E_1R_vs_completo, E_efecto_velocidad      (E)
 ├── 🎓 resultados/                       valores y tablas LaTeX que exporta el notebook (los lee el informe)
+├── 🎓 presentacion/                    página interactiva para la defensa (Hito2_en_vivo.html, sin internet)
 ├── ⚙️ irb120/                           paquete Python: TODA la matemática
 │     dh.py · transforms.py · pieper.py · validation.py · lspb.py · jacobian.py
 │     dynamics.py · dynamics_1r.py · rosi_model.py (modelo oficial ROS-I, verificación) · urdf_chain.py
@@ -34,8 +38,7 @@ hito2/
 └── 🗄️ anexos/                           notebooks de la versión anterior del hito (no son la entrega)
 ```
 
-**Entregables según la guía oficial:** (1) el notebook `.ipynb`, que necesita junto a él la carpeta `irb120/` (no
-funciona aislado); (2) el **informe IEEE en PDF**, que está en
+**Entregables según la guía oficial:** (1) el notebook todo en uno `.ipynb`, que incorpora el código; la versión modular alternativa necesita `irb120/`; (2) el **informe IEEE en PDF**, que está en
 [`../docs/hito2/informe_ieee/informe_hito2_ieee.pdf`](../docs/hito2/informe_ieee/README.md) (el `.tex` lee
 `figuras/` y `resultados/` de esta carpeta); (3) la **defensa** oral, para la que sirven `explicacion/` y el notebook.
 ROS, RViz y Gazebo **no** se requieren.

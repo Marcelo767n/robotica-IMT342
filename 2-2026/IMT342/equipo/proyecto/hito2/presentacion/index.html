@@ -1,0 +1,174 @@
+<title>IRB 120 · Hito 2 en vivo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: consola de ingeniería — barra de entrada de pose arriba, riel de criterios de la rúbrica a la izquierda,
+   mesa de trabajo (vista 3D + gráficas sincronizadas) a la derecha. */
+:root {
+  --bg: #eef2f5; --surface: #ffffff; --sunken: #f6f8fa; --ink: #132130; --muted: #566778; --line: #d3dbe3; --grid: #e3e8ee;
+  --accent: #1d5fc4; --accent-soft: #dfe9f8; --amber: #b56a00; --ok: #17844a; --ok-soft: #dcf1e5; --bad: #c03a2b; --bad-soft: #f8e1de;
+  --j1: #1d5fc4; --j2: #d9480f; --j3: #2b8a3e; --j4: #9c36b5; --j5: #c2255c; --j6: #0b7285;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e141b; --surface: #151e28; --sunken: #111921; --ink: #e5ecf2; --muted: #93a3b3; --line: #263443; --grid: #1f2b38;
+    --accent: #6ea4ff; --accent-soft: #1b2c45; --amber: #f0a33a; --ok: #4cc283; --ok-soft: #133324; --bad: #ff7b6b; --bad-soft: #3a1c18;
+    --j1: #6ea4ff; --j2: #ff8a4c; --j3: #63c174; --j4: #c98cdb; --j5: #f06595; --j6: #3bc9db;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e141b; --surface: #151e28; --sunken: #111921; --ink: #e5ecf2; --muted: #93a3b3; --line: #263443; --grid: #1f2b38;
+  --accent: #6ea4ff; --accent-soft: #1b2c45; --amber: #f0a33a; --ok: #4cc283; --ok-soft: #133324; --bad: #ff7b6b; --bad-soft: #3a1c18;
+  --j1: #6ea4ff; --j2: #ff8a4c; --j3: #63c174; --j4: #c98cdb; --j5: #f06595; --j6: #3bc9db;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: 1.7rem; }
+h2 { font-size: 2.1rem; }
+h3 { font-size: 1.25rem; }
+p { margin: 0; max-width: 68ch; }
+.mono, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- barra superior ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line);
+  padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top-inner { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+.brand { display: flex; flex-direction: column; min-width: 0; }
+.brand small { color: var(--muted); font-size: 0.78rem; }
+.pose-form { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; }
+.pose-form label { display: flex; flex-direction: column; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em; }
+.pose-form input { width: 5.6em; padding: 5px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--sunken); font-family: var(--font-mono); font-size: 0.86rem; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--surface); border-color: var(--accent); font-weight: 600; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 0.78rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--sunken); cursor: pointer; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.verdict { font-size: 0.85rem; font-weight: 600; padding: 4px 10px; border-radius: 4px; }
+.verdict.ok { background: var(--ok-soft); color: var(--ok); }
+.verdict.bad { background: var(--bad-soft); color: var(--bad); }
+.err { color: var(--bad); font-size: 0.85rem; }
+
+/* ---------- estructura ---------- */
+.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 0; min-height: 70vh; }
+.rail { border-right: 1px solid var(--line); background: var(--surface); padding-block: 14px; position: sticky; top: 112px; align-self: start; max-height: calc(100vh - 112px); overflow-y: auto; }
+.rail a { display: grid; grid-template-columns: 2.1em 1fr; gap: 4px; align-items: baseline; padding: 7px 14px; text-decoration: none; color: var(--ink); border-left: 3px solid transparent; }
+.rail a .crit { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--muted); }
+.rail a small { grid-column: 2; color: var(--muted); font-size: 0.74rem; }
+.rail a[aria-current="true"] { border-left-color: var(--accent); background: var(--accent-soft); }
+.rail a[aria-current="true"] .crit { color: var(--accent); }
+main { padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); min-width: 0; }
+section.view { display: flex; flex-direction: column; gap: 18px; max-width: 1240px; }
+.head { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; }
+.badge { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; padding: 2px 10px; border-radius: 3px; background: var(--ink); color: var(--surface); letter-spacing: 0.04em; }
+.rubric { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 12px 16px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 26px; }
+.rubric ul { margin: 4px 0 0; padding-left: 1.1em; }
+.rubric li { margin: 2px 0; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.panel h3 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+canvas.view3d { width: 100%; aspect-ratio: 4 / 3; max-width: 100%; display: block; background: var(--sunken); border-radius: 4px; cursor: grab; touch-action: none; }
+canvas.chart { width: 100%; height: 170px; display: block; }
+canvas.chart.tall { height: 230px; }
+.hint { font-size: 0.78rem; color: var(--muted); }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.84rem; }
+th, td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+td.l, th.l { text-align: left; }
+td a { font-family: var(--font-body); }
+td { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+tr.sel td { background: var(--ok-soft); }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover td { background: var(--accent-soft); }
+.pill { display: inline-block; font-family: var(--font-body); font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.info { background: var(--accent-soft); color: var(--accent); }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 14px; font-size: 0.88rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.eq { font-family: var(--font-mono); background: var(--sunken); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font-size: 0.82rem; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.controls label { display: flex; gap: 8px; align-items: center; font-size: 0.85rem; }
+input[type="range"] { accent-color: var(--accent); width: 160px; }
+.checks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 22px; }
+.check { display: grid; grid-template-columns: 1.4em minmax(0, 1fr); gap: 6px; font-size: 0.86rem; align-items: baseline; }
+.check b { color: var(--ok); }
+.check.fail b { color: var(--bad); }
+.steps { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.step { flex: 1 1 130px; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
+.step:hover { border-color: var(--accent); }
+.step .crit { font-family: var(--font-display); font-weight: 700; color: var(--accent); }
+.step .out { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; }
+.qa details { border-bottom: 1px solid var(--line); padding: 8px 0; }
+.qa summary { cursor: pointer; font-weight: 600; }
+.qa p { margin-top: 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.78rem; color: var(--muted); }
+.legend i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+.branchbar { display: flex; flex-wrap: wrap; gap: 6px; }
+.branchbar button { font-size: 0.8rem; padding: 4px 9px; border-radius: 4px; border: 1px solid var(--line); background: var(--sunken); cursor: pointer; font-family: var(--font-mono); }
+.branchbar button[aria-pressed="true"] { outline: 2px solid var(--accent); }
+.branchbar button.ok { border-color: var(--ok); color: var(--ok); }
+.branchbar button.bad { color: var(--bad); }
+.notice { border: 1px dashed var(--bad); background: var(--bad-soft); color: var(--bad); padding: 10px 14px; border-radius: var(--radius); }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: static; max-height: none; display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); padding-block: 4px; }
+  .rail a { flex: 0 0 auto; grid-template-columns: auto; border-left: 0; border-bottom: 3px solid transparent; padding: 6px 10px; }
+  .rail a small { display: none; }
+  .rail a[aria-current="true"] { border-bottom-color: var(--accent); }
+  .grid2, .grid3, .rubric, .checks { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>IRB 120 · Hito 2 en vivo</h1>
+      <small>IMT-342 Robótica · Andrade · Ayala · Navarro</small>
+    </div>
+    <form class="pose-form" id="poseForm" autocomplete="off">
+      <span class="label" style="align-self:center">Pose objetivo T<sub>d</sub> del TCP</span>
+      <label>x [m]<input id="px" type="number" step="0.01" value="0.40"></label>
+      <label>y [m]<input id="py" type="number" step="0.01" value="0.10"></label>
+      <label>z [m]<input id="pz" type="number" step="0.01" value="0.35"></label>
+      <label>roll [°]<input id="pr" type="number" step="1" value="0"></label>
+      <label>pitch [°]<input id="pp" type="number" step="1" value="180"></label>
+      <label>yaw [°]<input id="pw" type="number" step="1" value="0"></label>
+      <button class="btn primary" type="submit">Calcular</button>
+    </form>
+    <span id="verdict" class="verdict"></span>
+  </div>
+  <div class="top-inner" style="margin-top:8px">
+    <span class="label">Poses de prueba</span>
+    <div class="presets" id="presets"></div>
+    <span id="formErr" class="err" role="alert"></span>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Secciones por criterio de la rúbrica"></nav>
+  <main id="main"></main>
+</div>
+
+<script src="irb120.js"></script>
+<script src="app.js"></script>
