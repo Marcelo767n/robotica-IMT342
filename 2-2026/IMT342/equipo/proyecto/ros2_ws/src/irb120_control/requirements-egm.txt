@@ -1,0 +1,3 @@
+# En esta PC se verificó protobuf 4.21.12 de python3-protobuf (implementación Python).
+# Para otro entorno Python 3.12 aislado, instalar y registrar la versión usada.
+protobuf>=4.21.12,<5

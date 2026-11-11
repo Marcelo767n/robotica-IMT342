@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IRB 120 · Prueba de comunicación</title>
+<style>
+  :root { color-scheme: light; font-family: system-ui, sans-serif; color:#172330; background:#edf1f5; }
+  * { box-sizing:border-box; } body { margin:0; padding:28px; max-width:1440px; margin-inline:auto; }
+  header { display:flex; justify-content:space-between; gap:24px; align-items:center; margin-bottom:22px; }
+  .eyebrow { color:#965019; font-size:12px; font-weight:800; letter-spacing:2px; }
+  h1 { margin:7px 0; font-size:30px; } .muted { color:#607182; } p { margin:6px 0; }
+  #overall { padding:13px 20px; border-radius:9px; font-weight:750; text-align:center; }
+  .wait { background:#fff1cb; color:#795200; } .ok { background:#d9f2e3; color:#17633b; }
+  .bad { background:#fde3df; color:#9a2b22; }
+  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
+  .card, .tablebox, .note { background:white; border:1px solid #dce3e9; border-radius:12px; }
+  .card { padding:19px 22px; } .card h2 { margin:0 0 12px; font-size:15px; }
+  .rate { font-size:33px; font-weight:750; font-variant-numeric:tabular-nums; }
+  .badge { font-size:12px; font-weight:750; border-radius:6px; padding:4px 8px; float:right; }
+  .meta { font-size:13px; margin-top:6px; color:#607182; }
+  .tablebox { overflow:auto; } table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+  th { background:#172b3e; color:white; padding:15px 18px; text-align:right; font-size:13px; }
+  th:first-child, td:first-child { text-align:left; } td { padding:15px 18px; text-align:right; border-bottom:1px solid #edf1f5; font-size:25px; }
+  td:first-child { font-size:17px; font-weight:750; color:#657384; } .diff { font-size:19px; color:#17633b; }
+  .mismatch { background:#fde3df; color:#9a2b22; } .stale td { color:#7b8792; }
+  .caption { padding:13px 18px; color:#607182; font-size:13px; background:#f8fafb; }
+  .note { padding:16px 20px; margin-top:16px; font-size:14px; line-height:1.6; }
+  #error { color:#9a2b22; font-weight:650; overflow-wrap:anywhere; }
+  footer { margin-top:18px; font-size:13px; color:#607182; }
+  @media(max-width:800px) { body { padding:14px; } header { display:block; } #overall { margin-top:14px; }
+    .cards { gap:8px; } .card { padding:12px; } td,th { padding:12px 10px; } td { font-size:19px; } h1 { font-size:24px; } }
+</style>
+<header>
+  <div><div class="eyebrow">IMT-342 · HITOS 3 / 4</div><h1>ABB IRB 120 · Comunicación en vivo</h1>
+  <p class="muted">Mueve el brazo con el FlexPendant y observa la misma postura en RViz.</p><p id="source" class="muted">Esperando el origen de los datos…</p></div>
+  <div id="overall" class="wait" role="status" aria-live="polite">ESPERANDO DATOS</div>
+</header>
+<div class="cards">
+  <section class="card"><h2>Robot · lectura RWS <span id="rws-badge" class="badge wait">ESPERANDO</span></h2>
+    <div id="rws-rate" class="rate">— Hz</div><div id="rws-meta" class="meta">Sin muestras</div></section>
+  <section class="card"><h2>ROS · ángulos recibidos <span id="ros-badge" class="badge wait">ESPERANDO</span></h2>
+    <div id="ros-rate" class="rate">— Hz</div><div id="ros-meta" class="meta">Sin muestras</div></section>
+  <section class="card"><h2>Gemelo · transformadas TF <span id="tf-badge" class="badge wait">ESPERANDO</span></h2>
+    <div id="tf-rate" class="rate">— Hz</div><div id="tf-meta" class="meta">Sin muestras</div></section>
+</div>
+<div class="tablebox">
+  <table aria-label="Ángulos del robot y del gemelo en grados">
+    <thead><tr><th>Eje</th><th>Robot RWS (°)</th><th>ROS recibido (°)</th><th>Gemelo TF (°)</th><th>Δ ROS − RWS (°)</th><th>Δ TF − ROS (°)</th></tr></thead>
+    <tbody id="angles"></tbody>
+  </table>
+  <div id="sample-meta" class="caption">Los valores aparecerán al recibir la primera muestra. Todos los ángulos se muestran en grados.</div>
+</div>
+<div class="note">
+  <div id="error" role="alert"></div>
+  <div id="transport">Lectura RWS solicitada a través de la PC. Esperando respuesta.</div>
+  <div id="read-mode"></div>
+  <div>Las columnas corresponden a una misma muestra. El ángulo del gemelo se obtiene de los TF que usa RViz.
+    Para J6, TF muestra la orientación equivalente más cercana al ángulo ROS; las vueltas completas provienen del valor recibido.</div>
+  <div>Si se interrumpe la lectura, se conservan los últimos valores y se marca <strong>SIN DATOS</strong> después de 1 s.
+    Un valor de diferencia menor que 0,01° comprueba esta cadena de conversión y visualización.</div>
+</div>
+<footer>Solo lectura · Sin comandos al ABB · Lectura por sondeo RWS, hasta 10 Hz · Ctrl+C en la terminal detiene la prueba.</footer>
+<script>
+  const rows = document.getElementById('angles');
+  for(let i=0;i<6;i++) {
+    const tr=document.createElement('tr');
+    for(let j=0;j<6;j++) { const td=document.createElement('td'); td.textContent=j===0?`J${i+1}`:'—'; if(j>3)td.className='diff'; tr.append(td); }
+    rows.append(tr);
+  }
+  const setStatus=(el,label,style)=>{el.textContent=label;el.className=style;};
+  async function update() {
+    try {
+      const response=await fetch('/estado',{cache:'no-store',signal:AbortSignal.timeout(1800)});
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      const d=await response.json();
+      document.getElementById('read-mode').textContent=d.ignore_joint_state?
+        'LECTURA CON ignore=1 · Contrasta los ángulos y su actualización con el FlexPendant. Este panel comprueba la transmisión, no la validez física del estado ABB.':'';
+      document.getElementById('source').textContent=d.source?`${d.source.includes('127.0.0.1')?'SIMULACIÓN LOCAL · ':''}Controlador: ${d.source} · ${d.mechunit}`:'Esperando el origen de los datos…';
+      for(const key of ['rws','ros','tf']) {
+        const s=d.stats[key], badge=document.getElementById(key+'-badge');
+        setStatus(badge,s.fresh?'RECIBIENDO':s.age_s===null?'ESPERANDO':'SIN DATOS','badge '+(s.fresh?'ok':s.age_s===null?'wait':'bad'));
+        document.getElementById(key+'-rate').textContent=s.hz.toFixed(1)+' Hz';
+        document.getElementById(key+'-meta').textContent=s.age_s===null?'Sin muestras':`${s.count} muestras · última hace ${s.age_s.toFixed(2)} s`;
+      }
+      const fresh=Object.values(d.stats).every(s=>s.fresh), known=d.stats.rws.age_s!==null;
+      const values=d.sample, maxDiff=Math.max(0,...(values.delta_ros||[]).map(Math.abs),...(values.delta_tf||[]).map(Math.abs));
+      const complete=values.rws&&values.ros&&values.tf;
+      const matched=fresh&&complete&&d.sample_age_s<d.stale_seconds&&!d.error;
+      setStatus(document.getElementById('overall'),d.error?'ERROR DE LECTURA':matched?(maxDiff<0.01?'COMUNICACIÓN CORRECTA':'REVISAR DIFERENCIAS'):
+        fresh?'ESPERANDO MUESTRA COMÚN':known?'REVISAR COMUNICACIÓN':'ESPERANDO DATOS',d.error?'bad':matched&&maxDiff<0.01?'ok':'wait');
+      [...rows.children].forEach((tr,i)=>{
+        tr.className=d.sample_age_s===null||d.sample_age_s>=d.stale_seconds?'stale':'';
+        ['rws','ros','tf','delta_ros','delta_tf'].forEach((key,j)=>{
+          const value=values[key]?.[i], td=tr.children[j+1];
+          td.textContent=value==null?'—':value.toFixed(j>=3?5:3);
+          td.className=j>=3?'diff'+(value!=null&&Math.abs(value)>=0.01?' mismatch':''):'';
+        });
+      });
+      document.getElementById('sample-meta').textContent=d.seq==null?'Esperando la primera lectura RWS.':
+        `Muestra #${d.seq} · edad ${d.sample_age_s.toFixed(2)} s · sello ROS ${d.stamp[0]}.${String(d.stamp[1]).padStart(9,'0')} · columnas vacías = recepción pendiente`;
+      document.getElementById('error').textContent=d.error||'';
+      document.getElementById('transport').textContent=`Última consulta RWS: ${d.request_ms==null?'—':d.request_ms.toFixed(1)+' ms'} · mensajes descartados: ${d.invalid_messages}. La duración HTTP no mide la latencia total del robot.`;
+    } catch(error) {
+      setStatus(document.getElementById('overall'),'PANEL DESCONECTADO','bad');
+      for(const key of ['rws','ros','tf'])setStatus(document.getElementById(key+'-badge'),'SIN CONEXIÓN','badge bad');
+      for(const tr of rows.children)tr.className='stale';
+      document.getElementById('error').textContent='El monitor local no responde. Revisa la terminal; los valores mostrados son anteriores.';
+    } finally { setTimeout(update,100); }
+  }
+  update();
+</script>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IRB 120 · Validación FK</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#edf1f5;color:#172b3e;margin:0;padding:26px;max-width:1350px;margin-inline:auto}
+*{box-sizing:border-box}h1{font-size:29px;margin:5px 0}p{line-height:1.5}.eyebrow{font-size:12px;font-weight:800;letter-spacing:2px;color:#965019}
+header{display:flex;gap:20px;align-items:center;justify-content:space-between}.badge{padding:14px 22px;border-radius:9px;font-weight:800;background:#fff0c8;color:#795200}
+.ok{background:#d9f2e3;color:#17633b}.bad{background:#fde3df;color:#9a2b22}.cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin:20px 0}
+.card,.box{background:white;border:1px solid #dce3e9;border-radius:12px;padding:18px}.label{color:#607182;font-size:14px}.value{font-size:30px;font-weight:750;font-variant-numeric:tabular-nums;margin:8px 0}.detail{font-size:13px;color:#607182}
+.tables{display:grid;grid-template-columns:1fr 1fr;gap:16px}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}th,td{padding:12px;text-align:right;border-bottom:1px solid #edf1f5}th{font-size:13px;color:#607182}td{font-size:20px}th:first-child,td:first-child{text-align:left}
+.note{background:white;border-radius:10px;padding:16px 20px;margin-top:16px;font-size:14px;line-height:1.6}.muted{color:#607182}.angles{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.axis{padding:10px 13px;border-radius:8px;background:#172b3e;color:white;font-variant-numeric:tabular-nums;white-space:pre-line}.stale{opacity:.5}
+.flow{background:#172b3e;color:white;border-radius:10px;padding:16px 20px;margin:16px 0;line-height:1.7}.matrices{display:grid;grid-template-columns:1fr 1fr;gap:16px}.matrices pre{overflow:auto;font-size:13px}summary{cursor:pointer;font-weight:650}
+@media(max-width:850px){header{display:block}.cards{grid-template-columns:1fr}.tables{grid-template-columns:1fr}body{padding:14px}}
+</style>
+<header><div><div class="eyebrow">IMT-342 · GATE 2</div><h1>Cinemática directa · Python frente al ABB</h1>
+<p class="muted">FK propia DH · base_link ↔ Base ABB · tool0 · wobj0 · Solo lectura</p></div>
+<div id="status" class="badge" role="status" aria-live="polite">ESPERANDO DATOS</div></header>
+<p class="muted" id="source">Esperando origen de los datos…</p>
+<div id="reason">Mueve el brazo con el FlexPendant y déjalo quieto para evaluar una postura.</div>
+<div class="flow">1. Leer los seis ángulos del ABB → 2. Convertir a radianes y calcular nuestra FK → 3. Leer la pose ABB y calcular el error</div>
+<strong>Entrada a nuestra cinemática directa · ángulos reales de jointtarget</strong>
+<div class="angles" id="angles"></div>
+<div class="cards">
+<div class="card"><div class="label">Error de posición · norma XYZ</div><div class="value" id="ep">— mm</div><div class="detail" id="tp"></div></div>
+<div class="card"><div class="label">Error de orientación · distancia en SO(3)</div><div class="value" id="er">— °</div><div class="detail" id="tr"></div></div>
+<div class="card"><div class="label">Muestras evaluadas</div><div class="value" id="counts">—</div><div class="detail" id="skip"></div></div>
+</div>
+<details class="note"><summary>Ver las dos matrices de pose completas (traslación en metros)</summary><div class="matrices"><div><strong>T propia = forward_kinematics(q)</strong><pre id="own-matrix">—</pre></div><div><strong>T ABB = pose recibida de robtarget</strong><pre id="abb-matrix">—</pre></div></div></details>
+<div class="tables" id="tables">
+<section class="box"><strong>Posición de tool0 en Base (mm)</strong><table><thead><tr><th>Eje</th><th>Python DH</th><th>ABB</th><th>Δ Python − ABB</th></tr></thead><tbody id="xyz"></tbody></table></section>
+<section class="box"><strong>Orientación RPY (grados, solo para visualizar)</strong><table><thead><tr><th>Ángulo</th><th>Python DH</th><th>ABB</th></tr></thead><tbody id="rpy"></tbody></table></section>
+</div>
+<div class="note"><div id="timing"></div><div id="mode"></div><div id="age"></div>
+El criterio inicial es <strong>estricto y configurable</strong>: 10⁻⁶ m y 10⁻⁶ rad. No es una tolerancia física oficial del docente ni prueba la exactitud mecánica del brazo.
+La referencia ABB usa su propio modelo del controlador; esta comparación valida concordancia de modelos, no una medición externa del robot.
+<br>Las lecturas q → pose → q son secuenciales. Si cambian los ángulos más que los límites de quietud, la muestra se registra como <strong>NO EVALUABLE</strong>, aunque se muestran sus diferencias de forma diagnóstica.
+El error angular se calcula con matrices de rotación, no restando RPY.</div>
+<p class="muted" id="model"></p><p class="muted">Ctrl+C en la terminal detiene la sesión. Los CSV y JSONL conservan lecturas, errores, criterios y muestras descartadas.</p>
+<script>
+const $=id=>document.getElementById(id);const fmt=(v,n=6)=>v==null?'—':v.toFixed(n);
+for(let i=0;i<6;i++){const e=document.createElement('span');e.className='axis';e.textContent=`J${i+1}: —`; $('angles').append(e)}
+for(const [id,labels,cols] of [['xyz',['X','Y','Z'],4],['rpy',['Roll','Pitch','Yaw'],3]])for(const label of labels){const tr=document.createElement('tr');for(let j=0;j<cols;j++){const td=document.createElement('td');td.textContent=j===0?label:'—';tr.append(td)}$(id).append(tr)}
+async function tick(){try{
+const response=await fetch('/estado',{cache:'no-store',signal:AbortSignal.timeout(1800)});if(!response.ok)throw Error('HTTP '+response.status);const d=await response.json(),r=d.result;
+$('source').textContent=r?.source?`${r.source.includes('127.0.0.1')?'SIMULACIÓN LOCAL · ':''}Origen de las lecturas: ${r.source}`:'Esperando origen de los datos…';
+$('tp').textContent=`Límite: ${d.position_tolerance_mm} mm`;$('tr').textContent=`Límite: ${d.orientation_tolerance_rad} rad (${(d.orientation_tolerance_rad*180/Math.PI).toPrecision(5)}°)`;
+$('counts').textContent=`${d.pass} dentro · ${d.fail} fuera`;$('skip').textContent=`${d.skipped} no evaluables · ${d.count} recibidas`;
+$('model').textContent=`Modelo: ${d.model.model} · SHA256 ${d.model.sha256.slice(0,16)} · referencia: robtarget ABB, sin TF/RViz como referencia`;
+const stale=d.age_s!==null&&d.age_s>1.5;$('status').textContent=stale?'SIN DATOS':r?r.status.replaceAll('_',' '):'ESPERANDO DATOS';$('status').className='badge '+(stale||r?.accepted===false?'bad':r?.accepted===true?'ok':'');
+$('tables').className='tables'+(stale?' stale':'');$('reason').textContent=r?.reason||'Esperando las lecturas del ABB.';
+$('age').textContent=d.age_s==null?'Sin muestras':`Última muestra hace ${d.age_s.toFixed(2)} s. Valores históricos si aparece SIN DATOS.`;
+$('ep').textContent=fmt(r?.position_error_mm)+' mm';$('er').textContent=fmt(r?.orientation_error_deg,8)+'°';
+for(let i=0;i<6;i++)$('angles').children[i].textContent=`J${i+1}: ${fmt(r?.q_before_deg?.[i],6)}°\n${fmt(r?.q_input_rad?.[i],9)} rad`;
+for(const [id,matrix] of [['own-matrix',r?.own_matrix_m],['abb-matrix',r?.controller_matrix_m]])$(id).textContent=matrix?matrix.map(row=>row.map(v=>v.toFixed(9).padStart(13)).join(' ')).join('\n'):'—';
+for(let i=0;i<3;i++){const row=$('xyz').children[i];[r?.own_xyz_mm?.[i],r?.controller_xyz_mm?.[i],r?.delta_xyz_mm?.[i]].forEach((v,j)=>row.children[j+1].textContent=fmt(v));const rot=$('rpy').children[i];rot.children[1].textContent=fmt(r?.own_rpy_deg?.[i]);rot.children[2].textContent=fmt(r?.controller_rpy_deg?.[i])}
+$('timing').textContent=r?.window_ms==null?'':`Ventana q → pose → q: ${fmt(r.window_ms,1)} ms · cambio articular máximo ${fmt(r.joint_span_deg)}° · desplazamiento FK entre lecturas ${fmt(r.position_span_mm)} mm`;
+$('mode').textContent=r?.ignore_joint_state?'Lectura articular con ignore=1. Contrastar con FlexPendant.':'';
+}catch(e){$('status').textContent='PANEL DESCONECTADO';$('status').className='badge bad';$('tables').className='tables stale';$('reason').textContent='El monitor no responde. Los números mostrados son anteriores.'}finally{setTimeout(tick,150)}}tick();
+</script></html>

@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.16)
+project(irb120_rviz_probe LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+find_package(ament_cmake REQUIRED)
+find_package(rviz_common REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
+add_executable(rviz_probe probe.cpp)
+# Igual que rviz2: enlazar su biblioteca binaria sin añadir otra versión de
+# tinyxml2 por las dependencias CMake del SO anfitrión (Ubuntu 26 / ROS Jazzy).
+get_filename_component(ros_prefix "${rviz_common_DIR}/../../.." ABSOLUTE)
+file(GLOB ros_headers LIST_DIRECTORIES true "${ros_prefix}/include/*")
+target_include_directories(rviz_probe SYSTEM PRIVATE ${ros_headers})
+get_target_property(rviz_common_library rviz_common::rviz_common IMPORTED_LOCATION_NONE)
+get_target_property(rviz_rendering_library rviz_rendering::rviz_rendering IMPORTED_LOCATION_NONE)
+target_link_libraries(rviz_probe "${rviz_common_library}" "${rviz_rendering_library}" Qt5::Widgets rviz_ogre_vendor::OgreMain)

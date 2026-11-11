@@ -1,0 +1,41 @@
+# Plantilla NO-GO. Completar con datos verificados del ABB y del ensayo de laboratorio.
+# No cambiar los campos a true sin realizar/registrar esas verificaciones.
+schema: 1
+robot: ABB_IRB120_3_0_6
+network:
+  controller_ip: 192.168.125.1
+  bind_ip: null  # IP actual de esta PC en Ethernet, confirmada; no asumir la del último día
+  port: null     # puerto destino configurado en UDPUC, no inferido de ejemplos
+  comm_timeout_s: null  # mismo CommTimeout del RAPID, con parada por pérdida ensayada
+controller_limits_deg: null       # seis pares [mínimo, máximo] obtenidos del controlador
+initial_joints_deg: null          # seis ángulos medidos de la postura inicial revisada
+approved_joint_window_deg: null   # seis pares estrechos para el recorrido revisado de esta sesión
+margin_deg: 2.0
+test:
+  step: null              # grados; máximo 1 para el primer ensayo
+  speed: null             # grados/s; máximo 1
+  acceleration: null      # grados/s²; máximo 1
+  following: null         # error de seguimiento máximo en grados, <= 0.5
+  stationary: null        # variación máxima para considerar reposo, en grados
+  start_drift: null       # máximo cambio desde la postura revisada, en grados
+  state_timeout: null     # segundos sin feedback permitido
+  heartbeat_timeout: null # segundos sin señal de vida del supervisor ROS
+  loop_timeout: null      # máximo retraso del ciclo; menor que state_timeout
+  settle_timeout: null    # segundos para comprobar llegada al objetivo
+  max_session_s: null     # hasta 300 s; no renueva automáticamente
+  min_sigma: null         # >=0.01, SVD Jacobiano propio en tool0 (filas lineales m, angulares rad)
+verified:
+  backup_verified: false
+  controller_limits_verified: false
+  joint_mapping_verified: false
+  egm_configuration_verified: false
+  comm_timeout_stop_verified: false
+  trajectory_clearance_verified: false
+  tool_and_load_verified: false
+  initial_posture_verified: false
+go:
+  decision: NO-GO
+  operator: null
+  laboratory_responsible: null
+  approved_at: null   # ISO8601 con zona, por ejemplo fecha real con -04:00
+  valid_until: null   # misma sesión, máximo dos horas después de approved_at
