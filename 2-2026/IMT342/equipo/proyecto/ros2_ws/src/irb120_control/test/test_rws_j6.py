@@ -299,7 +299,7 @@ class RwsJ6Tests(unittest.TestCase):
         for field,value,issue in (('ctrl','guardstop','ESTADO_CONTROLADOR:'),
                                   ('execution','running','RAPID_NO_DETENIDO:'),
                                   ('target',[[0.]*6,[9e9]*6],'OBJETIVO_PENDIENTE:'),
-                                  ('source',SOURCE,'MODULO_NO_J6_REVISADO:'),
+                                  ('source',SOURCE,'MODULO_NO_REVISADO:'),
                                   ('robot','other','IDENTIDAD_NO_VERIFICADA:')):
             client=self.client();self.session.source=J6_SOURCE;self.session.mode='MANR'
             setattr(self.session,field,value)

@@ -1,5 +1,7 @@
 # Conexión del ABB IRB 120 desde Linux: decisión y preparación
 
+**Próxima sesión (preparado 11/11):** [MOVER_DESDE_PC.md](MOVER_DESDE_PC.md) explica por qué no se movió (AUTO y falta de RMMP para escribir en manual), instala el módulo `LabJointRws` v2 con un servidor de órdenes y da la secuencia del FlexPendant y de la PC.
+
 **Cierre 10/11: el movimiento físico no se consiguió.** La recepción por RWS, la transferencia del módulo y el objetivo J6 +0,1° se verificaron; el monitor registró 584 muestras sin movimiento. El último modo confirmado fue AUTO, con `Debug` deshabilitado. No quedó comprobada la ejecución de la rutina en manual reducido. El objetivo podría seguir pendiente. [Diagnóstico del intento y correcciones del procedimiento](CIERRE_PRUEBA_J6_2026-11-10.md), [guía J6](PRUEBA_J6_RWS_RAPID.md). Esta prueba usa RWS + RAPID; EGM físico sigue pendiente.
 
 **Arranques actuales:** [comandos para cada conexión y prueba](COMANDOS_LABORATORIO.md), incluido el nuevo [ensayo de un eje desde RViz](../../ros2_ws/src/irb120_control/README.md), probado con EGM UDP simulado. La salida EGM física todavía requiere preparación y validación de controlador.

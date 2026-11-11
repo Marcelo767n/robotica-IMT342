@@ -1,5 +1,7 @@
 # irb120_control · ensayo de J1 a J6 desde RViz
 
+**11/11 — ruta para mover desde la PC:** `./iniciar.sh rws_mover interactivo` con el módulo [`rapid/rws_mover/LabJointRws.mod`](rapid/rws_mover/LabJointRws.mod) (`ServidorPC`). Guía y pasos del FlexPendant: [MOVER_DESDE_PC.md](../../../docs/conexion_abb/MOVER_DESDE_PC.md). 37 pruebas RWS offline aprobadas (`python3 -m unittest discover -s src/irb120_control/test -p 'test_rws_*.py'` desde `ros2_ws/`); falta ejecutarlo en el IRC5 real.
+
 **10/11 — movimiento físico no conseguido:** [prueba puntual J6 mediante RWS + RAPID](../../../docs/conexion_abb/PRUEBA_J6_RWS_RAPID.md). `rws_j6.py` inspecciona, respalda/transfiere únicamente `LabJointRws`, comprueba recepción sin desplazamiento y prepara ±0,1° de J6 para confirmación local en FlexPendant. La recepción y transferencia se verificaron, pero el monitor terminó sin movimiento y no se comprobó la ejecución local en manual reducido. [Diagnóstico del intento](../../../docs/conexion_abb/CIERRE_PRUEBA_J6_2026-11-10.md). Esta ruta está separada de la demo/EGM descrita a continuación.
 
 Para retomar: `./iniciar.sh rws_j6 diagnosticar` consulta modo, controlador, RAPID, módulo y objetivo con GET; `--informe /ruta/inspeccion.json` analiza un archivo histórico sin red ni contraseña. No habilita movimiento ni verifica el puntero. [Secuencia para la próxima visita](../../../docs/conexion_abb/PROXIMA_SESION_J6.md). El conjunto RWS suma 21 pruebas offline aprobadas; se conserva [su salida](../../../docs/conexion_abb/evidencias/rws_j6_diagnostico_2026-11-10_pruebas.txt).

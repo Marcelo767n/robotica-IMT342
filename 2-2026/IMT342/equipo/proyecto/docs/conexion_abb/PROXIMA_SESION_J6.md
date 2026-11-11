@@ -1,5 +1,7 @@
 # Próxima sesión: resolver la ejecución local y comprobar J6
 
+> **Actualización 11/11:** esta secuencia queda como antecedente. Para la próxima visita usar [MOVER_DESDE_PC.md](MOVER_DESDE_PC.md). Ese procedimiento añade RMMP, que faltaba para escribir en manual, y reemplaza el ensayo de ±0,1° por un servidor de órdenes de hasta 10°.
+
 Preparado el **10/11/2026**. El equipo dispone de nueve días y ahora no tiene acceso al brazo. El primer resultado pendiente es un desplazamiento físico J6 de +0,1° recibido desde Linux y confirmado con lecturas reales. [Cierre del intento anterior](CIERRE_PRUEBA_J6_2026-11-10.md).
 
 ## Qué está preparado en la PC

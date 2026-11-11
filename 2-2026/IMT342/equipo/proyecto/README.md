@@ -6,6 +6,8 @@ Modelo cinemático, simulación ROS 2 e integración con el brazo ABB IRB120-3/0
 
 ## Empezar aquí
 
+**Próxima sesión con el brazo (11/11):** [mover el IRB 120 desde la PC: FlexPendant paso a paso y órdenes](docs/conexion_abb/MOVER_DESDE_PC.md). Sustituye la prueba J6 de ±0,1°.
+
 **ROS 2 organizado por nodos:** [estructura y arranque único](ros2_ws/README.md). El seguimiento físico en RViz fue reportado exitoso el 03/11 y la [comparación FK propia frente al controlador](docs/conexion_abb/VALIDACION_FK_EN_VIVO.md) cuenta con evidencia del 04/11. La prueba pendiente es la ejecución física J6 descrita en la bitácora actual.
 
 **Prueba de comunicación preparada para el laboratorio (30/10):** [FlexPendant → robot → RViz y panel de ángulos](docs/conexion_abb/PRUEBA_COMUNICACION_EN_VIVO.md).

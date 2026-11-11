@@ -24,6 +24,11 @@ CANDIDATE = Path(__file__).resolve().parents[1] / 'rapid/rws_j6/LabJointRws.mod'
 ORIGINAL_MODULE_SHA256 = 'fbf5527946c8e2e9b3d627628326a495c8c614b8ea25b069a2ec067da797e1ec'
 ORIGINAL_NORMALIZED_SHA256 = 'e39d1f16392c93096d19754bc826da61664632b6acf8a4cab06bf8e4e9fdc55c'
 J6_MODULE_SHA256 = 'cb07b7fba9a6f869ed87f21a77cdfb70ea454232132a3e2973daaffb34d2fdf0'
+# Versión 2 (servidor de objetivos, rws_mover.py). Revisada el 11/11/2026.
+SERVER_CANDIDATE = Path(__file__).resolve().parents[1] / 'rapid/rws_mover/LabJointRws.mod'
+SERVER_MODULE_SHA256 = '1a7ab00bf5d43fe285d4b2b0c333d04e8d07a7c5bb322b919eb68aff95f77789'
+# Misma versión con permitirAuto := TRUE (plan B autorizado por el responsable).
+SERVER_AUTO_MODULE_SHA256 = '4f387764e894dcfe3aa94fcffcb6c22a5abf70bf9c438b7c797f9b8fb5ddbc26'
 EMPTY = [[9e9] * 6, [9e9] * 6]
 LIMITS = ((-165,165),(-110,110),(-110,70),(-160,160),(-120,120),(-400,400))
 
@@ -94,6 +99,11 @@ def source_fingerprint(source):
     return hashlib.sha256(source.encode()).hexdigest()
 
 
+def module_label(digest):
+    return {J6_MODULE_SHA256:'J6_revisado',ORIGINAL_NORMALIZED_SHA256:'original_v5',
+            SERVER_MODULE_SHA256:'servidor_v2',SERVER_AUTO_MODULE_SHA256:'servidor_v2_auto'}.get(digest,'no_verificado')
+
+
 def diagnose_inspection(inspection, historical=False):
     """Interpreta lecturas; nunca certifica PP, permisos locales ni movimiento seguro."""
     if not isinstance(inspection,dict):
@@ -118,7 +128,7 @@ def diagnose_inspection(inspection, historical=False):
     mode=value('mode','opmode');state=value('controller','ctrlstate')
     execution=value('execution','ctrlexecstate')
     if mode=='AUTO':
-        issues.append('MODO_AUTO: falta pasar localmente a manual reducido; ProbarObjetivo retorna sin mover en AUTO.')
+        issues.append('MODO_AUTO: falta pasar localmente a manual reducido; ProbarObjetivo y ServidorPC retornan sin mover en AUTO.')
     elif mode!='MANR':
         issues.append('MODO_NO_MANUAL_REDUCIDO: se necesita MANR para la rutina local de esta prueba.')
     if state=='motoroff':
@@ -141,11 +151,10 @@ def diagnose_inspection(inspection, historical=False):
             issues.append('OBJETIVO_NO_VALIDO: '+str(exc))
     source=value('module','module-text')
     digest=source_fingerprint(source) if isinstance(source,str) else None
-    module_version=('J6_revisado' if digest==J6_MODULE_SHA256 else
-                    'original_v5' if digest==ORIGINAL_NORMALIZED_SHA256 else 'no_verificado')
-    if module_version!='J6_revisado':
-        issues.append('MODULO_NO_J6_REVISADO: confirmar el módulo vigente; no preparar un giro con esta lectura.')
-    snapshot_ok=identity_ok and mode=='MANR' and state in ('motoroff','motoron') and execution=='stopped' and pending is False and module_version=='J6_revisado'
+    module_version=module_label(digest)
+    if module_version not in ('J6_revisado','servidor_v2','servidor_v2_auto'):
+        issues.append('MODULO_NO_REVISADO: confirmar el módulo vigente; instalar la v2 con rws_mover instalar.')
+    snapshot_ok=identity_ok and mode=='MANR' and state in ('motoroff','motoron') and execution=='stopped' and pending is False and module_version in ('J6_revisado','servidor_v2','servidor_v2_auto')
     return {'action':'diagnose_read_only','observed_at_utc':inspection.get('observed_at_utc'),
             'base_url':inspection.get('base_url'),'historical_report':historical,
             'requests':'none_historical_file' if historical else 'GET_only',
@@ -178,12 +187,13 @@ class Client:
     def __init__(self, session, base, timeout=3.):
         self.session, self.base, self.timeout = session, base, timeout
         self.write_events=[]
+        self.extra_reads=set()
 
     def read(self, path, **params):
         allowed = {'/rw/system', '/rw/panel/ctrlstate', '/rw/panel/opmode',
                    '/rw/rapid/execution', '/rw/rapid/tasks/T_ROB1/motion',
                    '/rw/rapid/modules', MODULE_PATH, MAIN_MODULE_PATH, SYMBOL}
-        if path not in allowed:
+        if path not in allowed | self.extra_reads:
             raise Refused('Recurso fuera de la lista de diagnóstico.')
         response = self.session.get(self.base + path, params={'json': '1', **params},
                                     timeout=self.timeout, allow_redirects=False)
@@ -340,14 +350,15 @@ class Client:
             raise Refused('No se prepara movimiento: falta la versión J6 revisada con vLabJ6 '
                           'y conservación de J1–J5. La versión original usa v5. '
                           'Usar actualizar_modulo y verificar el programa en el FlexPendant.')
-        if digest not in (ORIGINAL_NORMALIZED_SHA256,J6_MODULE_SHA256):
+        if digest not in (ORIGINAL_NORMALIZED_SHA256,J6_MODULE_SHA256,SERVER_MODULE_SHA256,SERVER_AUTO_MODULE_SHA256):
             raise Refused('El módulo cambió desde su revisión. Ejecutar inspeccionar antes de escribir.')
         return hashlib.sha256(source.encode()).hexdigest()
 
-    def update_module(self,directory):
+    def update_module(self,directory,candidate_path=None,candidate_sha=J6_MODULE_SHA256,accepted=None):
         """Solo sustituye LabJointRws conocido; nunca carga programas ni arranca tareas."""
-        candidate=CANDIDATE.read_text(encoding='utf-8')
-        if source_fingerprint(candidate)!=J6_MODULE_SHA256:
+        candidate=(candidate_path or CANDIDATE).read_text(encoding='utf-8')
+        accepted=set(accepted or (ORIGINAL_NORMALIZED_SHA256,J6_MODULE_SHA256))|{candidate_sha}
+        if source_fingerprint(candidate)!=candidate_sha:
             raise Refused('El candidato local cambió; requiere una nueva revisión.')
         identity=self.verify_identity()
         state=self.assert_stopped_off()
@@ -358,9 +369,9 @@ class Client:
             raise Refused('pcTarget no está vacío; no se edita el módulo con un objetivo pendiente.')
         before=self.module_source()
         digest=source_fingerprint(before)
-        if digest not in (ORIGINAL_NORMALIZED_SHA256,J6_MODULE_SHA256):
-            raise Refused('El módulo del ABB difiere de las dos versiones revisadas. Solo inspeccionar.')
-        if digest==J6_MODULE_SHA256:
+        if digest not in accepted:
+            raise Refused('El módulo del ABB difiere de las versiones revisadas. Solo inspeccionar.')
+        if digest==candidate_sha:
             return {'action':'update_LabJointRws','passed':True,'already_installed':True,
                     'motion_command_sent':False,'program_verification_required':True,
                     'note':'Ya coincide; no se hizo POST. Verificar programa localmente antes de mover.'}
@@ -381,7 +392,7 @@ class Client:
         report={'action':'update_LabJointRws','identity':identity,'backup_directory':str(backup.resolve()),
                 'motion_command_sent':False,'program_pointer_may_reset':True,
                 'program_verification_required':True,'before_sha256':digest,
-                'candidate_sha256':J6_MODULE_SHA256,'module1_before_sha256':main_digest,
+                'candidate_sha256':candidate_sha,'module1_before_sha256':main_digest,
                 'initial_joints_deg':initial[0],'passed':False}
         def record(phase):
             report['phase']=phase
@@ -433,7 +444,7 @@ class Client:
             after=self.stable_target()
             report['after_joints_deg']=after[0]
             report['no_displacement_observed']=same_target(initial,after,tolerance=.005)
-            report['passed']=(report['readback_sha256']==J6_MODULE_SHA256 and
+            report['passed']=(report['readback_sha256']==candidate_sha and
                               report['module1_after_sha256']==main_digest and report['module_list_unchanged'] and
                               report['target_empty'] and report['no_displacement_observed'])
             if not report['passed']:
