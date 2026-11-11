@@ -1,10 +1,16 @@
 # Proyecto ABB IRB 120 · IMT-342
 
-Modelo cinemático, simulación ROS 2 y preparación de la integración con el brazo ABB IRB120-3/0.6. La prioridad actual es completar el inventario del controlador y obtener lectura real de estado antes de preparar movimiento. Actualización documental: **22 de octubre de 2026**.
+Modelo cinemático, simulación ROS 2 e integración con el brazo ABB IRB120-3/0.6. La prioridad actual es completar la primera ejecución física J6 mediante RWS + RAPID. Actualización documental: **10 de noviembre de 2026**.
+
+**[Bitácora del 10/11: avances, prueba fallida y pendientes](AVANCE_2026-11-10.md).** La recepción de ángulos y la transferencia del módulo se comprobaron, pero el movimiento físico no se consiguió. El monitor registró 584 muestras sin desplazamiento y el último modo confirmado fue AUTO. Se preparó un diagnóstico de solo lectura y una [secuencia para la próxima sesión](docs/conexion_abb/PROXIMA_SESION_J6.md).
 
 ## Empezar aquí
 
+**ROS 2 organizado por nodos:** [estructura y arranque único](ros2_ws/README.md). El seguimiento físico en RViz fue reportado exitoso el 03/11 y la [comparación FK propia frente al controlador](docs/conexion_abb/VALIDACION_FK_EN_VIVO.md) cuenta con evidencia del 04/11. La prueba pendiente es la ejecución física J6 descrita en la bitácora actual.
+
 **Prueba de comunicación preparada para el laboratorio (30/10):** [FlexPendant → robot → RViz y panel de ángulos](docs/conexion_abb/PRUEBA_COMUNICACION_EN_VIVO.md).
+
+**Avance del 03/11:** lectura del ABB real publicada en ROS y contrastada con TF (28 muestras, error máximo `7.11e-15°`). Se añadió `--ignore-joint-state` para reproducir la consulta GET `ignore=1` que resolvió el HTTP 400 en la prueba del usuario. [Procedimiento actualizado y evidencia](docs/conexion_abb/PRUEBA_COMUNICACION_EN_VIVO.md). Las tablas del corte documental del 22/10 que siguen abajo son históricas.
 
 | Necesito… | Abrir |
 |---|---|
@@ -17,7 +23,7 @@ Modelo cinemático, simulación ROS 2 y preparación de la integración con el b
 | Usar la simulación del Hito 1 | [Instrucciones ROS](docs/hito1/README.md) |
 | Entender dónde se trasladaron los archivos | [Mapa y registro de organización](docs/organizacion/README.md) |
 
-## Estado comprobado y pendientes
+## Inventario histórico y pendientes al 22/10
 
 | Elemento | Estado |
 |---|---|

@@ -10,6 +10,13 @@ spec.loader.exec_module(monitor)
 
 
 class MonitorTests(unittest.TestCase):
+    def test_ignore_option_is_visible_and_recorded_in_csv(self):
+        self.state.raw({"ok": True, "stamp": {"sec": 1, "nanosec": 0},
+                        "seq": 1, "request_ms": 2, "axes_deg": self.q, "ignore_joint_state": True}, 10)
+        self.ros(); self.tf()
+        self.assertTrue(self.state.snapshot(10.04)["ignore_joint_state"])
+        self.assertIs(self.rows[0][-1], True)
+
     def setUp(self):
         self.geometry = monitor.load_joint_geometry(monitor.DEFAULT_URDF)
         self.rows = []

@@ -1,0 +1,28 @@
+{
+  "action": "observe_J6_only",
+  "identity": {
+    "name": "120-101516",
+    "rwversionname": "6.12.01.00"
+  },
+  "motion_command_sent": false,
+  "passed": false,
+  "reason": "Tiempo agotado sin llegada comprobada.",
+  "samples": 584,
+  "final_sample": {
+    "t_s": 119.85820284300007,
+    "joints_deg": [
+      -4.28397,
+      -12.4929,
+      0.697668,
+      -0.640559,
+      3.30636,
+      1.73935
+    ],
+    "delta_j6_deg": 0.0,
+    "error_j6_deg": -0.10000000000000009,
+    "max_other_joint_change_deg": 0.0
+  },
+  "samples_path": "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/salidas/control_articular/rws_j6/muestras_20261110_215144_245184Z.jsonl",
+  "note": "No calcula velocidad/aceleración física fiable a 5 Hz ni ordena parada.",
+  "write_events": []
+}

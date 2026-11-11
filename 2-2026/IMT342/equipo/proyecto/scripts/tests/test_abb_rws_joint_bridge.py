@@ -5,6 +5,8 @@ from pathlib import Path
 from http.server import ThreadingHTTPServer
 import threading
 import unittest
+from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
 
 import requests
 from requests.auth import HTTPDigestAuth
@@ -24,6 +26,33 @@ sim = load("test_rws_simulado_loopback_mod", HERE / "test_rws_simulado_loopback.
 
 
 class BridgeLogicTests(unittest.TestCase):
+    def test_controller_400_is_not_silently_retried_and_explicit_ignore_reads_axes(self):
+        class RequiresIgnore(sim.FakeRws):
+            def do_GET(self):
+                query = parse_qs(urlsplit(self.path).query)
+                if "jointtarget" in self.path and query.get("ignore") != ["1"]:
+                    self.server.log.append((self.command, self.path))
+                    data = b'{"_embedded":{"status":{"code":-1073414145,"msg":"Unable to get jointtarget icode:-804"}}}'
+                    self.send_response(400)
+                    self.send_header("Content-Length", str(len(data)))
+                    self.end_headers()
+                    self.wfile.write(data)
+                    return
+                super().do_GET()
+        server = ThreadingHTTPServer(("127.0.0.1", 0), RequiresIgnore)
+        server.mode, server.log = "json", []
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        base = f"http://127.0.0.1:{server.server_address[1]}"
+        session = self.session()
+        with self.assertRaisesRegex(bridge.BridgeError, "-1073414145.*icode:-804"):
+            bridge.fetch_joints_deg(session, base)
+        self.assertEqual(len(server.log), 1, "No debe activar ignore=1 automáticamente")
+        self.assertEqual(bridge.fetch_joints_deg(session, base, ignore_joint_state=True), sim.AXES)
+        self.assertTrue(all(method == "GET" for method, _ in server.log))
+        self.assertEqual(parse_qs(urlsplit(server.log[-1][1]).query), {"json": ["1"], "ignore": ["1"]})
+
     def serve(self, mode="json"):
         server = ThreadingHTTPServer(("127.0.0.1", 0), sim.FakeRws)
         server.mode, server.log = mode, []
@@ -75,6 +104,13 @@ class BridgeLogicTests(unittest.TestCase):
 
 
 class PureFunctionTests(unittest.TestCase):
+    def test_http_400_reports_the_controller_cause_without_publishing_values(self):
+        response = {"http_status": 400, "records": [],
+                    "controller_error": {"code": "-123", "message": "State not valid"}}
+        with patch.object(bridge.abb, "read_resource", return_value=response):
+            with self.assertRaisesRegex(bridge.BridgeError, "HTTP 400.*code=-123.*State not valid"):
+                bridge.fetch_joints_deg(object(), "http://192.0.2.1")
+
     def test_degrees_to_radians_and_names(self):
         names, positions = bridge.joint_state_fields([180, 90, 0, -90, 45, 0])
         self.assertEqual(names, ["joint_1", "joint_2", "joint_3", "joint_4", "joint_5", "joint_6"])
@@ -104,7 +140,7 @@ class PureFunctionTests(unittest.TestCase):
             bridge.main(["--host", "127.0.0.1", "--user", "u", "--rate", "50"])
 
     def test_the_bridge_has_no_write_path(self):
-        source = (HERE.parents[0] / "abb_rws_joint_bridge.py").read_text()
+        source = Path(bridge.__file__).read_text()
         for forbidden in (".post(", ".put(", ".delete(", ".patch(", "create_subscription", "create_service", "ActionServer"):
             self.assertNotIn(forbidden, source)
 

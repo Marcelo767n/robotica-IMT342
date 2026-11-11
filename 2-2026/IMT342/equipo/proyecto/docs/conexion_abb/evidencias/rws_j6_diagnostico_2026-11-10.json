@@ -1,0 +1,23 @@
+{
+  "date_local": "2026-11-10",
+  "timezone": "America/La_Paz",
+  "change": "Read-only RWS diagnosis and offline replay of saved inspection",
+  "offline_tests_passed": 21,
+  "hardware_contact_this_change": false,
+  "hardware_diagnostic_validation": "pending_next_visit",
+  "robot_movement_verified": false,
+  "rapid_module_changed_this_change": false,
+  "validations": [
+    "AUTO versus MANR and other modes",
+    "Guard Stop, RAPID running, pending target, unknown module and identity",
+    "Missing readings remain unknown",
+    "Historical replay does not prompt password or create session",
+    "Live CLI with mocked session saves reports, never POSTs or changes pending target, does not log password"
+  ],
+  "sha256": {
+    "ros2_ws/src/irb120_control/irb120_control/rws_j6.py": "25f62eb6754083a5cc4757cd24f8a224419bddf36002bf614c5f4c4117abd7c3",
+    "ros2_ws/src/irb120_control/test/test_rws_j6.py": "7e8ce19716a4e77f8ccbc06dd5c6a4f87da8854d9ae4882c3f8c894655d491ca",
+    "ros2_ws/src/irb120_control/rapid/rws_j6/LabJointRws.mod": "b47ccaa0d158bfeb6dcef35475a8571c6a2d0105ab5011f4b9b8a72079fccdd0",
+    "docs/conexion_abb/evidencias/rws_j6_diagnostico_2026-11-10_pruebas.txt": "bf67dde72b3b923a197d40b8f743818bf153503d06d46ef9c5fb4506c8610af1"
+  }
+}

@@ -4,6 +4,26 @@ Preparada el 30/10/2026. El operador mueve el brazo con el FlexPendant; la PC le
 
 ## Ejecutar hoy
 
+**Actualización del 03/11 — HTTP 400 al consultar ejes:** el ensayo del usuario devolvió `-1073414145`, `icode:-804` con la consulta normal y HTTP 200 con `ignore=1`. Para repetir esa lectura de forma explícita, usar:
+
+```bash
+bash scripts/prueba_comunicacion.sh --host 192.168.125.1 --user "Default User" --ignore-joint-state
+```
+
+`--ignore-joint-state` añade únicamente el parámetro GET `ignore=1` a `jointtarget`; no cambia el controlador, no enciende motores ni arranca programas. No se activa automáticamente ante un error. El panel indica su uso y el CSV lo registra en la columna `ignore_joint_state`. ABB documenta este parámetro para obtener `jointtarget`, pero HTTP 200 por sí solo no certifica validez física ni actualización de las medidas: comparar con FlexPendant en la prueba. [Referencia ABB](https://developercenter.robotstudio.com/api/rwsApi/ms_mechunit_jointtarget_page.html).
+
+La captura adjunta del fallo mostraba `AUTO / motoroff`. En la comprobación posterior, `MANR / motoron`, tanto la consulta normal como la de `ignore=1` respondieron 200; se observaron cambios de J3 entre consultas. Esto sugiere dependencia del estado, pero no identifica por sí solo el significado del código interno `-804`. No cambiar modo, motores ni configuración para intentar resolver un error de lectura.
+
+El 03/11 se verificó **RWS real → ROS → TF**, sin abrir RViz: 30 publicaciones y 28 muestras sincronizadas, con diferencia máxima de `7.11e-15°`. Durante ese ensayo corto el brazo estaba quieto. [Evidencia](evidencias/verificacion_rws_ros_tf_2026-11-03.json). La confirmación visual del gemelo siguiendo el brazo físico sigue pendiente.
+
+Si solo se quiere diagnosticar sin abrir el gemelo:
+
+```bash
+python3 scripts/abb_lectura_rws.py --host 192.168.125.1 --user "Default User" --ignore-joint-state
+```
+
+Los errores muestran ahora el código y mensaje entregados por ABB, además del HTTP 400. Reiniciar los procesos que estuvieran ejecutándose para que carguen estos cambios.
+
 Desde `proyecto/`, con el acceso y la operación acordados con el laboratorio y el cable en X2 Service:
 
 ```bash

@@ -1,0 +1,81 @@
+test_malformed_nonfinite_short_replayed_and_other_port_are_rejected (test_egm.EgmTests.test_malformed_nonfinite_short_replayed_and_other_port_are_rejected) ... ok
+test_no_send_before_feedback_and_degrees_are_preserved (test_egm.EgmTests.test_no_send_before_feedback_and_degrees_are_preserved) ... ok
+test_receive_only_runtime_has_no_path_to_send_commands (test_egm.EgmTests.test_receive_only_runtime_has_no_path_to_send_commands) ... [CONTROL] LISTO: Vista sincronizada. Ajustar UN eje; arrastrar no envía al robot.
+ok
+test_stream_and_missing_status_are_not_assumed_guidance (test_egm.EgmTests.test_stream_and_missing_status_are_not_assumed_guidance) ... ok
+test_wrong_controller_ip_never_becomes_destination (test_egm.EgmTests.test_wrong_controller_ip_never_becomes_destination) ... ok
+test_six_axes_via_public_interactive_feedback_and_loss_of_heartbeat (test_ros_rviz.RosRvizTests.test_six_axes_via_public_interactive_feedback_and_loss_of_heartbeat) ... [CONTROL] LISTO: Vista sincronizada. Ajustar UN eje; arrastrar no envía al robot.
+[INFO] [1793848090.385293935] [irb120_ensayo_articular]: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[CONTROL] ARMADO: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[INFO] [1793848090.486521886] [irb120_ensayo_articular]: Ensayo J1 con LSPB; duración 0.89 s.
+[CONTROL] MOVIENDO: Ensayo J1 con LSPB; duración 0.89 s.
+[CONTROL] ASENTANDO: Objetivo enviado; comprobando llegada medida.
+[CONTROL] MANTENIENDO: Llegada medida dentro del criterio articular de esta sesión.
+[INFO] [1793848091.407056692] [irb120_ensayo_articular]: Manteniendo la referencia anterior; ajustar otro eje y ARMAR de nuevo.
+[CONTROL] PREPARANDO: Manteniendo la referencia anterior; ajustar otro eje y ARMAR de nuevo.
+[INFO] [1793848092.967980546] [irb120_ensayo_articular]: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[CONTROL] ARMADO: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[INFO] [1793848093.085870571] [irb120_ensayo_articular]: Ensayo J2 con LSPB; duración 0.89 s.
+[CONTROL] MOVIENDO: Ensayo J2 con LSPB; duración 0.89 s.
+[CONTROL] ASENTANDO: Objetivo enviado; comprobando llegada medida.
+[CONTROL] MANTENIENDO: Llegada medida dentro del criterio articular de esta sesión.
+[INFO] [1793848094.007294811] [irb120_ensayo_articular]: Envío cerrado. El controlador debe finalizar EGM según su procedimiento.
+[CONTROL] LISTO: Envío cerrado. El controlador debe finalizar EGM según su procedimiento.
+[INFO] [1793848094.385521391] [irb120_ensayo_articular]: Vista sincronizada. Ajustar UN eje; arrastrar no envía al robot.
+[INFO] [1793848095.936010473] [irb120_ensayo_articular]: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[CONTROL] ARMADO: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[INFO] [1793848096.056445132] [irb120_ensayo_articular]: Ensayo J3 con LSPB; duración 0.89 s.
+[CONTROL] MOVIENDO: Ensayo J3 con LSPB; duración 0.89 s.
+[CONTROL] ASENTANDO: Objetivo enviado; comprobando llegada medida.
+[CONTROL] MANTENIENDO: Llegada medida dentro del criterio articular de esta sesión.
+[INFO] [1793848096.986027452] [irb120_ensayo_articular]: Manteniendo la referencia anterior; ajustar otro eje y ARMAR de nuevo.
+[CONTROL] PREPARANDO: Manteniendo la referencia anterior; ajustar otro eje y ARMAR de nuevo.
+[INFO] [1793848098.548028978] [irb120_ensayo_articular]: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[CONTROL] ARMADO: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[INFO] [1793848098.665236158] [irb120_ensayo_articular]: Ensayo J4 con LSPB; duración 0.89 s.
+[CONTROL] MOVIENDO: Ensayo J4 con LSPB; duración 0.89 s.
+[CONTROL] ASENTANDO: Objetivo enviado; comprobando llegada medida.
+[CONTROL] MANTENIENDO: Llegada medida dentro del criterio articular de esta sesión.
+[INFO] [1793848099.576090322] [irb120_ensayo_articular]: Envío cerrado. El controlador debe finalizar EGM según su procedimiento.
+[CONTROL] LISTO: Envío cerrado. El controlador debe finalizar EGM según su procedimiento.
+[INFO] [1793848099.975034619] [irb120_ensayo_articular]: Vista sincronizada. Ajustar UN eje; arrastrar no envía al robot.
+[INFO] [1793848101.525026265] [irb120_ensayo_articular]: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[CONTROL] ARMADO: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[INFO] [1793848101.645823584] [irb120_ensayo_articular]: Ensayo J5 con LSPB; duración 0.89 s.
+[CONTROL] MOVIENDO: Ensayo J5 con LSPB; duración 0.89 s.
+[CONTROL] ASENTANDO: Objetivo enviado; comprobando llegada medida.
+[CONTROL] MANTENIENDO: Llegada medida dentro del criterio articular de esta sesión.
+[INFO] [1793848102.577442643] [irb120_ensayo_articular]: Manteniendo la referencia anterior; ajustar otro eje y ARMAR de nuevo.
+[CONTROL] PREPARANDO: Manteniendo la referencia anterior; ajustar otro eje y ARMAR de nuevo.
+[INFO] [1793848104.125922153] [irb120_ensayo_articular]: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[CONTROL] ARMADO: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[INFO] [1793848104.245816560] [irb120_ensayo_articular]: Ensayo J6 con LSPB; duración 0.89 s.
+[CONTROL] MOVIENDO: Ensayo J6 con LSPB; duración 0.89 s.
+[CONTROL] ASENTANDO: Objetivo enviado; comprobando llegada medida.
+[CONTROL] MANTENIENDO: Llegada medida dentro del criterio articular de esta sesión.
+[INFO] [1793848105.176318973] [irb120_ensayo_articular]: Envío cerrado. El controlador debe finalizar EGM según su procedimiento.
+[CONTROL] LISTO: Envío cerrado. El controlador debe finalizar EGM según su procedimiento.
+[INFO] [1793848105.565303418] [irb120_ensayo_articular]: Vista sincronizada. Ajustar UN eje; arrastrar no envía al robot.
+[INFO] [1793848106.416310473] [irb120_ensayo_articular]: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[CONTROL] ARMADO: Primera consigna = postura medida. Esperar EGM Guidance activo antes de EJECUTAR.
+[CONTROL] FALLO: El supervisor ROS no está actualizando su señal de vida.
+RESULTADO INTEGRADO RVIZ/EGM: [{"axis": 1, "measured_deg": [0.1, -20.0, 20.0, 0.0, 30.0, 0.0], "target_deg": [0.1, -20.0, 20.0, 0.0, 30.0, 0.0], "packets_sent": 121}, {"axis": 2, "measured_deg": [0.1, -19.89999999999999, 20.0, 0.0, 30.0, 0.0], "target_deg": [0.1, -19.89999999999999, 20.0, 0.0, 30.0, 0.0], "packets_sent": 153}, {"axis": 3, "measured_deg": [0.1, -19.89999999999999, 20.1, 0.0, 30.0, 0.0], "target_deg": [0.1, -19.89999999999999, 20.1, 0.0, 30.0, 0.0], "packets_sent": 124}, {"axis": 4, "measured_deg": [0.1, -19.89999999999999, 20.1, 0.09999999999999999, 30.0, 0.0], "target_deg": [0.1, -19.89999999999999, 20.1, 0.09999999999999999, 30.0, 0.0], "packets_sent": 153}, {"axis": 5, "measured_deg": [0.1, -19.89999999999999, 20.1, 0.09999999999999999, 30.1, 0.0], "target_deg": [0.1, -19.89999999999999, 20.1, 0.09999999999999999, 30.1, 0.0], "packets_sent": 124}, {"axis": 6, "measured_deg": [0.1, -19.89999999999999, 20.1, 0.09999999999999999, 30.1, 0.1], "target_deg": [0.1, -19.89999999999999, 20.1, 0.09999999999999999, 30.1, 0.1], "packets_sent": 155}]
+ok
+test_cancel_brakes_instead_of_jumping (test_supervisor.SupervisorTests.test_cancel_brakes_instead_of_jumping) ... ok
+test_following_other_joint_and_motor_faults (test_supervisor.SupervisorTests.test_following_other_joint_and_motor_faults) ... ok
+test_go_and_session_expire (test_supervisor.SupervisorTests.test_go_and_session_expire) ... ok
+test_hard_limits_j3_j6_and_single_step (test_supervisor.SupervisorTests.test_hard_limits_j3_j6_and_single_step) ... ok
+test_initial_reference_and_all_six_individual_profiles (test_supervisor.SupervisorTests.test_initial_reference_and_all_six_individual_profiles) ... ok
+test_j6_is_not_wrapped_modulo_360 (test_supervisor.SupervisorTests.test_j6_is_not_wrapped_modulo_360) ... ok
+test_measured_overshoot_of_reviewed_window_stops_even_below_following_limit (test_supervisor.SupervisorTests.test_measured_overshoot_of_reviewed_window_stops_even_below_following_limit) ... ok
+test_no_reference_on_start_or_preview_and_no_automatic_resume (test_supervisor.SupervisorTests.test_no_reference_on_start_or_preview_and_no_automatic_resume) ... ok
+test_physical_template_blocks_and_requires_explicit_limits (test_supervisor.SupervisorTests.test_physical_template_blocks_and_requires_explicit_limits) ... ok
+test_rejects_nonfinite_incomplete_and_invalid_bounds (test_supervisor.SupervisorTests.test_rejects_nonfinite_incomplete_and_invalid_bounds) ... ok
+test_singular_home_is_not_an_implicit_start (test_supervisor.SupervisorTests.test_singular_home_is_not_an_implicit_start) ... ok
+test_stale_moving_unhealthy_and_preview_only_cannot_arm (test_supervisor.SupervisorTests.test_stale_moving_unhealthy_and_preview_only_cannot_arm) ... ok
+test_stream_can_arm_hold_but_execution_waits_for_guidance (test_supervisor.SupervisorTests.test_stream_can_arm_hold_but_execution_waits_for_guidance) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 19.613s
+
+OK

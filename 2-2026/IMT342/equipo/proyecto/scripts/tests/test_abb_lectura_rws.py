@@ -29,6 +29,44 @@ def payload(records):
 
 
 class ReadOnlyDiagnosticTests(unittest.TestCase):
+    def test_ignore_joint_state_is_opt_in_and_limited_to_jointtarget(self):
+        path = "/rw/motionsystem/mechunits/ROB_1/jointtarget"
+        session = FakeSession({path: (200, payload([{f"rax_{i}": i for i in range(1, 7)}]))})
+        abb.read_resource(session, "http://192.0.2.1", path, 2)
+        result = abb.read_resource(session, "http://192.0.2.1", path, 2, ignore_joint_state=True)
+        self.assertEqual(session.calls[0][1]["params"], {"json": "1"})
+        self.assertEqual(session.calls[1][1]["params"], {"json": "1", "ignore": "1"})
+        self.assertTrue(result["ignore_joint_state"])
+        with self.assertRaises(ValueError):
+            abb.read_resource(session, "http://192.0.2.1", "/rw/system", 2, ignore_joint_state=True)
+        self.assertEqual(len(session.calls), 2)
+
+    def test_controller_error_is_preserved_from_xhtml_and_json(self):
+        for text in (
+            '<html xmlns="http://www.w3.org/1999/xhtml"><body><div class="status">'
+            '<span class="code">-123</span><span class="msg">State not valid</span></div></body></html>',
+            json.dumps({"_embedded": {"status": [{"code": -123, "msg": "State not valid"}]}}),
+        ):
+            self.assertEqual(abb.error_details(text), {"code": "-123", "message": "State not valid"})
+
+    def test_error_extraction_does_not_store_unrelated_fields_or_raw_page(self):
+        text = json.dumps({"code": -1, "msg": "x"*1000, "Authorization": "secret", "cookie": "secret"})
+        detail = abb.error_details(text)
+        self.assertEqual(set(detail), {"code", "message"})
+        self.assertEqual(len(detail["message"]), 400)
+        self.assertNotIn("secret", json.dumps(detail))
+        self.assertEqual(abb.error_details("not an ABB error"), {})
+
+    def test_bad_request_keeps_the_abb_error_and_never_produces_axes(self):
+        session = FakeSession({"/rw/motionsystem/mechunits/ROB_1/jointtarget":
+                               (400, {"code": -123, "msg": "State not valid"})})
+        result = abb.read_resource(session, "http://192.0.2.1",
+                                   "/rw/motionsystem/mechunits/ROB_1/jointtarget", 2)
+        self.assertEqual(result["http_status"], 400)
+        self.assertEqual(result["controller_error"]["code"], "-123")
+        self.assertIsNone(abb.robot_axes(result["records"]))
+        self.assertEqual(len(session.calls), 1)
+
     def test_json_and_namespaced_xhtml_axes(self):
         row = {f"rax_{i}": str(i) for i in range(1, 7)}
         self.assertEqual(abb.robot_axes(abb.state_records(json.dumps(payload([row])))),

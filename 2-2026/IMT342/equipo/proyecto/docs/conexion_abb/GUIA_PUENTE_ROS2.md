@@ -2,6 +2,13 @@
 
 **Prueba preparada el 30/10:** para abrir juntos RViz y un panel con los ángulos RWS, ROS y del gemelo TF, usar la [prueba de comunicación en vivo](PRUEBA_COMUNICACION_EN_VIVO.md). Incluye frecuencia, detección de datos antiguos y registro CSV con un solo comando.
 
+**03/11:** comprobada la cadena RWS → ROS → TF con el ABB real: 28 muestras sincronizadas, diferencia máxima `7.11e-15°`, brazo quieto. Ante el HTTP 400 observado, se añadió la opción explícita `--ignore-joint-state` (GET `ignore=1`), visible en panel/CSV. Ver la guía anterior y la [evidencia](evidencias/verificacion_rws_ros_tf_2026-11-03.json). Los apartados del 29/10 de esta página se conservan como registro histórico.
+
+```bash
+source /opt/ros/jazzy/setup.bash
+~/ros_py312/bin/python scripts/abb_rws_joint_bridge.py --host 192.168.125.1 --user "Default User" --ignore-joint-state
+```
+
 Segunda etapa de la comunicación, después de G1. **No mueve el robot**: cada ciclo hace una consulta GET de los seis ejes y los publica como `sensor_msgs/JointState`. El nodo no tiene suscriptores, servicios ni acciones, así que nada de ROS llega al controlador (una prueba lo verifica).
 
 ## Qué se comprobó y qué no

@@ -1,0 +1,367 @@
+{
+  "observed_at_local": "2026-11-04T23:36:33.209631-04:00",
+  "scope": "offline_ROS_UDP_loopback_and_native_RViz_displays_TF_render",
+  "physical_robot_contacted": false,
+  "physical_motion_tested": false,
+  "rapid_template_compiled": false,
+  "previous_evidence": "control_rviz_egm_2026-11-04.json",
+  "reported_problem": "Piezas del robot amontonadas, aro ausente y displays rojos al ejecutar control_demo.",
+  "fixes": [
+    "RobotModel TF Prefix medido/objetivo alineado con frame_prefix de RSP",
+    "Interactive Markers Namespace de ROS 2 Jazzy reemplaza Update Topic",
+    "Marker Topic sustituido por Topic y QoS explícito",
+    "Reloj del ciclo EGM leído dentro del lock, después de callbacks ROS concurrentes; umbrales sin cambios",
+    "Texto 3D ASCII, ancho de espacio explícito scale.x y líneas de tamaño limitado"
+  ],
+  "offline_tests_passed": 21,
+  "skipped": 0,
+  "final_visual_test_passed_after_spacing_change": true,
+  "runtime_regression_negative_control": "La misma prueba falla con el orden antiguo reconstruido en memoria; pasa con el corregido.",
+  "six_axis_results": [
+    {
+      "axis": 1,
+      "measured_deg": [
+        0.1,
+        -20.0,
+        20.0,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -20.0,
+        20.0,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "packets_sent": 121
+    },
+    {
+      "axis": 2,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.0,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.0,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "packets_sent": 155
+    },
+    {
+      "axis": 3,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "packets_sent": 125
+    },
+    {
+      "axis": 4,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.0,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.0,
+        0.0
+      ],
+      "packets_sent": 156
+    },
+    {
+      "axis": 5,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.1,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.1,
+        0.0
+      ],
+      "packets_sent": 125
+    },
+    {
+      "axis": 6,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.1,
+        0.1
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.1,
+        0.1
+      ],
+      "packets_sent": 154
+    }
+  ],
+  "native_rviz_displays": [
+    {
+      "class": "rviz_default_plugins/Grid",
+      "name": "Grid",
+      "ok": true,
+      "statuses": [
+        {
+          "level": 0,
+          "name": "Status: Ok",
+          "value": ""
+        },
+        {
+          "level": 0,
+          "name": "Transform",
+          "value": "Ok"
+        }
+      ]
+    },
+    {
+      "class": "rviz_default_plugins/RobotModel",
+      "name": "MEDIDO · medido",
+      "ok": true,
+      "statuses": [
+        {
+          "level": 0,
+          "name": "Status: Ok",
+          "value": ""
+        },
+        {
+          "level": 0,
+          "name": "Topic",
+          "value": "1 messages received at 1.5 hz."
+        },
+        {
+          "level": 0,
+          "name": "URDF",
+          "value": "URDF parsed OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/base_link",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/gripper_link",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/gripper_tcp",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/link_1",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/link_2",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/link_3",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/link_4",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/link_5",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "medido/tool0",
+          "value": "Transform OK"
+        }
+      ]
+    },
+    {
+      "class": "rviz_default_plugins/RobotModel",
+      "name": "VISTA PREVIA · objetivo naranja",
+      "ok": true,
+      "statuses": [
+        {
+          "level": 0,
+          "name": "Status: Ok",
+          "value": ""
+        },
+        {
+          "level": 0,
+          "name": "Topic",
+          "value": "1 messages received at 1.8 hz."
+        },
+        {
+          "level": 0,
+          "name": "URDF",
+          "value": "URDF parsed OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/base_link",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/gripper_link",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/gripper_tcp",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/link_1",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/link_2",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/link_3",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/link_4",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/link_5",
+          "value": "Transform OK"
+        },
+        {
+          "level": 0,
+          "name": "objetivo/tool0",
+          "value": "Transform OK"
+        }
+      ]
+    },
+    {
+      "class": "rviz_default_plugins/InteractiveMarkers",
+      "name": "CONTROL J1–J6 · clic derecho",
+      "ok": true,
+      "statuses": [
+        {
+          "level": 0,
+          "name": "Status: Ok",
+          "value": ""
+        },
+        {
+          "level": 0,
+          "name": "j1_3",
+          "value": "Locked to frame objetivo/base_link"
+        },
+        {
+          "level": 0,
+          "name": "Interactive Marker Client",
+          "value": "Pushing update with sequence number 190"
+        }
+      ]
+    },
+    {
+      "class": "rviz_default_plugins/Marker",
+      "name": "Estado de la prueba",
+      "ok": true,
+      "statuses": [
+        {
+          "level": 0,
+          "name": "Status: Ok",
+          "value": ""
+        },
+        {
+          "level": 0,
+          "name": "Topic",
+          "value": "119 messages received at 19.1 hz."
+        },
+        {
+          "level": 0,
+          "name": "Array Topic",
+          "value": "OK"
+        }
+      ]
+    }
+  ],
+  "frame_validation": "Todos los links de ambos URDF resuelven a base_link; preview J2 +0.5 grados cambia tool0 objetivo sin cambiar medido.",
+  "screenshot": "control_rviz_corregido_2026-11-04.png",
+  "source_log": "control_rviz_corregido_2026-11-04_pruebas.txt",
+  "module_sha256": {
+    "irb120_control/__init__.py": "d2fb1580258de099151f51db1cd75eadfeb7d1d608091da30dabe49f67e13539",
+    "irb120_control/arranque.py": "26c409bfd596c5820271fae875237d186f3f63321a4e214f753af918c759d783",
+    "irb120_control/protocolo.py": "46a50679d8bc7fe0e2310d1cb8e45bfb9b94e9c85ab41b11afbcfce61fa75370",
+    "irb120_control/runtime.py": "645522fdc1355887c3165e9cd6c08fb7ffa6a7725f864ceb67976278f05bd58e",
+    "irb120_control/rviz_control.py": "3128c70beb79aca75bf684f9107c614729bba1dd7c5f667d1d1d884d3a32448d",
+    "irb120_control/simulador.py": "03f4225813e257fef219d1a23c1519ba0b3d58f768e792ae35d225d061f26353",
+    "irb120_control/supervisor.py": "7bbfea3ae31a9523a9a352a117559b283f12e6943e09eff69d4c533d26072fb3",
+    "irb120_control/vendor/__init__.py": "25960834489447e4ed25f18b38487d863843c0602ec23d35f3409e980410ec23",
+    "irb120_control/vendor/egm_pb2.py": "a211939bfb5d6a1020bebc6a473c24a24ac2caf1fc0ee75cfeb4580130a5d0f5",
+    "test/test_egm.py": "4c7a9d8a4bfe59eab005c4e9998f470d100da62711cf36a39ed6f88c5f6e650d",
+    "test/test_ros_rviz.py": "15db3bbff5a0326c05e3bc91be9691f353993d86a16deee97e808f197851eb15",
+    "test/test_runtime.py": "2fe56f075afd8f30afb2b46594e089537d5dfaa9fa9525575b8d13b44a018b34",
+    "test/test_supervisor.py": "38947018da23dc9ae86e9de003eb368107e76853d9d883e8c29ea7f710707b02",
+    "test/test_tf_visualization.py": "58e4168225f97339085a6eff4f37054914c022681bf5166881fc2bc9cae1d061",
+    "test/rviz_probe/probe.cpp": "97c559bcc39b6c4e138bd77af758b91bfc18ea2167b7019d053b0df1c504b0c3",
+    "test/rviz_probe/CMakeLists.txt": "e3ddaf7e1f0fc90423373683739430f5ebe95d82d775d7805a7656d3f376da4c"
+  },
+  "development_observation": "Antes de corregir la carrera, una ejecución de 20 pruebas detectó un falso fallo de heartbeat. El comprobador C++ se enlazó con la misma ABI tinyxml2 que RViz Jazzy, sin instalar ni modificar dependencias. Python no garantiza tiempo real duro.",
+  "primary_sources": [
+    "https://github.com/ros2/rviz/blob/jazzy/rviz_default_plugins/src/rviz_default_plugins/displays/robot_model/robot_model_display.cpp",
+    "https://github.com/ros2/rviz/blob/jazzy/rviz_default_plugins/src/rviz_default_plugins/displays/interactive_markers/interactive_marker_display.cpp",
+    "https://github.com/ros2/rviz/blob/jazzy/rviz_common/include/rviz_common/ros_topic_display.hpp",
+    "https://github.com/ros2/rviz/blob/jazzy/rviz_default_plugins/src/rviz_default_plugins/displays/marker/markers/text_view_facing_marker.cpp"
+  ]
+}

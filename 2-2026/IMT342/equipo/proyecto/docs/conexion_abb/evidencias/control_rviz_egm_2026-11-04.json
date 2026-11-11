@@ -1,0 +1,167 @@
+{
+  "observed_at_local": "2026-11-04T23:09:16.613368-04:00",
+  "scope": "offline_only_ROS_InteractiveMarkerFeedback_to_EGM_UDP_loopback",
+  "physical_robot_contacted": false,
+  "physical_motion_tested": false,
+  "rapid_template_compiled": false,
+  "tests_passed": 19,
+  "skipped": 0,
+  "six_axis_results": [
+    {
+      "axis": 1,
+      "measured_deg": [
+        0.1,
+        -20.0,
+        20.0,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -20.0,
+        20.0,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "packets_sent": 121
+    },
+    {
+      "axis": 2,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.0,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.0,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "packets_sent": 153
+    },
+    {
+      "axis": 3,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.0,
+        30.0,
+        0.0
+      ],
+      "packets_sent": 124
+    },
+    {
+      "axis": 4,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.0,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.0,
+        0.0
+      ],
+      "packets_sent": 153
+    },
+    {
+      "axis": 5,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.1,
+        0.0
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.1,
+        0.0
+      ],
+      "packets_sent": 124
+    },
+    {
+      "axis": 6,
+      "measured_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.1,
+        0.1
+      ],
+      "target_deg": [
+        0.1,
+        -19.89999999999999,
+        20.1,
+        0.09999999999999999,
+        30.1,
+        0.1
+      ],
+      "packets_sent": 155
+    }
+  ],
+  "validated": [
+    "no_output_on_start_or_preview",
+    "initial_reference_equals_measured",
+    "single_joint_only",
+    "finite_six_joints_and_joint_limits",
+    "J6_no_modulo_360",
+    "LSPB_speed_acceleration",
+    "smooth_cancel",
+    "stale_feedback_fault",
+    "excess_following_fault",
+    "unselected_joint_drift_fault",
+    "motor_and_guidance_flags",
+    "heartbeat_loss_stops_output",
+    "GO_missing_or_expired_blocks",
+    "singular_posture_blocks_arm",
+    "receive_only_runtime_cannot_send",
+    "wrong_peer_invalid_or_duplicate_packets_rejected",
+    "public_RViz_menu_and_pose_feedback",
+    "continuous_hold_between_axes_requires_new_arm",
+    "measured_window_overshoot_stops_output",
+    "receive_only_feedback_at_nominal_limits"
+  ],
+  "rviz_startup": "two_RSP_models_and_RViz_started_and_exited_without_plugin_load_errors",
+  "module_sha256": {
+    "irb120_control/__init__.py": "d2fb1580258de099151f51db1cd75eadfeb7d1d608091da30dabe49f67e13539",
+    "irb120_control/arranque.py": "0970891dfd9ce54cdb3bc718a1d63a29ac7bad27362d5f02335e9db0f521062a",
+    "irb120_control/protocolo.py": "46a50679d8bc7fe0e2310d1cb8e45bfb9b94e9c85ab41b11afbcfce61fa75370",
+    "irb120_control/runtime.py": "dbb273bb685e494b83f69623442534e80b9ab6783aa461d5a61ae6a11d2b3880",
+    "irb120_control/rviz_control.py": "3f4bb66bc620725f445baad78677d5908b51880b484af14de3c2b0c9bfbd531a",
+    "irb120_control/simulador.py": "03f4225813e257fef219d1a23c1519ba0b3d58f768e792ae35d225d061f26353",
+    "irb120_control/supervisor.py": "7bbfea3ae31a9523a9a352a117559b283f12e6943e09eff69d4c533d26072fb3",
+    "irb120_control/vendor/__init__.py": "25960834489447e4ed25f18b38487d863843c0602ec23d35f3409e980410ec23",
+    "irb120_control/vendor/egm_pb2.py": "a211939bfb5d6a1020bebc6a473c24a24ac2caf1fc0ee75cfeb4580130a5d0f5"
+  },
+  "source_log": "control_rviz_egm_2026-11-04_pruebas.txt",
+  "development_observation": "Una ejecución de desarrollo abortó por watchdog de heartbeat. Se conservó el umbral; no hay garantía de tiempo real duro. La suite final completa terminó aprobada."
+}

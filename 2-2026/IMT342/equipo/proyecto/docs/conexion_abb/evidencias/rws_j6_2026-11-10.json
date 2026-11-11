@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-10",
+  "controller": "120-101516",
+  "robotware": "6.12.01.00",
+  "route": "RWS_RAPID_not_EGM",
+  "zero_displacement_reception_passed": true,
+  "module_transfer_readback_verified": true,
+  "transfer_checks": {
+    "readback_sha256": "cb07b7fba9a6f869ed87f21a77cdfb70ea454232132a3e2973daaffb34d2fdf0",
+    "module1_before_sha256": "3532846e8bbe2a9487d99a8c81ab9d90fc7e49c3ed1beac4adc3b123c5d342f7",
+    "module1_after_sha256": "3532846e8bbe2a9487d99a8c81ab9d90fc7e49c3ed1beac4adc3b123c5d342f7",
+    "module_list_unchanged": true,
+    "target_empty": true,
+    "final_state": {
+      "ctrlstate": "motoroff",
+      "opmode": "AUTO",
+      "ctrlexecstate": "stopped"
+    },
+    "initial_joints_deg": [
+      -4.28397,
+      -12.4929,
+      0.697668,
+      -0.640559,
+      3.30636,
+      1.73935
+    ],
+    "after_joints_deg": [
+      -4.28397,
+      -12.4929,
+      0.697668,
+      -0.640559,
+      3.30636,
+      1.73935
+    ],
+    "no_displacement_observed": true
+  },
+  "original_transfer_report_passed": false,
+  "original_transfer_report_failure": "Release 403: The resource is not held by caller; accepted edit and all readback checks completed first. Original report retained unchanged.",
+  "diagnostic_fix": "Only the exact release code -1073445880 with The resource is not held by caller is treated as already released; other 403 errors remain failures.",
+  "candidate_program_verification": "user_confirmed_FlexPendant_Verify_Program_correct_without_errors",
+  "physical_j6_motion_tested": false,
+  "motion_started_by_pc": false,
+  "session_authorization": "User reported responsible review of Guard Stop, J6 clearance and permission with operator present; only current trial.",
+  "physical_acceleration_verified": false,
+  "offline_tests": {
+    "passed": 16,
+    "scope": "Mock RWS session, fixed resources, backup before mutation, same-angle reception, J6-only targets, readback, failure and timeout handling. No RAPID compiler or hardware motion."
+  },
+  "evidence_files": {
+    "inspection": "docs/conexion_abb/evidencias/rws_j6_inspection_2026-11-10.json",
+    "zero_reception_1": "docs/conexion_abb/evidencias/rws_j6_zero_reception_1_2026-11-10.json",
+    "zero_reception_2": "docs/conexion_abb/evidencias/rws_j6_zero_reception_2_2026-11-10.json",
+    "transfer": "docs/conexion_abb/evidencias/rws_j6_transfer_2026-11-10.json",
+    "preparation": "docs/conexion_abb/evidencias/rws_j6_preparacion_2026-11-10.json",
+    "windows_handoff": "docs/conexion_abb/evidencias/handoff_windows_2026-11-10.md",
+    "observation": "docs/conexion_abb/evidencias/rws_j6_observacion_2026-11-10.json",
+    "observation_samples": "docs/conexion_abb/evidencias/rws_j6_observacion_2026-11-10_muestras.jsonl"
+  },
+  "sha256": {
+    "ros2_ws/src/irb120_control/irb120_control/rws_j6.py": "73d0f146d7dabec9b7e3baf25a0243f13f228bd617021ffa829ded1de71121f2",
+    "ros2_ws/src/irb120_control/rapid/rws_j6/LabJointRws.mod": "b47ccaa0d158bfeb6dcef35475a8571c6a2d0105ab5011f4b9b8a72079fccdd0",
+    "ros2_ws/src/irb120_control/test/test_rws_j6.py": "2a9034852678db49cc5cfe81cdf249dd24d9d3f84288443da62799d222868bff",
+    "ros2_ws/iniciar.sh": "e6fa170a473ac250ef93f464b6d42f2d26cf230429ea352ae6df4b4339669f0b"
+  },
+  "first_target_prepared_readback_verified": true,
+  "prepared_j6_deg": {
+    "from": 1.73935,
+    "to": 1.83935,
+    "delta": 0.1,
+    "other_five_unchanged": true
+  },
+  "target_pending_at_last_write": true,
+  "session_result": "physical_motion_attempt_unsuccessful",
+  "physical_motion_attempt_reported": true,
+  "physical_j6_motion_verified": false,
+  "observation_result": {
+    "samples": 584,
+    "first_t_s": 0.0061367830001017865,
+    "last_t_s": 119.85820284300007,
+    "joint_min_deg": [
+      -4.28397,
+      -12.4929,
+      0.697668,
+      -0.640559,
+      3.30636,
+      1.73935
+    ],
+    "joint_max_deg": [
+      -4.28397,
+      -12.4929,
+      0.697668,
+      -0.640559,
+      3.30636,
+      1.73935
+    ],
+    "max_abs_j6_displacement_deg": 0.0,
+    "max_abs_other_joint_change_deg": 0.0,
+    "final_j6_error_deg": -0.10000000000000009,
+    "no_displacement_observed_in_recorded_window": true
+  },
+  "last_confirmed_controller_mode": "AUTO",
+  "last_confirmed_mode_source": "user_reply_and_FlexPendant_photos",
+  "manual_reduced_mode_confirmed_during_trial": false,
+  "program_pointer_at_routine_entry_confirmed": false,
+  "local_mover_confirmation_observed": false,
+  "root_cause_status": "observed_AUTO_blocked_Debug_and_manual_only_routine; complete_causal_chain_not_verified",
+  "historical_40322_status": "Windows_handoff_reports_initial_syntax_error_corrected_before_Linux_session",
+  "target_state_at_session_end": "unknown_not_read_after_last_preparation; may_remain_pending",
+  "next_trial_prerequisite": "read_current_state_clear_old_target_when_stopped_off_then_demonstrate_local_MostrarObjetivo_in_MANR_before_preparing_new_nonzero_target",
+  "evidence_sha256": {
+    "docs/conexion_abb/evidencias/rws_j6_inspection_2026-11-10.json": "5baa9ca12089c1dae1912c1b45ff335a74ac4a251d83213d109b8314fb6b2980",
+    "docs/conexion_abb/evidencias/rws_j6_zero_reception_1_2026-11-10.json": "49d606b3a1f4c6718b90b583f735d8ea13fcae75b0c30c88214102567435415e",
+    "docs/conexion_abb/evidencias/rws_j6_zero_reception_2_2026-11-10.json": "5caa0e2286487b7e1dc1e0537f0913ea10f68ff061d6f2f03b767ab38eb8448e",
+    "docs/conexion_abb/evidencias/rws_j6_transfer_2026-11-10.json": "4bd90d0d7071f515fa49e36c245b09f6d9bf7ca5da0bf192f3e6eaa109ba33e5",
+    "docs/conexion_abb/evidencias/rws_j6_preparacion_2026-11-10.json": "0e143b42b518e274a939ac4f82b31e577c5e847cb0303b0d21d25f35e0cc8bc6",
+    "docs/conexion_abb/evidencias/handoff_windows_2026-11-10.md": "752cd3a6d6b0698679b60eb4494d7577765c6ac2b5c25531ba65cb8898ca8c33",
+    "docs/conexion_abb/evidencias/rws_j6_observacion_2026-11-10.json": "955ff9e959fbc62c8c5421cc810a29b231620d416c6c739552247765b85c01b8",
+    "docs/conexion_abb/evidencias/rws_j6_observacion_2026-11-10_muestras.jsonl": "95c7f5976c04df07e1cab4954f17ec1bd85fe6457caf2de1ea2a68463302f9f0"
+  }
+}

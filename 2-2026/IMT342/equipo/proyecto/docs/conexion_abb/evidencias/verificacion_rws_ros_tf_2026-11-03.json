@@ -1,0 +1,42 @@
+{
+  "observed_at_utc": "2026-11-03T20:41:38.478007+00:00",
+  "controller": "120-101516",
+  "host": "192.168.125.1",
+  "test": "physical_RWS_to_ROS_to_robot_state_publisher_TF_no_RViz",
+  "ignore_joint_state": true,
+  "published_messages": 30,
+  "synchronized_csv_rows": 28,
+  "maximum_absolute_difference_deg": 7.105427357601002e-15,
+  "first_axes_deg": [
+    0.653889238834381,
+    22.4104633331299,
+    -12.890625,
+    21.7858333587646,
+    3.49495792388916,
+    59.9028358459473
+  ],
+  "last_axes_deg": [
+    0.653889238834381,
+    22.4104633331299,
+    -12.890625,
+    21.7858333587646,
+    3.49495792388916,
+    59.9028358459473
+  ],
+  "range_by_joint_deg": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "csv_local_path": "/tmp/abb_verificacion_20261103/comunicacion_20261103_204131_043911Z.csv",
+  "motion_commands_sent": false,
+  "limits": [
+    "Sin RViz ni confirmacion visual del gemelo en este ensayo",
+    "ignore=1 no certifica validez fisica por si solo",
+    "Contraste simultaneo con FlexPendant pendiente"
+  ],
+  "csv_evidence_file": "verificacion_rws_ros_tf_2026-11-03.csv"
+}

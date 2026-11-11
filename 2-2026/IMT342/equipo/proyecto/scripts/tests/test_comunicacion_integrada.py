@@ -37,7 +37,9 @@ class IntegratedCommunicationTests(unittest.TestCase):
 
         class InterruptedRws(sim.FakeRws):
             def do_GET(self):
-                elapsed = time.monotonic() - started
+                if self.server.first_read_at is None and self._digest_ok():
+                    self.server.first_read_at = time.monotonic()
+                elapsed = 0 if self.server.first_read_at is None else time.monotonic() - self.server.first_read_at
                 if 2.2 < elapsed < 4.6:
                     self.server.log.append((self.command, self.path))
                     self.send_response(503)
@@ -48,6 +50,7 @@ class IntegratedCommunicationTests(unittest.TestCase):
 
         server = ThreadingHTTPServer(("127.0.0.1", 0), InterruptedRws)
         server.mode, server.log = "json", []
+        server.first_read_at = None
         threading.Thread(target=server.serve_forever, daemon=True).start()
         self.addCleanup(server.server_close)
         self.addCleanup(server.shutdown)

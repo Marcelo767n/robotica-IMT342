@@ -1,6 +1,12 @@
 # Conexión del ABB IRB 120 desde Linux: decisión y preparación
 
-Revisión: 22 de octubre de 2026, incorporando las fotos y la versión transcrita del FlexPendant. **Estado: inventario parcial confirmado por fotos; ninguna conexión de la PC al controlador físico verificada.** RobotWare **6.12.01.00** fue reportado por el usuario desde System properties. El objetivo inmediato es preparar la primera lectura. La disponibilidad actual de cable/adaptador debe comprobarse antes de esa prueba. Los drivers no se instalaron ni ejecutaron contra el brazo.
+**Cierre 10/11: el movimiento físico no se consiguió.** La recepción por RWS, la transferencia del módulo y el objetivo J6 +0,1° se verificaron; el monitor registró 584 muestras sin movimiento. El último modo confirmado fue AUTO, con `Debug` deshabilitado. No quedó comprobada la ejecución de la rutina en manual reducido. El objetivo podría seguir pendiente. [Diagnóstico del intento y correcciones del procedimiento](CIERRE_PRUEBA_J6_2026-11-10.md), [guía J6](PRUEBA_J6_RWS_RAPID.md). Esta prueba usa RWS + RAPID; EGM físico sigue pendiente.
+
+**Arranques actuales:** [comandos para cada conexión y prueba](COMANDOS_LABORATORIO.md), incluido el nuevo [ensayo de un eje desde RViz](../../ros2_ws/src/irb120_control/README.md), probado con EGM UDP simulado. La salida EGM física todavía requiere preparación y validación de controlador.
+
+**Estado actualizado al 04/11:** Ethernet/RWS y lectura ROS/TF físicos comprobados; gemelo RViz reportado exitoso. La comparación FK propia frente a ABB ya tiene [evidencia física en Base/tool0/wobj0](evidencias/fk_real_2026-11-04_224412Z_informe.md): 100 muestras finales estacionarias dentro del criterio estricto. Se conservan 25 resultados previos FUERA y falta ampliar la cobertura articular. EGM físico aún no está demostrado. Guías actuales: [arranque por nodos](../../ros2_ws/README.md), [validación FK](VALIDACION_FK_EN_VIVO.md) y [plan EGM/IK/visión](../hitos_3_4/PLAN_CONTROL_EGM_IK_VISION.md).
+
+La investigación base que sigue corresponde al 22 de octubre de 2026; las observaciones iniciales y bitácoras se conservan como antecedente y no sustituyen el estado actualizado de arriba. RobotWare 6.12.01.00 y las opciones se contrastaron posteriormente por RWS.
 
 ## Recomendación
 

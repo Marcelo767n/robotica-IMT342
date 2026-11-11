@@ -21,3 +21,4 @@ hito2/.venv/
 docs/conexion_abb/evidencias/g1_rws_2026-10-29.json
 # Registros de las sesiones de comunicación (revisar antes de publicar).
 /salidas/prueba_comunicacion/
+/salidas/control_articular/

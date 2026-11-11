@@ -1,0 +1,16 @@
+Respaldo previo: /tmp/tmp2honvlb8/respaldo_modulo_20261111_024946_219089Z
+Respaldo previo: /tmp/tmp1yu0u4xh/respaldo_modulo_20261111_024946_221457Z
+..........J6=1.83935° | objetivo=1.83935° | error=+0.00000° | cambio máximo J1–J5=0.00000°
+J6=1.83935° | objetivo=1.83935° | error=+0.00000° | cambio máximo J1–J5=0.00000°
+J6=1.83935° | objetivo=1.83935° | error=+0.00000° | cambio máximo J1–J5=0.00000°
+J6=1.83935° | objetivo=1.83935° | error=+0.00000° | cambio máximo J1–J5=0.10000°
+.......Respaldo previo: /tmp/tmpzfsl73kz/respaldo_modulo_20261111_024946_287132Z
+..Respaldo previo: /tmp/tmpsjawc1y9/respaldo_modulo_20261111_024946_291765Z
+Respaldo previo: /tmp/tmpqbaovx0k/respaldo_modulo_20261111_024946_293957Z
+Respaldo previo: /tmp/tmprsgf8bi4/respaldo_modulo_20261111_024946_295900Z
+Respaldo previo: /tmp/tmp7yx93cb0/respaldo_modulo_20261111_024946_298307Z
+..
+----------------------------------------------------------------------
+Ran 21 tests in 0.083s
+
+OK

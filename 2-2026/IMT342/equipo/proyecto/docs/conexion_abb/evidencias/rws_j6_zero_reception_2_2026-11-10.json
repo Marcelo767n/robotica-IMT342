@@ -1,0 +1,59 @@
+{
+  "observed_at_utc": "2026-11-10T21:37:16.063972+00:00",
+  "identity": {
+    "name": "120-101516",
+    "rwversionname": "6.12.01.00"
+  },
+  "action": "write_read_clear_same_measured_angles",
+  "module_sha256": "fbf5527946c8e2e9b3d627628326a495c8c614b8ea25b069a2ec067da797e1ec",
+  "motion_command_sent": false,
+  "initial_joints_deg": [
+    -4.28397,
+    -12.4929,
+    0.697668,
+    -0.640559,
+    3.30636,
+    1.73935
+  ],
+  "target_joints_deg": [
+    -4.28397,
+    -12.4929,
+    0.697668,
+    -0.640559,
+    3.30636,
+    1.73935
+  ],
+  "readback_verified": true,
+  "cleared": true,
+  "readback_joints_deg": [
+    -4.28397,
+    -12.4929,
+    0.697668,
+    -0.640559,
+    3.30636,
+    1.73935
+  ],
+  "readback_errors_deg": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "after_joints_deg": [
+    -4.28397,
+    -12.4929,
+    0.697668,
+    -0.640559,
+    3.30636,
+    1.73935
+  ],
+  "no_displacement_observed": true,
+  "final_state": {
+    "ctrlstate": "motoroff",
+    "opmode": "AUTO",
+    "ctrlexecstate": "stopped"
+  },
+  "passed": true
+}

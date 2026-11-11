@@ -1,0 +1,288 @@
+{
+  "captured_at_utc": "2026-11-04T22:44:12.836363+00:00",
+  "captured_at_local": "2026-11-04T18:44:12.836363-04:00",
+  "source_file": "salidas/prueba_comunicacion/comunicacion_20261104_223936_186467Z_fk.jsonl",
+  "snapshot_file": "fk_real_2026-11-04_224412Z_muestras.jsonl",
+  "snapshot_sha256": "1b67f5871ace03c4fd45d35a9f9e34431a5bec23bd2e6b9a0a0fc471e66f667c",
+  "first_sample_at_utc": "2026-11-04T22:39:39.908733+00:00",
+  "last_sample_at_utc": "2026-11-04T22:44:12.693478+00:00",
+  "controller_source": "http://192.168.125.1",
+  "context": {
+    "tool": "tool0",
+    "wobj": "wobj0",
+    "coordinate": "Base"
+  },
+  "model": {
+    "file": "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/ros2_ws/src/irb120_hito1/irb120_hito1/kinematics/dh.py",
+    "sha256": "5124f4ef749e2529ef2a4cff379693d932a84f4acf79e02d0d69f71fe4c0b37f",
+    "model": "FK DH propia irb120_hito1",
+    "base": "base_link",
+    "end_frame": "tool0"
+  },
+  "all_session": {
+    "samples": 1365,
+    "statuses": {
+      "NO_EVALUABLE": 163,
+      "FUERA": 25,
+      "DENTRO": 1177
+    },
+    "comparable_samples": 1202,
+    "position_error_mm": {
+      "min": 3.9767162385623415e-05,
+      "median": 7.451143150356348e-05,
+      "p95": 7.451143150356348e-05,
+      "max": 0.0013338862512316458
+    },
+    "orientation_error_rad": {
+      "min": 5.2389965764024155e-08,
+      "median": 2.0568284452128297e-07,
+      "p95": 2.0568284452128297e-07,
+      "max": 7.931044818206134e-06
+    },
+    "orientation_error_deg": {
+      "min": 3.0017239271134593e-06,
+      "median": 1.1784758909315022e-05,
+      "p95": 1.1784758909315022e-05,
+      "max": 0.0004544153952123127
+    },
+    "window_ms": {
+      "min": 11.532353999996303,
+      "median": 14.259429500043552,
+      "p95": 17.561672300007558,
+      "max": 19.349538999904325
+    }
+  },
+  "last_100": {
+    "samples": 100,
+    "statuses": {
+      "DENTRO": 100
+    },
+    "comparable_samples": 100,
+    "position_error_mm": {
+      "min": 7.451143150356348e-05,
+      "median": 7.451143150356348e-05,
+      "p95": 7.451143150356348e-05,
+      "max": 7.451143150356348e-05
+    },
+    "orientation_error_rad": {
+      "min": 2.0568284452128297e-07,
+      "median": 2.0568284452128297e-07,
+      "p95": 2.0568284452128297e-07,
+      "max": 2.0568284452128297e-07
+    },
+    "orientation_error_deg": {
+      "min": 1.1784758909315022e-05,
+      "median": 1.1784758909315022e-05,
+      "p95": 1.1784758909315022e-05,
+      "max": 1.1784758909315022e-05
+    },
+    "window_ms": {
+      "min": 11.873538999907396,
+      "median": 14.253402999997888,
+      "p95": 17.54675925004676,
+      "max": 18.415027999935774
+    }
+  },
+  "last_100_identical_joint_vectors_and_zero_bracket_span": true,
+  "last_100_duration_s": 19.800399,
+  "observed_joint_ranges_deg": [
+    8.927116394042898,
+    12.35330867767334,
+    15.55109500885009,
+    0.0,
+    0.00042915344239702335,
+    0.00044250488298303026
+  ],
+  "recomputation_max_absolute_difference": 0.0,
+  "hito1_vs_hito2_max_position_mm": 0.0,
+  "hito1_vs_hito2_max_rotation_rad": 0.0,
+  "hito1_vs_rosi_max_position_mm": 2.288783399261119e-13,
+  "hito1_vs_rosi_max_rotation_rad": 3.1411485492981204e-16,
+  "last_sample": {
+    "received_at_utc": "2026-11-04T22:44:12.693478+00:00",
+    "sample": {
+      "ok": true,
+      "q_before_deg": [
+        -73.2051544189453,
+        -12.1486206054688,
+        9.91144466400146,
+        91.8839874267578,
+        31.7478084564209,
+        -134.498596191406
+      ],
+      "q_after_deg": [
+        -73.2051544189453,
+        -12.1486206054688,
+        9.91144466400146,
+        91.8839874267578,
+        31.7478084564209,
+        -134.498596191406
+      ],
+      "controller_pose": {
+        "xyz_mm": [
+          123.9005,
+          -279.4678,
+          639.3236
+        ],
+        "quaternion_wxyz": [
+          0.532165,
+          -0.01589103,
+          0.6888447,
+          -0.4919764
+        ]
+      },
+      "context": {
+        "tool": "tool0",
+        "wobj": "wobj0",
+        "coordinate": "Base"
+      },
+      "window_ms": 13.708201999861558,
+      "ignore_joint_state": true,
+      "seq": 1365,
+      "stamp": {
+        "sec": 1793832252,
+        "nanosec": 683437671
+      },
+      "source": "http://192.168.125.1"
+    },
+    "result": {
+      "status": "DENTRO",
+      "reason": "Comparación de FK propia frente a pose del controlador",
+      "accepted": true,
+      "position_error_mm": 7.451143150356348e-05,
+      "orientation_error_rad": 2.0568284452128297e-07,
+      "orientation_error_deg": 1.1784758909315022e-05,
+      "position_tolerance_mm": 0.001,
+      "orientation_tolerance_rad": 1e-06,
+      "orientation_tolerance_deg": 5.729577951308232e-05,
+      "motion_threshold_deg": 0.01,
+      "max_window_ms": 500.0,
+      "q_before_deg": [
+        -73.2051544189453,
+        -12.1486206054688,
+        9.91144466400146,
+        91.8839874267578,
+        31.7478084564209,
+        -134.498596191406
+      ],
+      "q_after_deg": [
+        -73.2051544189453,
+        -12.1486206054688,
+        9.91144466400146,
+        91.8839874267578,
+        31.7478084564209,
+        -134.498596191406
+      ],
+      "joint_span_deg": 0.0,
+      "position_span_mm": 0.0,
+      "orientation_span_rad": 0.0,
+      "window_ms": 13.708201999861558,
+      "own_xyz_mm": [
+        123.90051690136964,
+        -279.4678289764906,
+        639.3235334668495
+      ],
+      "controller_xyz_mm": [
+        123.9005,
+        -279.4678,
+        639.3236
+      ],
+      "delta_xyz_mm": [
+        1.6901369651045606e-05,
+        -2.897649059585561e-05,
+        -6.653315054450104e-05
+      ],
+      "own_rpy_deg": [
+        -85.84390045228992,
+        45.85027024701929,
+        -128.44664062558206
+      ],
+      "controller_rpy_deg": [
+        -85.84389413565188,
+        45.85027918993744,
+        -128.44662980462775
+      ],
+      "own_matrix_m": [
+        [
+          -0.4330958980525163,
+          0.5017323302816299,
+          0.7487941051051684,
+          0.12390051690136965
+        ],
+        [
+          -0.5455181999016319,
+          0.5154132440361733,
+          -0.6608775086566281,
+          -0.2794678289764906
+        ],
+        [
+          -0.7175220112764261,
+          -0.6947041504282766,
+          0.050480755853678505,
+          0.6393235334668496
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "controller_matrix_m": [
+        [
+          -0.4330957253894714,
+          0.5017323829129581,
+          0.7487941697061029,
+          0.1239005
+        ],
+        [
+          -0.5455181939849267,
+          0.5154133508572114,
+          -0.6608774302316315,
+          -0.2794678
+        ],
+        [
+          -0.7175221199940744,
+          -0.6947040331642144,
+          0.0504808243255086,
+          0.6393236000000001
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "seq": 1365,
+      "stamp": {
+        "sec": 1793832252,
+        "nanosec": 683437671
+      },
+      "context": {
+        "tool": "tool0",
+        "wobj": "wobj0",
+        "coordinate": "Base"
+      },
+      "source": "http://192.168.125.1",
+      "ignore_joint_state": true
+    },
+    "model": {
+      "file": "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/ros2_ws/src/irb120_hito1/irb120_hito1/kinematics/dh.py",
+      "sha256": "5124f4ef749e2529ef2a4cff379693d932a84f4acf79e02d0d69f71fe4c0b37f",
+      "model": "FK DH propia irb120_hito1",
+      "base": "base_link",
+      "end_frame": "tool0"
+    }
+  },
+  "physical_motion_commands_sent_by_this_analysis": false,
+  "limitations": [
+    "Lecturas RWS secuenciales; igualdad de ángulos antes/después no garantiza simultaneidad ni detecta todo movimiento intermedio.",
+    "Los resultados FUERA no se eliminan ni se atribuyen automáticamente a movimiento o redondeo.",
+    "Contexto Base/tool0/wobj0; no valida el TCP físico de la pinza ni exactitud mecánica externa.",
+    "La campaña no varió sustancialmente J4, J5 ni J6; no cierra validación global de seis ejes.",
+    "ignore=1 habilitado explícitamente: HTTP 200 no certifica por sí solo vigencia/validez física.",
+    "El criterio numérico estricto del proyecto no es un requisito físico oficial del docente."
+  ],
+  "last_sample_age_at_capture_s": 0.142885
+}

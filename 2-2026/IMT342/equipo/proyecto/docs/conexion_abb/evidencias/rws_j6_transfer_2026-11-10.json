@@ -1,0 +1,65 @@
+{
+  "action": "update_LabJointRws",
+  "identity": {
+    "name": "120-101516",
+    "rwversionname": "6.12.01.00"
+  },
+  "backup_directory": "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/salidas/control_articular/rws_j6/respaldo_modulo_20261110_214712_749907Z",
+  "motion_command_sent": false,
+  "program_pointer_may_reset": true,
+  "program_verification_required": true,
+  "before_sha256": "e39d1f16392c93096d19754bc826da61664632b6acf8a4cab06bf8e4e9fdc55c",
+  "candidate_sha256": "cb07b7fba9a6f869ed87f21a77cdfb70ea454232132a3e2973daaffb34d2fdf0",
+  "module1_before_sha256": "3532846e8bbe2a9487d99a8c81ab9d90fc7e49c3ed1beac4adc3b123c5d342f7",
+  "initial_joints_deg": [
+    -4.28397,
+    -12.4929,
+    0.697668,
+    -0.640559,
+    3.30636,
+    1.73935
+  ],
+  "passed": false,
+  "phase": "release_failed_inspect_session",
+  "write_events": [
+    {
+      "at_utc": "2026-11-10T21:47:12.751248+00:00",
+      "resource": "/rw/mastership/rapid",
+      "action": "request",
+      "result": "accepted",
+      "http_status": 204
+    },
+    {
+      "at_utc": "2026-11-10T21:47:12.809898+00:00",
+      "resource": "/rw/rapid/modules/LabJointRws",
+      "action": "set-module-text",
+      "result": "accepted",
+      "http_status": 200
+    },
+    {
+      "at_utc": "2026-11-10T21:47:13.280291+00:00",
+      "resource": "/rw/mastership/rapid",
+      "action": "release",
+      "result": "rejected",
+      "http_status": 403
+    }
+  ],
+  "readback_sha256": "cb07b7fba9a6f869ed87f21a77cdfb70ea454232132a3e2973daaffb34d2fdf0",
+  "module1_after_sha256": "3532846e8bbe2a9487d99a8c81ab9d90fc7e49c3ed1beac4adc3b123c5d342f7",
+  "module_list_unchanged": true,
+  "target_empty": true,
+  "final_state": {
+    "ctrlstate": "motoroff",
+    "opmode": "AUTO",
+    "ctrlexecstate": "stopped"
+  },
+  "after_joints_deg": [
+    -4.28397,
+    -12.4929,
+    0.697668,
+    -0.640559,
+    3.30636,
+    1.73935
+  ],
+  "no_displacement_observed": true
+}

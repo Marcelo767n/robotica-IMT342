@@ -1,0 +1,461 @@
+{
+  "observed_at_utc": "2026-11-10T21:31:50.976600+00:00",
+  "base_url": "http://192.168.125.1",
+  "route": "RWS_RAPID_not_EGM",
+  "requests": "GET_only",
+  "motion_command_sent": false,
+  "resources": {
+    "system": {
+      "ok": true,
+      "records": [
+        {
+          "_type": "sys-system-li",
+          "_title": "system",
+          "major": "6",
+          "minor": "12",
+          "build": "1014",
+          "revision": "01",
+          "sub-revision": "00",
+          "buildtag": "",
+          "robapi-compatibility-revision": "0",
+          "title": "RobotWare",
+          "type": "RobotWare",
+          "description": "Controller Software",
+          "date": "2021-05-12",
+          "mctimestamp": "#08:57:17/May 12 2021#",
+          "name": "120-101516",
+          "rwversion": "6.12.1014",
+          "sysid": "{2e4101e3-9025-4fd8-90a2-83301c130aa3}",
+          "starttm": "2026-11-10 T 22:35:01",
+          "rwversionname": "6.12.01.00"
+        },
+        {
+          "_type": "sys-options-li",
+          "_title": "options",
+          "_links": {
+            "self": {
+              "href": "options?json=1"
+            }
+          },
+          "options": [
+            {
+              "_type": "sys-option-li",
+              "_title": "0",
+              "option": "UDPUC Driver"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "1",
+              "option": "English"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "2",
+              "option": "687-1 Advanced Robot Motion"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "3",
+              "option": "613-1 Collision Detection"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "4",
+              "option": "709-1 DeviceNet Master/Slave"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "5",
+              "option": "689-1 Externally Guided Motion (EGM)"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "6",
+              "option": "617-1 FlexPendant Interface"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "7",
+              "option": "614-1 FTP SFTP and NFS client"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "8",
+              "option": "610-1 Independent Axis"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "9",
+              "option": "623-1 Multitasking"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "10",
+              "option": "612-1 Path Offset"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "11",
+              "option": "611-1 Path Recovery"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "12",
+              "option": "616-1 PC Interface"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "13",
+              "option": "628-1 Sensor Interface"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "14",
+              "option": "885-1 SoftMove"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "15",
+              "option": "608-1 World Zones"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "16",
+              "option": "RobotWare Base"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "17",
+              "option": "Axis Calibration"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "18",
+              "option": "Pendelum Calibration"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "19",
+              "option": "Motor Commutation"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "20",
+              "option": "Service Info System"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "21",
+              "option": "Drive System IRB 120/140/260/360/910SC/1200/1400/1520/1600/1660ID IRC5 Compact"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "22",
+              "option": "IRB 120-3/0.6"
+            },
+            {
+              "_type": "sys-option-li",
+              "_title": "23",
+              "option": "StateMachine Core"
+            }
+          ]
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "0",
+          "option": "UDPUC Driver"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "1",
+          "option": "English"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "2",
+          "option": "687-1 Advanced Robot Motion"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "3",
+          "option": "613-1 Collision Detection"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "4",
+          "option": "709-1 DeviceNet Master/Slave"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "5",
+          "option": "689-1 Externally Guided Motion (EGM)"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "6",
+          "option": "617-1 FlexPendant Interface"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "7",
+          "option": "614-1 FTP SFTP and NFS client"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "8",
+          "option": "610-1 Independent Axis"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "9",
+          "option": "623-1 Multitasking"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "10",
+          "option": "612-1 Path Offset"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "11",
+          "option": "611-1 Path Recovery"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "12",
+          "option": "616-1 PC Interface"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "13",
+          "option": "628-1 Sensor Interface"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "14",
+          "option": "885-1 SoftMove"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "15",
+          "option": "608-1 World Zones"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "16",
+          "option": "RobotWare Base"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "17",
+          "option": "Axis Calibration"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "18",
+          "option": "Pendelum Calibration"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "19",
+          "option": "Motor Commutation"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "20",
+          "option": "Service Info System"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "21",
+          "option": "Drive System IRB 120/140/260/360/910SC/1200/1400/1520/1600/1660ID IRC5 Compact"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "22",
+          "option": "IRB 120-3/0.6"
+        },
+        {
+          "_type": "sys-option-li",
+          "_title": "23",
+          "option": "StateMachine Core"
+        },
+        {
+          "_type": "sys-license-li",
+          "_title": "license",
+          "self": {
+            "href": "license?json=1"
+          }
+        },
+        {
+          "_links": {
+            "self": {
+              "href": "products"
+            }
+          },
+          "_type": "sys-products-li",
+          "_title": "products"
+        }
+      ]
+    },
+    "controller": {
+      "ok": true,
+      "records": [
+        {
+          "_type": "pnl-ctrlstate",
+          "_title": "ctrlstate",
+          "ctrlstate": "motoroff"
+        }
+      ]
+    },
+    "mode": {
+      "ok": true,
+      "records": [
+        {
+          "_type": "pnl-opmode",
+          "_title": "opmode",
+          "opmode": "AUTO"
+        }
+      ]
+    },
+    "execution": {
+      "ok": true,
+      "records": [
+        {
+          "_type": "rap-execution",
+          "_title": "execution",
+          "ctrlexecstate": "stopped",
+          "cycle": "forever"
+        }
+      ]
+    },
+    "joints": {
+      "ok": true,
+      "records": [
+        {
+          "_type": "rapid-jointtarget",
+          "_title": "jointtarget",
+          "j1": "-4.28397",
+          "j2": "-12.4929",
+          "j3": "0.697668",
+          "j4": "-0.640559",
+          "j5": "3.30636",
+          "j6": "1.73935",
+          "ej1": "8.999999e+09",
+          "ej2": "8.999999e+09",
+          "ej3": "8.999999e+09",
+          "ej4": "8.999999e+09",
+          "ej5": "8.999999e+09",
+          "ej6": "8.999999e+09"
+        }
+      ]
+    },
+    "modules": {
+      "ok": true,
+      "records": [
+        {
+          "_links": {
+            "self": {
+              "href": "modules?task=T_ROB1&amp;json=1"
+            }
+          },
+          "_type": "rap-module-info-li",
+          "_title": "T_ROB1/LabJointRws",
+          "name": "LabJointRws",
+          "type": "ProgMod"
+        },
+        {
+          "_links": {
+            "self": {
+              "href": "modules?task=T_ROB1&amp;json=1"
+            }
+          },
+          "_type": "rap-module-info-li",
+          "_title": "T_ROB1/user",
+          "name": "user",
+          "type": "SysMod"
+        },
+        {
+          "_links": {
+            "self": {
+              "href": "modules?task=T_ROB1&amp;json=1"
+            }
+          },
+          "_type": "rap-module-info-li",
+          "_title": "T_ROB1/BASE",
+          "name": "BASE",
+          "type": "SysMod"
+        },
+        {
+          "_links": {
+            "self": {
+              "href": "modules?task=T_ROB1&amp;json=1"
+            }
+          },
+          "_type": "rap-module-info-li",
+          "_title": "T_ROB1/Module1",
+          "name": "Module1",
+          "type": "ProgMod"
+        },
+        {
+          "_links": {
+            "self": {
+              "href": "modules?task=T_ROB1&amp;json=1"
+            }
+          },
+          "_type": "rap-module-info-li",
+          "_title": "T_ROB1/CalibData",
+          "name": "CalibData",
+          "type": "ProgMod"
+        }
+      ]
+    },
+    "target": {
+      "ok": true,
+      "records": [
+        {
+          "_type": "rap-data",
+          "_title": "RAPID/T_ROB1/LabJointRws/pcTarget",
+          "value": "[[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]]"
+        },
+        {
+          "_type": "rap-data-decl-pos",
+          "_title": "decl-pos",
+          "begin-row": "4",
+          "begin-coloumn": "5",
+          "end-row": "4",
+          "end-coloumn": "87"
+        },
+        {
+          "_type": "rap-data-initval-pos",
+          "_title": "initval_pos",
+          "begin-row": "4",
+          "begin-coloumn": "34",
+          "end-row": "4",
+          "end-coloumn": "86"
+        }
+      ]
+    },
+    "module": {
+      "ok": true,
+      "records": [
+        {
+          "_links": {
+            "self": {
+              "href": "modules/LabJointRws?task=T_ROB1&resource=module-text&json=1"
+            }
+          },
+          "_type": "rap-module-text",
+          "_title": "module-text",
+          "change-count": 360202,
+          "file-path": "%22/hd0a/TEMPpusres.205502%22",
+          "module-length": "1368",
+          "module-text": "MODULE LabJointRws\n    CONST jointtarget noTarget := [[9E9,9E9,9E9,9E9,9E9,9E9],[9E9,9E9,9E9,9E9,9E9,9E9]];\n    CONST num maxDeltaDeg := 1;\n    PERS jointtarget pcTarget := [[9E9,9E9,9E9,9E9,9E9,9E9],[9E9,9E9,9E9,9E9,9E9,9E9]];\n\n    PROC MostrarObjetivo()\n        MostrarEjes pcTarget.robax;\n    ENDPROC\n\n    PROC ProbarObjetivo()\n        VAR jointtarget objetivo;\n        VAR jointtarget actual;\n        VAR num respuesta := 0;\n        VAR errnum motivo := 0;\n\n        IF OpMode() <> OP_MAN_PROG THEN\n            TPWrite \"Seleccione modo manual reducido.\";\n            RETURN;\n        ENDIF\n\n        objetivo := pcTarget;\n        pcTarget := noTarget;\n        actual := CJointT();\n        IF NOT ObjetivoCercano(objetivo.robax, actual.robax) THEN\n            TPWrite \"Sin objetivo o diferencia mayor a 1 grado.\";\n            RETURN;\n        ENDIF\n\n        MostrarEjes objetivo.robax;\n        TPReadFK respuesta,\"Ejecutar el objetivo mostrado?\",stEmpty,stEmpty,stEmpty,\"Mover\",\"Cancelar\"\\MaxTime:=15\\BreakFlag:=motivo;\n        IF motivo <> 0 OR respuesta <> 4 THEN\n            RETURN;\n        ENDIF\n\n        actual := CJointT();\n        IF OpMode() <> OP_MAN_PROG OR ObjetivoCercano(objetivo.robax, actual.robax) = FALSE THEN\n            TPWrite \"Cambio de modo o de posicion. Prueba cancelada.\";\n            RETURN;\n        ENDIF\n\n        objetivo.extax := actual.extax;\n        MoveAbsJ objetivo,v5,fine,tool0;\n        TPWrite \"Movimiento terminado.\";\n    ENDPROC\n\n    LOCAL PROC MostrarEjes(robjoint ejes)\n        TPWrite \"Objetivo absoluto en grados:\";\n        TPWrite \"J1\"\\Num:=ejes.rax_1;\n        TPWrite \"J2\"\\Num:=ejes.rax_2;\n        TPWrite \"J3\"\\Num:=ejes.rax_3;\n        TPWrite \"J4\"\\Num:=ejes.rax_4;\n        TPWrite \"J5\"\\Num:=ejes.rax_5;\n        TPWrite \"J6\"\\Num:=ejes.rax_6;\n    ENDPROC\n\n    LOCAL FUNC bool ObjetivoCercano(robjoint destino, robjoint actual)\n        RETURN Abs(destino.rax_1 - actual.rax_1) <= maxDeltaDeg AND\n               Abs(destino.rax_2 - actual.rax_2) <= maxDeltaDeg AND\n               Abs(destino.rax_3 - actual.rax_3) <= maxDeltaDeg AND\n               Abs(destino.rax_4 - actual.rax_4) <= maxDeltaDeg AND\n               Abs(destino.rax_5 - actual.rax_5) <= maxDeltaDeg AND\n               Abs(destino.rax_6 - actual.rax_6) <= maxDeltaDeg;\n    ENDFUNC\nENDMODULE\n\n"
+        }
+      ]
+    }
+  },
+  "elapsed_s": 0.05809913900009178,
+  "module_sha256": "fbf5527946c8e2e9b3d627628326a495c8c614b8ea25b069a2ec067da797e1ec",
+  "module_source_path": "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/salidas/control_articular/rws_j6/LabJointRws_20261110_213151_034907Z.mod"
+}
