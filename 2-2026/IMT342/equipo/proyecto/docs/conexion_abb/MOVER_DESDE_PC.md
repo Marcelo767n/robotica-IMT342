@@ -2,7 +2,12 @@
 
 Preparado el **11/11/2026**. Sustituye la prueba puntual J6 de ±0,1° ([cierre del 10/11](CIERRE_PRUEBA_J6_2026-11-10.md)) por una ruta pensada para **mover el brazo desde Linux, orden tras orden**, sin volver a tocar el puntero de programa en cada movimiento.
 
-> **Estado:** código y módulo RAPID nuevos, con 16 pruebas offline más una prueba de punta a punta contra un ABB simulado en loopback. **Todavía no se ejecutó en el IRC5 real.** La compilación del módulo la confirma el FlexPendant con *Comprobar programa*.
+> **Estado (16/11/2026): probado en el IRC5 real.** Se instaló el módulo v2 por RWS, se concedió RMMP en manual reducido y la PC ejecutó 15 órdenes sobre J6, J1, J4 y J3 con llegada confirmada (error máximo 0,007°). Quedan sin probar en el robot real: J5 y J2, el modo AUTO (§6) y el panel con RViz (§7).
+>
+> Lo que el robot real enseñó ese día y ya está corregido en el código:
+> - El controlador devuelve el texto del módulo con el **valor actual de cada PERS** en su declaración. La huella del módulo ahora ignora esos valores (antes `limpiar`, `instalar` y el envío se bloqueaban con `no_verificado`).
+> - La comprobación de paso tiene 0,05° de tolerancia: sin ella un `j6 +5` se rechazaba o se partía en dos órdenes por ruido de medida.
+> - `Module1/main` es el programa de ajedrez: abre un socket hacia la PC (puerto 5000) y mueve a `v200`. **Nunca pulsar Start con el puntero en `main`.**
 
 ## 1. Por qué no se movió el 10/11
 
@@ -192,20 +197,37 @@ Este modo pide RMMP en cada ejecución. Para la sesión conviene `interactivo`.
 | `Sin respuesta del robot` | RAPID detenido mucho tiempo, o rutina distinta | Mirar el FlexPendant y la ventana de producción; ejecutar `estado`. No enviar más órdenes |
 | Error de RAPID o del movimiento en el FlexPendant | Por ejemplo, colisión, límite o configuración | Fotografiar **Registro de eventos** (código y hora) y detenerse |
 
-## 6. Plan B: AUTO (solo con autorización del responsable)
+## 6. Motores siempre en ON: modo AUTO (solo con autorización del responsable)
 
-Si el manual reducido no es práctico (por ejemplo, porque RMMP no se puede conceder), el módulo puede aceptar AUTO, donde las escrituras no necesitan RMMP. **Requiere la celda cerrada y la autorización explícita del responsable**: en AUTO el robot se mueve sin habilitador.
+En **manual** no hay forma de dejar los motores en ON sin mantener el habilitador: es una función de seguridad del controlador y no se puede ni se debe anular. La única manera de trabajar sin sostener el FlexPendant es el **modo automático**, donde el robot se mueve sin habilitador. **Requiere autorización explícita del responsable, la zona despejada y a nadie dentro del alcance del brazo.** Además, en AUTO las escrituras no necesitan RMMP.
 
-1. En manual: **Editor de programas → LabJointRws**, cambiar `CONST bool permitirAuto := FALSE;` por `TRUE;` y ejecutar **Comprobar programa**. `rws_mover` reconoce esa variante como `servidor_v2_auto`.
-2. En manual: **PP a rutina → ServidorPC**.
-3. Llave en **AUTO**, aceptar el diálogo, pulsar el botón **Motors On** del controlador y luego **Start** en el FlexPendant. Pulsar **Iniciar**.
-4. En la PC: `./iniciar.sh rws_mover interactivo`.
+1. Llave en **AUTO**, motores apagados, RAPID detenido. En la PC:
+   ```bash
+   ./iniciar.sh rws_mover instalar --auto
+   ```
+   Instala la misma v2 con `permitirAuto := TRUE` (se reconoce como `servidor_v2_auto`). Se hace por RWS y no editando la línea en el FlexPendant, que puede reformatearla y romper la huella.
+2. Llave en **Manual**: **Editor de programas → Depurar → Comprobar programa** y **PP a rutina → LabJointRws / ServidorPC**.
+3. Llave en **AUTO** y aceptar el diálogo. Comprobar que el puntero sigue en `ServidorPC`. Pulsar el botón **Motors On** del controlador (queda encendido fijo) y luego **Start** en el FlexPendant. Pulsar **Iniciar**.
+4. En la PC: `./iniciar.sh panel` o `./iniciar.sh rws_mover interactivo`.
 
-La velocidad sigue limitada por `vPc` en el RAPID. Al terminar, volver a poner `permitirAuto := FALSE`.
+La velocidad sigue limitada por `vPc` en el RAPID (20 mm/s, 5°/s) aunque el FlexPendant marque 100 %. Para parar: **Stop**, botón de **Motors Off** o paro de emergencia. Al terminar, `./iniciar.sh rws_mover instalar` (llave en AUTO, motores apagados) devuelve el módulo a solo manual.
 
-## 7. Siguiente paso: RViz
+## 7. Panel de ángulos con RViz
 
-Con la ruta de órdenes comprobada, el siguiente paso es enviar desde ROS 2 o RViz los mismos objetivos que hoy se escriben en el prompt. Se haría con una orden por objetivo confirmado, no con un flujo continuo; para seguimiento continuo sigue haciendo falta EGM ([plan](../hitos_3_4/PLAN_CONTROL_EGM_IK_VISION.md)). Mientras tanto, el gemelo de solo lectura (`./iniciar.sh comunicacion ...`) puede correr en paralelo en otra terminal para ver el robot real en RViz.
+```bash
+./iniciar.sh panel              # robot real: pide la contraseña RWS en la terminal
+./iniciar.sh panel --simulado   # sin robot, para practicar
+```
+
+Abre RViz con dos modelos (sólido = postura medida, naranja translúcido = objetivo) y una página local `http://127.0.0.1:8770/` que sustituye al prompt:
+
+- **Ángulos:** deslizador y casilla por eje (grados, con los mismos límites y 2° de margen). El modelo naranja sigue al objetivo en vivo; nada se mueve hasta pulsar **Enviar al robot** y confirmar el resumen.
+- **Posición cartesiana:** X, Y, Z en mm y roll, pitch, yaw en grados (R = Rz·Ry·Rx, respecto a la base). **Calcular ángulos** usa la cinemática inversa de Pieper del Hito 2 (`hito2/irb120/pieper.py`): muestra las 8 ramas, elige la más cercana a la postura medida con el criterio del proyecto y la carga como objetivo. El punto de referencia puede ser el TCP del proyecto (150 mm) o la brida (`tool0`, que es lo que muestra el FlexPendant con `tool0`).
+- El envío usa el mismo `Mover.send` que la terminal: mismas validaciones, división en órdenes de como máximo el paso elegido y mismo registro en `salidas/control_articular/rws_mover/panel_*.jsonl`.
+- El robot se mueve con `MoveAbsJ` orden a orden: **el TCP no sigue una línea recta** entre la pose actual y la pedida. Revisar el modelo naranja antes de enviar.
+- **Cancelar** solo evita las órdenes siguientes. Para detener el robot: habilitador, Stop o paro de emergencia.
+
+La preparación en el FlexPendant es la misma (pasos 3 a 5 en manual, o §6 en AUTO). El panel usa los mismos tópicos que `control_*`, así que no pueden estar abiertos a la vez. Para seguimiento continuo sigue haciendo falta EGM ([plan](../hitos_3_4/PLAN_CONTROL_EGM_IK_VISION.md)).
 
 ## Fuentes
 

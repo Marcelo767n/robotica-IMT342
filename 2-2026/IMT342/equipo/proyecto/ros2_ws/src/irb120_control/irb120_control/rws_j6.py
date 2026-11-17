@@ -93,9 +93,19 @@ def literal(target):
     return '['+','.join('['+','.join(format(v,'.15g') for v in group)+']' for group in target)+']'
 
 
+_PERS_VALUE=re.compile(r'^([ \t]*PERS[ \t]+(jointtarget|num)[ \t]+\w+[ \t]*:=[ \t]*)[^;\n]*;',flags=re.M)
+_PERS_INITIAL={'jointtarget':'[[9E9,9E9,9E9,9E9,9E9,9E9],[9E9,9E9,9E9,9E9,9E9,9E9]]','num':'0'}
+
+
 def source_fingerprint(source):
     # El editor ABB puede normalizar CRLF; el resto del código debe coincidir.
+    # Observado en RW6.12 (16/11/2026): el texto que devuelve el controlador lleva
+    # el valor ACTUAL de cada PERS en su declaración (p. ej. un pcTarget pendiente,
+    # con 9E+09 en vez de 9E9). Ese valor es dato, no código: se restituye el
+    # inicial revisado antes de calcular la huella. Los datos se validan aparte
+    # (pcTarget vacío, pcSeq == rbSeq, etc.).
     source=source.replace('\r\n','\n').replace('\r','\n').strip()
+    source=_PERS_VALUE.sub(lambda m:m.group(1)+_PERS_INITIAL[m.group(2)]+';',source)
     return hashlib.sha256(source.encode()).hexdigest()
 
 

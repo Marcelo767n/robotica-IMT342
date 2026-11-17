@@ -174,6 +174,18 @@ class RwsJ6Tests(unittest.TestCase):
         with self.assertRaisesRegex(Refused,'v5'):client.prepare_j6(.1)
         self.assertFalse(any(c[0]=='POST' for c in self.session.calls))
 
+    def test_fingerprint_ignores_current_pers_values_but_not_code(self):
+        # Línea tal como la devolvió el IRC5 real el 16/11/2026 con un objetivo pendiente.
+        empty='PERS jointtarget pcTarget := [[9E9,9E9,9E9,9E9,9E9,9E9],[9E9,9E9,9E9,9E9,9E9,9E9]];'
+        pending=('PERS jointtarget pcTarget := [[-4.28397,-12.4929,0.697668,-0.640559,3.30636,1.83935],'
+                 '[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];')
+        self.assertIn(empty,J6_SOURCE)
+        self.assertEqual(source_fingerprint(J6_SOURCE.replace(empty,pending)),J6_MODULE_SHA256)
+        self.assertNotEqual(source_fingerprint(J6_SOURCE.replace('vLabJ6 := [5,0.5,5,0.5]','vLabJ6 := [50,5,50,5]')),
+                            J6_MODULE_SHA256)
+        self.assertNotEqual(source_fingerprint(J6_SOURCE.replace('maxDeltaDeg := 0.11','maxDeltaDeg := 11')),
+                            J6_MODULE_SHA256)
+
     def test_candidate_exact_hash_and_prepare_only_joint_six(self):
         self.assertEqual(source_fingerprint(J6_SOURCE),J6_MODULE_SHA256)
         self.assertEqual(source_fingerprint(J6_SOURCE.replace('\n','\r\n')),J6_MODULE_SHA256)

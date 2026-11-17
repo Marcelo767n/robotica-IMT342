@@ -268,6 +268,18 @@ class Protocol(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder, self.assertRaises(Refused):
             mover(abb2).install(Path(folder))
 
+    def test_install_auto_variant_and_back(self):
+        import tempfile
+        abb = Abb('AUTO'); abb.source = V2; abb.ctrl = 'motoroff'; abb.execution = 'stopped'
+        abb.require_rmmp = False
+        client = mover(abb)
+        with tempfile.TemporaryDirectory() as folder:
+            self.assertTrue(client.install(Path(folder), auto=True)['passed'])
+            self.assertEqual(source_fingerprint(abb.source), SERVER_AUTO_MODULE_SHA256)
+            self.assertIn('CONST bool permitirAuto := TRUE;', abb.source)
+            self.assertTrue(client.install(Path(folder))['passed'])
+        self.assertEqual(source_fingerprint(abb.source), SERVER_MODULE_SHA256)
+
     def test_diagnosis_accepts_v2(self):
         rows = lambda key, value: {'ok': True, 'records': [{key: value}]}
         inspection = {'resources': {

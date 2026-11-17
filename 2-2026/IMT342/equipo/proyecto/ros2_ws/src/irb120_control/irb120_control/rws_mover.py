@@ -36,6 +36,11 @@ RMMP = '/users/rmmp'
 RMMP_POLL = '/users/rmmp/poll'
 MAX_STEP_DEG = 10.0      # igual a maxPasoDeg del módulo RAPID
 MARGIN_DEG = 2.0         # igual a margenDeg del módulo RAPID
+# La postura se relee entre el cálculo del tramo y su envío: el ruido de medida y el
+# error residual de llegada (centésimas de grado) no deben rechazar un «j6 +5» con paso 5.
+STEP_TOL_DEG = 0.05
+AUTO_OFF = 'CONST bool permitirAuto := FALSE;'
+AUTO_ON = 'CONST bool permitirAuto := TRUE;'
 CODES = {0: 'listo', 1: 'moviendo', 2: 'llegada', -1: 'objetivo vacío o no válido',
          -2: 'fuera de límites con margen de 2°', -3: 'algún eje cambia más de 10° en una orden',
          -4: 'modo no permitido por el módulo (¿AUTO sin permitirAuto?)'}
@@ -49,7 +54,7 @@ def check_target(target, current, step):
         if not lo + MARGIN_DEG <= q <= hi - MARGIN_DEG:
             raise Refused(f'J{index}={q:.3f}° fuera de [{lo + MARGIN_DEG}, {hi - MARGIN_DEG}].')
     worst = max(abs(a - b) for a, b in zip(target[0], current[0]))
-    if worst > step + 1e-9:
+    if worst > step + STEP_TOL_DEG:
         raise Refused(f'Cambio de {worst:.3f}° mayor que el paso permitido de {step}°.')
     return target
 
@@ -63,7 +68,10 @@ def split_path(current, goal, step):
         if not lo + MARGIN_DEG <= q <= hi - MARGIN_DEG:
             raise Refused(f'Destino J{index}={q:.3f}° fuera de [{lo + MARGIN_DEG}, {hi - MARGIN_DEG}].')
     worst = max(abs(a - b) for a, b in zip(goal[0], current[0]))
-    count = max(1, math.ceil(worst / step - 1e-9))
+    # Observado en el IRC5 (16/11/2026): un «j6 +5» medido como 5,000004° se partía en
+    # dos órdenes. Se tolera el ruido de medida sin superar nunca el máximo del robot.
+    tolerance = min(STEP_TOL_DEG, MAX_STEP_DEG - step)
+    count = max(1, math.ceil((worst - tolerance) / step - 1e-9))
     return [[[c + (g - c) * k / count for c, g in zip(current[0], goal[0])], [9e9] * 6]
             for k in range(1, count + 1)]
 
@@ -153,6 +161,7 @@ class Mover(Client):
         # Una sola operación HTTP a la vez: requests.Session no es segura entre hilos.
         self.lock = threading.RLock()
         self.keeper_error = None
+        self.on_joints = None
 
     def start_keeper(self, period=2.):
         """Mantiene RMMP mientras el usuario escribe en el prompt (sin sondeo el ABB lo revoca)."""
@@ -185,7 +194,10 @@ class Mover(Client):
             raise Refused(f'{name} no es numérico: {value}') from exc
 
     def joints(self):
-        return measured_target(self.read('/rw/rapid/tasks/T_ROB1/motion', resource='jointtarget'))
+        target = measured_target(self.read('/rw/rapid/tasks/T_ROB1/motion', resource='jointtarget'))
+        if self.on_joints is not None:  # p. ej. el panel refresca RViz durante un movimiento
+            self.on_joints(list(target[0]))
+        return target
 
     def status(self):
         state = {'opmode': single(self.read('/rw/panel/opmode'), 'opmode'),
@@ -298,10 +310,29 @@ class Mover(Client):
         self.module_version = module_label(source_fingerprint(self.module_source()))
         return identity
 
-    def install(self, directory):
-        return self.update_module(directory, candidate_path=SERVER_CANDIDATE, candidate_sha=SERVER_MODULE_SHA256,
+    def install(self, directory, auto=False):
+        """auto=True instala la misma v2 con permitirAuto := TRUE (motores ON sin habilitador,
+        solo con autorización del responsable). Se transfiere por RWS para que la huella sea
+        exacta: editar la línea en el FlexPendant puede reformatearla."""
+        path, sha = SERVER_CANDIDATE, SERVER_MODULE_SHA256
+        if auto:
+            source = SERVER_CANDIDATE.read_text(encoding='utf-8')
+            if source.count(AUTO_OFF) != 1:
+                raise Refused('El candidato no contiene exactamente una línea permitirAuto := FALSE.')
+            directory.mkdir(parents=True, exist_ok=True)
+            path, sha = directory / 'LabJointRws_auto.mod', SERVER_AUTO_MODULE_SHA256
+            path.write_text(source.replace(AUTO_OFF, AUTO_ON), encoding='utf-8')
+        return self.update_module(directory, candidate_path=path, candidate_sha=sha,
                                   accepted=(ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
                                             SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256))
+
+
+def logout(mover):
+    """Cierra la sesión RWS: RW6 admite pocas sesiones simultáneas y tarda en caducarlas."""
+    try:
+        mover.session.get(mover.base + '/logout', timeout=2., allow_redirects=False)
+    except Exception:
+        pass
 
 
 def print_status(state):
@@ -394,7 +425,15 @@ def _interactive(mover, step, timeout):
             elif words[0] == 'fin':
                 mover.finish(); print('pcFin=1 enviado: ServidorPC termina en el robot.')
             else:
-                goal = parse_goal(words, mover.joints())
+                current = mover.joints()
+                goal = parse_goal(words, current)
+                legs = len(split_path(current, goal, step))
+                if legs > 1 or words[0] == 'abs':
+                    # Un «abs» en radianes o un destino lejano moverían varios ejes sin avisar.
+                    shown = ', '.join(f'J{i}={v:.2f}' for i, v in enumerate(goal[0], 1))
+                    if input(f'{legs} orden(es) hasta {shown} (grados). ¿Confirmar? [s/N] ').strip().lower() != 's':
+                        print('Cancelado: no se envió nada.')
+                        continue
                 result = mover.move_to(goal, step, timeout)
                 print(f"LLEGADA confirmada por el robot (orden {result['seq']}), error máximo "
                       f"{result['max_error_deg']:.3f}°.")
@@ -413,6 +452,8 @@ def main(argv=None):
     parser.add_argument('--http-port', type=int, default=80, help='Distinto de 80 solo en 127.0.0.1')
     parser.add_argument('--paso', type=float, default=5., help='Máximo cambio por eje en cada orden (≤10°)')
     parser.add_argument('--timeout', type=float, default=120., help='Segundos de espera por orden')
+    parser.add_argument('--auto', action='store_true',
+                        help='instalar: variante con permitirAuto := TRUE (modo AUTO, motores ON sin habilitador)')
     parser.add_argument('--log-dir', type=Path, default=PROJECT / 'salidas/control_articular/rws_mover')
     args = parser.parse_args(argv)
     if not 0 < args.paso <= MAX_STEP_DEG:
@@ -448,7 +489,7 @@ def main(argv=None):
                     print('LISTO para recibir órdenes.')
                 return 0
             if args.action == 'instalar':
-                report = mover.install(args.log_dir)
+                report = mover.install(args.log_dir, auto=args.auto)
                 report['write_events'] = mover.write_events
                 path = args.log_dir / f'instalar_{stamp}.json'
                 path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
@@ -456,7 +497,8 @@ def main(argv=None):
                                  ensure_ascii=False, indent=2))
                 print('Informe:', path)
                 if report['passed']:
-                    print('Módulo v2 instalado. En el FlexPendant: Editor de programas → Verificar programa. '
+                    print(('Módulo v2 (variante AUTO) instalado. ' if args.auto else 'Módulo v2 instalado. ') +
+                          'En el FlexPendant: Editor de programas → Verificar programa. '
                           'El puntero pudo restablecerse: NO pulsar Start sobre main.')
                 return 0 if report['passed'] else 2
             if args.action == 'terminar':
@@ -479,6 +521,7 @@ def main(argv=None):
     finally:
         if mover is not None:
             mover.rmmp.close()
+            logout(mover)
 
 
 if __name__ == '__main__':

@@ -11,11 +11,13 @@ case "$mode" in
   rws_j6) module="irb120_control.rws_j6" ;;
   rws_mover) module="irb120_control.rws_mover" ;;
   control_demo|control_vista|control_egm_lectura|control_robot) module="irb120_control.arranque" ;;
+  panel) module="irb120_control.panel_rws" ;;
   *)
-    echo 'Uso: ./iniciar.sh {enlace|comunicacion|validar_fk|rws_j6|rws_mover|control_demo|control_vista|control_egm_lectura|control_robot} [opciones]'
+    echo 'Uso: ./iniciar.sh {enlace|comunicacion|validar_fk|rws_j6|rws_mover|panel|control_demo|control_vista|control_egm_lectura|control_robot} [opciones]'
     echo 'Lectura: ./iniciar.sh comunicacion --host 192.168.125.1 --user "Default User" --ignore-joint-state'
     echo 'Sin robot: ./iniciar.sh control_demo'
-    echo 'Mover desde la PC: ./iniciar.sh rws_mover estado | instalar | interactivo | mover j6 +5 | terminar'
+    echo 'Mover desde la PC: ./iniciar.sh rws_mover estado | instalar [--auto] | interactivo | mover j6 +5 | terminar'
+    echo 'Panel de ángulos + RViz: ./iniciar.sh panel   (sin robot: ./iniciar.sh panel --simulado)'
     exit 2 ;;
 esac
 shift
@@ -33,9 +35,11 @@ source /opt/ros/jazzy/setup.bash
 set -u
 export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
-if [[ "$mode" == control_* ]]; then
+if [[ "$mode" == control_* || "$mode" == panel ]]; then
   mkdir -p "$here/../salidas/control_articular/ros_logs"
   export ROS_LOG_DIR="$here/../salidas/control_articular/ros_logs"
+fi
+if [[ "$mode" == control_* ]]; then
   exec "$py" -m "$module" --modo "${mode#control_}" "$@"
 fi
 exec "$py" -m "$module" "$@"

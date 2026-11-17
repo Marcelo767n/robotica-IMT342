@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IRB 120 · Panel de ángulos</title>
+<style>
+  :root { --bg:#f4f5f7; --card:#fff; --ink:#1c2430; --soft:#5d6878; --line:#d9dde3; --accent:#c2410c;
+          --ok:#15803d; --bad:#b91c1c; --warn:#b45309; --chip:#eef0f3; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14181e; --card:#1d232c; --ink:#e7eaee; --soft:#9aa5b4; --line:#313a47; --accent:#fb923c;
+            --ok:#4ade80; --bad:#f87171; --warn:#fbbf24; --chip:#262e39; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--ink);
+         font:15px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:900px; margin:0 auto; display:grid; gap:14px; }
+  h1 { font-size:20px; margin:0; }
+  h2 { font-size:13px; margin:0 0 8px; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .head { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; justify-content:space-between; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { background:var(--chip); border-radius:999px; padding:3px 10px; font-size:13px; white-space:nowrap; }
+  .chip b { font-weight:600; }
+  .chip.ok b { color:var(--ok); } .chip.bad b { color:var(--bad); } .chip.warn b { color:var(--warn); }
+  #sim { display:none; background:var(--warn); color:#111; font-weight:600; border-radius:8px; padding:6px 12px; }
+  #faltas { margin:0; padding-left:18px; color:var(--bad); }
+  #listo { color:var(--ok); font-weight:600; }
+  .joint { display:grid; grid-template-columns:34px 82px 1fr 96px 74px; gap:10px; align-items:center;
+           padding:7px 0; border-top:1px solid var(--line); }
+  .joint:first-of-type { border-top:0; }
+  .joint .name { font-weight:700; }
+  .num { font-variant-numeric:tabular-nums; text-align:right; }
+  .soft { color:var(--soft); font-size:12px; }
+  .delta.on { color:var(--accent); font-weight:600; }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  input[type=number], select { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px;
+           background:var(--bg); color:var(--ink); font:inherit; font-variant-numeric:tabular-nums; }
+  input:invalid { border-color:var(--bad); }
+  .cols { display:grid; grid-template-columns:34px 82px 1fr 96px 74px; gap:10px; font-size:12px; color:var(--soft); }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  button { font:inherit; padding:9px 16px; border-radius:8px; border:1px solid var(--line);
+           background:var(--chip); color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:700; }
+  @media (prefers-color-scheme: dark) { button.primary { color:#111; } }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  .grow { flex:1; }
+  #progreso { font-variant-numeric:tabular-nums; color:var(--accent); min-height:1.4em; }
+  #registro { margin:0; max-height:210px; overflow:auto; font:12.5px/1.5 ui-monospace, Menlo, monospace;
+              white-space:pre-wrap; overflow-wrap:anywhere; }
+  .stop { border-left:4px solid var(--bad); }
+  .pose { display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; margin:8px 0; }
+  .pose label { font-size:12px; color:var(--soft); display:grid; gap:3px; }
+  .lectura { display:grid; grid-template-columns:auto 1fr; gap:2px 12px; font-size:13px;
+             font-variant-numeric:tabular-nums; margin:0 0 6px; }
+  .lectura dt { color:var(--soft); } .lectura dd { margin:0; }
+  #veredicto { font-weight:600; margin:10px 0 4px; }
+  #veredicto.bad { color:var(--bad); } #veredicto.ok { color:var(--ok); }
+  #ramas { width:100%; border-collapse:collapse; font-size:13px; }
+  #ramas td, #ramas th { padding:4px 6px; border-top:1px solid var(--line); text-align:left; vertical-align:top; }
+  #ramas th { color:var(--soft); font-weight:500; font-size:12px; border-top:0; }
+  #ramas tr.elegida td { background:var(--chip); font-weight:600; }
+  #ramas tr.no td { color:var(--soft); }
+  #ramas button { padding:3px 10px; font-size:12px; }
+  .tabla { overflow-x:auto; }
+  dialog { border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);
+           padding:18px 20px; max-width:440px; width:calc(100% - 32px); }
+  dialog::backdrop { background:rgba(0,0,0,.45); }
+  dialog table { width:100%; border-collapse:collapse; margin:10px 0; }
+  dialog td { padding:3px 6px; font-variant-numeric:tabular-nums; }
+  dialog td:not(:first-child) { text-align:right; }
+  #error { color:var(--bad); min-height:1.4em; }
+  @media (max-width:640px) {
+    .pose { grid-template-columns:repeat(3, 1fr); }
+    .joint, .cols { grid-template-columns:30px 1fr 84px; }
+    .joint .medido, .joint .delta, .cols .c-med, .cols .c-delta { display:none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <h1>IRB 120 · Panel de ángulos</h1>
+    <div id="sim">SIMULADO · sin robot</div>
+  </div>
+
+  <section class="card">
+    <h2>Estado del robot</h2>
+    <div class="chips" id="chips"></div>
+    <p id="listo" hidden>Listo para recibir órdenes.</p>
+    <ul id="faltas"></ul>
+  </section>
+
+  <section class="card">
+    <h2>Objetivo articular (grados)</h2>
+    <div class="cols"><span></span><span class="c-med num">Medido</span><span>Objetivo</span><span></span><span class="c-delta num">Cambio</span></div>
+    <div id="joints"></div>
+  </section>
+
+  <section class="card">
+    <h2>Posición cartesiana → ángulos (cinemática inversa de Pieper)</h2>
+    <div class="actions" style="margin-bottom:8px">
+      <label class="soft" for="herramienta">Punto de referencia</label>
+      <span style="width:230px"><select id="herramienta">
+        <option value="tcp">TCP del proyecto (150 mm desde la brida)</option>
+        <option value="brida">Brida (tool0, como el FlexPendant)</option>
+      </select></span>
+    </div>
+    <dl class="lectura">
+      <dt>Pose medida</dt><dd id="poseMedida">—</dd>
+      <dt>Pose del objetivo</dt><dd id="poseObjetivo">—</dd>
+    </dl>
+    <div class="pose">
+      <label>X (mm)<input type="number" id="p0" step="1"></label>
+      <label>Y (mm)<input type="number" id="p1" step="1"></label>
+      <label>Z (mm)<input type="number" id="p2" step="1"></label>
+      <label>Roll · Rx (°)<input type="number" id="p3" step="1"></label>
+      <label>Pitch · Ry (°)<input type="number" id="p4" step="1"></label>
+      <label>Yaw · Rz (°)<input type="number" id="p5" step="1"></label>
+    </div>
+    <div class="actions">
+      <button id="calcular">Calcular ángulos</button>
+      <button id="copiarPose">Copiar pose medida</button>
+      <span class="soft grow">Respecto a la base del robot; orientación R = Rz·Ry·Rx. Calcular solo actualiza el
+        objetivo naranja: revisar en RViz y pulsar «Enviar al robot».</span>
+    </div>
+    <p id="veredicto"></p>
+    <div class="tabla"><table id="ramas"></table></div>
+  </section>
+
+  <section class="card">
+    <div class="actions">
+      <button class="primary" id="enviar" disabled>Enviar al robot</button>
+      <button id="sincronizar">Copiar postura actual</button>
+      <button id="cancelar" disabled>Cancelar tras la orden en curso</button>
+      <span class="grow"></span>
+      <label class="soft" for="paso">Paso por orden</label>
+      <span style="width:84px"><select id="paso"></select></span>
+    </div>
+    <p id="progreso"></p>
+    <p id="error"></p>
+  </section>
+
+  <section class="card stop">
+    <strong>Para detener el robot:</strong> soltar el habilitador, pulsar Stop o el paro de emergencia.
+    Este panel no puede detener un movimiento en curso; «Cancelar» solo evita las órdenes siguientes.
+  </section>
+
+  <section class="card">
+    <h2>Registro</h2>
+    <pre id="registro"></pre>
+    <div class="actions" style="margin-top:10px">
+      <span class="grow"></span>
+      <button id="terminar">Terminar ServidorPC en el robot</button>
+    </div>
+  </section>
+</main>
+
+<dialog id="confirmar">
+  <strong>¿Enviar este objetivo al robot?</strong>
+  <table id="resumen"></table>
+  <p class="soft" id="ordenes"></p>
+  <div class="actions">
+    <span class="grow"></span>
+    <button id="no">No enviar</button>
+    <button class="primary" id="si">Enviar</button>
+  </div>
+</dialog>
+
+<script>
+const TOKEN = "__TOKEN__";
+const $ = id => document.getElementById(id);
+let estado = null, objetivo = null, editando = false, temporizador = null;
+
+async function api(accion, cuerpo) {
+  const respuesta = await fetch("/api/" + accion, {
+    method: "POST", headers: {"Content-Type": "application/json", "X-Panel-Token": TOKEN},
+    body: JSON.stringify(cuerpo || {})});
+  const datos = await respuesta.json();
+  $("error").textContent = datos.ok ? "" : datos.error;
+  return datos;
+}
+
+function construir(limites) {
+  const caja = $("joints");
+  limites.forEach(([lo, hi], i) => {
+    const fila = document.createElement("div");
+    fila.className = "joint";
+    fila.innerHTML =
+      `<span class="name">J${i + 1}</span>` +
+      `<span class="num medido" id="m${i}">—</span>` +
+      `<span><input type="range" id="r${i}" min="${lo}" max="${hi}" step="0.1" aria-label="J${i + 1} deslizador">` +
+      `<span class="soft">${lo}° … ${hi}°</span></span>` +
+      `<input type="number" id="n${i}" min="${lo}" max="${hi}" step="0.1" aria-label="J${i + 1} en grados">` +
+      `<span class="num delta" id="d${i}"></span>`;
+    caja.appendChild(fila);
+    const mover = origen => {
+      let valor = parseFloat($(origen + i).value);
+      if (!Number.isFinite(valor)) return;
+      valor = Math.min(hi, Math.max(lo, valor));
+      objetivo[i] = valor;
+      $((origen === "r" ? "n" : "r") + i).value = valor;
+      pintarCambios();
+      clearTimeout(temporizador);
+      temporizador = setTimeout(() => api("objetivo", {q: objetivo}), 120);
+    };
+    $("r" + i).addEventListener("input", () => mover("r"));
+    $("n" + i).addEventListener("input", () => mover("n"));
+    $("n" + i).addEventListener("focus", () => editando = true);
+    $("n" + i).addEventListener("blur", () => { editando = false; $("n" + i).value = objetivo[i].toFixed(2); });
+  });
+  for (const paso of [1, 2, 5, 10]) $("paso").add(new Option(paso + "°", paso));
+  $("paso").addEventListener("change", () => api("paso", {valor: parseFloat($("paso").value)}));
+}
+
+function ponerObjetivo(valores) {
+  objetivo = valores.slice();
+  objetivo.forEach((valor, i) => { $("r" + i).value = valor; $("n" + i).value = valor.toFixed(2); });
+  pintarCambios();
+}
+
+function pintarCambios() {
+  if (!estado || !estado.medido || !objetivo) return;
+  objetivo.forEach((valor, i) => {
+    const cambio = valor - estado.medido[i];
+    const celda = $("d" + i);
+    celda.textContent = Math.abs(cambio) < 0.005 ? "" : (cambio > 0 ? "+" : "") + cambio.toFixed(2) + "°";
+    celda.classList.toggle("on", Math.abs(cambio) >= 0.005);
+  });
+}
+
+function textoPose(pose) {
+  if (!pose) return "—";
+  return `X ${pose[0].toFixed(1)}  Y ${pose[1].toFixed(1)}  Z ${pose[2].toFixed(1)} mm · ` +
+         `roll ${pose[3].toFixed(1)}°  pitch ${pose[4].toFixed(1)}°  yaw ${pose[5].toFixed(1)}°`;
+}
+
+function ponerPose(pose) {
+  pose.forEach((valor, i) => $("p" + i).value = valor.toFixed(i < 3 ? 1 : 2));
+}
+
+function pintarRamas(datos) {
+  const tabla = $("ramas");
+  $("veredicto").textContent = datos.veredicto;
+  $("veredicto").className = datos.elegida ? "ok" : "bad";
+  tabla.replaceChildren();
+  const cabecera = tabla.insertRow();
+  for (const titulo of ["Rama", "Brazo", "Codo", "Muñeca", "J1…J6 (°)", "Cambio mayor", "Estado", ""]) {
+    const celda = document.createElement("th"); celda.textContent = titulo; cabecera.appendChild(celda);
+  }
+  for (const rama of datos.ramas) {
+    const fila = tabla.insertRow();
+    fila.className = rama.rama === datos.elegida ? "elegida" : rama.usable ? "" : "no";
+    const valores = [rama.rama, rama.brazo, rama.codo, rama.muneca,
+      rama.q ? rama.q.map(v => v.toFixed(1)).join("  ") : "—",
+      rama.cambio_max === null ? "—" : rama.cambio_max.toFixed(1) + "°", rama.estado];
+    for (const valor of valores) fila.insertCell().textContent = valor;
+    const celda = fila.insertCell();
+    if (rama.usable) {
+      const boton = document.createElement("button");
+      boton.textContent = "Usar";
+      boton.addEventListener("click", async () => {
+        const respuesta = await api("objetivo", {q: rama.q});
+        if (!respuesta.ok) return;
+        ponerObjetivo(respuesta.objetivo);
+        for (const otra of tabla.rows) otra.classList.remove("elegida");
+        fila.classList.add("elegida");
+      });
+      celda.appendChild(boton);
+    }
+  }
+}
+
+function chip(nombre, valor, clase) {
+  return `<span class="chip ${clase}">${nombre}: <b>${valor ?? "—"}</b></span>`;
+}
+
+function pintar() {
+  const e = estado;
+  $("sim").style.display = e.simulado ? "block" : "none";
+  const manual = e.modo === "MANR", auto = e.modo === "AUTO" || e.modo === "SIMULADO";
+  $("chips").innerHTML =
+    chip("Modo", {MANR: "Manual reducido", MANF: "Manual 100 %", AUTO: "Automático"}[e.modo] || e.modo,
+         manual || auto ? "ok" : "bad") +
+    chip("Motores", e.motores === "motoron" ? "ON" : e.motores, e.motores === "motoron" ? "ok" : "bad") +
+    chip("RAPID", e.rapid === "running" ? "en ejecución" : e.rapid, e.rapid === "running" ? "ok" : "bad") +
+    chip("ServidorPC", e.servidor_activo ? "activo" : "inactivo", e.servidor_activo ? "ok" : "bad") +
+    chip("Módulo", e.modulo, e.modulo === "no_verificado" ? "bad" : "") +
+    chip("Último resultado", e.ultimo, "");
+  $("faltas").replaceChildren(...e.faltas.map(texto => {
+    const item = document.createElement("li"); item.textContent = texto; return item; }));
+  $("listo").hidden = e.faltas.length > 0;
+  if (e.medido) e.medido.forEach((valor, i) => $("m" + i).textContent = valor.toFixed(3) + "°");
+  if (objetivo === null && e.objetivo) ponerObjetivo(e.objetivo);
+  pintarCambios();
+  $("poseMedida").textContent = textoPose(e.pose_medida);
+  $("poseObjetivo").textContent = textoPose(e.pose_objetivo);
+  if (document.activeElement !== $("herramienta")) $("herramienta").value = e.herramienta;
+  if ($("p0").value === "" && e.pose_objetivo) ponerPose(e.pose_objetivo);
+  $("calcular").disabled = e.ocupado || !e.medido;
+  $("copiarPose").disabled = !e.pose_medida;
+  if (document.activeElement !== $("paso")) $("paso").value = e.paso;
+  const hayCambio = e.medido && objetivo && objetivo.some((valor, i) => Math.abs(valor - e.medido[i]) >= 0.01);
+  $("enviar").disabled = !e.listo || !hayCambio;
+  $("enviar").title = e.ocupado ? "Hay un envío en curso" : e.faltas.length ? "El robot no está listo" :
+                      hayCambio ? "" : "El objetivo coincide con la postura actual";
+  $("cancelar").disabled = !e.ocupado;
+  $("sincronizar").disabled = e.ocupado || !e.medido;
+  $("terminar").disabled = e.ocupado;
+  for (let i = 0; i < 6; i++) { $("r" + i).disabled = e.ocupado; $("n" + i).disabled = e.ocupado; }
+  $("progreso").textContent = e.progreso || "";
+  const registro = $("registro"), texto = e.registro.join("\n");
+  if (registro.textContent !== texto) { registro.textContent = texto; registro.scrollTop = registro.scrollHeight; }
+}
+
+async function refrescar() {
+  try {
+    const respuesta = await fetch("/estado", {cache: "no-store"});
+    const nuevo = await respuesta.json();
+    if (estado === null) construir(nuevo.limites);
+    estado = nuevo;
+    pintar();
+  } catch (fallo) {
+    $("error").textContent = "Sin respuesta del panel (¿se cerró el programa en la terminal?).";
+  }
+  setTimeout(refrescar, 300);
+}
+
+$("enviar").addEventListener("click", () => {
+  const filas = objetivo.map((valor, i) => {
+    const cambio = valor - estado.medido[i];
+    return `<tr><td>J${i + 1}</td><td>${estado.medido[i].toFixed(2)}°</td><td>→ ${valor.toFixed(2)}°</td>` +
+           `<td>${Math.abs(cambio) < 0.005 ? "" : (cambio > 0 ? "+" : "") + cambio.toFixed(2) + "°"}</td></tr>`;
+  });
+  $("resumen").innerHTML = filas.join("");
+  const mayor = Math.max(...objetivo.map((valor, i) => Math.abs(valor - estado.medido[i])));
+  $("ordenes").textContent = `Cambio mayor: ${mayor.toFixed(2)}°. Se enviará en ` +
+    `${Math.max(1, Math.ceil((mayor - 0.05) / estado.paso))} orden(es) de como máximo ${estado.paso}° por eje. ` +
+    "Los valores están en grados.";
+  $("confirmar").showModal();
+});
+$("no").addEventListener("click", () => $("confirmar").close());
+$("si").addEventListener("click", async () => { $("confirmar").close(); await api("enviar", {q: objetivo}); });
+$("cancelar").addEventListener("click", () => api("cancelar"));
+$("sincronizar").addEventListener("click", async () => {
+  const datos = await api("sincronizar");
+  if (datos.ok) ponerObjetivo(datos.objetivo);
+});
+$("calcular").addEventListener("click", async () => {
+  const pose = [0, 1, 2, 3, 4, 5].map(i => parseFloat($("p" + i).value));
+  if (pose.some(valor => !Number.isFinite(valor))) {
+    $("error").textContent = "Completar X, Y, Z y los tres ángulos antes de calcular.";
+    return;
+  }
+  const datos = await api("ik", {pose});
+  if (!datos.ok) return;
+  pintarRamas(datos);
+  if (datos.objetivo) ponerObjetivo(datos.objetivo);
+});
+$("copiarPose").addEventListener("click", () => { if (estado.pose_medida) ponerPose(estado.pose_medida); });
+$("herramienta").addEventListener("change", async () => {
+  await api("herramienta", {valor: $("herramienta").value});
+  for (let i = 0; i < 6; i++) $("p" + i).value = "";   // se rellena con la pose del nuevo punto
+  $("veredicto").textContent = ""; $("ramas").replaceChildren();
+});
+$("terminar").addEventListener("click", () => {
+  if (confirm("¿Terminar ServidorPC en el robot? Después habrá que arrancarlo de nuevo en el FlexPendant.")) api("terminar");
+});
+refrescar();
+</script>
+</body>
+</html>
