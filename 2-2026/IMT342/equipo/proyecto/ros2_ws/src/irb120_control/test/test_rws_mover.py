@@ -243,6 +243,26 @@ class Protocol(unittest.TestCase):
         with self.assertRaisesRegex(Refused, 'Sin respuesta'):
             client.send([[*abb.current[:5], abb.current[5] + 1], [9e9] * 6], timeout=0.01, echo=quiet)
 
+    def test_write_403_with_poll_still_granted_asks_rmmp_again(self):
+        abb = Abb('MANR'); client = mover(abb)
+        client.move_to(parse_goal(['j6', '+1'], client.joints()), 5, echo=quiet)
+        original = abb.post
+
+        def refuse_writes(url, **kw):  # el sondeo sigue en GRANTED, como en el robot real
+            if SYMBOL in url:
+                abb.calls.append(('POST', SYMBOL, {}, {}))
+                return Response([{'code': '-1073445862', 'msg': 'rws_resource_rapid_symbol_data'}], status=403)
+            return original(url, **kw)
+        abb.post = refuse_writes
+        with self.assertRaisesRegex(Refused, 'Conceder'):
+            client.move_to(parse_goal(['j6', '+1'], client.joints()), 5, echo=quiet)
+        self.assertFalse(client.rmmp.granted)
+        abb.post = original
+        before = len([c for c in abb.calls if c[0] == 'POST' and c[1] == RMMP])
+        result = client.move_to(parse_goal(['j6', '+1'], client.joints()), 5, echo=quiet)
+        self.assertEqual(result['code'], 2)
+        self.assertEqual(len([c for c in abb.calls if c[0] == 'POST' and c[1] == RMMP]), before + 1)
+
     def test_lost_rmmp_stops_next_write(self):
         abb = Abb('MANR'); client = mover(abb)
         client.move_to(parse_goal(['j6', '+1'], client.joints()), 5, echo=quiet)

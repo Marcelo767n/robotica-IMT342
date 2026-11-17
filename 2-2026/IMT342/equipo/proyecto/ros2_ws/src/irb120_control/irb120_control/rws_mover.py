@@ -224,7 +224,15 @@ class Mover(Client):
         event['result'] = 'accepted' if response.status_code in (200, 204) else 'rejected'
         self.record(event='write', symbol=name, value=value, http_status=response.status_code)
         if response.status_code not in (200, 204):
-            hint = (' En manual hace falta RMMP aceptado en el FlexPendant.' if response.status_code == 403 else '')
+            hint = ''
+            if response.status_code == 403:
+                hint = ' En manual hace falta RMMP aceptado en el FlexPendant.'
+                if self.rmmp.granted:
+                    # Observado en el IRC5 (16/11/2026): tras detener RAPID el sondeo seguía en GRANTED
+                    # pero la escritura daba 403. Se descarta el permiso para pedirlo de nuevo.
+                    self.rmmp.granted = False
+                    hint = (' El controlador ya no acepta el permiso RMMP: repetir la orden y '
+                            'pulsar «Conceder» otra vez en el FlexPendant.')
             raise Refused(f'POST {name}: HTTP {response.status_code}; {error_details(response.text)}.{hint}')
 
     def ensure_rmmp(self, state):
