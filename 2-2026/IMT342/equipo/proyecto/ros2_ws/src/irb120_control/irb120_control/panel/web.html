@@ -170,7 +170,7 @@
 <script>
 const TOKEN = "__TOKEN__";
 const $ = id => document.getElementById(id);
-let estado = null, objetivo = null, editando = false, temporizador = null;
+let estado = null, objetivo = null, editando = false, temporizador = null, ultimaEdicion = 0;
 
 async function api(accion, cuerpo) {
   const respuesta = await fetch("/api/" + accion, {
@@ -199,6 +199,7 @@ function construir(limites) {
       if (!Number.isFinite(valor)) return;
       valor = Math.min(hi, Math.max(lo, valor));
       objetivo[i] = valor;
+      ultimaEdicion = Date.now();
       $((origen === "r" ? "n" : "r") + i).value = valor;
       pintarCambios();
       clearTimeout(temporizador);
@@ -291,7 +292,9 @@ function pintar() {
     const item = document.createElement("li"); item.textContent = texto; return item; }));
   $("listo").hidden = e.faltas.length > 0;
   if (e.medido) e.medido.forEach((valor, i) => $("m" + i).textContent = valor.toFixed(3) + "°");
-  if (objetivo === null && e.objetivo) ponerObjetivo(e.objetivo);
+  // El objetivo también cambia desde RViz: seguirlo salvo mientras se edita aquí.
+  if (e.objetivo && (objetivo === null || (!editando && Date.now() - ultimaEdicion > 800 &&
+      e.objetivo.some((valor, i) => Math.abs(valor - objetivo[i]) > 1e-6)))) ponerObjetivo(e.objetivo);
   pintarCambios();
   $("poseMedida").textContent = textoPose(e.pose_medida);
   $("poseObjetivo").textContent = textoPose(e.pose_objetivo);

@@ -8,7 +8,12 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from irb120_control.panel_rws import BOUNDS, Panel, SimulatedMover, clean_target, pose_of, serve, solve_pose
+from irb120_control.panel.cinematica import pose_of, solve_pose
+from irb120_control.panel.estado import Panel
+from irb120_control.panel.limites import BOUNDS, clean_target
+from irb120_control.panel.ordenes import Ordenes, finite
+from irb120_control.panel.simulado import SimulatedMover
+from irb120_control.panel.web import serve
 from irb120_control.rws_j6 import Refused
 from test_rws_mover import Abb, mover
 
@@ -174,6 +179,56 @@ class PanelKinematics(unittest.TestCase):
         wait_idle(panel)
         for got, expected in zip(panel.mover.q, goal):
             self.assertAlmostEqual(got, expected, places=6)
+
+
+class PanelOrders(unittest.TestCase):
+    """Las órdenes que manda el panel C++ de RViz por /irb120/panel/orden."""
+
+    def setUp(self):
+        self.panel = Panel(SimulatedMover(speed=5000., sleep=lambda _: None), simulated=True)
+        self.panel.poll()
+        self.orders = Ordenes(self.panel)
+
+    def state(self):
+        return json.loads(self.orders.estado())
+
+    def test_objective_ik_and_send_round_trip(self):
+        self.orders.atender(json.dumps({'id': 1, 'accion': 'objetivo', 'q': [4., 0., 0., 0., 30., 0.]}))
+        state = self.state()
+        self.assertEqual(state['respuesta'], {'id': 1, 'accion': 'objetivo', 'ok': True, 'error': None})
+        self.assertEqual(state['objetivo'], [4., 0., 0., 0., 30., 0.])
+        goal = [10., -4., 8., 5., 35., -6.]
+        self.orders.atender(json.dumps({'id': 2, 'accion': 'ik', 'pose': pose_of(goal, 'tcp')}))
+        state = self.state()
+        self.assertEqual(state['ik']['id'], 2)
+        self.assertEqual(len(state['ik']['ramas']), 8)
+        for got, expected in zip(state['objetivo'], goal):
+            self.assertAlmostEqual(got, expected, places=6)
+        self.orders.atender(json.dumps({'id': 3, 'accion': 'enviar', 'q': state['objetivo']}))
+        wait_idle(self.panel)
+        for got, expected in zip(self.panel.mover.q, goal):
+            self.assertAlmostEqual(got, expected, places=6)
+        self.assertTrue(self.state()['respuesta']['ok'])
+
+    def test_bad_orders_are_reported_not_raised(self):
+        for text, error in (('{no json', 'JSON'), ('[1, 2]', 'objeto'), ('{"id": 4, "accion": "borrar"}', 'desconocida'),
+                            ('{"id": 5, "accion": "objetivo", "q": [999, 0, 0, 0, 0, 0]}', 'fuera'),
+                            ('x' * 5000, 'grande')):
+            answer = self.orders.atender(text)
+            self.assertFalse(answer['ok'])
+            self.assertIn(error, answer['error'])
+        self.assertEqual(self.panel.mover.seq, 0)
+        self.assertIn('rechazada', self.state()['registro'][-1])
+
+    def test_state_is_strict_json(self):
+        self.assertIsNone(finite(float('nan')))
+        self.assertEqual(finite({'a': [1., float('inf')]}), {'a': [1., None]})
+        unreachable = pose_of([0.] * 6, 'tcp'); unreachable[0] = 1400.
+        self.orders.atender(json.dumps({'id': 6, 'accion': 'ik', 'pose': unreachable}))
+        state = self.state()
+        self.assertIsNone(state['ik']['elegida'])
+        for key in ('modo', 'motores', 'medido', 'objetivo', 'limites', 'pose_medida', 'faltas', 'listo'):
+            self.assertIn(key, state)
 
 
 class PanelHttp(unittest.TestCase):

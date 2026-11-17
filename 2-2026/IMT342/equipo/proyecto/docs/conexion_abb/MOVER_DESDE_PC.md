@@ -2,12 +2,15 @@
 
 Preparado el **11/11/2026**. Sustituye la prueba puntual J6 de ±0,1° ([cierre del 10/11](CIERRE_PRUEBA_J6_2026-11-10.md)) por una ruta pensada para **mover el brazo desde Linux, orden tras orden**, sin volver a tocar el puntero de programa en cada movimiento.
 
-> **Estado (16/11/2026): probado en el IRC5 real.** Se instaló el módulo v2 por RWS, se concedió RMMP en manual reducido y la PC ejecutó 15 órdenes sobre J6, J1, J4 y J3 con llegada confirmada (error máximo 0,007°). Quedan sin probar en el robot real: J5 y J2, el modo AUTO (§6) y el panel con RViz (§7).
+> **Estado (16/11/2026): probado en el IRC5 real.** Se instaló el módulo v2 por RWS, se concedió RMMP en manual reducido y la PC ejecutó **24 órdenes** con llegada confirmada (error máximo por orden ≤ 0,016°). Se movieron J6, J1, J4, J3 y J2. J5 dio `HTTP 403` tras detener RAPID: ya se corrigió en `rws_mover` (vuelve a pedir RMMP), pero falta repetirlo en el robot. Quedan sin probar en el robot real: J5, el modo AUTO (§6) y el **panel «IRB 120» dentro de RViz** (§7), que es la forma principal de mover el brazo y se probó solo con el robot simulado.
 >
 > Lo que el robot real enseñó ese día y ya está corregido en el código:
 > - El controlador devuelve el texto del módulo con el **valor actual de cada PERS** en su declaración. La huella del módulo ahora ignora esos valores (antes `limpiar`, `instalar` y el envío se bloqueaban con `no_verificado`).
 > - La comprobación de paso tiene 0,05° de tolerancia: sin ella un `j6 +5` se rechazaba o se partía en dos órdenes por ruido de medida.
+> - Tras detener y reanudar RAPID, el controlador rechaza la escritura con 403 aunque el sondeo siga en `GRANTED`: ahora se descarta el permiso y se vuelve a pedir «Conceder».
 > - `Module1/main` es el programa de ajedrez: abre un socket hacia la PC (puerto 5000) y mueve a `v200`. **Nunca pulsar Start con el puntero en `main`.**
+>
+> Todos los comandos están en `ros2_ws/brazo.sh` (`./brazo.sh ayuda`). Los `./iniciar.sh …` de esta guía equivalen a `./brazo.sh …`.
 
 ## 1. Por qué no se movió el 10/11
 
@@ -36,7 +39,10 @@ Preparado el **11/11/2026**. Sustituye la prueba puntual J6 de ±0,1° ([cierre 
 | [`rapid/rws_mover/LabJointRws.mod`](../../ros2_ws/src/irb120_control/rapid/rws_mover/LabJointRws.mod) | Módulo v2: `ServidorPC` (bucle de órdenes) y `MostrarObjetivo` |
 | [`irb120_control/rws_mover.py`](../../ros2_ws/src/irb120_control/irb120_control/rws_mover.py) | Cliente: `estado`, `instalar`, `interactivo`, `mover`, `terminar` |
 | [`test/test_rws_mover.py`](../../ros2_ws/src/irb120_control/test/test_rws_mover.py) | 16 pruebas con un IRC5 simulado que replica `Validar()` del RAPID |
-| [`iniciar.sh`](../../ros2_ws/iniciar.sh) | Nueva entrada `rws_mover`. Las herramientas `rws_*` ya no necesitan ROS: basta Python 3 con `requests` |
+| [`iniciar.sh`](../../ros2_ws/iniciar.sh) | Entradas `rws_mover` y `panel`. Las herramientas `rws_*` no necesitan ROS: basta Python 3 con `requests`. En el modo `panel` aísla ROS 2 a `localhost` |
+| [`brazo.sh`](../../ros2_ws/brazo.sh) | Un solo script para todo: `estado`, `instalar`, `panel`, `simulado`, `terminal`, `mover`, `terminar`, `compilar`, `pruebas`, `ayuda` |
+| [`irb120_control/panel/`](../../ros2_ws/src/irb120_control/irb120_control/panel/) | Panel Python (antes `panel_rws.py`): órdenes, cinemática, nodo ROS 2, control 3D, página opcional |
+| [`irb120_rviz_panel/`](../../ros2_ws/src/irb120_rviz_panel/) | Panel «IRB 120» de RViz en C++ (se compila con `./brazo.sh compilar`) |
 
 ### Protocolo PC ↔ robot
 
@@ -67,11 +73,12 @@ git pull origin proyectoHito3y4
 ```
 
 ```bash
-cd 2-2026/IMT342/equipo/proyecto/ros2_ws && python3 -m unittest discover -s src/irb120_control/test -p 'test_rws_*.py'
+cd 2-2026/IMT342/equipo/proyecto/ros2_ws && ./brazo.sh pruebas
 ```
 
-Debe terminar en `OK` (37 pruebas). Comprobar también:
+Debe terminar en `OK` (pruebas de `rws_*` y del panel, sin robot ni red). Comprobar también:
 
+- **Panel de RViz compilado** (una vez): `./brazo.sh compilar`. Sin él quedan el control 3D y `--web`.
 - **Cable** en el puerto **X2 Service** del IRC5 e IP de la PC en **192.168.125.x** (por DHCP del controlador).
 - **Usuario y contraseña RWS.** Hasta ahora se usó `Default User`.
 - **Coordinación con el operador o responsable.** La sesión necesita dos personas: el operador sostiene el FlexPendant con el habilitador presionado y tú escribes las órdenes en la PC.
@@ -199,35 +206,50 @@ Este modo pide RMMP en cada ejecución. Para la sesión conviene `interactivo`.
 
 ## 6. Motores siempre en ON: modo AUTO (solo con autorización del responsable)
 
-En **manual** no hay forma de dejar los motores en ON sin mantener el habilitador: es una función de seguridad del controlador y no se puede ni se debe anular. La única manera de trabajar sin sostener el FlexPendant es el **modo automático**, donde el robot se mueve sin habilitador. **Requiere autorización explícita del responsable, la zona despejada y a nadie dentro del alcance del brazo.** Además, en AUTO las escrituras no necesitan RMMP.
+**En manual no hay forma de dejar los motores en ON sin mantener el habilitador.** El controlador solo los mantiene encendidos mientras se sostiene el habilitador de 3 posiciones. Es una función de seguridad (norma de robots industriales) y **no se puede ni se debe anular por software**: la PC nunca enciende motores ni lo intenta.
 
-1. Llave en **AUTO**, motores apagados, RAPID detenido. En la PC:
+La única manera de tener los motores en ON fijos es el **modo automático** con la variante `./brazo.sh instalar-auto` (`permitirAuto := TRUE`). En AUTO el robot se mueve **sin habilitador**: requiere autorización explícita del responsable, la zona despejada y a nadie dentro del alcance del brazo. En AUTO las escrituras tampoco necesitan RMMP.
+
+**FlexPendant y PC, en este orden:**
+
+1. Llave en **AUTO**, motores OFF (cabecera `Motors Off`), RAPID detenido. En la PC:
    ```bash
-   ./iniciar.sh rws_mover instalar --auto
+   ./brazo.sh instalar-auto
    ```
-   Instala la misma v2 con `permitirAuto := TRUE` (se reconoce como `servidor_v2_auto`). Se hace por RWS y no editando la línea en el FlexPendant, que puede reformatearla y romper la huella.
-2. Llave en **Manual**: **Editor de programas → Depurar → Comprobar programa** y **PP a rutina → LabJointRws / ServidorPC**.
-3. Llave en **AUTO** y aceptar el diálogo. Comprobar que el puntero sigue en `ServidorPC`. Pulsar el botón **Motors On** del controlador (queda encendido fijo) y luego **Start** en el FlexPendant. Pulsar **Iniciar**.
-4. En la PC: `./iniciar.sh panel` o `./iniciar.sh rws_mover interactivo`.
+   Pide escribir `AUTO` para continuar. Instala la misma v2 con `permitirAuto := TRUE` (se reconoce como `servidor_v2_auto`). Se hace por RWS y no editando la línea en el FlexPendant, que puede reformatearla y romper la huella.
+2. Llave en **Manual**: **Editor de programas → Depurar → Comprobar programa**, y luego **Depurar → PP a rutina → LabJointRws / ServidorPC**.
+3. Llave en **AUTO** y aceptar el diálogo. Comprobar que el puntero sigue en `ServidorPC`.
+4. Pulsar el botón **Motors On** del controlador (queda encendido fijo), luego **Start** en el FlexPendant y **Iniciar**.
+5. En la PC: `./brazo.sh panel` (o `./brazo.sh terminal`).
 
-La velocidad sigue limitada por `vPc` en el RAPID (20 mm/s, 5°/s) aunque el FlexPendant marque 100 %. Para parar: **Stop**, botón de **Motors Off** o paro de emergencia. Al terminar, `./iniciar.sh rws_mover instalar` (llave en AUTO, motores apagados) devuelve el módulo a solo manual.
+La velocidad sigue limitada por `vPc` en el RAPID (20 mm/s, 5°/s) aunque el FlexPendant marque 100 %. Para parar: **Stop**, botón de **Motors Off** o paro de emergencia. Al terminar: llave en AUTO, motores OFF y `./brazo.sh instalar` para devolver el módulo a solo manual.
 
-## 7. Panel de ángulos con RViz
+## 7. Panel de RViz: la forma principal de mover el brazo
 
 ```bash
-./iniciar.sh panel              # robot real: pide la contraseña RWS en la terminal
-./iniciar.sh panel --simulado   # sin robot, para practicar
+./brazo.sh compilar          # una sola vez (o tras cambiar el panel C++)
+./brazo.sh panel             # robot real: pide la contraseña RWS en la terminal
+./brazo.sh simulado          # sin robot, para practicar
+./brazo.sh panel --web       # opcional: además, la página local en http://127.0.0.1:8770/
 ```
 
-Abre RViz con dos modelos (sólido = postura medida, naranja translúcido = objetivo) y una página local `http://127.0.0.1:8770/` que sustituye al prompt:
+Abre RViz con dos modelos (**blanco sólido = gemelo digital con la postura medida**, naranja translúcido = objetivo), el **panel «IRB 120»** ocupando el lateral izquierdo y un **control 3D** de la pose. Los paneles «Displays» y «Views» de RViz se reabren desde el menú *Panels* si hacen falta. La preparación en el FlexPendant es la misma (pasos 3 a 5 en manual, o §6 en AUTO). Todo se hace dentro de RViz:
 
-- **Ángulos:** deslizador y casilla por eje (grados, con los mismos límites y 2° de margen). El modelo naranja sigue al objetivo en vivo; nada se mueve hasta pulsar **Enviar al robot** y confirmar el resumen.
-- **Posición cartesiana:** X, Y, Z en mm y roll, pitch, yaw en grados (R = Rz·Ry·Rx, respecto a la base). **Calcular ángulos** usa la cinemática inversa de Pieper del Hito 2 (`hito2/irb120/pieper.py`): muestra las 8 ramas, elige la más cercana a la postura medida con el criterio del proyecto y la carga como objetivo. El punto de referencia puede ser el TCP del proyecto (150 mm) o la brida (`tool0`, que es lo que muestra el FlexPendant con `tool0`).
-- El envío usa el mismo `Mover.send` que la terminal: mismas validaciones, división en órdenes de como máximo el paso elegido y mismo registro en `salidas/control_articular/rws_mover/panel_*.jsonl`.
+- **Estado:** modo, motores, RAPID, ServidorPC, módulo, último resultado y la lista **FALTA**. Una nota recuerda que en manual los motores solo quedan en ON con el habilitador.
+- **Ángulos J1–J6:** casilla y deslizador por eje (grados, con los mismos límites y 2° de margen), con la medida y el cambio. El modelo naranja sigue al objetivo en vivo; nada se mueve hasta pulsar **Enviar al robot** y confirmar el resumen.
+- **Pose cartesiana:** punto de referencia (TCP de 150 mm o brida `tool0`, que es lo que muestra el FlexPendant), X, Y, Z en mm y roll, pitch, yaw en grados (R = Rz·Ry·Rx, respecto a la base). **Calcular ángulos (IK)** usa la cinemática inversa de Pieper del Hito 2 (`hito2/irb120/pieper.py`): muestra las 8 ramas, propone la más cercana a la postura medida con el criterio del proyecto y permite usar otra (doble clic en la fila).
+- **Acciones:** paso por orden (≤ 10°), **Enviar al robot** (con confirmación), **Copiar postura actual**, **Cancelar tras la orden en curso** y **Terminar ServidorPC en el robot**. Más abajo, progreso, errores y registro.
+- **Control 3D:** herramienta **Interact**; arrastrar el marcador recalcula la IK y mueve el modelo naranja. Clic derecho: ajustar un eje (±1°, ±5°), copiar la postura actual, cambiar el punto de referencia, enviar (dos niveles) o cancelar.
+- **Si el panel no está compilado**, el arranque lo avisa y quedan el control 3D y `--web`.
+
+El envío usa el mismo `Mover.send` que la terminal: mismas validaciones, división en órdenes de como máximo el paso elegido y mismo registro en `salidas/control_articular/rws_mover/panel_*.jsonl`.
+
+- El panel de RViz **no habla con el robot**: publica órdenes JSON en `/irb120/panel/orden` y el nodo Python las ejecuta. En el modo `panel` ROS 2 se limita a `localhost` (`ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST`): nadie en la red Wi-Fi puede publicar órdenes.
 - El robot se mueve con `MoveAbsJ` orden a orden: **el TCP no sigue una línea recta** entre la pose actual y la pedida. Revisar el modelo naranja antes de enviar.
-- **Cancelar** solo evita las órdenes siguientes. Para detener el robot: habilitador, Stop o paro de emergencia.
+- **Cancelar** solo evita las órdenes siguientes. Cerrar el panel o RViz tampoco detiene el robot. Para detenerlo: habilitador, Stop o paro de emergencia.
+- La página local (`--web`) es **opcional**: ofrece los mismos controles en el navegador y comparte el objetivo con RViz.
 
-La preparación en el FlexPendant es la misma (pasos 3 a 5 en manual, o §6 en AUTO). El panel usa los mismos tópicos que `control_*`, así que no pueden estar abiertos a la vez. Para seguimiento continuo sigue haciendo falta EGM ([plan](../hitos_3_4/PLAN_CONTROL_EGM_IK_VISION.md)).
+El panel usa los mismos tópicos que `control_*`, así que no pueden estar abiertos a la vez. Para seguimiento continuo sigue haciendo falta EGM ([plan](../hitos_3_4/PLAN_CONTROL_EGM_IK_VISION.md)). Cómo funciona por dentro: [COMO_FUNCIONA.md](COMO_FUNCIONA.md).
 
 ## Fuentes
 

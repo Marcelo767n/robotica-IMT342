@@ -11,7 +11,7 @@ case "$mode" in
   rws_j6) module="irb120_control.rws_j6" ;;
   rws_mover) module="irb120_control.rws_mover" ;;
   control_demo|control_vista|control_egm_lectura|control_robot) module="irb120_control.arranque" ;;
-  panel) module="irb120_control.panel_rws" ;;
+  panel) module="irb120_control.panel.arranque" ;;
   *)
     echo 'Uso: ./iniciar.sh {enlace|comunicacion|validar_fk|rws_j6|rws_mover|panel|control_demo|control_vista|control_egm_lectura|control_robot} [opciones]'
     echo 'Lectura: ./iniciar.sh comunicacion --host 192.168.125.1 --user "Default User" --ignore-joint-state'
@@ -32,6 +32,12 @@ if [[ ! -x "$py" || ! -f /opt/ros/jazzy/setup.bash ]]; then
   exit 2
 fi
 source /opt/ros/jazzy/setup.bash
+if [[ "$mode" == panel ]]; then
+  # Panel C++ de RViz (./brazo.sh compilar). Los tópicos de órdenes se quedan en esta PC:
+  # nadie en la red Wi-Fi puede publicar en /irb120/panel/orden.
+  [[ -f "$here/install/setup.bash" ]] && source "$here/install/setup.bash"
+  export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+fi
 set -u
 export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"

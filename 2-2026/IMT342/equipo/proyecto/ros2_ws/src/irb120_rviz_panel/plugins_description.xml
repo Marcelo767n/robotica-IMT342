@@ -1,0 +1,5 @@
+<library path="irb120_rviz_panel">
+  <class name="irb120_rviz_panel/PanelIRB120" type="irb120_rviz_panel::PanelIRB120" base_class_type="rviz_common::Panel">
+    <description>IRB 120: ángulos J1–J6, pose cartesiana con cinemática inversa y envío al robot real por RWS.</description>
+  </class>
+</library>
