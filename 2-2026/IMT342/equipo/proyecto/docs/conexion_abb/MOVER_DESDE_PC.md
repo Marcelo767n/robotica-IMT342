@@ -66,6 +66,8 @@ PC:    espera rbSeq = pcSeq y lee rbCodigo
 
 ## 3. Antes de ir
 
+> **Primero, una copia del programa del robot:** copia completa desde el FlexPendant a una USB y `./brazo.sh respaldar` desde la PC. Si alguien borra el programa, se recupera con [RESPALDO_Y_RESTAURACION.md](RESPALDO_Y_RESTAURACION.md).
+
 En la PC Linux, desde la carpeta del repositorio:
 
 ```bash

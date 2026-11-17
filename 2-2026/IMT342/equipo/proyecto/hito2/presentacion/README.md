@@ -5,7 +5,7 @@
 Carpeta en Linux:
 
 ```text
-/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/presentacion
+hito2/presentacion
 ```
 
 | Qué necesitas | Archivo de esta carpeta |

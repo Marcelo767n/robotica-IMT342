@@ -12,7 +12,7 @@ La hoja específica está aquí:
 - **Rama:** `main`.
 - **Ruta dentro del repositorio:** `2-2026/IMT342/Semana_10/hito_2/hito_2_rubrica.pdf`.
 - **Abrir en GitHub:** [Rúbrica oficial del Hito 2](https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_rubrica.pdf).
-- **Abrir la copia local:** [hito_2_rubrica.pdf](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/archivos que hay que presentar/hito_2/hito_2_rubrica.pdf>).
+- **Abrir la copia local:** [hito_2_rubrica.pdf](<../../archivos que hay que presentar/hito_2/hito_2_rubrica.pdf>).
 - **Página 1:** ponderación. **Página 2:** criterios A–F del producto grupal. **Página 3:** defensa individual G1–G4.
 
 Verifiqué las copias locales contra los objetos de GitHub el 30/10: la guía general tiene SHA de blob `828d5714b312e983f5a1123d74faa220ce3ac591`; la rúbrica específica, `97b991b1b90857cebf3a45cdc2816462f72e34b7`. Coinciden con las versiones consultadas en `main`.
@@ -34,13 +34,13 @@ La guía general inicial menciona un nodo ROS y divergencia de velocidades y tor
 **Carpeta raíz del repositorio en tu Linux:**
 
 ```text
-/home/marcelo767/Documentos/robotica/robotica-IMT342
+<carpeta donde clonaste el repositorio>
 ```
 
 **Carpeta del proyecto, dentro de ese repositorio:**
 
 ```text
-/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto
+<repositorio>/2-2026/IMT342/equipo/proyecto
 ```
 
 La estructura que **sí existe** dentro de `proyecto/` es:
@@ -67,12 +67,12 @@ proyecto/
 - **Rama:** `proyectoHito3y4`. También existe, con el mismo contenido revisado, en `proyectoHito2`.
 - **Ruta en GitHub:** `2-2026/IMT342/equipo/proyecto/hito2/Hito2_IRB120_todo_en_uno.ipynb`.
 - **GitHub:** [notebook todo en uno](https://github.com/Marcelo767n/robotica-IMT342/blob/proyectoHito3y4/2-2026/IMT342/equipo/proyecto/hito2/Hito2_IRB120_todo_en_uno.ipynb).
-- **Abrir el archivo local:** [Hito2_IRB120_todo_en_uno.ipynb](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/Hito2_IRB120_todo_en_uno.ipynb).
+- **Abrir el archivo local:** [Hito2_IRB120_todo_en_uno.ipynb](../../hito2/Hito2_IRB120_todo_en_uno.ipynb).
 
 **Ruta absoluta para copiar al explorador de archivos:**
 
 ```text
-/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/Hito2_IRB120_todo_en_uno.ipynb
+hito2/Hito2_IRB120_todo_en_uno.ipynb
 ```
 
 Es un solo notebook con el código de los módulos incorporado. No necesita la carpeta `irb120/`. Requiere Python, NumPy y Matplotlib, y Jupyter o un editor con soporte de notebooks para abrirlo. En la comprobación aislada previa se ejecutaron sus 39 celdas de código sin módulos locales y sin `datos/`; únicamente se omitió la comparación opcional con el URDF.
@@ -82,10 +82,10 @@ Es un solo notebook con el código de los módulos incorporado. No necesita la c
 - **Rama:** `proyectoHito3y4`; no está en el árbol revisado de `proyectoHito2`.
 - **Ruta en GitHub:** `2-2026/IMT342/equipo/proyecto/hito2/presentacion/Hito2_en_vivo.html`.
 - **GitHub, para descargar:** [HTML de un solo archivo](https://github.com/Marcelo767n/robotica-IMT342/blob/proyectoHito3y4/2-2026/IMT342/equipo/proyecto/hito2/presentacion/Hito2_en_vivo.html).
-- **Abrir el archivo local:** [Hito2_en_vivo.html](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/presentacion/Hito2_en_vivo.html).
+- **Abrir el archivo local:** [Hito2_en_vivo.html](../../hito2/presentacion/Hito2_en_vivo.html).
 
 ```text
-/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/presentacion/Hito2_en_vivo.html
+hito2/presentacion/Hito2_en_vivo.html
 ```
 
 Ábrela con doble clic en Chrome o Firefox. GitHub muestra el código del HTML; para interactuar con la página debes descargarlo y abrir el archivo. Esta versión contiene sus scripts y puede hacer los cálculos sin internet; las fuentes tipográficas tienen alternativas locales. No hace falta abrir `index.html`, `app.js` o `irb120.js` por separado.
@@ -95,10 +95,10 @@ Es un solo notebook con el código de los módulos incorporado. No necesita la c
 - **Rama:** `proyectoHito3y4`.
 - **Ruta en GitHub:** `2-2026/IMT342/equipo/proyecto/docs/hito2/informe_ieee/informe_hito2_ieee.pdf`.
 - **GitHub:** [informe IEEE](https://github.com/Marcelo767n/robotica-IMT342/blob/proyectoHito3y4/2-2026/IMT342/equipo/proyecto/docs/hito2/informe_ieee/informe_hito2_ieee.pdf).
-- **Abrir local:** [informe_hito2_ieee.pdf](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/docs/hito2/informe_ieee/informe_hito2_ieee.pdf).
+- **Abrir local:** [informe_hito2_ieee.pdf](../../docs/hito2/informe_ieee/informe_hito2_ieee.pdf).
 
 ```text
-/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/docs/hito2/informe_ieee/informe_hito2_ieee.pdf
+docs/hito2/informe_ieee/informe_hito2_ieee.pdf
 ```
 
 ### Archivo 4: URDF para completar el anexo
@@ -106,10 +106,10 @@ Es un solo notebook con el código de los módulos incorporado. No necesita la c
 - **Rama:** `proyectoHito3y4`.
 - **Ruta en GitHub:** `2-2026/IMT342/equipo/proyecto/hito2/datos/irb120.urdf`.
 - **GitHub:** [irb120.urdf](https://github.com/Marcelo767n/robotica-IMT342/blob/proyectoHito3y4/2-2026/IMT342/equipo/proyecto/hito2/datos/irb120.urdf).
-- **Abrir local:** [irb120.urdf](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/datos/irb120.urdf).
+- **Abrir local:** [irb120.urdf](../../hito2/datos/irb120.urdf).
 
 ```text
-/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/datos/irb120.urdf
+hito2/datos/irb120.urdf
 ```
 
 Para usar la comparación URDF, ejecuta el notebook desde `hito2/`, conservando `datos/irb120.urdf` junto a él con esa ruta relativa. Si falta, el anexo informa que omite esa comparación; el cálculo principal continúa.
@@ -311,11 +311,11 @@ Contesta sin mirar. Son preguntas de estudio basadas en la rúbrica, no una list
 
 ## 9. Material de estudio que ya existe
 
-- [Explicación extensa del notebook todo en uno](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/EXPLICACION_NOTEBOOK_TODO_EN_UNO.md).
-- [Guía de defensa por preguntas](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/explicacion/10_guia_defensa.md).
-- [Ejemplo de Pieper resuelto a mano](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/explicacion/08_ejemplo_resuelto_a_mano.md).
-- [Jacobiano y singularidades, explicación completa](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/explicacion/06_D_singularidades.md).
-- [Dinámica 1R, parámetros y supuestos](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/explicacion/07_E_dinamica_1R.md).
-- [Guía general del PFI, copia local](/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/referencias/bibliografia/Guia_PFI.pdf).
+- [Explicación extensa del notebook todo en uno](../../hito2/EXPLICACION_NOTEBOOK_TODO_EN_UNO.md).
+- [Guía de defensa por preguntas](../../hito2/explicacion/10_guia_defensa.md).
+- [Ejemplo de Pieper resuelto a mano](../../hito2/explicacion/08_ejemplo_resuelto_a_mano.md).
+- [Jacobiano y singularidades, explicación completa](../../hito2/explicacion/06_D_singularidades.md).
+- [Dinámica 1R, parámetros y supuestos](../../hito2/explicacion/07_E_dinamica_1R.md).
+- [Guía general del PFI, copia local](../../referencias/bibliografia/Guia_PFI.pdf).
 
 **Estado de este archivo:** se creó localmente en la carpeta raíz del proyecto. No se hizo commit ni se publicó en GitHub como parte de esta preparación; no busques un enlace remoto a esta guía hasta subirla.

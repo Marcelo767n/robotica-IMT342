@@ -3,7 +3,7 @@
 Actualizado: 10/11/2026. Abrir una terminal y entrar **una vez**:
 
 ```bash
-cd "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/ros2_ws"
+cd ros2_ws   # desde la raíz del proyecto
 ```
 
 Los comandos siguientes se ejecutan desde esa carpeta. `iniciar.sh` carga ROS Jazzy y Python 3.12 automáticamente; no hace falta ejecutar archivos de nodos a mano ni compilar con colcon para estos arranques fuente. Usar una sola sesión de prueba a la vez y cerrar la anterior con Ctrl+C una vez.

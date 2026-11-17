@@ -33,3 +33,19 @@ Las fuentes del docente se conservan intactas en su carpeta. `entregables/` perm
 Para nuevas fotos, usar las subcarpetas por tipo y conservar el nombre original; actualizar [el catálogo](../../fotos/README.md). No guardar contraseñas en manifiestos o evidencias.
 
 La [verificación de organización](verificacion_2026-10-20.json) registra preservación de fuentes y archivos trasladados, integridad de descargas y referencias locales. Esta verificación no es prueba de conexión al robot ni de funcionamiento de los generadores históricos.
+
+## Cambios del 17/11/2026
+
+| Cambio | Detalle |
+|---|---|
+| `AVANCE_2026-11-10.md` | Movido a [`docs/bitacora/`](../bitacora/README.md) |
+| `graphify-out/` | Fuera del repositorio: se conserva en disco pero está ignorada en `.gitignore` |
+| `.claude/` | Ignorada por Git |
+| READMEs nuevos | `docs/README.md`, `docs/bitacora/`, `docs/hito2/`, `ros2_ws/src/irb120_rviz_panel/` y `ros2_ws/src/irb120_hito2/` |
+| Panel de RViz | Panel C++ «IRB 120» ([`irb120_rviz_panel`](../../ros2_ws/src/irb120_rviz_panel/README.md)), control 3D y paquete Python `irb120_control/panel/` |
+| `ros2_ws/brazo.sh` | Script único de comandos para mover el robot; el [README de `ros2_ws`](../../ros2_ws/README.md) lo presenta como forma principal de uso |
+
+Qué no debe moverse:
+
+- `model_manifest.yaml` y `ros2_ws/` deben seguir juntos en la raíz del proyecto: `ros2_ws/src/irb120_conexion/irb120_conexion/rutas.py` los usa para encontrar la raíz.
+- `hito2/` no se mueve: el control del robot importa su cinemática.

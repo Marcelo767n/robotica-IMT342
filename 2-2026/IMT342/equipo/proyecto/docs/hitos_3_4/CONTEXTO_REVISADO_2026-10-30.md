@@ -24,7 +24,7 @@ El pipeline matemático vigente es `T_d → Pieper → candidatos → FK/límite
 
 ## Git y GitHub
 
-El repositorio Git abarca `/home/marcelo767/Documentos/robotica/robotica-IMT342`; esta carpeta de trabajo está dentro de él, en `2-2026/IMT342/equipo/proyecto`.
+El repositorio Git abarca `<carpeta del repositorio>`; esta carpeta de trabajo está dentro de él, en `2-2026/IMT342/equipo/proyecto`.
 
 - `origin`: `Marcelo767n/robotica-IMT342`.
 - `upstream`: `berquiroga/planificacion-UCB`, fuente docente.
@@ -102,11 +102,11 @@ La evaluación ECI-3/4 pondera ingeniería 20%, modelos/validación 25%, integra
 
 La FK física registrada compara `tool0`, no el TCP modelado a 0.150 m. La posición es aproximadamente `(208.05, 381.23, 557.26)` mm, con error redondeado de `0.01 mm` y `0.0004°`. Recalculé ambos errores con el JSON RWS y los valores del FlexPendant archivados, obteniendo esas mismas salidas. Una postura no certifica todo el espacio de trabajo ni valida IK, Jacobiano, dinámica o seguimiento LSPB físicos.
 
-La lectura B mencionada en el resumen existe en `/home/marcelo767/lecturas_abb/postura_B.json`, capturada el 29/10 a las 21:59:08 UTC. Se confirmó su existencia y seis ejes. Sigue faltando su referencia cartesiana independiente para cerrar la comparación; no se incorporó el archivo bruto al repositorio.
+La lectura B mencionada en el resumen existe en `~/lecturas_abb/postura_B.json`, capturada el 29/10 a las 21:59:08 UTC. Se confirmó su existencia y seis ejes. Sigue faltando su referencia cartesiana independiente para cerrar la comparación; no se incorporó el archivo bruto al repositorio.
 
 ## Entorno y comprobaciones del 30/10
 
-La PC usa Python 3.14.4. Existe `/home/marcelo767/ros_py312`, Python 3.12.3, y `/opt/ros/jazzy`. Tras cargar `setup.bash`, el entorno aislado importa `rclpy`, `sensor_msgs.msg`, `xacro`, `ament_index_python` y `ros2cli`. Importar `launch` falla por ausencia de `lark`; `colcon_core` tampoco está disponible en ese intérprete. La existencia de algunos módulos no demuestra una cadena completa de compilación/lanzamiento funcional.
+La PC usa Python 3.14.4. Existe `~/ros_py312`, Python 3.12.3, y `/opt/ros/jazzy`. Tras cargar `setup.bash`, el entorno aislado importa `rclpy`, `sensor_msgs.msg`, `xacro`, `ament_index_python` y `ros2cli`. Importar `launch` falla por ausencia de `lark`; `colcon_core` tampoco está disponible en ese intérprete. La existencia de algunos módulos no demuestra una cadena completa de compilación/lanzamiento funcional.
 
 | Comprobación ejecutada | Resultado |
 |---|---|

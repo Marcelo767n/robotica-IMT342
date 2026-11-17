@@ -32,7 +32,7 @@ Esa inspección se tomó **antes** de actualizar el módulo y preparar el objeti
 Entrar en esta carpeta en cada terminal nueva:
 
 ```bash
-cd "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/ros2_ws"
+cd ros2_ws   # desde la raíz del proyecto
 ```
 
 ### 1. Leer el estado antes de preparar un objetivo

@@ -1,6 +1,6 @@
 # Hitos 3 y 4 integrados · ECI-3/4
 
-**Corte del 10/11:** [bitácora del avance y resultado de la sesión](../../AVANCE_2026-11-10.md). Se verificaron recepción RWS y transferencia del módulo J6, pero el intento no consiguió movimiento físico. Sigue pendiente G3. [Procedimiento para la próxima visita](../conexion_abb/PROXIMA_SESION_J6.md).
+**Corte del 10/11:** [bitácora del avance y resultado de la sesión](../bitacora/AVANCE_2026-11-10.md). Se verificaron recepción RWS y transferencia del módulo J6, pero el intento no consiguió movimiento físico. Sigue pendiente G3. [Procedimiento para la próxima visita](../conexion_abb/PROXIMA_SESION_J6.md).
 
 **Actualización 04/11:** enlace RWS y publicación física ROS/TF comprobados; el usuario reportó exitoso el seguimiento visual del brazo con RViz. La [comparación FK propia/pose ABB](../conexion_abb/VALIDACION_FK_EN_VIVO.md) ya tiene [evidencia física registrada](../conexion_abb/evidencias/fk_real_2026-11-04_224412Z_informe.md): las últimas 100 muestras estacionarias pasan el criterio estricto. Se conservan 25 muestras previas FUERA; falta completar la campaña con variación de J4–J6. El código está organizado en [nodos ROS 2](../../ros2_ws/README.md).
 

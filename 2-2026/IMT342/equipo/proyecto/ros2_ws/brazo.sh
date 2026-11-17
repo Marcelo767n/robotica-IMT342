@@ -16,6 +16,7 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
   PREPARAR
     ./brazo.sh enlace          cable, IP de la PC, ping y puerto RWS (no pide contraseña)
     ./brazo.sh estado          modo, motores, RAPID, módulo y ángulos; dice qué FALTA
+    ./brazo.sh respaldar       copia los módulos RAPID del robot a rapid/respaldo_controlador/ (solo lectura)
     ./brazo.sh limpiar         vacía un objetivo pendiente     (llave AUTO, motores OFF)
     ./brazo.sh instalar        instala LabJointRws v2 (manual) (llave AUTO, motores OFF)
     ./brazo.sh instalar-auto   v2 que acepta modo AUTO         (llave AUTO, motores OFF, con autorización)
@@ -64,6 +65,7 @@ case "$cmd" in
     else echo "   CERRADO"; exit 2; fi ;;
   estado)   run rws_mover estado --host "$host" "$@" ;;
   limpiar)  run rws_j6 limpiar --host "$host" "$@" ;;
+  respaldar) run respaldar --host "$host" "$@" ;;
   instalar) run rws_mover instalar --host "$host" "$@" ;;
   instalar-auto)
     echo "Instala la variante que deja mover el robot en AUTO, SIN habilitador."
@@ -87,6 +89,7 @@ case "$cmd" in
     export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
     py="${ROS_PY312:-$HOME/ros_py312/bin/python}"; [[ -x "$py" ]] || py=python3
     cd "$here"
-    exec "$py" -m unittest discover -s src/irb120_control/test -p 'test_[rp][wa]*.py' ;;
+    "$py" -m unittest discover -s src/irb120_control/test -p 'test_r[we]*.py' \
+      && "$py" -m unittest discover -s src/irb120_control/test -p 'test_panel*.py' ;;
   *) echo "Comando desconocido: $cmd"; echo; ayuda; exit 2 ;;
 esac

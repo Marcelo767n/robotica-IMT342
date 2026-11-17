@@ -29,7 +29,7 @@ Declara `vLabJ6 := [5,0.5,5,0.5]`: componente de orientación 0,5°/s. Esto es u
 En cada terminal nueva:
 
 ```bash
-cd "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/ros2_ws"
+cd ros2_ws   # desde la raíz del proyecto
 ```
 
 `iniciar.sh` carga el entorno. La contraseña se escribe en tu terminal y no se guarda.

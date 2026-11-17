@@ -28,9 +28,9 @@
 
 **Prioridad alta de explicación. Criterios B, F y defensa.**
 
-El [generador, líneas 369–372](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/build_pipeline_notebook.py:369>) y la [explicación de validación](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/explicacion/03_B_validacion_fk.md:90>) dicen que el URDF procede de otra geometría y que revelaría un error de la tabla DH.
+El [generador, líneas 369–372](<../../hito2/build_pipeline_notebook.py#L369>) y la [explicación de validación](<../../hito2/explicacion/03_B_validacion_fk.md#L90>) dicen que el URDF procede de otra geometría y que revelaría un error de la tabla DH.
 
-Pero el [modelo del Hito 1](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/docs/hito1/modelo_cinematico.md:49>) explica expresamente **cómo se convierte esa misma tabla DH a los orígenes URDF**. También lo indican los comentarios iniciales de [irb120.macro.xacro](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/ros2_ws/src/irb120_hito1/urdf/irb120.macro.xacro:10>). Los meshes CAD son la geometría visual; no determinan por sí mismos los orígenes de las articulaciones.
+Pero el [modelo del Hito 1](<../hito1/modelo_cinematico.md#L49>) explica expresamente **cómo se convierte esa misma tabla DH a los orígenes URDF**. También lo indican los comentarios iniciales de [irb120.macro.xacro](<../../ros2_ws/src/irb120_hito1/urdf/irb120.macro.xacro#L10>). Los meshes CAD son la geometría visual; no determinan por sí mismos los orígenes de las articulaciones.
 
 La coincidencia numérica en 302 configuraciones es real y útil: comprueba la consistencia entre dos implementaciones y representaciones. **No demuestra que una dimensión equivocada, compartida por ambas, sea correcta.**
 
@@ -42,7 +42,7 @@ No hace falta eliminar esta prueba ni añadir ROS para cumplir la rúbrica. Hay 
 
 **Prioridad media. Criterios A y defensa.**
 
-La [justificación de selección](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/build_pipeline_notebook.py:396>) y el informe afirman que menor desplazamiento ponderado significa menor tiempo, energía y volumen barrido.
+La [justificación de selección](<../../hito2/build_pipeline_notebook.py#L396>) y el informe afirman que menor desplazamiento ponderado significa menor tiempo, energía y volumen barrido.
 
 El código minimiza únicamente `norm(W*(q-q0))`. Es un criterio razonable para favorecer posturas cercanas, pero **no calcula energía ni volumen barrido**, y no minimiza tf.
 
@@ -65,7 +65,7 @@ Sobre `sigma_min >= 0.01`, el límite de norma del inverso es una afirmación **
 
 `rank_candidates` puede relajar el margen y luego sigma cuando ninguna rama pasa los filtros. Ese comportamiento está previsto y la tabla lo informa.
 
-Sin embargo, la [salida de la sección 4](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/build_pipeline_notebook.py:415>) imprime siempre que `sigma_min >= 0.01` y que el margen es de al menos 5°, sin consultar qué filtros se relajaron.
+Sin embargo, la [salida de la sección 4](<../../hito2/build_pipeline_notebook.py#L415>) imprime siempre que `sigma_min >= 0.01` y que el margen es de al menos 5°, sin consultar qué filtros se relajaron.
 
 Se reprodujo con el objetivo igual a HOME:
 
@@ -82,7 +82,7 @@ La solución es válida, pero la desigualdad impresa es falsa.
 
 **Prioridad alta al empaquetar. Criterio F.**
 
-El texto adjunto y el [README](</home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto/hito2/README.md:37>) destacan que el notebook necesita `irb120/`. Con la nueva verificación cruzada, la sección 3.1 abre obligatoriamente `ROOT/datos/irb120.urdf`.
+El texto adjunto y el [README](<../../hito2/README.md#L37>) destacan que el notebook necesita `irb120/`. Con la nueva verificación cruzada, la sección 3.1 abre obligatoriamente `ROOT/datos/irb120.urdf`.
 
 Enviar solo el `.ipynb` y `irb120/` ya **no basta**: la carga del URDF falla con `FileNotFoundError`. Se comprobó con una copia mínima sin `datos/`.
 

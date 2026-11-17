@@ -10,6 +10,7 @@ case "$mode" in
   enlace) module="irb120_conexion.diagnostico.enlace" ;;
   rws_j6) module="irb120_control.rws_j6" ;;
   rws_mover) module="irb120_control.rws_mover" ;;
+  respaldar) module="irb120_control.respaldo" ;;
   control_demo|control_vista|control_egm_lectura|control_robot) module="irb120_control.arranque" ;;
   panel) module="irb120_control.panel.arranque" ;;
   *)
@@ -21,7 +22,7 @@ case "$mode" in
     exit 2 ;;
 esac
 shift
-if [[ "$mode" == rws_* ]]; then
+if [[ "$mode" == rws_* || "$mode" == respaldar ]]; then
   # Las herramientas RWS solo necesitan Python 3 y requests; no dependen de ROS.
   [[ -x "$py" ]] || py=python3
   export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
