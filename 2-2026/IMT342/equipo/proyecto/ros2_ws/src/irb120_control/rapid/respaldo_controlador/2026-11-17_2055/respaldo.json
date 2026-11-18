@@ -1,0 +1,67 @@
+{
+  "creado_utc": "2026-11-18T00:56:10.065788+00:00",
+  "tarea": "T_ROB1",
+  "controlador": {
+    "name": "120-101516",
+    "rwversionname": "6.12.01.00"
+  },
+  "modulos": [
+    {
+      "modulo": "LabJointRws",
+      "tipo": "ProgMod",
+      "archivo": "LabJointRws.mod",
+      "lineas": 121,
+      "sha256": "85e3006400b953d9c92e2c2a50cab6a6404e92ad39bf95056a6d1a792fc742a0"
+    },
+    {
+      "modulo": "EGM_ROS",
+      "tipo": "ProgMod",
+      "archivo": "EGM_ROS.mod",
+      "lineas": 86,
+      "sha256": "27e3cd45f62a9a870c08766817fe93b7e6301eb0bd30a4e163e8fed45e3c01a6"
+    },
+    {
+      "modulo": "user",
+      "tipo": "SysMod",
+      "archivo": "user.sys",
+      "lineas": 21,
+      "sha256": "d0b04e14792ba35d98a385ffb0fe631385a6bec979ee4aea747ca791220b3a2d"
+    },
+    {
+      "modulo": "BASE",
+      "tipo": "SysMod",
+      "archivo": "BASE.sys",
+      "lineas": 17,
+      "sha256": "30099415b0f0f667f6c8984be4d72da572449fccc9ea64181b62eec6c1cfaf58"
+    },
+    {
+      "modulo": "MainModule",
+      "tipo": "ProgMod",
+      "archivo": "MainModule.mod",
+      "lineas": 16,
+      "sha256": "41233ae5fe4ab5cbe20c1e2f8a7f4ee3622907804b1d4f47aa8c3b7f33b79a99"
+    },
+    {
+      "modulo": "Module1",
+      "tipo": "ProgMod",
+      "archivo": "Module1.mod",
+      "lineas": 4,
+      "sha256": "92c8a847a8435878f16cc2028fc2ea2de026442cd8b692815f302eff2413cbda"
+    },
+    {
+      "modulo": "IMT342_DestinoDirecto",
+      "tipo": "ProgMod",
+      "archivo": "IMT342_DestinoDirecto.mod",
+      "lineas": 141,
+      "sha256": "eb459da10cd6e73b00b2700f126668d969b093718f900fb76b5d22362a162c7d"
+    },
+    {
+      "modulo": "IMT342_EgmEnlace",
+      "tipo": "ProgMod",
+      "archivo": "IMT342_EgmEnlace.mod",
+      "lineas": 33,
+      "sha256": "80cb0e9ad01385e7cd00557c32db27ca8a9531dfd88461c8374f9844b93c1b8c"
+    }
+  ],
+  "fallos": []
+}
