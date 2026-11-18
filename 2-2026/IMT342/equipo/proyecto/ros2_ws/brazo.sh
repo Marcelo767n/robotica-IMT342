@@ -16,6 +16,7 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
   PREPARAR
     ./brazo.sh enlace          cable, IP de la PC, ping y puerto RWS (no pide contraseña)
     ./brazo.sh estado          modo, motores, RAPID, módulo y ángulos; dice qué FALTA
+    ./brazo.sh eventos         estado + puntero de programa + últimos mensajes del FlexPendant (solo lectura)
     ./brazo.sh respaldar       copia los módulos RAPID del robot a rapid/respaldo_controlador/ (solo lectura)
     ./brazo.sh limpiar         vacía un objetivo pendiente     (llave AUTO, motores OFF)
     ./brazo.sh instalar        instala LabJointRws v4 (manual) (llave AUTO, motores OFF)
@@ -91,6 +92,7 @@ case "$cmd" in
   simulado) run panel --simulado "$@" ;;
   terminal) run rws_mover interactivo --host "$host" "$@" ;;
   arrancar) run rws_mover arrancar --host "$host" "$@" ;;
+  eventos)  run rws_mover eventos --host "$host" "$@" ;;
   mover)
     [[ $# -gt 0 ]] || { echo 'Uso: ./brazo.sh mover j6 +5   |   mover j3= 20   |   mover abs J1 J2 J3 J4 J5 J6'; exit 2; }
     run rws_mover mover "$@" --host "$host" ;;

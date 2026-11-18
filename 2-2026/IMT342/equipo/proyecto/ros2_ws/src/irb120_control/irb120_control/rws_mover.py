@@ -331,6 +331,15 @@ class Mover(Client):
             raise Refused('La lectura de vuelta de pcVelPct no coincide.')
         return pct
 
+    def events(self, count=15):
+        """Últimos mensajes del registro de eventos del controlador (solo lectura)."""
+        response = self.session.get(self.base + '/rw/elog/0', params={'json': '1', 'lang': 'es'},
+                                    timeout=self.timeout, allow_redirects=False)
+        if response.status_code != 200:
+            raise Refused(f'Registro de eventos: HTTP {response.status_code}; {error_details(response.text)}')
+        rows = [r for r in state_records(response.text) if r.get('_type', '').startswith('elog-message')]
+        return rows[:count]
+
     def pointer(self):
         """Módulo y rutina donde está el puntero de programa (PP) de T_ROB1."""
         rows = self.read(PCP)
@@ -553,7 +562,8 @@ def _interactive(mover, step, timeout):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('action', choices=('estado', 'instalar', 'arrancar', 'mover', 'interactivo', 'terminar'))
+    parser.add_argument('action', choices=('estado', 'eventos', 'instalar', 'arrancar', 'mover', 'interactivo',
+                                           'terminar'))
     parser.add_argument('valores', nargs='*', help='mover: "abs J1..J6", "j2 +5" o "j3= 20"')
     parser.add_argument('--host', default='192.168.125.1')
     parser.add_argument('--user', default='Default User')
@@ -609,6 +619,21 @@ def main(argv=None):
                           'En el FlexPendant: Editor de programas → Verificar programa. '
                           'El puntero pudo restablecerse: NO pulsar Start sobre main.')
                 return 0 if report['passed'] else 2
+            if args.action == 'eventos':
+                state = mover.status()
+                print_status(state)
+                try:
+                    row, values = mover.pointer()
+                    print('Puntero de programa:', values)
+                except Exception as exc:
+                    print('Puntero de programa: no se pudo leer:', exc)
+                print('Últimos eventos del controlador (más reciente primero):')
+                for row in mover.events():
+                    kind = {'1': 'info', '2': 'AVISO', '3': 'ERROR'}.get(str(row.get('msgtype')), row.get('msgtype'))
+                    print(f"  {row.get('tstamp', '')}  [{kind}] {row.get('code', '')}  {row.get('title', '')}")
+                    if row.get('desc'):
+                        print('      ' + str(row['desc'])[:200].replace('\n', ' '))
+                return 0
             if args.action == 'arrancar':
                 mover.start_server()
                 return 0
