@@ -219,6 +219,8 @@ class Mover(Client):
                  'joints_deg': self.joints()[0], 'module': self.module_version}
         if self.module_version.startswith('servidor_v'):
             for name in NUM_SYMBOLS:
+                if name == 'pcVelPct' and not self.module_version.startswith('servidor_v4'):
+                    continue   # la v2/v3 no tienen velocidad desde la PC: se instala la v4 antes
                 state[name] = self.num(name)
         return state
 
@@ -319,6 +321,8 @@ class Mover(Client):
         if isinstance(pct, bool) or not isinstance(pct, (int, float)) or not 1 <= pct <= 100:
             raise Refused('La velocidad debe estar entre 1 y 100 %.')
         pct = int(round(pct))
+        if not self.module_version.startswith('servidor_v4'):
+            raise Refused(f'El módulo {self.module_version} no admite velocidad desde la PC: instalar la v4.')
         state = self.status()
         self.ensure_rmmp(state)
         self.write('pcVelPct', str(pct))

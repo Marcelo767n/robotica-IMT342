@@ -225,6 +225,16 @@ class Protocol(unittest.TestCase):
         with self.assertRaisesRegex(Refused, 'instalar'):
             client.send([[*abb.current[:5], abb.current[5] + 1], [9e9] * 6], echo=quiet)
 
+    def test_older_module_without_speed_variable_still_reads_status(self):
+        # 17/11: el robot tenía la v3 (sin pcVelPct) y status() fallaba con HTTP 400 antes de instalar la v4.
+        abb = Abb('AUTO'); del abb.nums['pcVelPct']; client = mover(abb)
+        client.module_version = 'servidor_v3_auto'
+        state = client.status()
+        self.assertNotIn('pcVelPct', state)
+        self.assertIn('instalar la v4', ' '.join(client.ready(state)))
+        with self.assertRaisesRegex(Refused, 'instalar la v4'):
+            client.set_speed(50)
+
     def test_speed_percent_is_written_and_validated(self):
         abb = Abb('MANR'); client = mover(abb)
         self.assertEqual(client.set_speed(55), 55)
