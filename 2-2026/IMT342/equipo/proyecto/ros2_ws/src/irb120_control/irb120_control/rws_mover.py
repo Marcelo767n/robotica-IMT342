@@ -30,6 +30,7 @@ from irb120_control.rws_j6 import MASTERSHIP
 from irb120_control.rws_j6 import (Client, Refused, EMPTY, LIMITS, SYMBOL, SERVER_CANDIDATE,
     SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
     SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256, SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256, SERVER_LABELS,
+    SERVER_V4_CUT_SHA256,
     measured_target, module_label, parse_target, literal, same_target, single, source_fingerprint)
 
 BASE_SYMBOL = '/rw/rapid/symbol/data/RAPID/T_ROB1/LabJointRws/'
@@ -407,7 +408,7 @@ class Mover(Client):
                                   accepted=(ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
                                             SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256,
                                             SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256,
-                                            SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256))
+                                            SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256, SERVER_V4_CUT_SHA256))
 
 
 def logout(mover):

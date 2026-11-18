@@ -41,7 +41,10 @@ def preparar_auto(mover, log_dir, echo=print, sleep=time.sleep, timeout=600.):
             echo(f"El robot tiene el módulo {state['module']}: se instalará la v4 (variante AUTO).")
             esperar(mover, lambda s: s['execution'] == 'stopped' and s['ctrlstate'] != 'motoron',
                     'Pulsar Stop en el FlexPendant y el botón Motors Off del controlador.', echo, timeout, sleep)
-            esperar(mover, lambda s: s['ctrlstate'] == 'motoroff', 'Esperando motores OFF…', echo, timeout, sleep)
+            # AUTO_CH = cambio de modo sin confirmar en el FlexPendant: esperar a AUTO firme.
+            esperar(mover, lambda s: s['ctrlstate'] == 'motoroff' and s['opmode'] == 'AUTO',
+                    'Esperando motores OFF y modo AUTO confirmado (aceptar el diálogo del FlexPendant)…',
+                    echo, timeout, sleep)
             if mover.get_target() != EMPTY:
                 echo('Vaciando un objetivo pendiente de la sesión anterior (no mueve el robot).')
                 mover.set_target(EMPTY)

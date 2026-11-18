@@ -26,9 +26,14 @@ ORIGINAL_NORMALIZED_SHA256 = 'e39d1f16392c93096d19754bc826da61664632b6acf8a4cab0
 J6_MODULE_SHA256 = 'cb07b7fba9a6f869ed87f21a77cdfb70ea454232132a3e2973daaffb34d2fdf0'
 # Versión 4 (servidor de objetivos, 17/11/2026): hasta 45° por orden, AccSet 50 y velocidad en % (pcVelPct).
 SERVER_CANDIDATE = Path(__file__).resolve().parents[1] / 'rapid/rws_mover/LabJointRws.mod'
-SERVER_MODULE_SHA256 = '9998b0fe7a862e1bfb965032156c39653a5cba3b272e8f6a9f31a86097519854'
+SERVER_MODULE_SHA256 = '157f9bcf62af9da55c0786a8d77b8928e043fb5847d9af75a233bd20bdeb8bca'
 # Misma versión con permitirAuto := TRUE (modo AUTO autorizado por el responsable).
-SERVER_AUTO_MODULE_SHA256 = 'f2585b21e9b062dff7c5bca8016734367a2bdd901f2b8eb75d47dc37f45998f1'
+SERVER_AUTO_MODULE_SHA256 = '021ef371c22000d359f3a3f2316567ac4d5198c1160703601759c517dbbc64f7'
+# 17/11/2026: la primera v4 (5605 caracteres) quedó cortada a 5000 en el controlador. Se reconoce
+# solo para poder sustituirla; nunca como módulo listo.
+SERVER_V4_CUT_SHA256 = '819b7bc952ec73321d05223a290f8468dc2ca545b5c281c2557327eaf5dbc834'
+# RWS (RW6.12) corta el texto de set-module-text a 5000 caracteres: el instalador exige menos.
+MODULE_TEXT_MAX = 4900
 # Versión 3 (17/11/2026, sin velocidad desde la PC): se reconoce para poder sustituirla.
 SERVER_V3_SHA256 = '652409d88ad2fd9ea7a6304f685f3c65536c8daf95b86ec0bfb03f3ac94bdbec'
 SERVER_V3_AUTO_SHA256 = 'ce83b233f8bfad39305f8118e33663b32a40dde04a428bd44a74a36dcf0e2cd9'
@@ -120,6 +125,7 @@ def module_label(digest):
     return {J6_MODULE_SHA256:'J6_revisado',ORIGINAL_NORMALIZED_SHA256:'original_v5',
             SERVER_MODULE_SHA256:'servidor_v4',SERVER_AUTO_MODULE_SHA256:'servidor_v4_auto',
             SERVER_V3_SHA256:'servidor_v3',SERVER_V3_AUTO_SHA256:'servidor_v3_auto',
+            SERVER_V4_CUT_SHA256:'v4_cortado_reinstalar',
             SERVER_V2_SHA256:'servidor_v2',SERVER_V2_AUTO_SHA256:'servidor_v2_auto'}.get(digest,'no_verificado')
 
 
@@ -381,6 +387,9 @@ class Client:
         accepted=set(accepted or (ORIGINAL_NORMALIZED_SHA256,J6_MODULE_SHA256))|{candidate_sha}
         if source_fingerprint(candidate)!=candidate_sha:
             raise Refused('El candidato local cambió; requiere una nueva revisión.')
+        if len(candidate)>MODULE_TEXT_MAX:
+            raise Refused(f'El módulo tiene {len(candidate)} caracteres: RWS lo cortaría a 5000 '
+                          f'(máximo admitido {MODULE_TEXT_MAX}). Acortarlo antes de instalar.')
         identity=self.verify_identity()
         state=self.assert_stopped_off()
         if state['opmode']!='AUTO':

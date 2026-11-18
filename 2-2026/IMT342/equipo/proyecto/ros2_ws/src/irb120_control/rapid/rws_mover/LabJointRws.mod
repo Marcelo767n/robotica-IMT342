@@ -1,23 +1,14 @@
 MODULE LabJointRws
-    ! V4 SERVIDOR PC. Recibe objetivos articulares absolutos (grados, J1..J6)
-    ! escritos por RWS desde Linux (rws_mover.py) y los ejecuta con MoveAbsJ.
-    ! No tiene main ni arranque automatico: el operador selecciona ServidorPC con
-    ! PP to Routine, en manual reducido, y lo arranca con habilitador + Start.
-    !
-    ! Protocolo: la PC escribe pcTarget, lo lee de vuelta y DESPUES incrementa
-    ! pcSeq. El robot valida, mueve y responde: primero rbCodigo, luego rbSeq.
-    ! rbCodigo: 0 listo, 1 moviendo, 2 llegada,
-    !          -1 objetivo vacio o no valido, -2 fuera de limites con margen,
-    !          -3 algun eje cambia mas de maxPasoDeg, -4 modo no permitido.
-    ! V3 (17/11/2026): hasta 45 grados por orden para movimientos sin paradas
-    ! intermedias, con aceleracion suavizada (AccSet 50, 50).
-    ! V4 (17/11/2026): velocidad elegida desde la PC en porcentaje (pcVelPct, 1..100)
-    ! sobre vMax; se lee al empezar cada orden. Fuera de rango se usa 20 %.
+    ! V4 servidor PC (17/11/2026). Docs: rws_mover.py y MOVER_DESDE_PC.md.
+    ! PC: escribe pcTarget, lo relee y sube pcSeq. Robot: valida, MoveAbsJ,
+    ! rbCodigo y luego rbSeq. rbCodigo 0 listo 1 moviendo 2 llegada
+    ! -1 vacio -2 limites -3 paso -4 modo. Velocidad: pcVelPct % de vMax.
+    ! Max 5000 caracteres: RWS corta el texto del modulo al cargarlo.
     CONST num maxPasoDeg := 45;
     CONST num margenDeg := 2;
-    ! Plan B en AUTO: solo con autorizacion del responsable cambiar a TRUE.
+    ! TRUE solo con autorizacion (modo AUTO).
     CONST bool permitirAuto := FALSE;
-    ! [TCP mm/s, orientacion grados/s, externo lineal mm/s, externo rotativo grados/s]
+    ! [TCP mm/s, orientacion grados/s, ejes externos]
     CONST speeddata vMax := [250,60,250,60];
     PERS num pcVelPct := 20;
     PERS jointtarget pcTarget := [[9E9,9E9,9E9,9E9,9E9,9E9],[9E9,9E9,9E9,9E9,9E9,9E9]];
@@ -74,8 +65,6 @@ MODULE LabJointRws
                     vOrden := vMax;
                     vOrden.v_tcp := vMax.v_tcp * pct / 100;
                     vOrden.v_ori := vMax.v_ori * pct / 100;
-                    vOrden.v_leax := vMax.v_leax * pct / 100;
-                    vOrden.v_reax := vMax.v_reax * pct / 100;
                     MoveAbsJ objetivo,vOrden,fine,tool0;
                     rbCodigo := 2;
                 ELSE

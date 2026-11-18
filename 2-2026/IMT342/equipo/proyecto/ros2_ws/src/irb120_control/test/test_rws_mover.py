@@ -225,6 +225,21 @@ class Protocol(unittest.TestCase):
         with self.assertRaisesRegex(Refused, 'instalar'):
             client.send([[*abb.current[:5], abb.current[5] + 1], [9e9] * 6], echo=quiet)
 
+    def test_module_fits_the_rws_text_limit_and_long_ones_are_refused(self):
+        # 17/11: la v4 de 5605 caracteres quedó cortada a 5000 en el IRC5.
+        from irb120_control.rws_j6 import MODULE_TEXT_MAX
+        self.assertLessEqual(len(V2.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')), MODULE_TEXT_MAX)
+        import tempfile
+        abb = Abb('AUTO'); abb.source = V2; abb.ctrl = 'motoroff'; abb.execution = 'stopped'; abb.require_rmmp = False
+        client = mover(abb)
+        with tempfile.TemporaryDirectory() as folder:
+            long = Path(folder) / 'largo.mod'
+            text = V2.replace('MODULE LabJointRws', 'MODULE LabJointRws\n' + '    ! relleno\n' * 40)
+            long.write_text(text)
+            with self.assertRaisesRegex(Refused, 'cortaría'):
+                client.update_module(Path(folder), candidate_path=long, candidate_sha=source_fingerprint(text))
+        self.assertFalse([c for c in abb.calls if c[0] == 'POST'])
+
     def test_older_module_without_speed_variable_still_reads_status(self):
         # 17/11: el robot tenía la v3 (sin pcVelPct) y status() fallaba con HTTP 400 antes de instalar la v4.
         abb = Abb('AUTO'); del abb.nums['pcVelPct']; client = mover(abb)
