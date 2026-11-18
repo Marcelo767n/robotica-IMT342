@@ -59,6 +59,7 @@ def preparar_auto(mover, log_dir, echo=print, sleep=time.sleep, timeout=600.):
         if state['execution'] != 'running':
             mover.start_server(echo=lambda line: echo(line))
         esperar(mover, lambda s: s.get('rbActivo') == 1 and s['execution'] == 'running',
-                'En el FlexPendant pulsar «Iniciar» (Aceptar objetivos enviados por la PC).', echo, 120., sleep)
+                'En el FlexPendant: icono «Ventana del operador» (barra superior, junto al Menú ABB) → '
+                '«¿Aceptar objetivos enviados por la PC?» → pulsar «Iniciar». Hay 2 minutos.', echo, 150., sleep)
         echo('ServidorPC activo: el robot acepta órdenes desde RViz.')
         return mover.status()

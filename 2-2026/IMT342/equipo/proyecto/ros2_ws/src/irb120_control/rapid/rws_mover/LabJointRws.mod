@@ -36,7 +36,7 @@ MODULE LabJointRws
             TPWrite "Seleccione manual reducido.";
             RETURN;
         ENDIF
-        TPReadFK respuesta,"Aceptar objetivos enviados por la PC?",stEmpty,stEmpty,stEmpty,"Iniciar","Cancelar"\MaxTime:=30\BreakFlag:=motivo;
+        TPReadFK respuesta,"Aceptar objetivos enviados por la PC?",stEmpty,stEmpty,stEmpty,"Iniciar","Cancelar"\MaxTime:=120\BreakFlag:=motivo;
         IF motivo <> 0 OR respuesta <> 4 THEN
             TPWrite "Servidor PC cancelado.";
             RETURN;

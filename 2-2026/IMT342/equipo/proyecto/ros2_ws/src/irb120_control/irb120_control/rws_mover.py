@@ -30,7 +30,7 @@ from irb120_control.rws_j6 import MASTERSHIP
 from irb120_control.rws_j6 import (Client, Refused, EMPTY, LIMITS, SYMBOL, SERVER_CANDIDATE,
     SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
     SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256, SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256, SERVER_LABELS,
-    SERVER_V4_CUT_SHA256,
+    SERVER_V4_CUT_SHA256, SERVER_V4_30S_SHA256, SERVER_V4_30S_AUTO_SHA256,
     measured_target, module_label, parse_target, literal, same_target, single, source_fingerprint)
 
 BASE_SYMBOL = '/rw/rapid/symbol/data/RAPID/T_ROB1/LabJointRws/'
@@ -220,7 +220,7 @@ class Mover(Client):
                  'joints_deg': self.joints()[0], 'module': self.module_version}
         if self.module_version.startswith('servidor_v'):
             for name in NUM_SYMBOLS:
-                if name == 'pcVelPct' and not self.module_version.startswith('servidor_v4'):
+                if name == 'pcVelPct' and not self.module_version.startswith('servidor_v4'):  # incluye v4_30s
                     continue   # la v2/v3 no tienen velocidad desde la PC: se instala la v4 antes
                 state[name] = self.num(name)
         return state
@@ -388,7 +388,8 @@ class Mover(Client):
                     post(MASTERSHIP, {'action': 'release'}, {}, (200, 204, 403))
                 except Exception:
                     pass
-        echo('RAPID arrancado en ServidorPC. En el FlexPendant pulsar «Iniciar» antes de 30 s.')
+        echo('RAPID arrancado en ServidorPC. En el FlexPendant abrir la Ventana del operador y pulsar «Iniciar» '
+             '(hay 2 minutos).')
 
     def finish(self):
         state = self.status()
@@ -417,7 +418,8 @@ class Mover(Client):
                                   accepted=(ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
                                             SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256,
                                             SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256,
-                                            SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256, SERVER_V4_CUT_SHA256))
+                                            SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256, SERVER_V4_CUT_SHA256,
+                                            SERVER_V4_30S_SHA256, SERVER_V4_30S_AUTO_SHA256))
 
 
 def logout(mover):

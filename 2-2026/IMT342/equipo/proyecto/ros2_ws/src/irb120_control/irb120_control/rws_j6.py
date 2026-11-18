@@ -26,9 +26,12 @@ ORIGINAL_NORMALIZED_SHA256 = 'e39d1f16392c93096d19754bc826da61664632b6acf8a4cab0
 J6_MODULE_SHA256 = 'cb07b7fba9a6f869ed87f21a77cdfb70ea454232132a3e2973daaffb34d2fdf0'
 # Versión 4 (servidor de objetivos, 17/11/2026): hasta 45° por orden, AccSet 50 y velocidad en % (pcVelPct).
 SERVER_CANDIDATE = Path(__file__).resolve().parents[1] / 'rapid/rws_mover/LabJointRws.mod'
-SERVER_MODULE_SHA256 = '157f9bcf62af9da55c0786a8d77b8928e043fb5847d9af75a233bd20bdeb8bca'
+SERVER_MODULE_SHA256 = 'd2a073d6f129dfa973a705474ff5d813703801ea3df0840c9693d9b037544af3'
 # Misma versión con permitirAuto := TRUE (modo AUTO autorizado por el responsable).
-SERVER_AUTO_MODULE_SHA256 = '021ef371c22000d359f3a3f2316567ac4d5198c1160703601759c517dbbc64f7'
+SERVER_AUTO_MODULE_SHA256 = '8cbed67802750bd3c010b64afce428bb9f8e48df9ab49a7449ed832bfec9559e'
+# v4 con solo 30 s para pulsar «Iniciar» (instalada el 17/11): se reconoce para sustituirla.
+SERVER_V4_30S_SHA256 = '157f9bcf62af9da55c0786a8d77b8928e043fb5847d9af75a233bd20bdeb8bca'
+SERVER_V4_30S_AUTO_SHA256 = '021ef371c22000d359f3a3f2316567ac4d5198c1160703601759c517dbbc64f7'
 # 17/11/2026: la primera v4 (5605 caracteres) quedó cortada a 5000 en el controlador. Se reconoce
 # solo para poder sustituirla; nunca como módulo listo.
 SERVER_V4_CUT_SHA256 = '819b7bc952ec73321d05223a290f8468dc2ca545b5c281c2557327eaf5dbc834'
@@ -126,6 +129,7 @@ def module_label(digest):
             SERVER_MODULE_SHA256:'servidor_v4',SERVER_AUTO_MODULE_SHA256:'servidor_v4_auto',
             SERVER_V3_SHA256:'servidor_v3',SERVER_V3_AUTO_SHA256:'servidor_v3_auto',
             SERVER_V4_CUT_SHA256:'v4_cortado_reinstalar',
+            SERVER_V4_30S_SHA256:'servidor_v4_30s',SERVER_V4_30S_AUTO_SHA256:'servidor_v4_30s_auto',
             SERVER_V2_SHA256:'servidor_v2',SERVER_V2_AUTO_SHA256:'servidor_v2_auto'}.get(digest,'no_verificado')
 
 
