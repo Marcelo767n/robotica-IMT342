@@ -20,6 +20,7 @@ class ClienteRos;
 class WidgetEjes;
 class WidgetEstado;
 class WidgetPose;
+class WidgetVerificacion;
 
 class PanelIRB120 : public rviz_common::Panel
 {
@@ -43,6 +44,7 @@ private:
   WidgetEstado * estado_;
   WidgetEjes * ejes_;
   WidgetPose * pose_;
+  WidgetVerificacion * verificacion_;
   QComboBox * paso_;
   QPushButton * enviar_;
   QPushButton * sincronizar_;
@@ -57,6 +59,7 @@ private:
   QJsonObject ultimo_;
   int respuestaVista_ = -1;
   bool conectado_ = false;
+  bool estabaOcupado_ = false;
 };
 
 }  // namespace irb120_rviz_panel

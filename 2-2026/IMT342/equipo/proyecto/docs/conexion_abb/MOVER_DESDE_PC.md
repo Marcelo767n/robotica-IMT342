@@ -228,6 +228,13 @@ La velocidad sigue limitada por `vPc` en el RAPID (20 mm/s, 5°/s) aunque el Fle
 
 ## 7. Panel de RViz: la forma principal de mover el brazo
 
+> **Verificación antes de enviar (pedido del ingeniero).** Se arrastra la pose con el ratón en RViz → la cinemática inversa de Pieper calcula los ángulos → el panel comprueba en tiempo real:
+> 1. **IK → FK**: FK(ángulos calculados) frente a la pose pedida (tolerancia 0,01 mm / 0,01°).
+> 2. **Robot real → pose pedida**: FK(ángulos medidos) frente a la pose pedida, con dx, dy, dz en mm, % del recorrido y error de cada eje en grados y en % (llegada: 0,5 mm / 0,1°).
+> 3. **Modelo frente al controlador ABB**: FK propia de `tool0` frente a la pose que informa el propio robot por RWS (`robtarget`), con el robot quieto (0,5 mm / 0,1°).
+>
+> «Enviar al robot» solo se habilita si la pose es alcanzable, los ángulos respetan los límites con 2° de margen, y 1 y 3 están dentro de tolerancia. Al llegar, el registro anota el error final. Código: [`panel/verificacion.py`](../../ros2_ws/src/irb120_control/irb120_control/panel/verificacion.py).
+
 ```bash
 ./brazo.sh compilar          # una sola vez (o tras cambiar el panel C++)
 ./brazo.sh panel             # robot real: pide la contraseña RWS en la terminal

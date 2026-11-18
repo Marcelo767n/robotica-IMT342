@@ -12,6 +12,7 @@ from irb120_control.rws_j6 import Refused
 from irb120_control.rws_mover import CODES, MAX_STEP_DEG, split_path
 from irb120_control.panel.cinematica import clean_tool, pose_of, solve_pose
 from irb120_control.panel.limites import BOUNDS, EXT, clean_target
+from irb120_control.panel import verificacion
 
 FRESH_S = 3.0            # una medida más antigua no se dibuja como postura actual
 ACTIONS = ('objetivo', 'enviar', 'cancelar', 'sincronizar', 'paso', 'terminar', 'ik', 'herramienta')
@@ -35,6 +36,10 @@ class Panel:
         self.log = collections.deque(maxlen=200)
         self.worker = None
         self.tool = 'tcp'
+        self.desired = None        # pose pedida por IK [mm, °] en self.tool; None si el objetivo son ángulos
+        self.reachable = True
+        self.abb = None            # (q leído, pose tool0 del ABB, instante) para la verificación 3
+        self.start = None          # ejes al empezar la última orden (base del error en %)
         mover.on_joints = self._measured
 
     # ---------- lectura ----------
@@ -50,15 +55,23 @@ class Panel:
             self.log.append(f'{stamp}  {text}')
 
     def poll(self, full=True):
-        """Lectura periódica; se salta mientras hay un envío (que ya refresca la postura)."""
+        """Lectura periódica; se salta mientras hay un envío (que ya refresca la postura).
+
+        full=False solo lee los ejes; full=True lee además estado, faltas y la pose del ABB."""
         if self.busy or not self.mover.lock.acquire(timeout=.2):
             return
+        abb = None
         try:
             if not full:
                 self.mover.joints()
                 return
             state = self.mover.status()
             problems = self.mover.ready(state)
+            try:
+                q_abb, abb_pose = verificacion.pose_controlador(self.mover)
+                abb = (q_abb, abb_pose, self.clock())
+            except Exception:  # sin robtarget: la verificación 3 queda sin dato y el envío bloqueado
+                abb = None
         except Exception as exc:  # red caída, 401, 503...: se muestra y se reintenta
             with self.mutex:
                 self.state, self.problems = None, [f'Sin lectura del robot: {exc}']
@@ -67,6 +80,8 @@ class Panel:
             self.mover.lock.release()
         with self.mutex:
             self.state, self.problems = state, problems
+            if abb is not None:
+                self.abb = abb
 
     # ---------- órdenes de la página ----------
     @staticmethod
@@ -75,13 +90,21 @@ class Panel:
             raise Refused(f'El paso debe estar entre 0 y {MAX_STEP_DEG:g}°.')
         return float(value)
 
-    def set_target(self, values):
+    def set_target(self, values, desired=None):
+        """desired: pose [mm, °] que se pidió por IK; None si el objetivo se dio en ángulos."""
         target = clean_target(values)
         with self.mutex:
             if self.busy:
                 raise Refused('Hay un envío en curso: el objetivo no se cambia hasta que termine.')
-            self.target = target
+            self.target, self.desired, self.reachable = target, desired, True
         return target
+
+    def verification(self):
+        with self.mutex:
+            target, measured, desired, tool = self.target, self.measured, self.desired, self.tool
+            abb, busy, reachable, start = self.abb, self.busy, self.reachable, self.start
+        return verificacion.evaluar(target, measured, desired, tool, abb, busy, self.simulated, self.clock(),
+                                    reachable, start)
 
     def sync(self):
         with self.mutex:
@@ -95,11 +118,19 @@ class Panel:
     def send(self, values):
         target = clean_target(values)
         with self.mutex:
+            same = self.target is not None and all(abs(a - b) < 1e-9 for a, b in zip(target, self.target))
+        if not same:
+            self.set_target(target)   # ángulos nuevos: se verifican como objetivo articular
+        check = self.verification()
+        if not check['envio_permitido']:
+            raise Refused('Envío bloqueado por la verificación: ' + check['motivo'])
+        with self.mutex:
             if self.busy:
                 raise Refused('Ya hay un envío en curso.')
             if self.problems:
                 raise Refused('El robot no está listo: ' + '; '.join(self.problems))
-            self.busy, self.target, self.progress = True, target, ''
+            self.busy, self.progress = True, ''
+            self.start = None if self.measured is None else list(self.measured)
             self.cancel.clear()
             step = self.step
         self.worker = threading.Thread(target=self._run, args=(target, step), daemon=True, name='panel-envio')
@@ -123,6 +154,7 @@ class Panel:
                     self._progress(f'Orden {index}/{len(legs)}')
                     result = self.mover.send(leg, step=step, timeout=self.timeout,
                                              echo=lambda line, i=index, n=len(legs): self._echo(i, n, line))
+                self._arrival_note = True
                 self.say(f"LLEGADA confirmada por el robot (orden {result['seq']}), "
                          f"error máximo {result['max_error_deg']:.3f}°.")
         except Exception as exc:
@@ -131,6 +163,19 @@ class Panel:
             with self.mutex:
                 self.busy, self.progress = False, ''
             self.poll()
+            if getattr(self, '_arrival_note', False):
+                self._arrival_note = False
+                check = self.verification()
+                if check and check['robot']:
+                    robot = check['robot']
+                    self.say(f"Verificación tras la llegada: pose real frente a la pedida {robot['pos_mm']:.3f} mm "
+                             f"(dx {robot['dx_mm']:+.3f}, dy {robot['dy_mm']:+.3f}, dz {robot['dz_mm']:+.3f} mm) / "
+                             f"{robot['rot_deg']:.3f}°, error articular máx. {robot['max_eje_deg']:.3f}° "
+                             f"({'dentro' if robot['ok'] else 'FUERA'} de tolerancia).")
+                    pct = ', '.join(f"J{row['eje']} {row['error_deg']:+.3f}°"
+                                    + ('' if row['error_pct'] is None else f" ({row['error_pct']:.2f} %)")
+                                    for row in check['ejes'] if row['error_deg'] is not None)
+                    self.say('Error por eje (respecto al recorrido de la orden): ' + pct)
 
     def _progress(self, text):
         with self.mutex:
@@ -177,7 +222,10 @@ class Panel:
         result = solve_pose(pose, reference, tool)
         chosen = next((row for row in result['ramas'] if row['rama'] == result['elegida']), None)
         if chosen is not None:
-            result['objetivo'] = self.set_target(chosen['q'])
+            result['objetivo'] = self.set_target(chosen['q'], desired=list(result['pose']))
+        else:
+            with self.mutex:
+                self.reachable = False   # se conserva el objetivo anterior, pero no se envía
         if quiet:
             pass
         elif chosen is not None:
@@ -203,6 +251,8 @@ class Panel:
     def set_tool(self, tool):
         tool = clean_tool(tool)
         with self.mutex:
+            if tool != self.tool and self.desired is not None and self.target is not None:
+                self.desired = pose_of(self.target, tool)   # la misma pose, vista desde el otro punto
             self.tool = tool
 
     def handle(self, action, body):
@@ -235,6 +285,15 @@ class Panel:
             return list(self.measured)
 
     def snapshot(self):
+        shot = self._snapshot()
+        try:
+            shot['verificacion'] = self.verification()
+        except Exception as exc:  # el panel sigue funcionando aunque falle el modelo
+            shot['verificacion'] = None
+            shot['faltas'] = shot['faltas'] + [f'Verificación no disponible: {exc}']
+        return shot
+
+    def _snapshot(self):
         with self.mutex:
             state = self.state or {}
             age = None if self.measured_at is None else self.clock() - self.measured_at

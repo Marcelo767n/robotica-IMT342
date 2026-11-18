@@ -19,6 +19,7 @@
 #include "widget_ejes.hpp"
 #include "widget_estado.hpp"
 #include "widget_pose.hpp"
+#include "widget_verificacion.hpp"
 
 namespace irb120_rviz_panel
 {
@@ -41,6 +42,7 @@ PanelIRB120::PanelIRB120(QWidget * padre)
   estado_ = new WidgetEstado;
   ejes_ = new WidgetEjes;
   pose_ = new WidgetPose;
+  verificacion_ = new WidgetVerificacion;
 
   contenido_ = new QWidget;
   auto * capa = new QVBoxLayout(contenido_);
@@ -48,6 +50,7 @@ PanelIRB120::PanelIRB120(QWidget * padre)
   capa->addWidget(grupo(QStringLiteral("Estado del robot"), estado_));
   capa->addWidget(grupo(QStringLiteral("Ángulos J1–J6 (grados)"), ejes_));
   capa->addWidget(grupo(QStringLiteral("Posición cartesiana → ángulos (cinemática inversa)"), pose_));
+  capa->addWidget(grupo(QStringLiteral("Verificación (en tiempo real)"), verificacion_));
   capa->addWidget(construirAcciones());
   auto * parar = new QLabel(QStringLiteral(
       "<b>Para detener el robot:</b> soltar el habilitador, Stop o paro de emergencia. "
@@ -161,6 +164,12 @@ void PanelIRB120::recibir(const QJsonObject & e)
   estado_->actualizar(e);
   ejes_->actualizar(e);
   pose_->actualizar(e);
+  verificacion_->actualizar(e);
+  const bool ocupado = e.value("ocupado").toBool();
+  if (estabaOcupado_ && !ocupado) {
+    verificacion_->resaltarLlegada();
+  }
+  estabaOcupado_ = ocupado;
   const int paso = static_cast<int>(std::lround(e.value("paso").toDouble(5)));
   const int indice = paso_->findData(paso);
   if (indice >= 0 && !paso_->view()->isVisible()) {
@@ -189,6 +198,7 @@ void PanelIRB120::vigilar()
   if (conectado_ && ultimoEstado_.isValid() && ultimoEstado_.elapsed() > 2000) {
     conectado_ = false;
     estado_->sinConexion();
+    verificacion_->sinConexion();
     progreso_->clear();
     habilitar();
   }
@@ -201,10 +211,12 @@ void PanelIRB120::habilitar()
   const bool hayCambio = !medido.isEmpty() && cambioMaximo(ejes_->objetivo(), medido) >= 0.01;
   ejes_->setBloqueado(!conectado_ || ocupado);
   pose_->setBloqueado(!conectado_ || ocupado);
-  enviar_->setEnabled(conectado_ && ultimo_.value("listo").toBool() && !ocupado && hayCambio);
+  const bool permitido = verificacion_->envioPermitido();
+  enviar_->setEnabled(conectado_ && ultimo_.value("listo").toBool() && !ocupado && hayCambio && permitido);
   enviar_->setToolTip(!conectado_ ? QStringLiteral("Sin conexión con irb120_panel_rws") :
     ocupado ? QStringLiteral("Hay un envío en curso") :
     !ultimo_.value("listo").toBool() ? QStringLiteral("El robot no está listo (ver FALTA)") :
+    !permitido ? QStringLiteral("Envío bloqueado: %1").arg(verificacion_->motivo()) :
     !hayCambio ? QStringLiteral("El objetivo coincide con la postura actual") : QString());
   sincronizar_->setEnabled(conectado_ && !ocupado && !medido.isEmpty());
   cancelar_->setEnabled(conectado_ && ocupado);
@@ -232,6 +244,7 @@ void PanelIRB120::confirmarEnvio()
   }
   tabla += QStringLiteral("</table><p>Cambio mayor: %1°. Se enviará en %2 orden(es) de como máximo %3° "
       "por eje. Valores en grados.</p>").arg(mayor, 0, 'f', 2).arg(ordenes).arg(paso);
+  tabla += verificacion_->resumenHtml();
   QMessageBox caja(QMessageBox::Question, QStringLiteral("¿Enviar este objetivo al robot?"), tabla,
     QMessageBox::Cancel, this);
   caja.setTextFormat(Qt::RichText);

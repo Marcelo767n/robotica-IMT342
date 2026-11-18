@@ -53,5 +53,11 @@ class SimulatedMover:
                 return {'seq': self.seq, 'code': 2, 'joints_deg': q, 'max_error_deg': error}
             self.sleep(.1)
 
+    def controller_pose(self):
+        """Como el robtarget del ABB, pero con la FK propia (el simulador no tiene otro modelo)."""
+        from irb120_control.panel.cinematica import pose_of
+        q = self.joints()[0]
+        return q, pose_of(q, 'brida')
+
     def finish(self):
         pass

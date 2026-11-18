@@ -14,7 +14,7 @@ import time
 import textwrap
 import unicodedata
 
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Point, Pose
 from interactive_markers.interactive_marker_server import InteractiveMarkerServer
 from interactive_markers.menu_handler import MenuHandler
 from visualization_msgs.msg import InteractiveMarker, InteractiveMarkerControl, InteractiveMarkerFeedback, Marker
@@ -179,24 +179,95 @@ class RvizControls:
 
     def publish_text(self, target):
         shot = self.panel.snapshot()
+        check = shot.get('verificacion') or {}
         if shot['ocupado']:
             head = 'MOVIENDO ' + (shot['progreso'] or '')
         elif shot['faltas']:
             head = 'NO LISTO: ' + shot['faltas'][0]
         else:
-            head = 'LISTO para enviar'
+            head = 'LISTO'
         orders = shot['ordenes']
         lines = [('SIMULADO | ' if shot['simulado'] else '') + head,
                  'Objetivo (deg): ' + ' '.join(f'{v:.1f}' for v in target),
                  'Ordenes: ' + ('-' if orders is None else str(orders)) + f" de max {shot['paso']:g} deg"
                  + f" | punto: {shot['herramienta']}"]
+        lines += verification_lines(check)
         if time.monotonic() - self.message_at < 20.:
             lines += textwrap.wrap(self.message, width=52)
+        stamp = self.node.get_clock().now().to_msg()
+        text = self.base_marker('estado', 0, Marker.TEXT_VIEW_FACING, stamp)
+        text.pose.position.x, text.pose.position.z = -.25, .95
+        text.scale.x, text.scale.z = .012, .028
+        text.color.r = text.color.g = text.color.b = 1.
+        text.text = ascii('\n'.join(textwrap.shorten(line, 70) if len(line) > 70 else line for line in lines))
+        self.text.publish(text)
+        self.publish_error_markers(check, shot, stamp)
+
+    def base_marker(self, ns, ident, kind, stamp):
         marker = Marker()
-        marker.header.frame_id, marker.header.stamp = 'base_link', self.node.get_clock().now().to_msg()
-        marker.ns, marker.id, marker.type, marker.action = 'estado', 0, Marker.TEXT_VIEW_FACING, Marker.ADD
-        marker.pose.orientation.w, marker.pose.position.x, marker.pose.position.z = 1., -.25, .95
-        marker.scale.x, marker.scale.z = .012, .028
-        marker.color.r, marker.color.g, marker.color.b, marker.color.a = 1., 1., 1., 1.
-        marker.text = ascii('\n'.join(textwrap.shorten(line, 70) if len(line) > 70 else line for line in lines))
-        self.text.publish(marker)
+        marker.header.frame_id, marker.header.stamp = 'base_link', stamp
+        marker.ns, marker.id, marker.type, marker.action = ns, ident, kind, Marker.ADD
+        marker.pose.orientation.w = 1.
+        marker.color.a = 1.
+        return marker
+
+    def publish_error_markers(self, check, shot, stamp):
+        """Esfera verde = pose pedida; esfera blanca = punto real (FK de lo medido); línea = error."""
+        wanted = check.get('pose_deseada')
+        measured = shot.get('pose_medida')
+        if wanted is None or measured is None:
+            return
+        ok = bool(check.get('robot') and check['robot']['ok'])
+        for ident, pose, (r, g, b) in ((1, wanted, (.1, .9, .2)), (2, measured, (.95, .95, .95))):
+            sphere = self.base_marker('error', ident, Marker.SPHERE, stamp)
+            sphere.pose.position.x, sphere.pose.position.y, sphere.pose.position.z = (v / 1000. for v in pose[:3])
+            sphere.scale.x = sphere.scale.y = sphere.scale.z = .018
+            sphere.color.r, sphere.color.g, sphere.color.b = r, g, b
+            self.text.publish(sphere)
+        line = self.base_marker('error', 3, Marker.LINE_LIST, stamp)
+        line.scale.x = .004
+        line.color.r, line.color.g, line.color.b = (.1, .9, .2) if ok else (1., .2, .1)
+        for pose in (wanted, measured):
+            point = Point()
+            point.x, point.y, point.z = (v / 1000. for v in pose[:3])
+            line.points.append(point)
+        self.text.publish(line)
+        label = self.base_marker('error', 4, Marker.TEXT_VIEW_FACING, stamp)
+        label.pose.position.x, label.pose.position.y, label.pose.position.z = (
+            (a + b) / 2000. for a, b in zip(wanted[:3], measured[:3]))
+        label.pose.position.z += .05
+        label.scale.x, label.scale.z = .010, .022   # scale.x = ancho del espacio en Jazzy
+        label.color.r, label.color.g, label.color.b = line.color.r, line.color.g, line.color.b
+        robot = check.get('robot') or {}
+        label.text = f"error {robot.get('pos_mm', 0.):.2f} mm / {robot.get('rot_deg', 0.):.2f} deg"
+        self.text.publish(label)
+
+
+def _estado(row, valid=True):
+    if row is None or not valid:
+        return 'sin dato'
+    return f"{row['pos_mm']:.3f} mm / {row['rot_deg']:.3f} deg {'OK' if row['ok'] else 'FUERA'}"
+
+
+def verification_lines(check):
+    """Las tres comprobaciones en texto 3D (ASCII)."""
+    if not check:
+        return []
+    controller = check.get('controlador')
+    lines = ['1 IK->FK:        ' + _estado(check.get('ik_fk')),
+             '2 Robot->pedida: ' + _estado(check.get('robot')),
+             '3 Modelo-ABB:    ' + _estado(controller, bool(controller and controller.get('valida')))]
+    robot = check.get('robot')
+    if robot:
+        pct = '' if robot.get('pos_pct') is None else f" ({robot['pos_pct']:.2f} % del recorrido)"
+        lines.append(f"  dx {robot['dx_mm']:+.2f} dy {robot['dy_mm']:+.2f} dz {robot['dz_mm']:+.2f} mm{pct}")
+    rows = [r for r in check.get('ejes') or [] if r.get('error_deg') is not None]
+    cells = [f"J{r['eje']} {r['error_deg']:+.2f}" + ('' if r['error_pct'] is None else f" ({r['error_pct']:.1f}%)")
+             for r in rows]
+    for first in range(0, len(cells), 3):
+        lines.append(('  Ejes (deg): ' if first == 0 else '              ') + '  '.join(cells[first:first + 3]))
+    if check.get('envio_permitido'):
+        lines.append('ENVIO PERMITIDO')
+    else:
+        lines += textwrap.wrap('ENVIO BLOQUEADO: ' + (check.get('motivo') or ''), width=60)
+    return lines

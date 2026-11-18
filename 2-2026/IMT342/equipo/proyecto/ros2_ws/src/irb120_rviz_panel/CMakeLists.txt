@@ -19,6 +19,7 @@ add_library(${PROJECT_NAME} SHARED
   src/widget_estado.hpp src/widget_estado.cpp
   src/widget_ejes.hpp src/widget_ejes.cpp
   src/widget_pose.hpp src/widget_pose.cpp
+  src/widget_verificacion.hpp src/widget_verificacion.cpp
   src/panel_irb120.hpp src/panel_irb120.cpp
 )
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)

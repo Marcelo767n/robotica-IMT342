@@ -1,5 +1,6 @@
 """Panel de ángulos: lógica y servidor local. Sin ROS, sin RViz y sin red externa."""
 import json
+import math
 import sys
 import time
 import unittest
@@ -16,6 +17,26 @@ from irb120_control.panel.simulado import SimulatedMover
 from irb120_control.panel.web import serve
 from irb120_control.rws_j6 import Refused
 from test_rws_mover import Abb, mover
+from irb120_control.panel import verificacion
+from irb120_control.panel.cinematica import kinematics
+
+
+class AbbConPose(Abb):
+    """El ABB simulado responde también robtarget (Base/tool0) con la FK de su postura."""
+
+    def __init__(self, *args, offset_mm=0., **kwargs):
+        super().__init__(*args, **kwargs)
+        self.offset_mm = offset_mm
+
+    def get(self, url, **kw):
+        if url.endswith('/rw/motionsystem/mechunits/ROB_1/robtarget'):
+            np, _, _, transforms = kinematics()
+            pose = pose_of(self.current, 'brida')
+            x, y, z, w = transforms.matrix_to_quaternion(transforms.rpy_to_matrix(*np.deg2rad(pose[3:])))
+            from test_rws_mover import Response
+            return Response([{'_type': 'ms-robtargets', 'x': pose[0] + self.offset_mm, 'y': pose[1], 'z': pose[2],
+                              'q1': w, 'q2': x, 'q3': y, 'q4': z}])
+        return super().get(url, **kw)
 
 
 def wait_idle(panel, seconds=5.):
@@ -103,7 +124,7 @@ class PanelLogic(unittest.TestCase):
             panel.handle('borrar', {})
 
     def test_real_mover_protocol_through_panel(self):
-        abb = Abb('AUTO'); abb.source = abb.source.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
+        abb = AbbConPose('AUTO'); abb.source = abb.source.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
         abb.require_rmmp = False
         client = mover(abb)
         panel = Panel(client)
@@ -175,6 +196,11 @@ class PanelKinematics(unittest.TestCase):
             panel.handle('herramienta', {'valor': 'otra'})
         unreachable = panel.handle('ik', {'pose': [1400., 100., 350., 0., 180., 0.]})
         self.assertNotIn('objetivo', unreachable)
+        with self.assertRaisesRegex(Refused, 'no es alcanzable'):   # el último pedido no era alcanzable
+            panel.send(result['objetivo'])
+        self.assertEqual(panel.mover.seq, 0)
+        panel.handle('herramienta', {'valor': 'tcp'})
+        panel.handle('ik', {'pose': pose_of(goal, 'tcp')})
         panel.send(result['objetivo'])
         wait_idle(panel)
         for got, expected in zip(panel.mover.q, goal):
@@ -229,6 +255,90 @@ class PanelOrders(unittest.TestCase):
         self.assertIsNone(state['ik']['elegida'])
         for key in ('modo', 'motores', 'medido', 'objetivo', 'limites', 'pose_medida', 'faltas', 'listo'):
             self.assertIn(key, state)
+
+
+class PanelVerification(unittest.TestCase):
+    """IK → FK, robot real frente a la pose pedida y modelo frente al controlador; bloqueo del envío."""
+    Q = [0.386, 4.139, -3.719, 2.666, 31.382, 3.565]
+
+    def test_exact_ik_and_controller_allow_sending(self):
+        goal = [10., -4., 8., 5., 35., -6.]
+        check = verificacion.evaluar(goal, self.Q, pose_of(goal, 'tcp'), 'tcp',
+                                     abb=(self.Q, pose_of(self.Q, 'brida'), 0.), now=1.)
+        self.assertTrue(check['envio_permitido'], check['motivo'])
+        self.assertLess(check['ik_fk']['pos_mm'], 1e-6)
+        self.assertLess(check['controlador']['pos_mm'], 1e-6)
+        self.assertFalse(check['robot']['ok'])          # todavía no ha llegado
+        self.assertAlmostEqual(check['robot']['max_eje_deg'], 11.719, places=3)
+        arrived = verificacion.evaluar(goal, goal, pose_of(goal, 'tcp'), 'tcp', abb=(goal, pose_of(goal, 'brida'), 0.), now=1.)
+        self.assertTrue(arrived['robot']['ok'])
+
+    def test_blocking_reasons(self):
+        good_abb = (self.Q, pose_of(self.Q, 'brida'), 0.)
+        far = pose_of(self.Q, 'brida'); far[0] += 2.
+        cases = [
+            (dict(abb=None), 'controlador'),
+            (dict(abb=(self.Q, far, 0.)), 'difieren'),
+            (dict(abb=good_abb, busy=True), 'orden en curso'),
+            (dict(abb=good_abb, now=60.), 'controlador'),                       # dato viejo
+            (dict(abb=good_abb, reachable=False), 'alcanzable'),
+        ]
+        for kwargs, reason in cases:
+            kwargs.setdefault('now', 1.)
+            check = verificacion.evaluar(self.Q, self.Q, None, 'tcp', **kwargs)
+            self.assertFalse(check['envio_permitido'], kwargs)
+            self.assertIn(reason, check['motivo'])
+        wrong = pose_of(self.Q, 'tcp'); wrong[2] += 1.
+        check = verificacion.evaluar(self.Q, self.Q, wrong, 'tcp', abb=good_abb, now=1.)
+        self.assertIn('IK→FK', check['motivo'])
+        check = verificacion.evaluar([0., 0., 69.5, 0., 0., 0.], self.Q, None, 'tcp', abb=good_abb, now=1.)
+        self.assertFalse(check['limites_ok'])
+        json.dumps(check, allow_nan=False)
+
+    def test_model_controller_mismatch_blocks_real_send(self):
+        abb = AbbConPose('AUTO', offset_mm=3.); abb.source = abb.source.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
+        abb.require_rmmp = False
+        panel = Panel(mover(abb)); panel.poll()
+        goal = list(abb.current); goal[5] += 5.
+        with self.assertRaisesRegex(Refused, 'difieren'):
+            panel.send(goal)
+        self.assertFalse(any(c[0] == 'POST' and 'pcSeq' in c[1] for c in abb.calls))
+
+    def test_arrival_is_verified_in_the_log(self):
+        panel = Panel(SimulatedMover(speed=5000., sleep=lambda _: None), simulated=True); panel.poll()
+        goal = [8., -3., 6., 0., 40., 5.]
+        panel.handle('ik', {'pose': pose_of(goal, 'tcp')})
+        panel.send(panel.target_copy())
+        wait_idle(panel)
+        line = next(l for l in panel.log if 'Verificación tras la llegada' in l)
+        self.assertIn('dentro de tolerancia', line)
+        self.assertTrue(any('Error por eje' in l for l in panel.log))
+        check = panel.snapshot()['verificacion']
+        self.assertTrue(check['robot']['ok'])
+        self.assertEqual(check['inicio'], [0., 0., 0., 0., 30., 0.])
+        self.assertLess(abs(check['robot']['dx_mm']), 1e-6)
+        self.assertIsNone(check['ejes'][3]['error_pct'])          # J4 no se movió: sin %
+        self.assertLess(check['ejes'][0]['error_pct'], 1e-6)       # J1 recorrió 8°
+
+    def test_percent_error_per_joint_and_mm(self):
+        rows = verificacion.ejes([10., 0., 5., 0., 30., 0.], [9.9, 0., 5.2, 0., 30., 0.], [0., 0., 0., 0., 30., 0.])
+        self.assertAlmostEqual(rows[0]['error_pct'], 1.0)          # 0,1° de 10°
+        self.assertAlmostEqual(rows[2]['error_pct'], 4.0)          # 0,2° de 5°
+        self.assertIsNone(rows[1]['error_pct'])
+        q = [10., 0., 5., 0., 30., 0.]
+        check = verificacion.evaluar(q, [9.9, 0., 5.2, 0., 30., 0.], None, 'tcp',
+                                     abb=(q, pose_of(q, 'brida'), 0.), now=1., start=[0., 0., 0., 0., 30., 0.])
+        robot = check['robot']
+        self.assertAlmostEqual(robot['pos_mm'], math.dist((0, 0, 0), (robot['dx_mm'], robot['dy_mm'], robot['dz_mm'])))
+        self.assertGreater(robot['pos_pct'], 0.)
+
+    def test_quick_reads_do_not_freeze_the_panel(self):
+        panel = Panel(SimulatedMover(), simulated=True)
+        for full in (False, True, False, True):
+            panel.poll(full=full)
+        self.assertTrue(panel.mover.lock.acquire(timeout=.1))     # nadie se quedó con el candado
+        panel.mover.lock.release()
+        self.assertIsNotNone(panel.abb)
 
 
 class PanelHttp(unittest.TestCase):
