@@ -26,6 +26,7 @@ import time
 from irb120_conexion.rutas import PROJECT
 from irb120_conexion.comunicacion.lectura_rws import error_details, state_records
 from irb120_conexion.nodos.lectura_articular.puente_rws import build_base_url
+from irb120_control.rws_j6 import MASTERSHIP
 from irb120_control.rws_j6 import (Client, Refused, EMPTY, LIMITS, SYMBOL, SERVER_CANDIDATE,
     SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
     SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256, SERVER_LABELS,
@@ -50,6 +51,10 @@ CODES = {0: 'listo', 1: 'moviendo', 2: 'llegada', -1: 'objetivo vacío o no vál
          -2: 'fuera de límites con margen de 2°', -3: 'algún eje cambia más de 10° en una orden',
          -4: 'modo no permitido por el módulo (¿AUTO sin permitirAuto?)'}
 FORM = {'Content-Type': 'application/x-www-form-urlencoded'}
+PCP = '/rw/rapid/tasks/T_ROB1/pcp'
+SERVER_MODULE, SERVER_ROUTINE = 'LabJointRws', 'ServidorPC'
+START_FORM = {'regain': 'continue', 'execmode': 'continue', 'cycle': 'once', 'condition': 'none',
+              'stopatbp': 'disabled', 'alltaskbytsp': 'false'}
 
 
 def check_target(target, current, step):
@@ -161,7 +166,7 @@ class Rmmp:
 class Mover(Client):
     def __init__(self, session, base, session_factory=None, timeout=3., log=None, sleep=time.sleep):
         super().__init__(session, base, timeout)
-        self.extra_reads = {BASE_SYMBOL + name for name in NUM_SYMBOLS} | {RMMP_POLL}
+        self.extra_reads = {BASE_SYMBOL + name for name in NUM_SYMBOLS} | {RMMP_POLL, PCP}
         self.rmmp = Rmmp(self, session_factory or (lambda: type(session)()))
         self.log, self.sleep = log, sleep
         self.module_version = 'no_leido'
@@ -307,6 +312,56 @@ class Mover(Client):
 
     def move_to(self, goal, step, timeout=120., echo=print, cancel=None):
         return move_to(self, goal, step, timeout, echo, cancel)
+
+    def pointer(self):
+        """Módulo y rutina donde está el puntero de programa (PP) de T_ROB1."""
+        rows = self.read(PCP)
+        for row in rows:
+            values = ' '.join(str(v) for v in row.values())
+            if 'pcp' in str(row.get('_type', '')).lower() or 'progpointer' in str(row.get('_title', '')).lower():
+                return row, values
+        return (rows[0] if rows else {}), ' '.join(str(v) for row in rows for v in row.values())
+
+    def start_server(self, echo=print):
+        """Solo en AUTO: PP a LabJointRws/ServidorPC, comprobar el PP y arrancar RAPID (ciclo único).
+
+        En AUTO el FlexPendant no permite «PP a rutina» y el controlador lleva el PP a main (que es
+        de otro programa). El operador sigue confirmando con «Iniciar» en el FlexPendant."""
+        state = self.status()
+        if state['opmode'] != 'AUTO':
+            raise Refused(f"Solo en AUTO (ahora {state['opmode']}). En manual: PP a rutina en el FlexPendant.")
+        if state['module'] != 'servidor_v3_auto':
+            raise Refused(f"El módulo es {state['module']}: instalar con ./brazo.sh instalar-auto.")
+        if state['execution'] != 'stopped':
+            raise Refused('RAPID ya está en ejecución: pulsar Stop en el FlexPendant antes de arrancar.')
+        if state['ctrlstate'] != 'motoron':
+            raise Refused(f"Motores {state['ctrlstate']}: pulsar el botón Motors On del controlador.")
+
+        def post(path, params, data, expected):
+            response = self.session.post(self.base + path, params=params, data=data, headers=FORM,
+                                         timeout=self.timeout, allow_redirects=False)
+            self.record(event='start_server', path=path, action=params.get('action'),
+                        http_status=response.status_code)
+            if response.status_code not in expected:
+                raise Refused(f"{params.get('action')}: HTTP {response.status_code}; {error_details(response.text)}")
+
+        held = False
+        try:
+            post(MASTERSHIP, {'action': 'request'}, {}, (200, 204)); held = True
+            post(PCP, {'action': 'set-pp-routine'},
+                 {'module': SERVER_MODULE, 'routine': SERVER_ROUTINE, 'userlevel': 'false'}, (200, 204))
+            row, values = self.pointer()
+            if SERVER_MODULE not in values or SERVER_ROUTINE not in values:
+                raise Refused(f'El PP no quedó en {SERVER_MODULE}/{SERVER_ROUTINE} ({row}); NO se arranca.')
+            echo(f'PP confirmado en {SERVER_MODULE}/{SERVER_ROUTINE}.')
+            post('/rw/rapid/execution', {'action': 'start'}, START_FORM, (200, 204))
+        finally:
+            if held:
+                try:
+                    post(MASTERSHIP, {'action': 'release'}, {}, (200, 204, 403))
+                except Exception:
+                    pass
+        echo('RAPID arrancado en ServidorPC. En el FlexPendant pulsar «Iniciar» antes de 30 s.')
 
     def finish(self):
         state = self.status()
@@ -479,7 +534,7 @@ def _interactive(mover, step, timeout):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('action', choices=('estado', 'instalar', 'mover', 'interactivo', 'terminar'))
+    parser.add_argument('action', choices=('estado', 'instalar', 'arrancar', 'mover', 'interactivo', 'terminar'))
     parser.add_argument('valores', nargs='*', help='mover: "abs J1..J6", "j2 +5" o "j3= 20"')
     parser.add_argument('--host', default='192.168.125.1')
     parser.add_argument('--user', default='Default User')
@@ -531,10 +586,13 @@ def main(argv=None):
                                  ensure_ascii=False, indent=2))
                 print('Informe:', path)
                 if report['passed']:
-                    print(('Módulo v2 (variante AUTO) instalado. ' if args.auto else 'Módulo v2 instalado. ') +
+                    print(('Módulo v3 (variante AUTO) instalado. ' if args.auto else 'Módulo v3 instalado. ') +
                           'En el FlexPendant: Editor de programas → Verificar programa. '
                           'El puntero pudo restablecerse: NO pulsar Start sobre main.')
                 return 0 if report['passed'] else 2
+            if args.action == 'arrancar':
+                mover.start_server()
+                return 0
             if args.action == 'terminar':
                 mover.finish(); print('pcFin=1 enviado.')
                 return 0

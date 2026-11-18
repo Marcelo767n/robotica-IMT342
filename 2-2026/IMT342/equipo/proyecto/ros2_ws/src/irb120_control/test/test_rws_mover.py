@@ -224,6 +224,41 @@ class Protocol(unittest.TestCase):
         with self.assertRaisesRegex(Refused, 'instalar'):
             client.send([[*abb.current[:5], abb.current[5] + 1], [9e9] * 6], echo=quiet)
 
+    def test_start_server_in_auto_sets_and_checks_pointer(self):
+        class AbbPP(Abb):
+            def __init__(self, mode, land='LabJointRws'):
+                super().__init__(mode); self.pp = ('MainModule', 'main'); self.land = land
+                self.source = V2.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
+                self.execution = 'stopped'; self.require_rmmp = False
+
+            def get(self, url, **kw):
+                if url.endswith('/rw/rapid/tasks/T_ROB1/pcp'):
+                    return Response([{'_type': 'pcp-info', '_title': 'progpointer',
+                                      'modulemame': self.pp[0], 'routinename': self.pp[1]}])
+                return super().get(url, **kw)
+
+            def post(self, url, params=None, data=None, headers=None, **kw):
+                path = url.replace('http://127.0.0.1', '')
+                if path == '/rw/rapid/tasks/T_ROB1/pcp':
+                    self.calls.append(('POST', path, dict(params), dict(data)))
+                    self.pp = (self.land, data['routine']); return Response(status=200)
+                if path == '/rw/rapid/execution':
+                    self.calls.append(('POST', path, dict(params), dict(data)))
+                    self.execution = 'running'; return Response(status=204)
+                return super().post(url, params=params, data=data, headers=headers, **kw)
+        abb = AbbPP('AUTO'); client = mover(abb)
+        client.start_server(echo=quiet)
+        posts = [c[1] for c in abb.calls if c[0] == 'POST']
+        self.assertEqual(posts, [MASTERSHIP, '/rw/rapid/tasks/T_ROB1/pcp', '/rw/rapid/execution', MASTERSHIP])
+        self.assertEqual(abb.execution, 'running')
+        bad = AbbPP('AUTO', land='MainModule'); client = mover(bad)   # el PP no quedó donde debía
+        with self.assertRaisesRegex(Refused, 'NO se arranca'):
+            client.start_server(echo=quiet)
+        self.assertNotIn('/rw/rapid/execution', [c[1] for c in bad.calls if c[0] == 'POST'])
+        manual = AbbPP('MANR'); client = mover(manual)
+        with self.assertRaisesRegex(Refused, 'Solo en AUTO'):
+            client.start_server(echo=quiet)
+
     def test_readback_of_angles_over_100_deg_with_6_digits(self):
         # 16/11-17/11: el ABB devuelve 6 cifras (101.664) y la PC había escrito 101.664181… → «no coincide».
         abb = Abb('MANR'); abb.current = [5., 10., -30., 101.6641, -20., 112.33]

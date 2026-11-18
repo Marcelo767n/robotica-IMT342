@@ -23,6 +23,7 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
 
   MOVER (todo en RViz: panel «IRB 120» + control 3D de la pose)
     ./brazo.sh panel           robot real: ángulos, pose con cinemática inversa, Enviar al robot
+    ./brazo.sh arrancar        solo AUTO: pone el puntero en ServidorPC y arranca RAPID (luego «Iniciar» en el FlexPendant)
     ./brazo.sh simulado        lo mismo sin robot, para practicar     (añadir --web para la página local)
     ./brazo.sh terminal        prompt de órdenes: j6 +5 · j3= 20 · abs 0 0 0 0 30 0 · estado · fin
     ./brazo.sh mover j6 +5     una sola orden y sale
@@ -45,7 +46,9 @@ FLEXPENDANT · MANUAL (motores ON mientras se sostiene el habilitador)
 FLEXPENDANT · AUTO (motores ON fijos; solo con autorización y nadie al alcance del brazo)
   1. Llave AUTO, motores OFF: ./brazo.sh instalar-auto
   2. Llave Manual: Comprobar programa y PP a rutina → ServidorPC.
-  3. Llave AUTO, confirmar el diálogo, botón Motors On del controlador, Start, «Iniciar».
+  3. Llave AUTO, confirmar el diálogo y botón Motors On del controlador.
+     En AUTO el controlador lleva el puntero a main: en la PC ./brazo.sh arrancar (pone el puntero en
+     ServidorPC, lo comprueba y arranca) y en el FlexPendant pulsar «Iniciar».
   4. En la PC: ./brazo.sh panel. Al terminar: llave AUTO, motores OFF, ./brazo.sh instalar.
 
 PARAR EL ROBOT: soltar el habilitador, Stop, Motors Off o paro de emergencia.
@@ -76,6 +79,7 @@ case "$cmd" in
   panel)    run panel --host "$host" "$@" ;;
   simulado) run panel --simulado "$@" ;;
   terminal) run rws_mover interactivo --host "$host" "$@" ;;
+  arrancar) run rws_mover arrancar --host "$host" "$@" ;;
   mover)
     [[ $# -gt 0 ]] || { echo 'Uso: ./brazo.sh mover j6 +5   |   mover j3= 20   |   mover abs J1 J2 J3 J4 J5 J6'; exit 2; }
     run rws_mover mover "$@" --host "$host" ;;
