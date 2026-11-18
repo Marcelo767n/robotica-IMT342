@@ -43,3 +43,22 @@ Ejemplo (orden 1): J6 de 3,565° a 8,565°, llegada confirmada con error de 0,00
 | Comandos unificados | [`ros2_ws/brazo.sh`](../../ros2_ws/brazo.sh): `estado`, `instalar`, `panel`, `simulado`, `terminal`, `mover`, `terminar`, `compilar`, `pruebas` |
 
 Seguridad: soltar el habilitador, Stop o el paro de emergencia detienen el robot. Ctrl+C en la PC no lo detiene.
+
+## Sesión del 17/11/2026 (tarde): verificación, modo AUTO y v3
+
+Se probó el control desde RViz con el robot real. La verificación pedida por el ingeniero (modelo propio frente al controlador ABB, `robtarget` en `tool0`) dio **0,00007 mm** y **0,000007°** de diferencia.
+
+### Problemas y correcciones
+
+1. **El robot se quedaba antes del objetivo.** Causa: con ejes de más de 100° el ABB devuelve el objetivo con 6 cifras (p. ej. 101.664) y la PC lo comparaba con más decimales. La lectura de vuelta no coincidía y la orden no se enviaba (4 veces en el registro). Corrección: objetivos con 3 decimales, lectura de vuelta con 0,002° de tolerancia, cada tramo replanificado desde la postura real y orden de corrección final si faltan más de 0,02°.
+2. **Pausas cada 5-10°.** Corrección: módulo `LabJointRws` v3 (hasta 45° por orden; la PC usa 40°; AccSet 50, 50).
+3. **Al pasar la llave a AUTO, el puntero iba a `main`.** El controlador lleva el puntero a `main` (de `MainModule`, de otro grupo) y el FlexPendant no permite «PP a rutina». Corrección: `./brazo.sh arrancar` pone el PP en LabJointRws/ServidorPC por RWS (set-pp-routine), lo lee de vuelta y solo entonces arranca RAPID; el operador confirma con «Iniciar».
+4. **El adaptador USB-Ethernet se desconectó con el hub USB.** Se resolvió conectándolo directo a la laptop.
+
+### Resultado en AUTO (sin habilitador)
+
+De [7,02; 10,22; −33,33; 48,94; −1,48; 103,57]° a la posición 0 en 3 órdenes (J6 recorría 103,6°), ~10,5 s cada una, código 2 (llegada) y error final 0,0046°. El usuario lo describió como fluido.
+
+### Copia del programa del robot (`./brazo.sh respaldar`)
+
+`Module1` está vacío y aparecieron `MainModule`, `IMT342_DestinoDirecto` e `IMT342_EgmEnlace` (de otro grupo). La versión anterior de Module1 está en `ros2_ws/src/irb120_control/rapid/respaldo_controlador/2026-11-16/`.

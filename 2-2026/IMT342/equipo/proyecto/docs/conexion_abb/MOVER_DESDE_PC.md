@@ -214,15 +214,17 @@ La única manera de tener los motores en ON fijos es el **modo automático** con
 
 **FlexPendant y PC, en este orden:**
 
-1. Llave en **AUTO**, motores OFF (cabecera `Motors Off`), RAPID detenido. En la PC:
+1. Llave en **AUTO**, motores OFF, RAPID detenido. En la PC, `./brazo.sh limpiar` si hay un objetivo pendiente y luego:
    ```bash
    ./brazo.sh instalar-auto
    ```
-   Pide escribir `AUTO` para continuar. Instala la misma v2 con `permitirAuto := TRUE` (se reconoce como `servidor_v2_auto`). Se hace por RWS y no editando la línea en el FlexPendant, que puede reformatearla y romper la huella.
-2. Llave en **Manual**: **Editor de programas → Depurar → Comprobar programa**, y luego **Depurar → PP a rutina → LabJointRws / ServidorPC**.
-3. Llave en **AUTO** y aceptar el diálogo. Comprobar que el puntero sigue en `ServidorPC`.
-4. Pulsar el botón **Motors On** del controlador (queda encendido fijo), luego **Start** en el FlexPendant y **Iniciar**.
-5. En la PC: `./brazo.sh panel` (o `./brazo.sh terminal`).
+   Pide escribir `AUTO` para continuar. Instala la v3 con `permitirAuto := TRUE` (se reconoce como `servidor_v3_auto`). Se hace por RWS y no editando la línea en el FlexPendant, que puede reformatearla y romper la huella.
+2. Llave en **Manual**: **Editor de programas → Depurar → Comprobar programa**.
+3. Llave en **AUTO**, confirmar el diálogo y pulsar el botón **Motors On**.
+4. En la PC, `./brazo.sh arrancar`: pone el puntero en `ServidorPC`, lo verifica y arranca RAPID. En el FlexPendant, pulsar **Iniciar**.
+5. En la PC: `./brazo.sh panel`.
+
+> **Nota:** en AUTO el controlador lleva el puntero a `main`. **Nunca pulsar Start en el FlexPendant con el puntero en `main`**: es el programa de otro grupo.
 
 La velocidad sigue limitada por `vPc` en el RAPID (20 mm/s, 5°/s) aunque el FlexPendant marque 100 %. Para parar: **Stop**, botón de **Motors Off** o paro de emergencia. Al terminar: llave en AUTO, motores OFF y `./brazo.sh instalar` para devolver el módulo a solo manual.
 
@@ -247,7 +249,8 @@ Abre RViz con dos modelos (**blanco sólido = gemelo digital con la postura medi
 - **Estado:** modo, motores, RAPID, ServidorPC, módulo, último resultado y la lista **FALTA**. Una nota recuerda que en manual los motores solo quedan en ON con el habilitador.
 - **Ángulos J1–J6:** casilla y deslizador por eje (grados, con los mismos límites y 2° de margen), con la medida y el cambio. El modelo naranja sigue al objetivo en vivo; nada se mueve hasta pulsar **Enviar al robot** y confirmar el resumen.
 - **Pose cartesiana:** punto de referencia (TCP de 150 mm o brida `tool0`, que es lo que muestra el FlexPendant), X, Y, Z en mm y roll, pitch, yaw en grados (R = Rz·Ry·Rx, respecto a la base). **Calcular ángulos (IK)** usa la cinemática inversa de Pieper del Hito 2 (`hito2/irb120/pieper.py`): muestra las 8 ramas, propone la más cercana a la postura medida con el criterio del proyecto y permite usar otra (doble clic en la fila).
-- **Acciones:** paso por orden (≤ 10°), **Enviar al robot** (con confirmación), **Copiar postura actual**, **Cancelar tras la orden en curso** y **Terminar ServidorPC en el robot**. Más abajo, progreso, errores y registro.
+- **Acciones:** paso máximo por orden (5, 10, 20 o 40°; 40 por defecto), **Enviar al robot** (con confirmación), **Copiar postura actual**, **Cancelar tras la orden en curso** y **Terminar ServidorPC en el robot**. Más abajo, progreso, errores y registro.
+- **Botones de posición:** «Posición 0 (calibración)» y «Reposo (J5 30°)». Con la v3 un movimiento normal es una sola orden de hasta 40°.
 - **Control 3D:** herramienta **Interact**; arrastrar el marcador recalcula la IK y mueve el modelo naranja. Clic derecho: ajustar un eje (±1°, ±5°), copiar la postura actual, cambiar el punto de referencia, enviar (dos niveles) o cancelar.
 - **Si el panel no está compilado**, el arranque lo avisa y quedan el control 3D y `--web`.
 
