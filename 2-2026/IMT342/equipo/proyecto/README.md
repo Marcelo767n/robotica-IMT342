@@ -25,6 +25,7 @@ Requisitos: Ubuntu con ROS 2 Jazzy, Python 3 con `requests` y `numpy`. Todo se l
 ```bash
 cd ros2_ws
 ./brazo.sh compilar      # una vez: compila el panel de RViz
+./brazo.sh sesion        # con el robot: TODO en un comando (AUTO guiado, RViz, panel y análisis)
 ./brazo.sh simulado      # sin robot: RViz + panel con un robot ficticio
 ./brazo.sh enlace        # con el robot: cable, IP, ping y puerto RWS
 ./brazo.sh respaldar     # con el robot: copia los programas RAPID a git (solo lectura)

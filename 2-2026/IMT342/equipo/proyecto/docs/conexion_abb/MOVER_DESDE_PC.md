@@ -12,6 +12,14 @@ Preparado el **11/11/2026**. Sustituye la prueba puntual J6 de ±0,1° ([cierre 
 >
 > Todos los comandos están en `ros2_ws/brazo.sh` (`./brazo.sh ayuda`). Los `./iniciar.sh …` de esta guía equivalen a `./brazo.sh …`.
 
+## 0. Inicio rápido: un solo comando
+
+```bash
+cd ros2_ws && ./brazo.sh sesion
+```
+
+Pide la contraseña **una vez**, comprueba el enlace y guía en la terminal hasta dejar el robot aceptando órdenes en **AUTO** (sin sostener el habilitador): llave en AUTO → si el módulo no es la v4, pide Stop y Motors Off e instala `LabJointRws` v4 → pide **Motors On** → pone el puntero en `ServidorPC` por RWS, lo comprueba y arranca → pide **«Iniciar»** en el FlexPendant. Después abre RViz con el panel «IRB 120» y la **ventana de análisis del Hito 2** (cinemática con matrices T e ida y vuelta, 8 ramas de Pieper, LSPB, Jacobiano, dinámica). La velocidad se elige en el panel en % (100 % = 250 mm/s y 60°/s; empieza en 20 %). Sin robot: `./brazo.sh simulado --analisis`.
+
 ## 1. Por qué no se movió el 10/11
 
 | Causa | Evidencia | Qué cambia ahora |
