@@ -31,7 +31,7 @@ def argumentos(argv):
     parser.add_argument('--host', default='192.168.125.1')
     parser.add_argument('--user', default='Default User')
     parser.add_argument('--http-port', type=int, default=80, help='Puerto RWS; distinto de 80 solo en 127.0.0.1')
-    parser.add_argument('--paso', type=float, default=5., help='Máximo cambio por eje en cada orden (≤10°)')
+    parser.add_argument('--paso', type=float, default=40., help='Máximo cambio por eje en cada orden (≤40°)')
     parser.add_argument('--timeout', type=float, default=120., help='Segundos de espera por orden')
     parser.add_argument('--simulado', action='store_true', help='Sin robot: practicar con un robot ficticio')
     parser.add_argument('--web', action='store_true', help='Abrir también la página local')
@@ -42,7 +42,7 @@ def argumentos(argv):
     parser.add_argument('--log-dir', type=Path, default=PROJECT / 'salidas/control_articular/rws_mover')
     args = parser.parse_args(argv)
     if not 0 < args.paso <= MAX_STEP_DEG:
-        parser.error('--paso debe estar entre 0 y 10')
+        parser.error(f'--paso debe estar entre 0 y {MAX_STEP_DEG:g}')
     if not 1024 <= args.panel_port <= 65535:
         parser.error('--panel-port debe estar entre 1024 y 65535')
     try:

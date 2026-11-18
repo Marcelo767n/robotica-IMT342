@@ -27,6 +27,15 @@ TEMP = re.compile(r'/hd0a/TEMP[A-Za-z0-9_.-]+')
 MAX_BYTES = 2_000_000
 
 
+def decode(text):
+    """RW6 devuelve a veces el texto del módulo codificado como URL (%0a, %20…), sin saltos de línea."""
+    if '\n' not in text and '%' in text:
+        decoded = unquote(text)
+        if 'MODULE' in decoded.upper():
+            return decoded
+    return text
+
+
 class Fallo(Exception):
     pass
 
@@ -62,7 +71,7 @@ class Respaldo:
             raise Fallo(f'Nombre de módulo inesperado: {name!r}')
         for row in self.get(f'/rw/rapid/modules/{name}', resource='module-text', task=TASK):
             if 'module-text' in row:
-                return row['module-text']
+                return decode(row['module-text'])
             if 'file-path' not in row:
                 continue
             path = unquote(row['file-path']).strip('"')

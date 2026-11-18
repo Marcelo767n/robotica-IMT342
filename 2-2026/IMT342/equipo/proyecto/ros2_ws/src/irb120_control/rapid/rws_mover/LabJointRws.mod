@@ -1,5 +1,5 @@
 MODULE LabJointRws
-    ! V2 SERVIDOR PC. Recibe objetivos articulares absolutos (grados, J1..J6)
+    ! V3 SERVIDOR PC. Recibe objetivos articulares absolutos (grados, J1..J6)
     ! escritos por RWS desde Linux (rws_mover.py) y los ejecuta con MoveAbsJ.
     ! No tiene main ni arranque automatico: el operador selecciona ServidorPC con
     ! PP to Routine, en manual reducido, y lo arranca con habilitador + Start.
@@ -9,7 +9,9 @@ MODULE LabJointRws
     ! rbCodigo: 0 listo, 1 moviendo, 2 llegada,
     !          -1 objetivo vacio o no valido, -2 fuera de limites con margen,
     !          -3 algun eje cambia mas de maxPasoDeg, -4 modo no permitido.
-    CONST num maxPasoDeg := 10;
+    ! V3 (17/11/2026): hasta 45 grados por orden para movimientos sin paradas
+    ! intermedias, con aceleracion suavizada (AccSet 50, 50). Velocidad sin cambios.
+    CONST num maxPasoDeg := 45;
     CONST num margenDeg := 2;
     ! Plan B en AUTO: solo con autorizacion del responsable cambiar a TRUE.
     CONST bool permitirAuto := FALSE;
@@ -48,6 +50,7 @@ MODULE LabJointRws
         rbCodigo := 0;
         rbSeq := pcSeq;
         rbActivo := 1;
+        AccSet 50, 50;
         TPWrite "Servidor PC activo. Esperando objetivos.";
         WHILE pcFin = 0 DO
             IF pcSeq <> rbSeq THEN
@@ -69,6 +72,7 @@ MODULE LabJointRws
             WaitTime 0.1;
         ENDWHILE
         rbActivo := 0;
+        AccSet 100, 100;
         TPWrite "Servidor PC terminado.";
     ENDPROC
 

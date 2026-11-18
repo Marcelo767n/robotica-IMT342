@@ -38,6 +38,8 @@ if [[ "$mode" == panel ]]; then
   # nadie en la red Wi-Fi puede publicar en /irb120/panel/orden.
   [[ -f "$here/install/setup.bash" ]] && source "$here/install/setup.bash"
   export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+  # Dominios ROS separados: un panel simulado nunca comparte tópicos con el del robot real.
+  if [[ " $* " == *" --simulado "* ]]; then export ROS_DOMAIN_ID=121; else export ROS_DOMAIN_ID=120; fi
 fi
 set -u
 export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"

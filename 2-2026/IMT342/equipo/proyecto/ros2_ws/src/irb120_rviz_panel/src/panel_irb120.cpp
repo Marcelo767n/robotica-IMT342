@@ -102,14 +102,21 @@ QWidget * PanelIRB120::construirAcciones()
   auto * caja = new QWidget;
   auto * capa = new QVBoxLayout(caja);
   capa->setContentsMargins(0, 0, 0, 0);
+  auto * filaPos = new QHBoxLayout();
+  posCero_ = new QPushButton(QStringLiteral("Posición 0 (calibración)"));
+  posReposo_ = new QPushButton(QStringLiteral("Reposo (J5 30°)"));
+  filaPos->addWidget(posCero_);
+  filaPos->addWidget(posReposo_);
+  capa->addLayout(filaPos);
   auto * fila1 = new QHBoxLayout();
   enviar_ = new QPushButton(QStringLiteral("Enviar al robot"));
   enviar_->setStyleSheet(QStringLiteral(
       "QPushButton{background:#c2410c; color:white; font-weight:bold; padding:6px 12px;}"
       "QPushButton:disabled{background:#9ca3af; color:#eee;}"));
   paso_ = new QComboBox;
-  for (int paso : {1, 2, 5, 10}) {
-    paso_->addItem(QStringLiteral("%1° por orden").arg(paso), paso);
+  paso_->setToolTip(QStringLiteral("Paso máx. por orden"));
+  for (int paso : {5, 10, 20, 40}) {
+    paso_->addItem(QStringLiteral("Paso máx. por orden: %1°").arg(paso), paso);
   }
   fila1->addWidget(enviar_, 1);
   fila1->addWidget(paso_);
@@ -132,6 +139,12 @@ QWidget * PanelIRB120::construirAcciones()
   capa->addWidget(error_);
 
   connect(enviar_, &QPushButton::clicked, this, &PanelIRB120::confirmarEnvio);
+  connect(posCero_, &QPushButton::clicked, this, [this]() {
+      orden(QStringLiteral("posicion"), {{QStringLiteral("valor"), QStringLiteral("cero")}});
+    });
+  connect(posReposo_, &QPushButton::clicked, this, [this]() {
+      orden(QStringLiteral("posicion"), {{QStringLiteral("valor"), QStringLiteral("reposo")}});
+    });
   connect(sincronizar_, &QPushButton::clicked, this, [this]() {orden(QStringLiteral("sincronizar"));});
   connect(cancelar_, &QPushButton::clicked, this, [this]() {orden(QStringLiteral("cancelar"));});
   connect(terminar_, &QPushButton::clicked, this, &PanelIRB120::confirmarTerminar);
@@ -170,6 +183,12 @@ void PanelIRB120::recibir(const QJsonObject & e)
     verificacion_->resaltarLlegada();
   }
   estabaOcupado_ = ocupado;
+  const int pasoMax = static_cast<int>(std::lround(e.value("paso_max").toDouble(40)));
+  for (int i = paso_->count() - 1; i >= 0; --i) {
+    if (paso_->itemData(i).toInt() > pasoMax && paso_->count() > 1) {
+      paso_->removeItem(i);
+    }
+  }
   const int paso = static_cast<int>(std::lround(e.value("paso").toDouble(5)));
   const int indice = paso_->findData(paso);
   if (indice >= 0 && !paso_->view()->isVisible()) {
@@ -222,6 +241,24 @@ void PanelIRB120::habilitar()
   cancelar_->setEnabled(conectado_ && ocupado);
   terminar_->setEnabled(conectado_ && !ocupado);
   paso_->setEnabled(conectado_ && !ocupado);
+  posCero_->setEnabled(conectado_ && !ocupado);
+  posReposo_->setEnabled(conectado_ && !ocupado);
+  const QJsonObject posiciones = ultimo_.value("posiciones").toObject();
+  const auto angulos = [&posiciones](const QString & clave, const QString & defecto) {
+      const QJsonArray a = posiciones.value(clave).toArray();
+      if (a.size() != 6) {
+        return defecto;
+      }
+      QStringList v;
+      for (const auto & x : a) {
+        v << QString::number(x.toDouble(), 'f', 1);
+      }
+      return QStringLiteral("J1..J6 = ") + v.join(QStringLiteral(", ")) + QStringLiteral("°");
+    };
+  posCero_->setToolTip(QStringLiteral("Objetivo en vista previa (no envía): ") +
+    angulos(QStringLiteral("cero"), QStringLiteral("todos los ejes 0°")));
+  posReposo_->setToolTip(QStringLiteral("Objetivo en vista previa (no envía): ") +
+    angulos(QStringLiteral("reposo"), QStringLiteral("J5 30°, resto 0°")));
 }
 
 void PanelIRB120::confirmarEnvio()

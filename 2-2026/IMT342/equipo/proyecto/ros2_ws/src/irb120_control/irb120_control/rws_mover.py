@@ -28,13 +28,18 @@ from irb120_conexion.comunicacion.lectura_rws import error_details, state_record
 from irb120_conexion.nodos.lectura_articular.puente_rws import build_base_url
 from irb120_control.rws_j6 import (Client, Refused, EMPTY, LIMITS, SYMBOL, SERVER_CANDIDATE,
     SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
+    SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256, SERVER_LABELS,
     measured_target, module_label, parse_target, literal, same_target, single, source_fingerprint)
 
 BASE_SYMBOL = '/rw/rapid/symbol/data/RAPID/T_ROB1/LabJointRws/'
 NUM_SYMBOLS = ('pcSeq', 'pcFin', 'rbSeq', 'rbCodigo', 'rbActivo')
 RMMP = '/users/rmmp'
 RMMP_POLL = '/users/rmmp/poll'
-MAX_STEP_DEG = 10.0      # igual a maxPasoDeg del módulo RAPID
+RAPID_MAX_STEP_DEG = 45.0   # maxPasoDeg del módulo RAPID v3
+MAX_STEP_DEG = 40.0         # paso máximo de la PC: 5° de margen para el error residual de llegada
+DECIMALS = 3                # RWS devuelve 6 cifras: con ejes ≥ 100° solo 3 decimales sobreviven
+READBACK_TOL_DEG = 2e-3
+ARRIVAL_DEG = 0.02          # si al terminar falta más, se envía una orden de corrección
 MARGIN_DEG = 2.0         # igual a margenDeg del módulo RAPID
 # La postura se relee entre el cálculo del tramo y su envío: el ruido de medida y el
 # error residual de llegada (centésimas de grado) no deben rechazar un «j6 +5» con paso 5.
@@ -56,6 +61,8 @@ def check_target(target, current, step):
     worst = max(abs(a - b) for a, b in zip(target[0], current[0]))
     if worst > step + STEP_TOL_DEG:
         raise Refused(f'Cambio de {worst:.3f}° mayor que el paso permitido de {step}°.')
+    # Redondear antes de escribir: lo que se escribe es exactamente lo que el ABB devuelve.
+    target = [[round(v, DECIMALS) for v in target[0]], target[1]]
     return target
 
 
@@ -70,7 +77,7 @@ def split_path(current, goal, step):
     worst = max(abs(a - b) for a, b in zip(goal[0], current[0]))
     # Observado en el IRC5 (16/11/2026): un «j6 +5» medido como 5,000004° se partía en
     # dos órdenes. Se tolera el ruido de medida sin superar nunca el máximo del robot.
-    tolerance = min(STEP_TOL_DEG, MAX_STEP_DEG - step)
+    tolerance = min(STEP_TOL_DEG, RAPID_MAX_STEP_DEG - step)
     count = max(1, math.ceil((worst - tolerance) / step - 1e-9))
     return [[[c + (g - c) * k / count for c, g in zip(current[0], goal[0])], [9e9] * 6]
             for k in range(1, count + 1)]
@@ -204,7 +211,7 @@ class Mover(Client):
                  'ctrlstate': single(self.read('/rw/panel/ctrlstate'), 'ctrlstate'),
                  'execution': single(self.read('/rw/rapid/execution'), 'ctrlexecstate'),
                  'joints_deg': self.joints()[0], 'module': self.module_version}
-        if self.module_version.startswith('servidor_v2'):
+        if self.module_version.startswith('servidor_v'):
             for name in NUM_SYMBOLS:
                 state[name] = self.num(name)
         return state
@@ -242,11 +249,12 @@ class Mover(Client):
     # ---------- protocolo ----------
     def ready(self, state):
         problems = []
-        if state.get('module') not in ('servidor_v2', 'servidor_v2_auto'):
-            problems.append(f"módulo {state.get('module')}: ejecutar 'instalar' (AUTO, motores apagados, RAPID detenido)")
+        if state.get('module') not in SERVER_LABELS:
+            problems.append(f"módulo {state.get('module')}: instalar la v3 ('./brazo.sh instalar' o 'instalar-auto', "
+                            "llave AUTO, motores apagados, RAPID detenido)")
         if state['opmode'] == 'MANF':
             problems.append('modo manual 100%: usar manual reducido')
-        elif state['opmode'] == 'AUTO' and state.get('module') != 'servidor_v2_auto':
+        elif state['opmode'] == 'AUTO' and state.get('module') != 'servidor_v3_auto':
             problems.append('modo AUTO: el módulo solo acepta manual reducido (permitirAuto := FALSE)')
         if state['ctrlstate'] != 'motoron':
             problems.append(f"motores {state['ctrlstate']}: mantener el habilitador (manual) o Motors On (AUTO)")
@@ -270,7 +278,7 @@ class Mover(Client):
         self.ensure_rmmp(state)
         self.write('pcTarget', literal(target))
         readback = self.get_target()
-        if not same_target(target, readback):
+        if not same_target(target, readback, tolerance=READBACK_TOL_DEG):
             raise Refused('La lectura de vuelta de pcTarget no coincide; no se ordena el movimiento.')
         seq = int(state['pcSeq']) + 1
         self.record(event='order', seq=seq, from_deg=current[0], target_deg=target[0])
@@ -297,15 +305,8 @@ class Mover(Client):
         raise Refused(f'Sin respuesta del robot a la orden {seq} en {timeout:.0f} s. '
                       'No enviar otra: revisar FlexPendant y ejecutar «estado».')
 
-    def move_to(self, goal, step, timeout=120., echo=print):
-        current = self.joints()
-        legs = split_path(current, goal, step)
-        echo(f'Recorrido dividido en {len(legs)} orden(es) de como máximo {step}° por eje.')
-        result = None
-        for index, leg in enumerate(legs, 1):
-            echo(f'Orden {index}/{len(legs)} → ' + ', '.join(f'{v:.3f}' for v in leg[0]))
-            result = self.send(leg, step=step, timeout=timeout, echo=echo)
-        return result
+    def move_to(self, goal, step, timeout=120., echo=print, cancel=None):
+        return move_to(self, goal, step, timeout, echo, cancel)
 
     def finish(self):
         state = self.status()
@@ -332,7 +333,8 @@ class Mover(Client):
             path.write_text(source.replace(AUTO_OFF, AUTO_ON), encoding='utf-8')
         return self.update_module(directory, candidate_path=path, candidate_sha=sha,
                                   accepted=(ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
-                                            SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256))
+                                            SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256,
+                                            SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256))
 
 
 def logout(mover):
@@ -341,6 +343,30 @@ def logout(mover):
         mover.session.get(mover.base + '/logout', timeout=2., allow_redirects=False)
     except Exception:
         pass
+
+
+def move_to(mover, goal, step, timeout=120., echo=print, cancel=None):
+    """Va al objetivo replanificando cada tramo desde la postura REAL (no acumula el error residual)
+    y termina con una orden de corrección si al final falta más de ARRIVAL_DEG. Sirve para Mover y
+    para el robot simulado (solo usa joints() y send())."""
+    current = mover.joints()
+    planned = len(split_path(current, goal, step))
+    echo(f'Recorrido dividido en {planned} orden(es) de como máximo {step}° por eje.')
+    result, index = None, 0
+    while True:
+        error = max(abs(a - b) for a, b in zip(current[0], goal[0]))
+        if error <= ARRIVAL_DEG:
+            return result or {'seq': 0, 'code': 2, 'joints_deg': current[0], 'max_error_deg': error}
+        if cancel is not None and cancel.is_set():
+            raise Refused(f'CANCELADO antes de la orden {index + 1}. El robot queda donde está.')
+        index += 1
+        if index > planned + 2:
+            raise Refused(f'No se alcanzó el objetivo tras {index - 1} órdenes (falta {error:.3f}°); '
+                          'revisar el FlexPendant.')
+        leg = split_path(current, goal, step)[0]
+        echo(f'Orden {index}/{max(planned, index)} → ' + ', '.join(f'{v:.3f}' for v in leg[0]))
+        result = mover.send(leg, step=step, timeout=timeout, echo=echo)
+        current = mover.joints()
 
 
 def print_status(state):

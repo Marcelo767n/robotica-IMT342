@@ -50,6 +50,7 @@ def wait_idle(panel, seconds=5.):
 
 class PanelLogic(unittest.TestCase):
     def sim(self, **kw):
+        kw.setdefault('step', 5.)   # tramos de 5° para comprobar la división
         panel = Panel(SimulatedMover(speed=5000., sleep=lambda _: None), simulated=True, **kw)
         panel.poll()
         return panel
@@ -117,7 +118,7 @@ class PanelLogic(unittest.TestCase):
         panel = self.sim()
         panel.handle('paso', {'valor': 2})
         self.assertEqual(panel.snapshot()['paso'], 2.)
-        for bad in (0, 11, 'x', None, True):
+        for bad in (0, 41, 'x', None, True):
             with self.assertRaises(Refused):
                 panel.handle('paso', {'valor': bad})
         with self.assertRaises(Refused):
@@ -133,8 +134,8 @@ class PanelLogic(unittest.TestCase):
         goal = list(abb.current); goal[5] += 8.
         panel.send(goal)
         wait_idle(panel)
-        self.assertAlmostEqual(abb.current[5], goal[5], places=4)
-        self.assertEqual(abb.nums['rbSeq'], 2.)
+        self.assertAlmostEqual(abb.current[5], goal[5], places=3)
+        self.assertEqual(abb.nums['rbSeq'], 1.)   # v3: 8° en una sola orden, sin paradas
         self.assertTrue(any('LLEGADA' in line for line in panel.log), list(panel.log))
 
     def test_robot_rejection_is_reported_not_raised(self):

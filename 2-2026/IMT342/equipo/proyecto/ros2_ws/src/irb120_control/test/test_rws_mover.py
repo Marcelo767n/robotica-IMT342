@@ -11,6 +11,7 @@ sys.path[:0] = [str(Path(__file__).resolve().parents[1]),
 from irb120_control.rws_j6 import (EMPTY, SYMBOL, MODULE_PATH, MAIN_MODULE_PATH, MASTERSHIP,
     SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, J6_MODULE_SHA256, literal, source_fingerprint,
     diagnose_inspection, module_label)
+from irb120_control.rws_j6 import parse_target
 from irb120_control.rws_mover import (Mover, Refused, BASE_SYMBOL, RMMP, RMMP_POLL, split_path,
     check_target, parse_goal)
 
@@ -109,7 +110,7 @@ class Abb:
         q, now = self.target[0], self.current
         if any(abs(v) > 1000 for v in q): code = -1
         elif any(not lo + 2 <= v <= hi - 2 for v, (lo, hi) in zip(q, LIMITS)): code = -2
-        elif any(abs(a - b) > 10 for a, b in zip(q, now)): code = -3
+        elif any(abs(a - b) > 45 for a, b in zip(q, now)): code = -3
         else: code = 0
         if code:
             self.nums['rbCodigo'] = float(code); self.nums['rbSeq'] = float(seq)
@@ -132,7 +133,7 @@ class RapidModule(unittest.TestCase):
         self.assertEqual(source_fingerprint(V2), SERVER_MODULE_SHA256)
         auto = V2.replace('CONST bool permitirAuto := FALSE;', 'CONST bool permitirAuto := TRUE;')
         self.assertEqual(source_fingerprint(auto), SERVER_AUTO_MODULE_SHA256)
-        self.assertEqual(module_label(SERVER_MODULE_SHA256), 'servidor_v2')
+        self.assertEqual(module_label(SERVER_MODULE_SHA256), 'servidor_v3')
 
     def test_structure(self):
         for routine in ('PROC MostrarObjetivo()', 'PROC ServidorPC()', 'LOCAL FUNC num Validar(',
@@ -164,7 +165,7 @@ class Geometry(unittest.TestCase):
         self.assertAlmostEqual(legs[-1][0][1], 12)
         self.assertLessEqual(max(abs(a - b) for a, b in zip(legs[0][0], current[0])), 5 + 1e-9)
         with self.assertRaises(Refused): split_path(current, [[0, 0, 69, 0, 30, 0], [9e9] * 6], 5)
-        with self.assertRaises(Refused): split_path(current, [[0, 0, 0, 0, 30, 0], [9e9] * 6], 11)
+        with self.assertRaises(Refused): split_path(current, [[0, 0, 0, 0, 30, 0], [9e9] * 6], 41)
         with self.assertRaises(Refused): check_target([[0, 6, 0, 0, 30, 0], [9e9] * 6], current, 5)
 
     def test_parse_goal(self):
@@ -181,7 +182,7 @@ class Protocol(unittest.TestCase):
         abb = Abb('MANR'); client = mover(abb)
         result = client.move_to(parse_goal(['j6', '+5'], client.joints()), 5, echo=quiet)
         self.assertEqual(result['code'], 2)
-        self.assertAlmostEqual(abb.current[5], 6.73935, places=5)
+        self.assertAlmostEqual(abb.current[5], 6.73935, places=3)   # se escribe con 3 decimales
         posts = [c for c in abb.calls if c[0] == 'POST']
         self.assertEqual(posts[0][1], RMMP)
         self.assertEqual([p[1] for p in posts[1:]], [SYMBOL, BASE_SYMBOL + 'pcSeq'])
@@ -193,7 +194,7 @@ class Protocol(unittest.TestCase):
         client.move_to(parse_goal(['j2', '+12'], client.joints()), 5, echo=quiet)
         seqs = [c[3]['value'] for c in abb.calls if c[0] == 'POST' and c[1].endswith('pcSeq')]
         self.assertEqual(seqs, ['1', '2', '3'])
-        self.assertAlmostEqual(abb.current[1], -0.4929, places=4)
+        self.assertAlmostEqual(abb.current[1], -0.4929, places=3)
 
     def test_rmmp_denied_writes_nothing(self):
         abb = Abb('MANR'); abb.rmmp_answer = 'DENIED'; client = mover(abb)
@@ -223,9 +224,29 @@ class Protocol(unittest.TestCase):
         with self.assertRaisesRegex(Refused, 'instalar'):
             client.send([[*abb.current[:5], abb.current[5] + 1], [9e9] * 6], echo=quiet)
 
+    def test_readback_of_angles_over_100_deg_with_6_digits(self):
+        # 16/11-17/11: el ABB devuelve 6 cifras (101.664) y la PC había escrito 101.664181… → «no coincide».
+        abb = Abb('MANR'); abb.current = [5., 10., -30., 101.6641, -20., 112.33]
+        original = abb.get
+
+        def six_digits(url, **kw):
+            response = original(url, **kw)
+            if url.endswith('pcTarget'):
+                rows = json.loads(response.text)['_embedded']['_state']
+                q = parse_target(rows[0]['value'])
+                rows[0]['value'] = literal([[float(f'{v:.6g}') for v in q[0]], q[1]])
+                response = Response(rows)
+            return response
+        abb.get = six_digits
+        client = mover(abb)
+        goal = [[5., 10., -30., 101.664181580645, -20., 117.332818], [9e9] * 6]
+        result = client.move_to(goal, 40, echo=quiet)
+        self.assertEqual(result['code'], 2)
+        self.assertAlmostEqual(abb.current[5], 117.333, places=3)
+
     def test_robot_rejection_is_reported(self):
         abb = Abb('MANR'); client = mover(abb)
-        abb.current[0] = 20  # el robot está lejos de lo que la PC creyó al planificar
+        abb.current[0] = 60  # el robot está lejos de lo que la PC creyó al planificar (> 45° del RAPID)
         target = [[-4.28397 + 1, *abb.current[1:5], abb.current[5]], [9e9] * 6]
         client.joints = lambda: [[-4.28397, *abb.current[1:]], [9e9] * 6]
         with self.assertRaisesRegex(Refused, 'código -3'):
@@ -234,7 +255,7 @@ class Protocol(unittest.TestCase):
     def test_auto_requires_auto_variant_and_needs_no_rmmp(self):
         abb = Abb('AUTO'); abb.source = V2.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
         client = mover(abb)
-        self.assertEqual(client.module_version, 'servidor_v2_auto')
+        self.assertEqual(client.module_version, 'servidor_v3_auto')
         client.move_to(parse_goal(['j1', '-2'], client.joints()), 5, echo=quiet)
         self.assertFalse([c for c in abb.calls if c[1] == RMMP])
 
@@ -308,7 +329,7 @@ class Protocol(unittest.TestCase):
             'execution': rows('ctrlexecstate', 'stopped'), 'target': rows('value', literal(EMPTY)),
             'module': rows('module-text', V2)}}
         report = diagnose_inspection(inspection)
-        self.assertEqual(report['module_version'], 'servidor_v2')
+        self.assertEqual(report['module_version'], 'servidor_v3')
         self.assertTrue(report['local_navigation_prerequisites_observed'], report['issues'])
 
 

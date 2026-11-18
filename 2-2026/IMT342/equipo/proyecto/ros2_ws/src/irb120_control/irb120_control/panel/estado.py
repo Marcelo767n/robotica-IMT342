@@ -9,19 +9,22 @@ import threading
 import time
 
 from irb120_control.rws_j6 import Refused
-from irb120_control.rws_mover import CODES, MAX_STEP_DEG, split_path
+from irb120_control.rws_mover import CODES, MAX_STEP_DEG, move_to, split_path
 from irb120_control.panel.cinematica import clean_tool, pose_of, solve_pose
 from irb120_control.panel.limites import BOUNDS, EXT, clean_target
 from irb120_control.panel import verificacion
 
 FRESH_S = 3.0            # una medida más antigua no se dibuja como postura actual
-ACTIONS = ('objetivo', 'enviar', 'cancelar', 'sincronizar', 'paso', 'terminar', 'ik', 'herramienta')
+ACTIONS = ('objetivo', 'enviar', 'cancelar', 'sincronizar', 'paso', 'terminar', 'ik', 'herramienta', 'posicion')
+# Posición 0 = calibración ABB (todos los ejes en 0°). Reposo = igual con la muñeca doblada (J5 30°),
+# fuera de la singularidad de muñeca de J5 = 0°, cómoda para empezar a arrastrar la pose.
+POSICIONES = {'cero': [0.] * 6, 'reposo': [0., 0., 0., 0., 30., 0.]}
 
 
 class Panel:
     """Estado compartido entre la página, RViz y el hilo que envía. Sin ROS ni HTTP: se prueba solo."""
 
-    def __init__(self, mover, step=5., timeout=120., simulated=False, clock=time.monotonic):
+    def __init__(self, mover, step=40., timeout=120., simulated=False, clock=time.monotonic):
         self.mover, self.timeout, self.simulated, self.clock = mover, timeout, simulated, clock
         self.step = self.clean_step(step)
         self.mutex = threading.Lock()
@@ -97,6 +100,7 @@ class Panel:
             if self.busy:
                 raise Refused('Hay un envío en curso: el objetivo no se cambia hasta que termine.')
             self.target, self.desired, self.reachable = target, desired, True
+            self.start = None   # el error en % se mide desde el inicio de la próxima orden
         return target
 
     def verification(self):
@@ -143,17 +147,9 @@ class Panel:
                 if state['opmode'] in ('MANR', 'MANF') and not self.mover.rmmp.granted:
                     self.say('Acceso remoto: pulsar «Conceder» en el FlexPendant.')
                     self.mover.ensure_rmmp(state)
-                legs = split_path([state['joints_deg'], list(EXT)], [target, list(EXT)], step)
-                self.say(f'Envío en {len(legs)} orden(es) de como máximo {step:g}° por eje → ' +
-                         ', '.join(f'{v:.2f}' for v in target))
-                result = None
-                for index, leg in enumerate(legs, 1):
-                    if self.cancel.is_set():
-                        self.say(f'CANCELADO antes de la orden {index}/{len(legs)}. El robot queda donde está.')
-                        return
-                    self._progress(f'Orden {index}/{len(legs)}')
-                    result = self.mover.send(leg, step=step, timeout=self.timeout,
-                                             echo=lambda line, i=index, n=len(legs): self._echo(i, n, line))
+                self.say('Envío → ' + ', '.join(f'{v:.2f}' for v in target))
+                result = move_to(self.mover, [target, list(EXT)], step, self.timeout, echo=self._echo,
+                                 cancel=self.cancel)
                 self._arrival_note = True
                 self.say(f"LLEGADA confirmada por el robot (orden {result['seq']}), "
                          f"error máximo {result['max_error_deg']:.3f}°.")
@@ -181,11 +177,15 @@ class Panel:
         with self.mutex:
             self.progress = text
 
-    def _echo(self, index, total, line):
-        if 'AVISO' in line:
-            self.say(line.strip())
+    def _echo(self, line):
+        line = line.strip()
+        if line.startswith('Orden '):
+            self._order = line.split(' →')[0]
+            self._progress(self._order)
+        elif line.startswith(('Recorrido', 'AVISO')):
+            self.say(line)
         else:
-            self._progress(f'Orden {index}/{total} · ' + line.strip().split(' | ', 1)[-1])
+            self._progress(getattr(self, '_order', 'Orden') + ' · ' + line.split(' | ', 1)[-1])
 
     def request_cancel(self):
         with self.mutex:
@@ -260,6 +260,14 @@ class Panel:
             return {'objetivo': self.set_target(body.get('q'))}
         if action == 'ik':
             return self.solve(body.get('pose'))
+        if action == 'posicion':
+            name = body.get('valor')
+            if name not in POSICIONES:
+                raise Refused('Posición desconocida: usar «cero» o «reposo».')
+            target = self.set_target(POSICIONES[name])
+            self.say(f'Objetivo = posición {name}: ' + ', '.join(f'{v:g}' for v in target) +
+                     '. Revisar el robot naranja y pulsar «Enviar al robot».')
+            return {'objetivo': target}
         if action == 'herramienta':
             self.set_tool(body.get('valor'))
             return {}
@@ -313,6 +321,6 @@ class Panel:
                     'servidor_activo': state.get('rbActivo') == 1,
                     'ultimo': None if code is None else CODES.get(int(code), str(code)),
                     'medido': self.measured, 'edad_s': age, 'objetivo': self.target, 'limites': BOUNDS,
-                    'paso': self.step, 'paso_max': MAX_STEP_DEG, 'ordenes': orders, 'ocupado': self.busy,
+                    'paso': self.step, 'paso_max': MAX_STEP_DEG, 'posiciones': POSICIONES, 'ordenes': orders, 'ocupado': self.busy,
                     'faltas': list(self.problems), 'listo': not self.problems and not self.busy,
                     'progreso': self.progress, 'registro': list(self.log)}

@@ -85,6 +85,11 @@ class RvizControls:
                                  callback=lambda f, i=i, d=delta: self.run(f'J{i + 1} {d:+g}°',
                                                                            lambda: panel.nudge(i, d)))
         self.menu.insert('Copiar postura actual', callback=lambda f: self.run('Objetivo = postura actual', panel.sync))
+        places = self.menu.insert('Posiciones fijas')
+        for name, label in (('cero', 'Posición 0 (calibración)'), ('reposo', 'Reposo (J5 30°)')):
+            self.menu.insert(label, parent=places,
+                             callback=lambda f, n=name, l=label: self.run(f'Objetivo = {l}',
+                                                                          lambda: panel.handle('posicion', {'valor': n})))
         tools = self.menu.insert('Punto de referencia')
         for tool, label in (('tcp', 'TCP del proyecto (150 mm)'), ('brida', 'Brida (tool0)')):
             self.menu.insert(label, parent=tools,

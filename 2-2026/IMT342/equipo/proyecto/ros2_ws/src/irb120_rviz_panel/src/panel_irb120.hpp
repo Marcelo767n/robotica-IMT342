@@ -46,6 +46,8 @@ private:
   WidgetPose * pose_;
   WidgetVerificacion * verificacion_;
   QComboBox * paso_;
+  QPushButton * posCero_;
+  QPushButton * posReposo_;
   QPushButton * enviar_;
   QPushButton * sincronizar_;
   QPushButton * cancelar_;

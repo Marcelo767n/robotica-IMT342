@@ -85,6 +85,12 @@ void WidgetEstado::actualizar(const QJsonObject & e)
   if (e.value("ocupado").toBool()) {
     faltas_->setText(QStringLiteral("<span style='color:#c2410c; font-weight:bold;'>Moviendo: ") +
                      e.value("progreso").toString().toHtmlEscaped() + QStringLiteral("</span>"));
+    if (rapid != "running") {
+      faltas_->setText(faltas_->text() + QStringLiteral(
+          "<br><span style='color:#b91c1c; font-weight:bold;'>Robot detenido a mitad de la orden: "
+          "mantener el habilitador y pulsar Start (manual) o Start (automático); "
+          "la orden continúa.</span>"));
+    }
   } else if (faltas.isEmpty()) {
     faltas_->setText(QStringLiteral(
         "<span style='color:#15803d; font-weight:bold;'>Listo para recibir órdenes.</span>"));

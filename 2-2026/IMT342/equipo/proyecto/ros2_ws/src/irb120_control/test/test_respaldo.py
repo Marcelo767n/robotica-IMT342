@@ -54,6 +54,11 @@ class RespaldoTest(unittest.TestCase):
         self.assertTrue(all(call[0] == 'GET' for call in controller.calls))
         self.assertNotIn(('GET', '/fileservice/etc/passwd'), controller.calls)
 
+    def test_url_encoded_text_is_decoded(self):
+        from irb120_control.respaldo import decode
+        self.assertEqual(decode('%0aMODULE%20Module1%0a%0aENDMODULE'), '\nMODULE Module1\n\nENDMODULE')
+        self.assertEqual(decode('MODULE A\n  x := 50%;\nENDMODULE'), 'MODULE A\n  x := 50%;\nENDMODULE')
+
     def test_rejects_odd_module_names(self):
         controller = Controller(); controller.names = [('../x', 'ProgMod')]
         with self.assertRaises(Fallo):
