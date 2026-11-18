@@ -11,6 +11,7 @@ import time
 from irb120_control.rws_j6 import EMPTY, Refused
 
 POLL_S = .5
+ATTEMPTS = 3
 
 
 def esperar(mover, condition, message, echo, timeout=600., sleep=time.sleep):
@@ -53,13 +54,27 @@ def preparar_auto(mover, log_dir, echo=print, sleep=time.sleep, timeout=600.):
                 raise Refused('La instalación del módulo v4 no pasó la verificación; ver ' + str(log_dir))
             echo('Módulo v4 instalado y verificado.')
             mover.connect()
-        esperar(mover, lambda s: s['ctrlstate'] == 'motoron',
-                'Pulsar el botón blanco Motors On del controlador (sin pulsar Start).', echo, timeout, sleep)
-        state = mover.status()
-        if state['execution'] != 'running':
-            mover.start_server(echo=lambda line: echo(line))
-        esperar(mover, lambda s: s.get('rbActivo') == 1 and s['execution'] == 'running',
-                'En el FlexPendant: icono «Ventana del operador» (barra superior, junto al Menú ABB) → '
-                '«¿Aceptar objetivos enviados por la PC?» → pulsar «Iniciar». Hay 2 minutos.', echo, 150., sleep)
-        echo('ServidorPC activo: el robot acepta órdenes desde RViz.')
-        return mover.status()
+        for attempt in range(1, ATTEMPTS + 1):
+            esperar(mover, lambda s: s['ctrlstate'] == 'motoron',
+                    'Pulsar el botón blanco Motors On del controlador (sin pulsar Start).', echo, timeout, sleep)
+            state = mover.status()
+            if state['execution'] == 'running':
+                _, where = mover.pointer()
+                if 'ServidorPC' not in where:
+                    # Otro programa (p. ej. main de otro grupo) en marcha: no lo tocamos desde la PC.
+                    esperar(mover, lambda s: s['execution'] == 'stopped',
+                            'Hay otro programa en ejecución en el robot: pulsar Stop en el FlexPendant.',
+                            echo, timeout, sleep)
+            if mover.status()['execution'] != 'running':
+                mover.start_server(echo=lambda line: echo(line))
+            state = esperar(mover, lambda s: (s.get('rbActivo') == 1 and s['execution'] == 'running')
+                            or s['execution'] == 'stopped',
+                            'En el FlexPendant: icono «Ventana del operador» (barra superior, junto al Menú ABB) → '
+                            '«¿Aceptar objetivos enviados por la PC?» → pulsar «Iniciar». Hay 2 minutos.',
+                            echo, 150., sleep)
+            if state.get('rbActivo') == 1 and state['execution'] == 'running':
+                echo('ServidorPC activo: el robot acepta órdenes desde RViz.')
+                return mover.status()
+            echo(f'No se confirmó «Iniciar» a tiempo o se pulsó Cancelar/Stop (intento {attempt}/{ATTEMPTS}): '
+                 'se vuelve a arrancar ServidorPC.')
+        raise Refused(f'No se confirmó «Iniciar» en {ATTEMPTS} intentos. Ejecutar de nuevo ./brazo.sh sesion.')

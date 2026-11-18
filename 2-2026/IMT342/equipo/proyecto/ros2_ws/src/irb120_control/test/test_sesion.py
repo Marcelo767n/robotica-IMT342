@@ -15,6 +15,7 @@ class FakeRobot:
         self.target = [[1.] * 6, [9e9] * 6]
         self.calls = []
         self.operator = []          # acciones del operador, una por espera
+        self.ours = False           # True cuando el programa en marcha es ServidorPC
 
     def status(self):
         return dict(self.s)
@@ -37,9 +38,13 @@ class FakeRobot:
     def connect(self):
         self.calls.append('connect')
 
+    def pointer(self):
+        where = 'LabJointRws ServidorPC' if self.s['execution'] == 'running' and self.ours else 'MainModule main'
+        return {}, where
+
     def start_server(self, echo=print):
         assert self.s['ctrlstate'] == 'motoron' and self.s['opmode'] == 'AUTO'
-        self.calls.append('arrancar'); self.s['execution'] = 'running'
+        self.calls.append('arrancar'); self.s['execution'] = 'running'; self.ours = True
 
 
 class Sesion(unittest.TestCase):
@@ -55,6 +60,19 @@ class Sesion(unittest.TestCase):
         text = '\n'.join(lines)
         for step in ('AUTO', 'Motors Off', 'Motors On', 'Iniciar', 'ServidorPC activo'):
             self.assertIn(step, text)
+
+    def test_missed_confirmation_restarts_and_other_program_is_stopped_first(self):
+        # Reconexión: el robot quedó con main de otro grupo en marcha; el primer «Iniciar» se pasa del plazo.
+        robot = FakeRobot(module='servidor_v4_auto', opmode='AUTO', ctrl='motoron', execution='running')
+        lines = []
+        robot.operator = [lambda s: s.update(execution='stopped'),     # el operador pulsa Stop
+                          lambda s: s.update(execution='stopped'),     # nadie pulsa Iniciar: ServidorPC termina
+                          lambda s: s.update(rbActivo=1.)]             # segundo intento: «Iniciar»
+        preparar_auto(robot, None, echo=lines.append, sleep=robot.sleep, timeout=5.)
+        self.assertEqual(robot.calls, ['arrancar', 'arrancar'])
+        text = '\n'.join(lines)
+        self.assertIn('otro programa', text)
+        self.assertIn('intento 1/3', text)
 
     def test_already_running_does_nothing(self):
         robot = FakeRobot(module='servidor_v4_auto', opmode='AUTO'); robot.s['rbActivo'] = 1.
