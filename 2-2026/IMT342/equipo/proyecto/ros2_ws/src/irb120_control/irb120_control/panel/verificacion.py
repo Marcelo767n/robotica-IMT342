@@ -7,6 +7,7 @@
 El envío solo se permite si la pose es alcanzable, el objetivo respeta los límites y los
 errores 1 y 3 están dentro de tolerancia. Sin ROS: se prueba solo.
 """
+import functools
 import math
 import time
 
@@ -14,7 +15,8 @@ from irb120_control.rws_j6 import Refused
 from irb120_control.panel.cinematica import kinematics, pose_of
 from irb120_control.panel.limites import clean_target
 
-TOLERANCIAS = {'ik_mm': 0.01, 'ik_deg': 0.01,           # Pieper es exacto: ~1e-12
+TOLERANCIAS = {'ik_mm': 0.001, 'ik_deg': 0.001,         # criterio del Hito 2 (10⁻⁶ m); Pieper da ~1e-12
+               'ida_vuelta_deg': 0.001,                 # IK(FK(q)) frente a q, eje por eje
                'llegada_mm': 0.5, 'llegada_deg': 0.1,   # 0,016° por eje a ~0,5 m ≈ 0,14 mm
                'modelo_mm': 0.5, 'modelo_deg': 0.1}     # FK propia frente al ABB (04/11: < 0,001 mm)
 CONTROLLER_MAX_AGE_S = 5.
@@ -31,6 +33,50 @@ def pose_error(a, b):
     rb = transforms.rpy_to_matrix(*np.deg2rad(b[3:]))
     cosine = (np.trace(ra.T @ rb) - 1.) / 2.
     return distance, math.degrees(math.acos(max(-1., min(1., float(cosine)))))
+
+
+def matriz(pose):
+    """[x, y, z mm, roll, pitch, yaw °] → matriz homogénea 4×4 (metros)."""
+    np, _, _, transforms = kinematics()
+    return transforms.pose_from_xyz_rpy_deg(*(v / 1000. for v in pose[:3]), *pose[3:])
+
+
+def fk_matriz(q_deg, tool):
+    """FK del Hito 2: T base→TCP (150 mm) o base→brida, en metros."""
+    np, dh, _, _ = kinematics()
+    forward = dh.forward_kinematics_tcp if tool == 'tcp' else dh.forward_kinematics
+    return forward(np.deg2rad(q_deg))
+
+
+@functools.lru_cache(maxsize=64)
+def _ida_vuelta(q, tool):
+    np, dh, pieper, _ = kinematics()
+    T = fk_matriz(list(q), tool)
+    if tool != 'tcp':
+        T = T @ dh.tcp_transform()
+    report = pieper.analyze_pose(T, np.deg2rad(q))
+    best, best_error = None, math.inf
+    for candidate in report.candidates:
+        values = candidate.q if candidate.q is not None else candidate.q_raw
+        if values is None:
+            continue
+        recovered = [float(v) for v in np.rad2deg(values)]
+        error = max(abs((r - g + 180.) % 360. - 180.) for r, g in zip(recovered, q))
+        if error < best_error:
+            best, best_error = recovered, error
+    return best
+
+
+def ida_vuelta(target, tool):
+    """IK(FK(q)) frente a q, eje por eje (rama más cercana a q)."""
+    recovered = _ida_vuelta(tuple(round(v, 9) for v in target), tool)
+    rows = []
+    for index, goal in enumerate(target):
+        value = None if recovered is None else recovered[index]
+        error = None if value is None else abs((value - goal + 180.) % 360. - 180.)
+        rows.append({'eje': index + 1, 'q_ik': goal, 'q_recuperado': value, 'error_deg': error})
+    ok = recovered is not None and all(r['error_deg'] <= TOLERANCIAS['ida_vuelta_deg'] for r in rows)
+    return rows, ok
 
 
 def pose_controlador(mover):
@@ -112,7 +158,12 @@ def evaluar(target, measured, desired, tool, abb=None, busy=False, simulated=Fal
         reasons.append('sin comparación reciente con el controlador ABB')
     elif not controller['ok']:
         reasons.append(f"modelo y controlador difieren {controller['pos_mm']:.3f} mm / {controller['rot_deg']:.3f}°")
+    round_trip, round_trip_ok = ida_vuelta(target, tool)
+    if not round_trip_ok:
+        reasons.append('la ida y vuelta IK(FK(q)) no recupera los ángulos')
+    matrices = {'T_pedida': matriz(wanted).tolist(), 'T_fk': fk_matriz(target, tool).tolist()}
     return {'origen': origin, 'herramienta': tool, 'pose_deseada': wanted, 'ik_fk': ik, 'robot': robot,
-            'ejes': ejes(target, measured, start), 'inicio': start,
+            'ejes': ejes(target, measured, start), 'inicio': start, 'ida_vuelta': round_trip,
+            'ida_vuelta_ok': round_trip_ok, 'matrices': matrices,
             'controlador': controller, 'limites_ok': limits_ok, 'alcanzable': reachable,
             'envio_permitido': not reasons, 'motivo': '; '.join(reasons) or None, 'tolerancias': dict(t)}

@@ -333,6 +333,29 @@ class PanelVerification(unittest.TestCase):
         self.assertAlmostEqual(robot['pos_mm'], math.dist((0, 0, 0), (robot['dx_mm'], robot['dy_mm'], robot['dz_mm'])))
         self.assertGreater(robot['pos_pct'], 0.)
 
+    def test_round_trip_and_matrices(self):
+        q = [10., -4., 8., 5., 35., -6.]
+        rows, ok = verificacion.ida_vuelta(q, 'tcp')
+        self.assertTrue(ok)
+        self.assertLess(max(r['error_deg'] for r in rows), 1e-6)
+        check = verificacion.evaluar(q, q, pose_of(q, 'tcp'), 'tcp', abb=(q, pose_of(q, 'brida'), 0.), now=1.)
+        self.assertTrue(check['ida_vuelta_ok'])
+        self.assertEqual(len(check['matrices']['T_fk']), 4)
+        diff = max(abs(a - b) for ra, rb in zip(check['matrices']['T_pedida'], check['matrices']['T_fk'])
+                   for a, b in zip(ra, rb))
+        self.assertLess(diff, 1e-9)
+        self.assertEqual(check['tolerancias']['ik_mm'], 0.001)
+
+    def test_speed_action(self):
+        panel = Panel(SimulatedMover(), simulated=True); panel.poll()
+        self.assertEqual(panel.snapshot()['velocidad_pct'], 20)
+        panel.handle('velocidad', {'valor': 60})
+        shot = panel.snapshot()
+        self.assertEqual((shot['velocidad_pct'], shot['velocidad_mm_s']), (60, 150.))
+        for bad in (0, 101, 'x'):
+            with self.assertRaises(Refused):
+                panel.handle('velocidad', {'valor': bad})
+
     def test_quick_reads_do_not_freeze_the_panel(self):
         panel = Panel(SimulatedMover(), simulated=True)
         for full in (False, True, False, True):

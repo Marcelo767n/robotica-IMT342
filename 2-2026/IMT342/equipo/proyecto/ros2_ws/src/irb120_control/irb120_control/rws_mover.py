@@ -29,14 +29,15 @@ from irb120_conexion.nodos.lectura_articular.puente_rws import build_base_url
 from irb120_control.rws_j6 import MASTERSHIP
 from irb120_control.rws_j6 import (Client, Refused, EMPTY, LIMITS, SYMBOL, SERVER_CANDIDATE,
     SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
-    SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256, SERVER_LABELS,
+    SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256, SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256, SERVER_LABELS,
     measured_target, module_label, parse_target, literal, same_target, single, source_fingerprint)
 
 BASE_SYMBOL = '/rw/rapid/symbol/data/RAPID/T_ROB1/LabJointRws/'
-NUM_SYMBOLS = ('pcSeq', 'pcFin', 'rbSeq', 'rbCodigo', 'rbActivo')
+NUM_SYMBOLS = ('pcSeq', 'pcFin', 'rbSeq', 'rbCodigo', 'rbActivo', 'pcVelPct')
+SPEED_MAX_MM_S, SPEED_MAX_DEG_S = 250., 60.   # vMax del RAPID v4: 100 %
 RMMP = '/users/rmmp'
 RMMP_POLL = '/users/rmmp/poll'
-RAPID_MAX_STEP_DEG = 45.0   # maxPasoDeg del módulo RAPID v3
+RAPID_MAX_STEP_DEG = 45.0   # maxPasoDeg del módulo RAPID v3/v4
 MAX_STEP_DEG = 40.0         # paso máximo de la PC: 5° de margen para el error residual de llegada
 DECIMALS = 3                # RWS devuelve 6 cifras: con ejes ≥ 100° solo 3 decimales sobreviven
 READBACK_TOL_DEG = 2e-3
@@ -224,8 +225,8 @@ class Mover(Client):
     # ---------- escrituras ----------
     def write(self, name, value):
         path = SYMBOL if name == 'pcTarget' else BASE_SYMBOL + name
-        if name not in ('pcTarget', 'pcSeq', 'pcFin'):
-            raise Refused('Solo se escriben pcTarget, pcSeq y pcFin.')
+        if name not in ('pcTarget', 'pcSeq', 'pcFin', 'pcVelPct'):
+            raise Refused('Solo se escriben pcTarget, pcSeq, pcFin y pcVelPct.')
         self.rmmp.keep()
         self.write_events.append({'at_utc': datetime.now(timezone.utc).isoformat(), 'symbol': name,
                                   'value': value, 'result': 'pending_or_unknown'})
@@ -255,11 +256,11 @@ class Mover(Client):
     def ready(self, state):
         problems = []
         if state.get('module') not in SERVER_LABELS:
-            problems.append(f"módulo {state.get('module')}: instalar la v3 ('./brazo.sh instalar' o 'instalar-auto', "
+            problems.append(f"módulo {state.get('module')}: instalar la v4 ('./brazo.sh instalar' o 'instalar-auto', "
                             "llave AUTO, motores apagados, RAPID detenido)")
         if state['opmode'] == 'MANF':
             problems.append('modo manual 100%: usar manual reducido')
-        elif state['opmode'] == 'AUTO' and state.get('module') != 'servidor_v3_auto':
+        elif state['opmode'] == 'AUTO' and state.get('module') != 'servidor_v4_auto':
             problems.append('modo AUTO: el módulo solo acepta manual reducido (permitirAuto := FALSE)')
         if state['ctrlstate'] != 'motoron':
             problems.append(f"motores {state['ctrlstate']}: mantener el habilitador (manual) o Motors On (AUTO)")
@@ -313,6 +314,18 @@ class Mover(Client):
     def move_to(self, goal, step, timeout=120., echo=print, cancel=None):
         return move_to(self, goal, step, timeout, echo, cancel)
 
+    def set_speed(self, pct):
+        """Velocidad de las próximas órdenes en % de vMax (100 % = 250 mm/s y 60°/s)."""
+        if isinstance(pct, bool) or not isinstance(pct, (int, float)) or not 1 <= pct <= 100:
+            raise Refused('La velocidad debe estar entre 1 y 100 %.')
+        pct = int(round(pct))
+        state = self.status()
+        self.ensure_rmmp(state)
+        self.write('pcVelPct', str(pct))
+        if int(round(self.num('pcVelPct'))) != pct:
+            raise Refused('La lectura de vuelta de pcVelPct no coincide.')
+        return pct
+
     def pointer(self):
         """Módulo y rutina donde está el puntero de programa (PP) de T_ROB1."""
         rows = self.read(PCP)
@@ -330,7 +343,7 @@ class Mover(Client):
         state = self.status()
         if state['opmode'] != 'AUTO':
             raise Refused(f"Solo en AUTO (ahora {state['opmode']}). En manual: PP a rutina en el FlexPendant.")
-        if state['module'] != 'servidor_v3_auto':
+        if state['module'] != 'servidor_v4_auto':
             raise Refused(f"El módulo es {state['module']}: instalar con ./brazo.sh instalar-auto.")
         if state['execution'] != 'stopped':
             raise Refused('RAPID ya está en ejecución: pulsar Stop en el FlexPendant antes de arrancar.')
@@ -389,7 +402,8 @@ class Mover(Client):
         return self.update_module(directory, candidate_path=path, candidate_sha=sha,
                                   accepted=(ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
                                             SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256,
-                                            SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256))
+                                            SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256,
+                                            SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256))
 
 
 def logout(mover):
@@ -586,7 +600,7 @@ def main(argv=None):
                                  ensure_ascii=False, indent=2))
                 print('Informe:', path)
                 if report['passed']:
-                    print(('Módulo v3 (variante AUTO) instalado. ' if args.auto else 'Módulo v3 instalado. ') +
+                    print(('Módulo v4 (variante AUTO) instalado. ' if args.auto else 'Módulo v4 instalado. ') +
                           'En el FlexPendant: Editor de programas → Verificar programa. '
                           'El puntero pudo restablecerse: NO pulsar Start sobre main.')
                 return 0 if report['passed'] else 2

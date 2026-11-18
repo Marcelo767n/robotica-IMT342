@@ -2,15 +2,19 @@
 
   ./iniciar.sh panel              robot real (pide la contraseña RWS en la terminal)
   ./iniciar.sh panel --simulado   sin robot
-  ./iniciar.sh panel --web        además, la página local http://127.0.0.1:8770/
+  ./iniciar.sh panel --web        además, abre la página local http://127.0.0.1:8770/
+  ./iniciar.sh panel --auto       guía la puesta en marcha en AUTO (./brazo.sh sesion)
+  ./iniciar.sh panel --analisis   abre también la ventana de análisis del Hito 2
 
 No arranca RAPID ni motores: el operador arranca ServidorPC en el FlexPendant.
 Cerrar el panel NO detiene el robot: habilitador, Stop o paro de emergencia.
 """
 import argparse
 import fcntl
+import os
 from pathlib import Path
 import signal
+import subprocess
 import tempfile
 import threading
 import time
@@ -34,8 +38,10 @@ def argumentos(argv):
     parser.add_argument('--paso', type=float, default=40., help='Máximo cambio por eje en cada orden (≤40°)')
     parser.add_argument('--timeout', type=float, default=120., help='Segundos de espera por orden')
     parser.add_argument('--simulado', action='store_true', help='Sin robot: practicar con un robot ficticio')
-    parser.add_argument('--web', action='store_true', help='Abrir también la página local')
-    parser.add_argument('--panel-port', type=int, default=8770, help='Puerto de la página local (--web)')
+    parser.add_argument('--web', action='store_true', help='Abrir también la página local en el navegador')
+    parser.add_argument('--auto', action='store_true', help='Puesta en marcha guiada en AUTO (una contraseña)')
+    parser.add_argument('--analisis', action='store_true', help='Abrir la ventana de análisis del Hito 2')
+    parser.add_argument('--panel-port', type=int, help='Puerto HTTP local (8770 real, 8771 simulado)')
     parser.add_argument('--no-rviz', action='store_true')
     parser.add_argument('--no-browser', action='store_true')
     parser.add_argument('--duration', type=float, default=0, help=argparse.SUPPRESS)
@@ -43,6 +49,8 @@ def argumentos(argv):
     args = parser.parse_args(argv)
     if not 0 < args.paso <= MAX_STEP_DEG:
         parser.error(f'--paso debe estar entre 0 y {MAX_STEP_DEG:g}')
+    if args.panel_port is None:
+        args.panel_port = 8771 if args.simulado else 8770
     if not 1024 <= args.panel_port <= 65535:
         parser.error('--panel-port debe estar entre 1024 y 65535')
     try:
@@ -73,6 +81,14 @@ def leer_en_segundo_plano(panel, stop):
     threading.Thread(target=reader, daemon=True, name='panel-lectura').start()
 
 
+def abrir_analisis(port):
+    """Ventana de análisis (tkinter + matplotlib, Python del sistema): lee el estado por HTTP local."""
+    here = Path(__file__).resolve().parents[3]   # ros2_ws/src
+    env = dict(os.environ, PYTHONPATH=f"{here / 'irb120_control'}:{here / 'irb120_conexion'}")
+    return subprocess.Popen(['/usr/bin/python3', '-m', 'irb120_control.analisis',
+                             '--url', f'http://127.0.0.1:{port}/estado'], env=env)
+
+
 def instrucciones(con_panel, url):
     lines = ['', 'RViz: robot sólido = postura medida; naranja = objetivo.']
     if con_panel:
@@ -97,9 +113,12 @@ def main(argv=None):
     from irb120_control.panel.puente_ros import PuenteRos, crear_nodo
     from irb120_control.panel.rviz_controles import RvizControls
     mover = session = keeper = server = node = None
-    children, stop = [], threading.Event()
+    children, extras, stop = [], [], threading.Event()
     try:
         mover, session = conexion.abrir(args.base, args.user, args.log_dir, args.simulado)
+        if args.auto and not args.simulado:
+            from irb120_control.panel.sesion import preparar_auto
+            preparar_auto(mover, args.log_dir)
         panel = Panel(mover, step=args.paso, timeout=args.timeout, simulated=args.simulado)
         panel.poll()
         if panel.state is not None:
@@ -109,13 +128,14 @@ def main(argv=None):
                 print('AVISO:', exc, '— se volverá a pedir en el primer envío.', flush=True)
         keeper = mover.start_keeper()
         leer_en_segundo_plano(panel, stop)
-        url = None
-        if args.web:
-            from irb120_control.panel.web import serve
-            server, _ = serve(panel, args.panel_port)
-            url = f'http://127.0.0.1:{server.server_address[1]}/'
-            if not args.no_browser:
-                threading.Thread(target=lambda: webbrowser.open(url), daemon=True).start()
+        # Estado en HTTP local (solo lectura sin testigo): lo usa la ventana de análisis.
+        from irb120_control.panel.web import serve
+        server, _ = serve(panel, args.panel_port)
+        url = f'http://127.0.0.1:{server.server_address[1]}/'
+        if args.web and not args.no_browser:
+            threading.Thread(target=lambda: webbrowser.open(url), daemon=True).start()
+        if not args.web:
+            url = None
         rclpy.init(args=[])
         node = crear_nodo()
         bridge = PuenteRos(node, panel)         # noqa: F841 (los temporizadores guardan la referencia)
@@ -123,6 +143,8 @@ def main(argv=None):
         con_panel = vista.panel_disponible()
         with tempfile.TemporaryDirectory(prefix='irb120_panel_') as directory:
             children = vista.lanzar(vista.preparar(directory, con_panel), rviz=not args.no_rviz)
+            if args.analisis:   # aparte: cerrar la ventana de análisis no cierra el panel
+                extras.append(abrir_analisis(server.server_address[1]))
             instrucciones(con_panel, url)
 
             def interrupt(*_):
@@ -153,7 +175,7 @@ def main(argv=None):
             server.shutdown()
         if mover is not None:
             conexion.cerrar(mover, session)
-        vista.detener(children)
+        vista.detener(children + extras)
         if node is not None:
             node.destroy_node()
         if rclpy.ok():

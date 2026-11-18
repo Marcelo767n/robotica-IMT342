@@ -9,13 +9,15 @@ import threading
 import time
 
 from irb120_control.rws_j6 import Refused
-from irb120_control.rws_mover import CODES, MAX_STEP_DEG, move_to, split_path
+from irb120_control.rws_mover import CODES, MAX_STEP_DEG, SPEED_MAX_DEG_S, SPEED_MAX_MM_S, move_to, split_path
 from irb120_control.panel.cinematica import clean_tool, pose_of, solve_pose
 from irb120_control.panel.limites import BOUNDS, EXT, clean_target
 from irb120_control.panel import verificacion
 
 FRESH_S = 3.0            # una medida más antigua no se dibuja como postura actual
-ACTIONS = ('objetivo', 'enviar', 'cancelar', 'sincronizar', 'paso', 'terminar', 'ik', 'herramienta', 'posicion')
+ACTIONS = ('objetivo', 'enviar', 'cancelar', 'sincronizar', 'paso', 'terminar', 'ik', 'herramienta', 'posicion',
+           'velocidad')
+DEFAULT_SPEED_PCT = 20
 # Posición 0 = calibración ABB (todos los ejes en 0°). Reposo = igual con la muñeca doblada (J5 30°),
 # fuera de la singularidad de muñeca de J5 = 0°, cómoda para empezar a arrastrar la pose.
 POSICIONES = {'cero': [0.] * 6, 'reposo': [0., 0., 0., 0., 30., 0.]}
@@ -43,6 +45,7 @@ class Panel:
         self.reachable = True
         self.abb = None            # (q leído, pose tool0 del ABB, instante) para la verificación 3
         self.start = None          # ejes al empezar la última orden (base del error en %)
+        self.speed_pct = None      # velocidad en % de vMax; se lee del robot (pcVelPct)
         mover.on_joints = self._measured
 
     # ---------- lectura ----------
@@ -83,6 +86,8 @@ class Panel:
             self.mover.lock.release()
         with self.mutex:
             self.state, self.problems = state, problems
+            if state.get('pcVelPct') is not None:
+                self.speed_pct = int(round(state['pcVelPct']))
             if abb is not None:
                 self.abb = abb
 
@@ -195,6 +200,18 @@ class Panel:
         self.say('Cancelación pedida: se detendrá al terminar la orden en curso. '
                  'Para parar YA: soltar el habilitador, Stop o paro de emergencia.')
 
+    def set_speed(self, value):
+        """Velocidad de las próximas órdenes en % (100 % = 250 mm/s y 60°/s). No durante un envío."""
+        with self.mutex:
+            if self.busy:
+                raise Refused('Hay una orden en curso: cambiar la velocidad cuando termine.')
+        with self.mover.lock:
+            pct = self.mover.set_speed(value)
+        with self.mutex:
+            self.speed_pct = pct
+        self.say(f'Velocidad = {pct} % (≈ {SPEED_MAX_MM_S * pct / 100:.0f} mm/s, {SPEED_MAX_DEG_S * pct / 100:.0f}°/s).')
+        return pct
+
     def set_step(self, value):
         value = self.clean_step(value)
         with self.mutex:
@@ -260,6 +277,8 @@ class Panel:
             return {'objetivo': self.set_target(body.get('q'))}
         if action == 'ik':
             return self.solve(body.get('pose'))
+        if action == 'velocidad':
+            return {'velocidad_pct': self.set_speed(body.get('valor'))}
         if action == 'posicion':
             name = body.get('valor')
             if name not in POSICIONES:
@@ -321,6 +340,9 @@ class Panel:
                     'servidor_activo': state.get('rbActivo') == 1,
                     'ultimo': None if code is None else CODES.get(int(code), str(code)),
                     'medido': self.measured, 'edad_s': age, 'objetivo': self.target, 'limites': BOUNDS,
-                    'paso': self.step, 'paso_max': MAX_STEP_DEG, 'posiciones': POSICIONES, 'ordenes': orders, 'ocupado': self.busy,
+                    'paso': self.step, 'paso_max': MAX_STEP_DEG, 'posiciones': POSICIONES,
+                    'velocidad_pct': self.speed_pct,
+                    'velocidad_mm_s': None if self.speed_pct is None else SPEED_MAX_MM_S * self.speed_pct / 100,
+                    'velocidad_deg_s': None if self.speed_pct is None else SPEED_MAX_DEG_S * self.speed_pct / 100, 'ordenes': orders, 'ocupado': self.busy,
                     'faltas': list(self.problems), 'listo': not self.problems and not self.busy,
                     'progreso': self.progress, 'registro': list(self.log)}

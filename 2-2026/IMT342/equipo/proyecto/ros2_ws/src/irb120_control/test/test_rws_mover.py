@@ -40,7 +40,7 @@ class Abb:
         self.source = V2
         self.current = [-4.28397, -12.4929, .697668, -.640559, 3.30636, 1.73935]
         self.target = copy.deepcopy(EMPTY)
-        self.nums = {'pcSeq': 0., 'pcFin': 0., 'rbSeq': 0., 'rbCodigo': 0., 'rbActivo': 1.}
+        self.nums = {'pcSeq': 0., 'pcFin': 0., 'rbSeq': 0., 'rbCodigo': 0., 'rbActivo': 1., 'pcVelPct': 20.}
         self.calls = []; self.rmmp = None; self.rmmp_answer = 'GRANTED'
         self.require_rmmp = mode.startswith('MAN'); self.respond = True; self.reads_until_done = 2
         self.pending = None; self.edit_status = 200
@@ -99,7 +99,7 @@ class Abb:
         if path == SYMBOL:
             self.target = json.loads(data['value']); return Response(status=204)
         name = path[len(BASE_SYMBOL):]
-        assert name in ('pcSeq', 'pcFin'), name
+        assert name in ('pcSeq', 'pcFin', 'pcVelPct'), name
         self.nums[name] = float(data['value'])
         if name == 'pcSeq' and self.respond:
             self.robot(int(self.nums['pcSeq']))
@@ -133,7 +133,7 @@ class RapidModule(unittest.TestCase):
         self.assertEqual(source_fingerprint(V2), SERVER_MODULE_SHA256)
         auto = V2.replace('CONST bool permitirAuto := FALSE;', 'CONST bool permitirAuto := TRUE;')
         self.assertEqual(source_fingerprint(auto), SERVER_AUTO_MODULE_SHA256)
-        self.assertEqual(module_label(SERVER_MODULE_SHA256), 'servidor_v3')
+        self.assertEqual(module_label(SERVER_MODULE_SHA256), 'servidor_v4')
 
     def test_structure(self):
         for routine in ('PROC MostrarObjetivo()', 'PROC ServidorPC()', 'LOCAL FUNC num Validar(',
@@ -153,7 +153,8 @@ class RapidModule(unittest.TestCase):
         # rbCodigo se publica antes que rbSeq (la PC lee rbSeq y después rbCodigo).
         body = V2[V2.index('WHILE pcFin'):V2.index('ENDWHILE')]
         self.assertLess(body.rindex('rbCodigo := 2'), body.index('rbSeq := seq'))
-        self.assertIn('CONST speeddata vPc := [20,5,20,5];', V2)
+        self.assertIn('CONST speeddata vMax := [250,60,250,60];', V2)
+        self.assertIn('PERS num pcVelPct := 20;', V2)
         self.assertIn('CONST bool permitirAuto := FALSE;', V2)
 
 
@@ -224,6 +225,15 @@ class Protocol(unittest.TestCase):
         with self.assertRaisesRegex(Refused, 'instalar'):
             client.send([[*abb.current[:5], abb.current[5] + 1], [9e9] * 6], echo=quiet)
 
+    def test_speed_percent_is_written_and_validated(self):
+        abb = Abb('MANR'); client = mover(abb)
+        self.assertEqual(client.set_speed(55), 55)
+        self.assertEqual(abb.nums['pcVelPct'], 55.)
+        for bad in (0, 101, 'x', True, None):
+            with self.assertRaises(Refused):
+                client.set_speed(bad)
+        self.assertEqual(abb.nums['pcVelPct'], 55.)
+
     def test_start_server_in_auto_sets_and_checks_pointer(self):
         class AbbPP(Abb):
             def __init__(self, mode, land='LabJointRws'):
@@ -290,7 +300,7 @@ class Protocol(unittest.TestCase):
     def test_auto_requires_auto_variant_and_needs_no_rmmp(self):
         abb = Abb('AUTO'); abb.source = V2.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
         client = mover(abb)
-        self.assertEqual(client.module_version, 'servidor_v3_auto')
+        self.assertEqual(client.module_version, 'servidor_v4_auto')
         client.move_to(parse_goal(['j1', '-2'], client.joints()), 5, echo=quiet)
         self.assertFalse([c for c in abb.calls if c[1] == RMMP])
 
@@ -364,7 +374,7 @@ class Protocol(unittest.TestCase):
             'execution': rows('ctrlexecstate', 'stopped'), 'target': rows('value', literal(EMPTY)),
             'module': rows('module-text', V2)}}
         report = diagnose_inspection(inspection)
-        self.assertEqual(report['module_version'], 'servidor_v3')
+        self.assertEqual(report['module_version'], 'servidor_v4')
         self.assertTrue(report['local_navigation_prerequisites_observed'], report['issues'])
 
 

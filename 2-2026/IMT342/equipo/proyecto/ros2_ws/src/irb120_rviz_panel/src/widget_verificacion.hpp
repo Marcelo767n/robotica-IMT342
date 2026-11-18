@@ -9,6 +9,7 @@
 #include <QWidget>
 
 class QGridLayout;
+class QPushButton;
 
 namespace irb120_rviz_panel
 {
@@ -35,6 +36,8 @@ private:
     QLabel * valores;
   };
   Fila crearFila(QGridLayout * rejilla, int fila, const QString & titulo);
+  void mostrarMatrices();
+  void actualizarIdaVuelta(const QJsonObject & v);
   static void pintarFila(const Fila & fila, const QString & texto, int estado);
 
   Fila ikFk_;
@@ -42,6 +45,9 @@ private:
   Fila controlador_;
   QLabel * desglose_;                 // dx dy dz y % del recorrido del TCP (fila 2)
   QVector<QVector<QLabel *>> ejes_;   // J1..J6 × (objetivo, medido, error °, error %)
+  QVector<QVector<QLabel *>> idaVuelta_;   // J1..J6 × (q IK, q recuperado, error °)
+  QLabel * idaVueltaOk_;
+  QPushButton * matrices_;
   QLabel * limites_;
   QLabel * alcanzable_;
   QLabel * veredicto_;

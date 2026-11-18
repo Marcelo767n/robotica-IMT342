@@ -1,6 +1,9 @@
 #include "widget_verificacion.hpp"
 
+#include <QDialog>
 #include <QGridLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
 #include <QJsonArray>
 #include <QVBoxLayout>
 
@@ -76,6 +79,42 @@ WidgetVerificacion::WidgetVerificacion(QWidget * padre)
   }
   caja->addLayout(tabla);
 
+  // Ida y vuelta IK(FK(q)): q IK, q recuperado y error por eje.
+  auto * titulo = new QLabel(QStringLiteral("<b>Ida y vuelta IK(FK(q))</b>"));
+  caja->addWidget(titulo);
+  auto * ida = new QGridLayout();
+  ida->setContentsMargins(0, 0, 0, 0);
+  ida->setHorizontalSpacing(10);
+  ida->setVerticalSpacing(1);
+  const QStringList cabIda{QString(), QStringLiteral("q IK °"), QStringLiteral("q recuperado °"),
+    QStringLiteral("Error °")};
+  for (int c = 0; c < cabIda.size(); ++c) {
+    auto * cab = new QLabel(cabIda[c]);
+    cab->setStyleSheet(QStringLiteral("color:#6b7280; font-size:8pt;"));
+    ida->addWidget(cab, 0, c, c == 0 ? Qt::AlignLeft : Qt::AlignRight);
+  }
+  for (int i = 0; i < 6; ++i) {
+    auto * nombre = new QLabel(QStringLiteral("J%1").arg(i + 1));
+    nombre->setStyleSheet(QStringLiteral("font-weight:bold;"));
+    ida->addWidget(nombre, i + 1, 0);
+    QVector<QLabel *> fila;
+    for (int c = 1; c <= 3; ++c) {
+      auto * celda = new QLabel(QStringLiteral("—"));
+      celda->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+      ida->addWidget(celda, i + 1, c);
+      fila.append(celda);
+    }
+    idaVuelta_.append(fila);
+  }
+  caja->addLayout(ida);
+  auto * filaIda = new QHBoxLayout();
+  idaVueltaOk_ = new QLabel;
+  matrices_ = new QPushButton(QStringLiteral("Ver matrices T"));
+  filaIda->addWidget(idaVueltaOk_, 1);
+  filaIda->addWidget(matrices_);
+  caja->addLayout(filaIda);
+  connect(matrices_, &QPushButton::clicked, this, &WidgetVerificacion::mostrarMatrices);
+
   auto * fila = new QHBoxLayout();
   limites_ = new QLabel;
   alcanzable_ = new QLabel;
@@ -136,6 +175,14 @@ void WidgetVerificacion::sinConexion()
   for (const Fila * f : {&ikFk_, &robot_, &controlador_}) {
     pintarFila(*f, QStringLiteral("—"), Gris);
   }
+  for (auto & fila : idaVuelta_) {
+    for (QLabel * celda : fila) {
+      celda->setText(QStringLiteral("—"));
+      celda->setStyleSheet(QString());
+    }
+  }
+  idaVueltaOk_->setText(QStringLiteral("<span style='color:#6b7280;'>Ida y vuelta: —</span>"));
+  matrices_->setEnabled(false);
   limites_->setText(QStringLiteral("Límites: —"));
   alcanzable_->setText(QStringLiteral("Alcanzable: —"));
   veredicto_->setText(QStringLiteral("<span style='color:#6b7280;'>Sin verificación</span>"));
@@ -162,9 +209,11 @@ void WidgetVerificacion::actualizar(const QJsonObject & estado)
     pintarFila(ikFk_, v.value("origen").toString() == QStringLiteral("angulos") ?
       QStringLiteral("— (objetivo escrito en ángulos: la pose deseada es su FK)") : QStringLiteral("—"), Gris);
   } else {
-    pintarFila(ikFk_, QString::asprintf("posición %.4f mm · orientación %.4f°",
+    pintarFila(ikFk_, QString::asprintf("posición %.4f mm · orientación %.4f°\ncriterio ≤ 0,001 mm / 0,001°",
       numero(ik, "pos_mm"), numero(ik, "rot_deg")), ik.value("ok").toBool() ? Verde : Rojo);
   }
+
+  actualizarIdaVuelta(v);
 
   const QJsonObject rb = v.value("robot").toObject();
   if (rb.isEmpty()) {
@@ -230,12 +279,93 @@ void WidgetVerificacion::actualizar(const QJsonObject & estado)
       .arg((motivo_.isEmpty() ? QStringLiteral("sin motivo informado") : motivo_).toHtmlEscaped()));
 
   const QString textoTol = tol.isEmpty() ? QString() : QString::asprintf(
-    "Tolerancias: IK→FK %.3g mm / %.3g° · llegada %.3g mm / %.3g° · modelo %.3g mm / %.3g°",
-    numero(tol, "ik_mm"), numero(tol, "ik_deg"), numero(tol, "llegada_mm"), numero(tol, "llegada_deg"),
+    "Tolerancias: IK→FK %.3g mm / %.3g° · ida y vuelta %.3g° · llegada %.3g mm / %.3g° · modelo %.3g mm / %.3g°",
+    numero(tol, "ik_mm"), numero(tol, "ik_deg"), numero(tol, "ida_vuelta_deg"), numero(tol, "llegada_mm"), numero(tol, "llegada_deg"),
     numero(tol, "modelo_mm"), numero(tol, "modelo_deg"));
   tolerancias_->setText(QStringLiteral("Pose deseada (%1): %2\n%3")
     .arg(texto(v.value("herramienta")), pose(seis(v.value("pose_deseada"))), textoTol));
   setToolTip(textoTol);
+}
+
+void WidgetVerificacion::actualizarIdaVuelta(const QJsonObject & v)
+{
+  const QJsonValue crudo = v.value("ida_vuelta");
+  const QJsonArray filas = crudo.toArray();
+  const double tol = [&v]() {
+      const double t = numero(v.value("tolerancias").toObject(), "ida_vuelta_deg");
+      return std::isfinite(t) ? t : 0.001;
+    }();
+  bool hayDatos = false;
+  for (int i = 0; i < 6; ++i) {
+    const QJsonObject f = i < filas.size() ? filas[i].toObject() : QJsonObject();
+    const double qik = numero(f, "q_ik");
+    const double qrec = numero(f, "q_recuperado");
+    const double err = numero(f, "error_deg");
+    hayDatos = hayDatos || std::isfinite(qik);
+    idaVuelta_[i][0]->setText(std::isfinite(qik) ? QString::number(qik, 'f', 4) : QStringLiteral("—"));
+    idaVuelta_[i][1]->setText(std::isfinite(qrec) ? QString::number(qrec, 'f', 4) : QStringLiteral("—"));
+    idaVuelta_[i][2]->setText(std::isfinite(err) ? QString::asprintf("%.4f", err) : QStringLiteral("—"));
+    idaVuelta_[i][2]->setStyleSheet(!std::isfinite(err) ? QString() :
+      std::abs(err) <= tol ? QStringLiteral("color:#15803d;") : QStringLiteral("color:#b91c1c; font-weight:bold;"));
+  }
+  const QJsonValue ok = v.value("ida_vuelta_ok");
+  if (!hayDatos || !ok.isBool()) {
+    idaVueltaOk_->setText(QStringLiteral("<span style='color:#6b7280;'>Ida y vuelta: — (objetivo en ángulos o sin IK)</span>"));
+  } else {
+    idaVueltaOk_->setText(QStringLiteral("<b style='color:%1;'>Ida y vuelta: %2</b> <span style='color:#6b7280;'>(≤ %3°)</span>")
+      .arg(ok.toBool() ? "#15803d" : "#b91c1c", ok.toBool() ? "OK" : "FUERA").arg(tol, 0, 'g', 3));
+  }
+  const QJsonObject m = v.value("matrices").toObject();
+  matrices_->setEnabled(m.value("T_pedida").isArray() && m.value("T_fk").isArray());
+}
+
+void WidgetVerificacion::mostrarMatrices()
+{
+  const QJsonObject m = ultima_.value("matrices").toObject();
+  const auto leer = [](const QJsonValue & val, double (&t)[4][4]) {
+      const QJsonArray a = val.toArray();
+      bool ok = a.size() == 4;
+      for (int i = 0; i < 4; ++i) {
+        const QJsonArray r = ok ? a[i].toArray() : QJsonArray();
+        ok = ok && r.size() == 4;
+        for (int j = 0; j < 4; ++j) {
+          t[i][j] = ok && r[j].isDouble() ? r[j].toDouble() : std::nan("");
+        }
+      }
+      return ok;
+    };
+  double pedida[4][4];
+  double fk[4][4];
+  if (!leer(m.value("T_pedida"), pedida) || !leer(m.value("T_fk"), fk)) {
+    return;
+  }
+  auto * dialogo = new QDialog(this);
+  dialogo->setAttribute(Qt::WA_DeleteOnClose);
+  dialogo->setWindowTitle(QStringLiteral("Matrices T (metros)"));
+  auto * capa = new QVBoxLayout(dialogo);
+  const auto bloque = [&](const QString & titulo, auto valor) {
+      capa->addWidget(new QLabel(QStringLiteral("<b>%1</b>").arg(titulo)));
+      auto * rejilla = new QGridLayout();
+      rejilla->setHorizontalSpacing(14);
+      rejilla->setVerticalSpacing(2);
+      for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+          const double x = valor(i, j);
+          auto * celda = new QLabel(std::isfinite(x) ? QString::asprintf("%+.4f", x) : QStringLiteral("—"));
+          celda->setFont(QFont(QStringLiteral("Monospace"), 9));
+          celda->setAlignment(Qt::AlignRight);
+          rejilla->addWidget(celda, i, j);
+        }
+      }
+      capa->addLayout(rejilla);
+    };
+  bloque(QStringLiteral("T pedida"), [&](int i, int j) {return pedida[i][j];});
+  bloque(QStringLiteral("T = FK(q_IK)"), [&](int i, int j) {return fk[i][j];});
+  bloque(QStringLiteral("Diferencia (T pedida − T FK)"), [&](int i, int j) {return pedida[i][j] - fk[i][j];});
+  auto * cerrar = new QPushButton(QStringLiteral("Cerrar"));
+  connect(cerrar, &QPushButton::clicked, dialogo, &QDialog::accept);
+  capa->addWidget(cerrar, 0, Qt::AlignRight);
+  dialogo->show();
 }
 
 void WidgetVerificacion::resaltarLlegada()

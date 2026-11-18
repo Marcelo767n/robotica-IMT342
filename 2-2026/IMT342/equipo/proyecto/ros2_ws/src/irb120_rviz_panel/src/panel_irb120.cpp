@@ -19,6 +19,7 @@
 #include "widget_ejes.hpp"
 #include "widget_estado.hpp"
 #include "widget_pose.hpp"
+#include "widget_velocidad.hpp"
 #include "widget_verificacion.hpp"
 
 namespace irb120_rviz_panel
@@ -43,6 +44,7 @@ PanelIRB120::PanelIRB120(QWidget * padre)
   ejes_ = new WidgetEjes;
   pose_ = new WidgetPose;
   verificacion_ = new WidgetVerificacion;
+  velocidad_ = new WidgetVelocidad;
 
   contenido_ = new QWidget;
   auto * capa = new QVBoxLayout(contenido_);
@@ -51,6 +53,7 @@ PanelIRB120::PanelIRB120(QWidget * padre)
   capa->addWidget(grupo(QStringLiteral("Ángulos J1–J6 (grados)"), ejes_));
   capa->addWidget(grupo(QStringLiteral("Posición cartesiana → ángulos (cinemática inversa)"), pose_));
   capa->addWidget(grupo(QStringLiteral("Verificación (en tiempo real)"), verificacion_));
+  capa->addWidget(grupo(QStringLiteral("Velocidad"), velocidad_));
   capa->addWidget(construirAcciones());
   auto * parar = new QLabel(QStringLiteral(
       "<b>Para detener el robot:</b> soltar el habilitador, Stop o paro de emergencia. "
@@ -89,6 +92,9 @@ PanelIRB120::PanelIRB120(QWidget * padre)
   connect(pose_, &WidgetPose::usarRama, this, [this](const QVector<double> & q) {
       ejes_->ponerObjetivo(q);
       orden(QStringLiteral("objetivo"), {{QStringLiteral("q"), arreglo(q)}});
+    });
+  connect(velocidad_, &WidgetVelocidad::velocidadElegida, this, [this](int pct) {
+      orden(QStringLiteral("velocidad"), {{QStringLiteral("valor"), pct}});
     });
   vigilancia_.setInterval(500);
   connect(&vigilancia_, &QTimer::timeout, this, &PanelIRB120::vigilar);
@@ -178,6 +184,7 @@ void PanelIRB120::recibir(const QJsonObject & e)
   ejes_->actualizar(e);
   pose_->actualizar(e);
   verificacion_->actualizar(e);
+  velocidad_->actualizar(e);
   const bool ocupado = e.value("ocupado").toBool();
   if (estabaOcupado_ && !ocupado) {
     verificacion_->resaltarLlegada();
@@ -230,6 +237,7 @@ void PanelIRB120::habilitar()
   const bool hayCambio = !medido.isEmpty() && cambioMaximo(ejes_->objetivo(), medido) >= 0.01;
   ejes_->setBloqueado(!conectado_ || ocupado);
   pose_->setBloqueado(!conectado_ || ocupado);
+  velocidad_->setBloqueado(!conectado_);
   const bool permitido = verificacion_->envioPermitido();
   enviar_->setEnabled(conectado_ && ultimo_.value("listo").toBool() && !ocupado && hayCambio && permitido);
   enviar_->setToolTip(!conectado_ ? QStringLiteral("Sin conexión con irb120_panel_rws") :

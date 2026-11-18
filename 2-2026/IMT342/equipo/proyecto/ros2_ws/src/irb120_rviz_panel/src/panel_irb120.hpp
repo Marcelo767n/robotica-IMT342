@@ -20,6 +20,7 @@ class ClienteRos;
 class WidgetEjes;
 class WidgetEstado;
 class WidgetPose;
+class WidgetVelocidad;
 class WidgetVerificacion;
 
 class PanelIRB120 : public rviz_common::Panel
@@ -45,6 +46,7 @@ private:
   WidgetEjes * ejes_;
   WidgetPose * pose_;
   WidgetVerificacion * verificacion_;
+  WidgetVelocidad * velocidad_;
   QComboBox * paso_;
   QPushButton * posCero_;
   QPushButton * posReposo_;

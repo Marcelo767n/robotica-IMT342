@@ -18,8 +18,13 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
     ./brazo.sh estado          modo, motores, RAPID, módulo y ángulos; dice qué FALTA
     ./brazo.sh respaldar       copia los módulos RAPID del robot a rapid/respaldo_controlador/ (solo lectura)
     ./brazo.sh limpiar         vacía un objetivo pendiente     (llave AUTO, motores OFF)
-    ./brazo.sh instalar        instala LabJointRws v2 (manual) (llave AUTO, motores OFF)
-    ./brazo.sh instalar-auto   v2 que acepta modo AUTO         (llave AUTO, motores OFF, con autorización)
+    ./brazo.sh instalar        instala LabJointRws v4 (manual) (llave AUTO, motores OFF)
+    ./brazo.sh instalar-auto   v4 que acepta modo AUTO         (llave AUTO, motores OFF, con autorización)
+
+  TODO EN UNO (jueves)
+    ./brazo.sh sesion          una contraseña: comprueba el enlace, guía AUTO (llave, módulo, Motors On,
+                               arranque, «Iniciar») y abre RViz + panel + ventana de análisis del Hito 2
+    ./brazo.sh analisis        solo la ventana de análisis (lee el panel abierto)
 
   MOVER (todo en RViz: panel «IRB 120» + control 3D de la pose)
     ./brazo.sh panel           robot real: ángulos, pose con cinemática inversa, Enviar al robot
@@ -77,6 +82,12 @@ case "$cmd" in
     [[ "$answer" == AUTO ]] || { echo "Cancelado."; exit 1; }
     run rws_mover instalar --auto --host "$host" "$@" ;;
   panel)    run panel --host "$host" "$@" ;;
+  sesion)
+    "$0" enlace || { echo; echo 'Sin enlace con el robot: revisar cable y adaptador USB (conectarlo directo a la PC).'; exit 2; }
+    run panel --auto --analisis --host "$host" "$@" ;;
+  analisis)
+    export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
+    exec /usr/bin/python3 -m irb120_control.analisis "$@" ;;
   simulado) run panel --simulado "$@" ;;
   terminal) run rws_mover interactivo --host "$host" "$@" ;;
   arrancar) run rws_mover arrancar --host "$host" "$@" ;;
@@ -94,6 +105,8 @@ case "$cmd" in
     py="${ROS_PY312:-$HOME/ros_py312/bin/python}"; [[ -x "$py" ]] || py=python3
     cd "$here"
     "$py" -m unittest discover -s src/irb120_control/test -p 'test_r[we]*.py' \
-      && "$py" -m unittest discover -s src/irb120_control/test -p 'test_panel*.py' ;;
+      && "$py" -m unittest discover -s src/irb120_control/test -p 'test_panel*.py' \
+      && "$py" -m unittest discover -s src/irb120_control/test -p 'test_sesion.py' \
+      && /usr/bin/python3 -m unittest discover -s src/irb120_control/test -p 'test_analisis.py' ;;
   *) echo "Comando desconocido: $cmd"; echo; ayuda; exit 2 ;;
 esac
