@@ -94,11 +94,19 @@ Antes de permitir la ejecución, comprobar a lo largo de **toda** la trayectoria
 - Que se vean con los valores numéricos actuales y se actualicen con la pose/trayectoria seleccionada.
 - Pensado para proyectar en la defensa: tipografía grande y explicación breve de cada bloque.
 
-## 8. Preguntas abiertas (para decidir antes de implementar)
+## 8. Decisiones del 20/11/2026
 
-1. ¿CustomTkinter **sustituye** a la ventana de análisis actual o convive con ella? (instalarlo requiere `pip` en un entorno virtual).
-2. Entre puntos de la trayectoria, ¿movimiento **articular** (como hoy, `MoveAbsJ` + LSPB del Hito 2) o **en línea recta cartesiana** (`MoveL`, con IK en muchos puntos intermedios)?
-3. ¿El robot debe pasar por los puntos **deteniéndose** en cada uno (`fine`) o **sin parar** (zonas `z10`), lo que exige ampliar el RAPID para encolar varios puntos?
-4. ¿Cómo se definen los puntos: escribiendo poses, capturando la postura del robot, arrastrando en RViz, o las tres?
-5. Tolerancias de las reglas: ¿σ_min ≥ 0,01 y 5° de margen a los límites como en el Hito 2, o más estrictas?
-6. Matemática: ¿basta con *mathtext* de matplotlib (sin instalar nada) o se quiere LaTeX completo (requiere TeX instalado)?
+| Tema | Decisión |
+|---|---|
+| Tipo de movimiento entre puntos | **Lo elige el programa según los cálculos**: para cada tramo evalúa recta cartesiana y movimiento articular (alcanzabilidad en todo el tramo, rama de IK consistente, σ_min(J), límites, duración LSPB, par) y propone el mejor, explicando por qué. |
+| Paradas | El robot **se detiene en cada punto de paso** (`fine`), donde se verifica la llegada (mm y %). |
+| Fluidez dentro de un tramo | **Sin paradas intermedias**: eliminar los cortes cada 40° que hoy dividen un tramo largo en varias órdenes con parada (requiere ampliar el RAPID a una sola orden por tramo o encolar subpuntos con zona y `fine` solo al final). |
+| Cómo se definen los puntos | **Capturando la postura actual** del robot y **arrastrando el control 3D en RViz** («Añadir a la trayectoria»). |
+| Interfaz CustomTkinter | **Solo análisis y trayectorias** (diseñar, verificar, ver la matemática). Para mover se sigue usando el panel de RViz; la trayectoria verificada se envía al panel. |
+| Visión artificial | Dejar el **cimiento**: una entrada de puntos externa (p. ej. un tópico ROS con poses en `base_link`) para que un nodo de visión publique coordenadas que aparezcan como puntos de trayectoria, con la misma verificación. |
+
+## 9. Preguntas abiertas
+
+1. Tolerancias de las reglas: ¿σ_min ≥ 0,01 y 5° de margen a los límites como en el Hito 2, o más estrictas?
+2. Matemática: ¿basta con *mathtext* de matplotlib (sin instalar nada) o se quiere LaTeX completo (requiere TeX)?
+3. Visión: ¿qué cámara y dónde va montada (fija sobre la mesa o en la pinza)? Define cómo se calibra cámara → base del robot.
