@@ -25,6 +25,7 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
   TODO EN UNO (jueves)
     ./brazo.sh sesion          una contraseña: comprueba el enlace, guía AUTO (llave, módulo, Motors On,
                                arranque, «Iniciar») y abre RViz + panel + Estudio de trayectorias
+    ./brazo.sh sesion --simulado  la misma sesión SIN robot (prueba): RViz + panel + Estudio, robot ficticio
     ./brazo.sh sesion --v4     lo mismo con el módulo de RESPALDO v4 (ya probado: solo articular, órdenes de ≤40°,
                                sin MoveL). Si la v5 no carga o no arranca en el robot, usar este.
                                También vale: ./brazo.sh panel --modulo v4
@@ -38,7 +39,7 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
     ./brazo.sh plc             nodo irb120_plc_s7 (telegrama TCP, puerto 2000) + nodo irb120_celda (traductor)
                                junto al panel ya abierto (sesion/panel). --simulado con ./brazo.sh simulado
     ./brazo.sh nodos           grafo ROS 2 en vivo: nodos, tópicos, quién publica/escucha (--simulado, --png F)
-    ./brazo.sh demo            TODO sin robot: RViz + panel simulado + Estudio + celda PLC simulada
+    ./brazo.sh demo            TODO sin robot: RViz + panel simulado + Estudio (--plc: + celda PLC)
     ./brazo.sh plc-simulador   PLC simulado en esta PC (sin hardware): habilitar on · ejecutar 1 40 · pausar…
 
   MOVER (todo en RViz: panel «IRB 120» + control 3D de la pose)
@@ -98,7 +99,15 @@ case "$cmd" in
     run rws_mover instalar --auto --host "$host" "$@" ;;
   panel)    run panel --host "$host" "$@" ;;
   sesion)
-    "$0" enlace || { echo; echo 'Sin enlace con el robot: revisar cable y adaptador USB (conectarlo directo a la PC).'; exit 2; }
+    # --simulado: la misma sesión (RViz + panel + Estudio) con un robot ficticio, sin cable ni FlexPendant.
+    for a in "$@"; do
+      if [[ "$a" == --simulado ]]; then
+        args=(); for b in "$@"; do [[ "$b" == --simulado || "$b" == --v4 ]] || args+=("$b"); done
+        echo "SESIÓN DE PRUEBA SIN ROBOT: robot simulado, mismas ventanas que la sesión real."
+        run panel --simulado --analisis "${args[@]}"
+      fi
+    done
+    "$here/brazo.sh" enlace || { echo; echo 'Sin enlace con el robot: revisar cable y adaptador USB (conectarlo directo a la PC).'; exit 2; }
     run panel --auto --analisis --host "$host" "$@" ;;
   estudio)
     export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
@@ -138,15 +147,19 @@ case "$cmd" in
     export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
     exec "${ROS_PY312:-$HOME/ros_py312/bin/python}" -m irb120_control.grafo_ros "${args[@]}" ;;
   demo)
-    # Todo sin robot: RViz + panel simulado + Estudio, y la celda PLC (nodos + PLC simulado) en segundo plano.
-    log="$here/../salidas/demo"; mkdir -p "$log"
-    "$here/brazo.sh" plc --simulado > "$log/plc_nodos.log" 2>&1 &
-    plc=$!
-    trap 'kill $plc 2>/dev/null; wait $plc 2>/dev/null' EXIT INT TERM
-    echo "Celda PLC simulada en segundo plano (registro: salidas/demo/plc_nodos.log)."
-    echo "En OTRA terminal: ./brazo.sh plc-simulador   (habilitar on · ejecutar 1 30 · pausar · reanudar)"
-    echo "Y para ver los nodos conectados: ./brazo.sh nodos --simulado --png salidas/grafo_ros.png"
-    "$here/brazo.sh" simulado --analisis "$@" ;;
+    # Todo sin robot: RViz + panel simulado + Estudio. Con --plc, además la celda PLC simulada en segundo plano.
+    args=(); conplc=0
+    for a in "$@"; do [[ "$a" == --plc ]] && conplc=1 || args+=("$a"); done
+    if [[ $conplc == 1 ]]; then
+      log="$here/../salidas/demo"; mkdir -p "$log"
+      "$here/brazo.sh" plc --simulado > "$log/plc_nodos.log" 2>&1 &
+      plc=$!
+      trap 'kill $plc 2>/dev/null; wait $plc 2>/dev/null' EXIT INT TERM
+      echo "Celda PLC simulada en segundo plano (registro: salidas/demo/plc_nodos.log)."
+      echo "En OTRA terminal: ./brazo.sh plc-simulador   (habilitar on · ejecutar 1 30 · pausar · reanudar)"
+    fi
+    echo "Para ver los nodos conectados: ./brazo.sh nodos --simulado --png salidas/grafo_ros.png"
+    "$here/brazo.sh" simulado --analisis "${args[@]}" ;;
   plc-simulador)
     export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
     exec /usr/bin/python3 -m irb120_control.plc.simulador "$@" ;;
