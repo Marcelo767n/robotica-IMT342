@@ -34,6 +34,8 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
   CELDA CON PLC S7-1200 (nodos ROS 2 independientes; ver docs/PLC_S7_1200.md)
     ./brazo.sh plc             nodo irb120_plc_s7 (telegrama TCP, puerto 2000) + nodo irb120_celda (traductor)
                                junto al panel ya abierto (sesion/panel). --simulado con ./brazo.sh simulado
+    ./brazo.sh nodos           grafo ROS 2 en vivo: nodos, tópicos, quién publica/escucha (--simulado, --png F)
+    ./brazo.sh demo            TODO sin robot: RViz + panel simulado + Estudio + celda PLC simulada
     ./brazo.sh plc-simulador   PLC simulado en esta PC (sin hardware): habilitar on · ejecutar 1 40 · pausar…
 
   MOVER (todo en RViz: panel «IRB 120» + control 3D de la pose)
@@ -124,6 +126,24 @@ case "$cmd" in
     celda=$!
     trap 'kill $celda 2>/dev/null; wait $celda 2>/dev/null' EXIT INT TERM
     "$py" -m irb120_control.plc.nodo_plc "${args[@]}" ;;
+  nodos)
+    # Grafo ROS 2 en vivo (nodos, tópicos, quién publica y escucha). --simulado para el panel simulado.
+    dominio=120; args=()
+    for a in "$@"; do [[ "$a" == --simulado ]] && dominio=121 || args+=("$a"); done
+    source /opt/ros/jazzy/setup.bash
+    export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST ROS_DOMAIN_ID=$dominio
+    export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
+    exec "${ROS_PY312:-$HOME/ros_py312/bin/python}" -m irb120_control.grafo_ros "${args[@]}" ;;
+  demo)
+    # Todo sin robot: RViz + panel simulado + Estudio, y la celda PLC (nodos + PLC simulado) en segundo plano.
+    log="$here/../salidas/demo"; mkdir -p "$log"
+    "$here/brazo.sh" plc --simulado > "$log/plc_nodos.log" 2>&1 &
+    plc=$!
+    trap 'kill $plc 2>/dev/null; wait $plc 2>/dev/null' EXIT INT TERM
+    echo "Celda PLC simulada en segundo plano (registro: salidas/demo/plc_nodos.log)."
+    echo "En OTRA terminal: ./brazo.sh plc-simulador   (habilitar on · ejecutar 1 30 · pausar · reanudar)"
+    echo "Y para ver los nodos conectados: ./brazo.sh nodos --simulado --png salidas/grafo_ros.png"
+    "$here/brazo.sh" simulado --analisis "$@" ;;
   plc-simulador)
     export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
     exec /usr/bin/python3 -m irb120_control.plc.simulador "$@" ;;
