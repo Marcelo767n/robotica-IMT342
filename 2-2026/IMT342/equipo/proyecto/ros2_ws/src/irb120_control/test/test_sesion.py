@@ -163,3 +163,51 @@ class SesionV4(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class PrepararConRespaldo(unittest.TestCase):
+    """arranque.preparar_con_respaldo: la demo nunca se queda sin interfaz (24/11/2026)."""
+
+    def setUp(self):
+        import types
+        self.args = types.SimpleNamespace(modulo='v5', paso=355., log_dir=None)
+        self.mover = types.SimpleNamespace(modulo='v5', module_version='servidor_v4_auto', connect=lambda: None)
+        self.lineas = []
+
+    def echo(self, *a, **k):
+        self.lineas.append(' '.join(map(str, a)))
+
+    def correr(self, fallos):
+        from irb120_control.panel.arranque import preparar_con_respaldo
+        from irb120_control.rws_j6 import Refused
+        llamadas = []
+
+        def preparar(mover, log_dir, modulo):
+            llamadas.append(modulo)
+            if modulo in fallos:
+                raise Refused(f'falla {modulo}')
+        listo = preparar_con_respaldo(self.mover, self.args, preparar=preparar, echo=self.echo)
+        return listo, llamadas
+
+    def test_v5_ok(self):
+        self.assertEqual(self.correr(set()), (True, ['v5']))
+        self.assertEqual(self.args.modulo, 'v5')
+
+    def test_v5_falla_y_sigue_con_v4(self):
+        listo, llamadas = self.correr({'v5'})
+        self.assertTrue(listo)
+        self.assertEqual(llamadas, ['v5', 'v4'])
+        self.assertEqual((self.mover.modulo, self.args.modulo, self.args.paso), ('v4', 'v4', 40.))
+
+    def test_sin_v4_en_el_robot_no_cambia_de_modulo(self):
+        self.mover.module_version = 'servidor_v5_auto'
+        listo, llamadas = self.correr({'v5'})
+        self.assertFalse(listo)
+        self.assertEqual(llamadas, ['v5'])
+        self.assertTrue(any('Se abre RViz igualmente' in l for l in self.lineas))
+
+    def test_todo_falla_abre_la_interfaz(self):
+        listo, llamadas = self.correr({'v5', 'v4'})
+        self.assertFalse(listo)
+        self.assertEqual(llamadas, ['v5', 'v4'])
+        self.assertTrue(any('Se abre RViz igualmente' in l for l in self.lineas))

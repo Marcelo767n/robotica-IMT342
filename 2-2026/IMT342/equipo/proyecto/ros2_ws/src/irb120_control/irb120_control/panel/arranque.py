@@ -67,6 +67,41 @@ def argumentos(argv):
     return parser, args
 
 
+def preparar_con_respaldo(mover, args, preparar=None, echo=print):
+    """Puesta en marcha AUTO que no deja la demo sin interfaz.
+
+    1. Con v5: si falla y el robot sigue con la v4, se pasa solo al módulo v4 (ya probado) y se reintenta.
+    2. Si aun así no queda listo, se avisa y se abre RViz igualmente: el panel muestra qué falta y
+       bloquea los envíos hasta que el robot esté listo (mismas comprobaciones de siempre)."""
+    if preparar is None:
+        from irb120_control.panel.sesion import preparar_auto as preparar
+    try:
+        preparar(mover, args.log_dir, modulo=args.modulo)
+        return True
+    except Refused as exc:
+        motivo = str(exc)
+    if args.modulo == 'v5':
+        try:
+            mover.connect()   # relee qué módulo quedó en el robot
+        except Exception:
+            pass
+        if str(getattr(mover, 'module_version', '')).startswith('servidor_v4'):
+            echo(f'AVISO: la v5 no se pudo preparar ({motivo}).', flush=True)
+            echo('Se sigue con el módulo v4 ya probado en el robot (tramos articulares; los largos se parten '
+                 'en órdenes de 40°).', flush=True)
+            mover.modulo, args.modulo = 'v4', 'v4'
+            args.paso = min(args.paso, V4_STEP_DEG)
+            try:
+                preparar(mover, args.log_dir, modulo='v4')
+                return True
+            except Refused as exc:
+                motivo = str(exc)
+    echo(f'AVISO: el robot no quedó listo: {motivo}', flush=True)
+    echo('Se abre RViz igualmente: el panel muestra qué falta y no enviará nada hasta que el robot esté listo.',
+         flush=True)
+    return False
+
+
 def bloquear(parser):
     """Mismos tópicos que control_*: nunca dos sesiones a la vez."""
     LOCK.parent.mkdir(parents=True, exist_ok=True)
@@ -127,8 +162,7 @@ def main(argv=None):
     try:
         mover, session = conexion.abrir(args.base, args.user, args.log_dir, args.simulado, modulo=args.modulo)
         if args.auto and not args.simulado:
-            from irb120_control.panel.sesion import preparar_auto
-            preparar_auto(mover, args.log_dir, modulo=args.modulo)
+            preparar_con_respaldo(mover, args)
         panel = Panel(mover, step=args.paso, timeout=args.timeout, simulated=args.simulado)
         panel.poll()
         if panel.state is not None:
