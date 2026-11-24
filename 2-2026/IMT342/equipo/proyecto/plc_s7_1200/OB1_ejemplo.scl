@@ -1,0 +1,146 @@
+// =============================================================================
+// Ejemplo de programa de celda: pieza presente -> trayectoria 1 -> esperar fin
+// -> trayectoria 2 -> esperar fin -> esperar retirada de pieza.
+// Importar DESPUES de las UDT y de FB_IRB120_PC. PENDIENTE DE COMPILAR EN TIA.
+//
+// Entradas fisicas supuestas (ajustar a la tabla de variables real):
+//   %I0.0 habilitar celda (selector)      %I0.1 parada OK (contacto NC: 1 = sin parada)
+//   %I0.2 pieza presente                  %I0.3 acuse de error (pulsador)
+//   %Q0.0 lampara de alarma
+// La parada de este programa solo envia PAUSAR (bit 2); solo PAUSA la trayectoria en el siguiente punto de
+// paso. NO es parada de emergencia (ver README).
+// =============================================================================
+FUNCTION_BLOCK "FB_Celda_Ejemplo"
+{ S7_Optimized_Access := 'FALSE' }   // igual que FB_IRB120_PC (multiinstancia)
+VERSION : 0.2
+   VAR_INPUT
+      HabilitarCelda : Bool;
+      ParadaOK : Bool;               // contacto NC: TRUE = no hay parada
+      PiezaPresente : Bool;
+      Reset : Bool;
+   END_VAR
+   VAR_OUTPUT
+      Alarma : Bool;
+      Paso : Int;
+   END_VAR
+   VAR
+      plc : "FB_IRB120_PC";          // multiinstancia
+      iPaso : Int;
+      trayAct : UInt;
+      cEj : Bool;                    // pulsos de 1 ciclo hacia el FB
+      cAc : Bool;
+      cPa : Bool;
+      tPaso : TON_TIME;
+      rtReset : R_TRIG;
+      ftParada : F_TRIG;
+   END_VAR
+
+BEGIN
+#cEj := FALSE;
+#cAc := FALSE;
+#rtReset(CLK := #Reset);
+#ftParada(CLK := #ParadaOK);
+#cPa := #ftParada.Q;                 // parada pulsada -> orden Pausar (bit 2 de mando)
+#tPaso(IN := (#iPaso = 10) OR (#iPaso = 20) OR (#iPaso = 50) OR (#iPaso = 60), PT := T#3s);
+
+// Fallo de secuencia: sin enlace o error del robot
+IF (#iPaso <> 0) AND (#iPaso <> 90) AND ((NOT #plc.EnlacePC) OR #plc.ErrorCelda) THEN
+    #iPaso := 90;
+END_IF;
+
+// Funciona en formato nucleo: solo usa bits de estado (Moviendo, Terminado, ErrorCelda).
+CASE #iPaso OF
+    0:  // todo listo y pieza presente
+        IF #PiezaPresente AND #HabilitarCelda AND #ParadaOK AND #plc.EnlacePC
+           AND #plc.RobotListo AND (NOT #plc.ErrorCelda) AND (NOT #plc.OrdenPendiente) THEN
+            #trayAct := 1;
+            #cEj := TRUE;            // flanco: mando = 16#0003 (habilitar + ejecutar), valor = 1
+            #iPaso := 10;
+        END_IF;
+    10: // saludo de la orden: aceptada / rechazada / sin respuesta
+        IF #plc.OrdenAceptada THEN
+            #iPaso := 20;
+        ELSIF #plc.OrdenRechazada THEN
+            #iPaso := 90;
+        END_IF;
+    20: // esperar que arranque (Moviendo)
+        IF #plc.Moviendo THEN
+            #iPaso := 30;
+        ELSIF #tPaso.Q THEN
+            #iPaso := 90;           // un recorrido muy corto tambien caeria aqui: ajustar
+        END_IF;
+    30: // esperar fin de la trayectoria 1 (sin timeout: depende del recorrido)
+        IF (NOT #plc.Moviendo) AND #plc.Terminado THEN
+            #trayAct := 2;
+            #cEj := TRUE;
+            #iPaso := 50;
+        END_IF;
+    50: // saludo de la orden 2
+        IF #plc.OrdenAceptada THEN
+            #iPaso := 60;
+        ELSIF #plc.OrdenRechazada THEN
+            #iPaso := 90;
+        END_IF;
+    60:
+        IF #plc.Moviendo THEN
+            #iPaso := 70;
+        ELSIF #tPaso.Q THEN
+            #iPaso := 90;
+        END_IF;
+    70: // fin de la trayectoria 2
+        IF (NOT #plc.Moviendo) AND #plc.Terminado THEN
+            #iPaso := 80;
+        END_IF;
+    80: // esperar retirada de la pieza
+        IF NOT #PiezaPresente THEN
+            #iPaso := 0;
+        END_IF;
+    90: // fallo: Reset acusa el error al robot (bit 6); vuelve a 0 si todo esta sano
+        #Alarma := TRUE;
+        IF #rtReset.Q THEN
+            #cAc := TRUE;
+        END_IF;
+        IF #plc.EnlacePC AND (NOT #plc.ErrorCelda) AND (NOT #PiezaPresente) THEN
+            #iPaso := 0;
+        END_IF;
+    ELSE
+        #iPaso := 90;
+END_CASE;
+IF #iPaso <> 90 THEN #Alarma := FALSE; END_IF;
+#Paso := #iPaso;
+
+// Llamada al enlace. Entradas no listadas conservan su valor (FALSE por defecto).
+#plc(Conectar := TRUE,
+     Completo := TRUE,                // FALSE para formato nucleo (4 B)
+     IpPC := [192, 168, 125, 100],    // IP de la PC (ajustar)
+     PuertoPC := 2000,
+     InterfaceId := 64,
+     ConnID := 1,
+     Habilitar := #HabilitarCelda AND #ParadaOK,
+     Pausar := #cPa,
+     Ejecutar := #cEj,
+     Trayectoria := #trayAct,
+     VelocidadPct := 30,
+     Repeticiones := 1,
+     AcusarError := #cAc);
+// Si TIA no admite constantes de array en la llamada, usar una variable Array[1..4] of Byte.
+END_FUNCTION_BLOCK
+
+DATA_BLOCK "DB_Celda_IRB120"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+NON_RETAIN
+"FB_Celda_Ejemplo"
+BEGIN
+END_DATA_BLOCK
+
+ORGANIZATION_BLOCK "Main"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+BEGIN
+"DB_Celda_IRB120"(HabilitarCelda := %I0.0,
+                  ParadaOK := %I0.1,
+                  PiezaPresente := %I0.2,
+                  Reset := %I0.3,
+                  Alarma => %Q0.0);
+END_ORGANIZATION_BLOCK

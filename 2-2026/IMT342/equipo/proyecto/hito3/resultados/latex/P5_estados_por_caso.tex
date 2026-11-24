@@ -1,0 +1,53 @@
+% Generado por hito3.validacion; requiere \usepackage{booktabs,longtable,array}
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lllp{9cm}}
+\caption{P5. Estado formal de decisión y nivel de evidencia por caso. «Verificado» = verificación procedimental (umbrales pendientes de aprobación docente).}\label{tab:P5}\\
+\toprule
+\textbf{Caso} & \textbf{Nivel} & \textbf{Estado P5} & \textbf{Justificación (resumen)} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Caso} & \textbf{Nivel} & \textbf{Estado P5} & \textbf{Justificación (resumen)} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+FK-N1 & S1 & parcial & Observaci\'on del controlador por RWS con unidad, fuente y marca temporal (S1). No es S2 (no trazada por ROS) ni S3. Parcial: umbral no aprobado; una so... \\
+FK-N1-S0 & S0 & verificado & Modelo vs modelo. rosi\_model es independiente de la TABLA DH y del c\'odigo propio, no de la geometr\'ia nominal ABB: no demuestra exactitud f\'isica. \\
+FK-N2 & S1 & parcial & Observaci\'on del controlador por RWS con unidad, fuente y marca temporal (S1). No es S2 (no trazada por ROS) ni S3. Parcial: umbral no aprobado; una so... \\
+FK-N2-S0 & S0 & verificado & Modelo vs modelo. rosi\_model es independiente de la TABLA DH y del c\'odigo propio, no de la geometr\'ia nominal ABB: no demuestra exactitud f\'isica. \\
+FK-N3 & S1 & parcial & Lectura de pantalla del controlador (S1 limitado): sin tiempo simult\'aneo ni registro autom\'atico; solo apoyo complementario. \\
+FK-L & S0 & verificado & Offline contra rosi\_model; los l\'imites son los documentados de la hoja ABB (dh.py), no le\'idos del controlador. \\
+FK-L-REAL & S1 (pendiente) & bloqueado por acceso & Depende de permiso/hardware no disponibles. \\
+FK-D-TCP & S1 & verificado & Datos reales S1 + perturbaci\'on offline declarada: demuestra la sensibilidad a la herramienta y la regla de no comparar brida con TCP. \\
+FK-D-ORD & S1 & verificado & Datos reales S1 con permutaci\'on offline intencional; el error emerge y desaparece al invertir la permutaci\'on. \\
+FK-FUERA & S1 & parcial & Clasificadas con el \'arbol del Bloque C; causa ra\'iz indeterminada por datos (falta registro simult\'aneo y repetici\'on controlada). \\
+FK-INV & S1 & parcial & Sin datos que comparar; clasificadas por tipo de excepci\'on. \\
+FK-TCP-REAL & S1 (pendiente) & bloqueado por acceso & Depende de acceso al controlador. \\
+IK-1 & S0 & verificado & IK propia vs FK propia/independiente y DLS independiente; offline. \\
+IK-2 & S0 & verificado & IK propia vs FK propia/independiente y DLS independiente; offline. \\
+IK-3 & S0 & verificado & IK propia vs FK propia/independiente y DLS independiente; offline. \\
+IK-4 & S0 & parcial & IK propia vs FK propia/independiente y DLS independiente; offline. \\
+IK-5 & S0 & verificado & IK propia vs FK propia/independiente y DLS independiente; offline. \\
+IK-REAL & S3 (no alcanzado) & bloqueado por acceso & NO-GO f\'isico; plan alternativo: IK offline (IK-1..IK-5). \\
+S3-MOV & S3 t\'ecnico (registrado); S3 autorizado no acreditado & parcial & Ver hito3/docs/evidencia\_gate3\_movimiento.md y gate3\_ordenes.csv; firmar checklist\_seguridad.md en la pr\'oxima sesi\'on. \\
+J-N1 & S0 & verificado & J propio vs diferenciaci\'on num\'erica de la FK independiente; dominado por el error de FD, no por el J. \\
+J-N2 & S0 & verificado & J propio vs diferenciaci\'on num\'erica de la FK independiente; dominado por el error de FD, no por el J. \\
+J-N3 & S0 & verificado & J propio vs diferenciaci\'on num\'erica de la FK independiente; dominado por el error de FD, no por el J. \\
+J-N4 & S0 & verificado & J propio vs diferenciaci\'on num\'erica de la FK independiente; dominado por el error de FD, no por el J. \\
+J-FD & S0 & verificado & Caracterizaci\'on num\'erica de la referencia por FD (autoconvergencia). \\
+J-REAL & S1/S3 (no alcanzado) & bloqueado por acceso & Depende de hardware y GO. \\
+F-reg & S0 & verificado & An\'alisis algebraico del modelo; sin datos f\'isicos. \\
+F-q5 & S0 & verificado & An\'alisis algebraico del modelo; sin datos f\'isicos. \\
+F-q5-0 & S0 & verificado & An\'alisis algebraico del modelo; sin datos f\'isicos. \\
+F-codo & S0 & verificado & An\'alisis algebraico del modelo; sin datos f\'isicos. \\
+F-hombro & S0 & verificado & An\'alisis algebraico del modelo; sin datos f\'isicos. \\
+F-TAU & S0 & verificado & Demostraci\'on algebraica sobre el modelo propio. \\
+MET-SINT & S0 & verificado & Valores esperados del documento. \\
+TOL-OFF & S0 & parcial & Presupuesto num\'erico declarado, sin aprobaci\'on; K y N\_ops son estimaciones. \\
+TOL-IRC5 & S1 & parcial & No se inventa ninguna tolerancia f\'isica. \\
+\end{longtable}
+\endgroup

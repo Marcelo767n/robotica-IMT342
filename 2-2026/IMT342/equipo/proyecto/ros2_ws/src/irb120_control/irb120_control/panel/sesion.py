@@ -1,7 +1,7 @@
 """Puesta en marcha guiada en AUTO para «./brazo.sh sesion» (una sola contraseña).
 
 Lee el estado del robot y pide al operador solo lo que falta, en orden:
-  llave en AUTO → módulo v4 (si hace falta: motores OFF, vaciar objetivo e instalar) →
+  llave en AUTO → módulo v5 (si hace falta: motores OFF, vaciar objetivo e instalar) →
   Motors On → PP a ServidorPC y arranque por RWS → «Iniciar» en el FlexPendant.
 Mientras espera solo lee (GET). No pulsa nada por el operador: Motors On e «Iniciar» siguen
 siendo suyos. Ctrl+C sale sin cambiar nada más.
@@ -30,16 +30,16 @@ def esperar(mover, condition, message, echo, timeout=600., sleep=time.sleep):
 
 
 def preparar_auto(mover, log_dir, echo=print, sleep=time.sleep, timeout=600.):
-    """Deja ServidorPC (v4, variante AUTO) en ejecución y aceptando órdenes."""
+    """Deja ServidorPC (v5, variante AUTO) en ejecución y aceptando órdenes."""
     with mover.lock:
         state = mover.status()
-        if state['module'] == 'servidor_v4_auto' and state['execution'] == 'running' and state.get('rbActivo') == 1:
+        if state['module'] == 'servidor_v5_auto' and state['execution'] == 'running' and state.get('rbActivo') == 1:
             echo('ServidorPC ya está activo en el robot.')
             return state
         state = esperar(mover, lambda s: s['opmode'] == 'AUTO',
                         'Girar la llave a AUTO y confirmar el diálogo del FlexPendant.', echo, timeout, sleep)
-        if state['module'] != 'servidor_v4_auto':
-            echo(f"El robot tiene el módulo {state['module']}: se instalará la v4 (variante AUTO).")
+        if state['module'] != 'servidor_v5_auto':
+            echo(f"El robot tiene el módulo {state['module']}: se instalará la v5 (variante AUTO).")
             esperar(mover, lambda s: s['execution'] == 'stopped' and s['ctrlstate'] != 'motoron',
                     'Pulsar Stop en el FlexPendant y el botón Motors Off del controlador.', echo, timeout, sleep)
             # AUTO_CH = cambio de modo sin confirmar en el FlexPendant: esperar a AUTO firme.
@@ -51,8 +51,8 @@ def preparar_auto(mover, log_dir, echo=print, sleep=time.sleep, timeout=600.):
                 mover.set_target(EMPTY)
             report = mover.install(log_dir, auto=True)
             if not report.get('passed'):
-                raise Refused('La instalación del módulo v4 no pasó la verificación; ver ' + str(log_dir))
-            echo('Módulo v4 instalado y verificado.')
+                raise Refused('La instalación del módulo v5 no pasó la verificación; ver ' + str(log_dir))
+            echo('Módulo v5 instalado y verificado.')
             mover.connect()
         for attempt in range(1, ATTEMPTS + 1):
             esperar(mover, lambda s: s['ctrlstate'] == 'motoron',

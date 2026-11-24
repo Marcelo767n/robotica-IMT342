@@ -1,0 +1,60 @@
+{
+  "umbral_estacionario_deg": 0.001,
+  "ventana_max_ms": 500.0,
+  "redondeo_postura_deg": 2,
+  "archivos": {
+    "S1": {
+      "archivo": "salidas/prueba_comunicacion/comunicacion_20261104_223936_186467Z_fk.jsonl",
+      "sha256": "2bca6e362bba492bc5beff00c0e7b61d6f81c39e1026a541af679bed065f2472",
+      "bytes": 14081985,
+      "lineas": 4719,
+      "estados": {
+        "NO_EVALUABLE": 693,
+        "FUERA": 32,
+        "DENTRO": 3994
+      },
+      "primera_recepcion_utc": "2026-11-04T22:39:39.908733+00:00",
+      "ultima_recepcion_utc": "2026-11-04T22:55:23.495419+00:00"
+    },
+    "S2": {
+      "archivo": "salidas/prueba_comunicacion/comunicacion_20261104_225612_309539Z_fk.jsonl",
+      "sha256": "7dadde162896a7ba8d595b5ceaff9705bc1c76097b1e9f044e2614fb752fc2ff",
+      "bytes": 16032516,
+      "lineas": 9084,
+      "estados": {
+        "DENTRO": 1969,
+        "NO_EVALUABLE": 729,
+        "FUERA": 123,
+        "LECTURA_INVALIDA": 6263
+      },
+      "primera_recepcion_utc": "2026-11-04T22:56:24.944304+00:00",
+      "ultima_recepcion_utc": "2026-11-05T03:15:15.430527+00:00"
+    }
+  },
+  "lecturas_invalidas": {
+    "S2": {
+      "ReadTimeout (timed out)": 1,
+      "ConnectTimeout (timed out)": 6130,
+      "ConnectionError": 132
+    }
+  },
+  "lecturas_invalidas_rango_utc": {
+    "S2": {
+      "ReadTimeout (timed out)": [
+        "2026-11-04T23:05:49.784066+00:00",
+        "2026-11-04T23:05:49.784066+00:00"
+      ],
+      "ConnectTimeout (timed out)": [
+        "2026-11-04T23:05:50.449640+00:00",
+        "2026-11-05T03:15:15.430527+00:00"
+      ],
+      "ConnectionError": [
+        "2026-11-04T23:06:09.029759+00:00",
+        "2026-11-05T03:05:31.889862+00:00"
+      ]
+    }
+  },
+  "n_fuera_total": 155,
+  "n_filas_N1": 1804,
+  "n_filas_N2": 1487
+}

@@ -1,0 +1,18 @@
+# Configuración de la celda PLC S7-1200 ↔ PC ↔ IRB 120 (docs/PLC_S7_1200.md).
+# Los argumentos de la línea de comandos tienen prioridad sobre este archivo.
+
+plc:                 # nodo irb120_plc_s7
+  modo: servidor     # servidor: la PC escucha y el PLC conecta (por defecto) · cliente: la PC conecta al PLC
+  host: 0.0.0.0      # interfaz de escucha (modo servidor)
+  puerto: 2000
+  ip: ""             # IP del PLC (solo modo cliente)
+  formato: completo  # nucleo (4 B por sentido) · completo (36 B PLC→PC, 68 B PC→PLC); igual en el PLC
+  guardian_s: 1.0    # sin trama válida durante este tiempo → enlace perdido
+
+celda:               # nodo irb120_celda
+  # Trayectorias del PLC: cada archivo `NN_nombre.json` de `carpeta` es la nº NN (se guardan así desde
+  # el Estudio y se releen en cada orden). Aquí se puede fijar o sustituir alguna a mano.
+  trayectorias:      # número → archivo dentro de `carpeta` (manda sobre los NN_ de la carpeta)
+    {}
+  carpeta: salidas/trayectorias
+  reposo: [0, 0, 0, 0, 30, 0]   # J1…J6 [°]

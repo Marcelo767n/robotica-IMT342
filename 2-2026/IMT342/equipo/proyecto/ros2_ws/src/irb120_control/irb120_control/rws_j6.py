@@ -24,11 +24,14 @@ CANDIDATE = Path(__file__).resolve().parents[1] / 'rapid/rws_j6/LabJointRws.mod'
 ORIGINAL_MODULE_SHA256 = 'fbf5527946c8e2e9b3d627628326a495c8c614b8ea25b069a2ec067da797e1ec'
 ORIGINAL_NORMALIZED_SHA256 = 'e39d1f16392c93096d19754bc826da61664632b6acf8a4cab06bf8e4e9fdc55c'
 J6_MODULE_SHA256 = 'cb07b7fba9a6f869ed87f21a77cdfb70ea454232132a3e2973daaffb34d2fdf0'
-# Versión 4 (servidor de objetivos, 17/11/2026): hasta 45° por orden, AccSet 50 y velocidad en % (pcVelPct).
+# Versión 5 (20/11/2026): una orden por tramo (maxPasoDeg 360), pcTipo 0 = MoveAbsJ / 1 = MoveL a pcPose.
 SERVER_CANDIDATE = Path(__file__).resolve().parents[1] / 'rapid/rws_mover/LabJointRws.mod'
-SERVER_MODULE_SHA256 = 'd2a073d6f129dfa973a705474ff5d813703801ea3df0840c9693d9b037544af3'
+SERVER_MODULE_SHA256 = '701cf8045b58fc71fc960cfaed99f7963d1d3cb1331f355c27c09cf750a2d9fa'
 # Misma versión con permitirAuto := TRUE (modo AUTO autorizado por el responsable).
-SERVER_AUTO_MODULE_SHA256 = '8cbed67802750bd3c010b64afce428bb9f8e48df9ab49a7449ed832bfec9559e'
+SERVER_AUTO_MODULE_SHA256 = 'e912974fd278541413bec7299e40b71179667da1c1e3c156321e88c22bbe057d'
+# Versión 4 (17/11/2026, hasta 45° por orden, velocidad en % con pcVelPct): se reconoce para sustituirla.
+SERVER_V4_SHA256 = 'd2a073d6f129dfa973a705474ff5d813703801ea3df0840c9693d9b037544af3'
+SERVER_V4_AUTO_SHA256 = '8cbed67802750bd3c010b64afce428bb9f8e48df9ab49a7449ed832bfec9559e'
 # v4 con solo 30 s para pulsar «Iniciar» (instalada el 17/11): se reconoce para sustituirla.
 SERVER_V4_30S_SHA256 = '157f9bcf62af9da55c0786a8d77b8928e043fb5847d9af75a233bd20bdeb8bca'
 SERVER_V4_30S_AUTO_SHA256 = '021ef371c22000d359f3a3f2316567ac4d5198c1160703601759c517dbbc64f7'
@@ -43,7 +46,7 @@ SERVER_V3_AUTO_SHA256 = 'ce83b233f8bfad39305f8118e33663b32a40dde04a428bd44a74a36
 # Versión 2 (11/11/2026, 10° por orden): se reconoce para poder sustituirla.
 SERVER_V2_SHA256 = '1a7ab00bf5d43fe285d4b2b0c333d04e8d07a7c5bb322b919eb68aff95f77789'
 SERVER_V2_AUTO_SHA256 = '4f387764e894dcfe3aa94fcffcb6c22a5abf70bf9c438b7c797f9b8fb5ddbc26'
-SERVER_LABELS = ('servidor_v4', 'servidor_v4_auto')
+SERVER_LABELS = ('servidor_v5', 'servidor_v5_auto')
 EMPTY = [[9e9] * 6, [9e9] * 6]
 LIMITS = ((-165,165),(-110,110),(-110,70),(-160,160),(-120,120),(-400,400))
 
@@ -108,8 +111,9 @@ def literal(target):
     return '['+','.join('['+','.join(format(v,'.15g') for v in group)+']' for group in target)+']'
 
 
-_PERS_VALUE=re.compile(r'^([ \t]*PERS[ \t]+(jointtarget|num)[ \t]+\w+[ \t]*:=[ \t]*)[^;\n]*;',flags=re.M)
-_PERS_INITIAL={'jointtarget':'[[9E9,9E9,9E9,9E9,9E9,9E9],[9E9,9E9,9E9,9E9,9E9,9E9]]','num':'0'}
+_PERS_VALUE=re.compile(r'^([ \t]*PERS[ \t]+(jointtarget|robtarget|num)[ \t]+\w+[ \t]*:=[ \t]*)[^;\n]*;',flags=re.M)
+_PERS_INITIAL={'jointtarget':'[[9E9,9E9,9E9,9E9,9E9,9E9],[9E9,9E9,9E9,9E9,9E9,9E9]]','num':'0',
+              'robtarget':'[[9E9,9E9,9E9],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]]'}
 
 
 def source_fingerprint(source):
@@ -126,7 +130,8 @@ def source_fingerprint(source):
 
 def module_label(digest):
     return {J6_MODULE_SHA256:'J6_revisado',ORIGINAL_NORMALIZED_SHA256:'original_v5',
-            SERVER_MODULE_SHA256:'servidor_v4',SERVER_AUTO_MODULE_SHA256:'servidor_v4_auto',
+            SERVER_MODULE_SHA256:'servidor_v5',SERVER_AUTO_MODULE_SHA256:'servidor_v5_auto',
+            SERVER_V4_SHA256:'servidor_v4',SERVER_V4_AUTO_SHA256:'servidor_v4_auto',
             SERVER_V3_SHA256:'servidor_v3',SERVER_V3_AUTO_SHA256:'servidor_v3_auto',
             SERVER_V4_CUT_SHA256:'v4_cortado_reinstalar',
             SERVER_V4_30S_SHA256:'servidor_v4_30s',SERVER_V4_30S_AUTO_SHA256:'servidor_v4_30s_auto',
@@ -182,9 +187,9 @@ def diagnose_inspection(inspection, historical=False):
     digest=source_fingerprint(source) if isinstance(source,str) else None
     module_version=module_label(digest)
     if module_version not in ('J6_revisado','servidor_v2','servidor_v2_auto','servidor_v3','servidor_v3_auto',
-                              'servidor_v4','servidor_v4_auto'):
-        issues.append('MODULO_NO_REVISADO: confirmar el módulo vigente; instalar la v4 con ./brazo.sh instalar.')
-    snapshot_ok=identity_ok and mode=='MANR' and state in ('motoroff','motoron') and execution=='stopped' and pending is False and module_version in ('J6_revisado','servidor_v2','servidor_v2_auto','servidor_v3','servidor_v3_auto','servidor_v4','servidor_v4_auto')
+                              'servidor_v4','servidor_v4_auto','servidor_v5','servidor_v5_auto'):
+        issues.append('MODULO_NO_REVISADO: confirmar el módulo vigente; instalar la v5 con ./brazo.sh instalar.')
+    snapshot_ok=identity_ok and mode=='MANR' and state in ('motoroff','motoron') and execution=='stopped' and pending is False and module_version in ('J6_revisado','servidor_v2','servidor_v2_auto','servidor_v3','servidor_v3_auto','servidor_v4','servidor_v4_auto','servidor_v5','servidor_v5_auto')
     return {'action':'diagnose_read_only','observed_at_utc':inspection.get('observed_at_utc'),
             'base_url':inspection.get('base_url'),'historical_report':historical,
             'requests':'none_historical_file' if historical else 'GET_only',
@@ -381,7 +386,8 @@ class Client:
                           'y conservación de J1–J5. La versión original usa v5. '
                           'Usar actualizar_modulo y verificar el programa en el FlexPendant.')
         if digest not in (ORIGINAL_NORMALIZED_SHA256,J6_MODULE_SHA256,SERVER_MODULE_SHA256,SERVER_AUTO_MODULE_SHA256,
-                          SERVER_V2_SHA256,SERVER_V2_AUTO_SHA256,SERVER_V3_SHA256,SERVER_V3_AUTO_SHA256):
+                          SERVER_V2_SHA256,SERVER_V2_AUTO_SHA256,SERVER_V3_SHA256,SERVER_V3_AUTO_SHA256,
+                          SERVER_V4_SHA256,SERVER_V4_AUTO_SHA256):
             raise Refused('El módulo cambió desde su revisión. Ejecutar inspeccionar antes de escribir.')
         return hashlib.sha256(source.encode()).hexdigest()
 

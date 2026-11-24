@@ -1,0 +1,10 @@
+fuente,valor,cota_e_p_m,cota_e_R_rad,origen,estado
+Resolución de la posición del robtarget (xyz),7 cifras significativas: 4 decimales en mm (1e-4 mm = 1e-7 m) si |v| ≥ 100 mm; hasta 6 decimales si |v| < 10 mm,8.660254037844388e-08,,observado en los registros S1 (FK-N1; cota de FK-N2: 7.1e-08 m),cota derivada; umbral pendiente
+"Resolución del cuaternión (w,x,y,z)",≤ 7 cifras significativas observadas (componentes ≤ 1),,2e-07,"observado; cota 2·||δq||, |δq_i| ≤ 5e-8",cota derivada; umbral pendiente
+Resolución de q (RWS entrega float32),semi-ulp float32 hasta 7.6e-06 ° en FK-N1,3.100498007748345e-08,,derivado: Σ‖Jv_i‖·semi-ulp (FK-N1),cota derivada; umbral pendiente
+Cota total de cuantización de los datos (FK-N1 / FK-N2),e_p ≤ 1.18e-07 / 7.78e-08 m; e_R ≤ 5.00e-07 / 4.13e-07 rad,,,suma de las tres fuentes anteriores,"piso de resolución, no tolerancia"
+TCP / herramienta activa,tooldata del IRC5 NO leído; se compara tool0 (brida) ⇒ TCP no interviene; TCP de 0.150 m es convención del modelo (tcp_verified_on_robot: false),,,no medido,bloqueado por datos
+Sincronía q ↔ pose,"ventana q→pose→q: mediana 14.2 / 15.0 ms, máx 54.3 / 33.7 ms (N1/N2); sin reloj común, robot estacionario",,,observado (window_ms),mitigada con q_antes ≈ q_después; no medible por debajo de la ventana
+Fluctuación de la pose del IRC5 con q constante,hasta e_p = 2.44e-06 m y e_R = 1.32e-05 rad en las 155 muestras FUERA,,,observado (diagnóstico FUERA),causa indeterminada por datos
+Base y ceros mecánicos del controlador frente al modelo,coincidencia empírica en 2 posturas distintas (error ≤ ~1e-6 m); calibración de fábrica del robot no consultada,,,no medido directamente,parcial
+Repetibilidad / exactitud absoluta del IRB 120,"no medida en este trabajo; el repositorio cita 0.01 mm de repetibilidad (hito2/irb120/validation.py, de la hoja ABB) sin verificación local",,,cita no verificada,bloqueada por datos

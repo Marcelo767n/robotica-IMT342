@@ -1,0 +1,106 @@
+# Manifiesto por experimento (Bloque B, W14-S02). Generado por hito3.validacion.
+id_prueba: FK-FUERA
+equipo: "Dayana Andrade, Mirko Ayala, Marcelo Navarro (IMT-342, UCB, 2-2026)"
+operador: por completar por el equipo
+generado_utc: "2026-11-24T14:11:45Z"
+tipo: FK diagnóstico de muestras FUERA
+codigo_modelo:
+  repositorio: robotica-IMT342 (rama claude/proyecto-hito3-4-objetivos-9709f0)
+  commit: 6e82c45680df44e3fdd1cdff2d5a6ab727dd0060
+  hito3_sin_versionar: true
+  modelo_propio:
+    archivos:
+      hito2/irb120/dh.py: 6af5c24c5d4e4bace33c4f023927f3ad9a2305ea1f47bf66a802ee10ea3f3173
+      hito2/irb120/pieper.py: 9ffd1dbe9b24c371a8a90a29d07532936cd408d014fcd52578b3fd3b600237c1
+      hito2/irb120/jacobian.py: a28195757e03eaae3382d2a08c12730558e465c410f80212fec1d20c9d77c22b
+      hito2/irb120/dynamics.py: fc304619cd482e1eab3dd0a157f8ff8e52cd9147f8aaa2541e774cd3f33dfe84
+      hito2/irb120/urdf_chain.py: 06b16d63c38c206c30fcc65af3415680bf6b6688929ee3deee5738cd3670f277
+    parametros_DH: "hito2/irb120/dh.py (Bahani et al. 2023, tabla I): d=[0.290,0,0,0.302,0,0.072] a=[0,0.270,0.070,0,0,0] alpha=[-90,0,-90,90,-90,0]°, offsets θ2=-90°, θ6=+180°"
+    tcp_z_m: 0.15
+  referencia_codigo:
+    hito2/irb120/rosi_model.py: c626eb8728a440129999712d28b8258259f9fa06315331db0baf09d42d04c24c
+  urdf:
+    archivo: hito2/datos/irb120.urdf
+    sha256: 0cf27d2c4524530d889bba7ee133c5583fdd3cdbe381774c7bc818796eb9041c
+    uso: "solo comprobación de implementación (no independiente: generado de la tabla DH)"
+  software:
+    python: "3.14.4"
+    numpy: "2.3.5"
+    scipy: "1.16.3"
+    matplotlib: 3.10.7+dfsg1
+    so: Linux-7.0.0-44-generic-x86_64-desconocido-with-glibc2.43
+juntas:
+  nombres: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+  joint_order: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+  tipos: [revolute, revolute, revolute, revolute, revolute, revolute]
+  q_rad: null
+  signos: positivos según ABB (eje 1..6); coincidencia empírica con el IRC5 en las posturas de FK-N1/N2
+  offsets: "los de dh.py (θ2 −90°, θ6 +180°) internos al modelo; cero mecánico ABB = q=0"
+  cero_mecanico: calibración de fábrica del robot no consultada
+unidades:
+  angulos: rad (los datos del IRC5 llegan en grados y se convierten)
+  longitudes: m (los datos del IRC5 llegan en mm)
+  velocidad: rad/s
+  cuaternion: "(w, x, y, z)"
+frames:
+  base_propia: base_link
+  base_referencia: Base del IRC5 (coordinate=Base)
+  world: no usado (wobj0)
+  flange: tool0
+  tool: tool0
+  tcp: tool0 (brida)
+herramienta:
+  activo_en_irc5: "tool0 (brida), wobj0"
+  pose_relativa: identidad (tool0) / Tz(0.150) solo en FK-D-TCP y Jacobiano-TCP
+  fuente: IRC5 (tool0 por definición) / convención del modelo (0.150 m); tooldata real NO leído
+datos:
+  origen: "IRC5 vía RWS (HTTP), sesiones 1 y 2 del 2026-11-04"
+  endpoint_variable: igual que FK-N1
+  archivos:
+    -
+      subconjunto: hito3/datos/fk_real_fuera.csv
+      sha256: f2b28d3a49f23a665d7bcdb15f69530586f000dda7132b648ff4d48d333de270
+      filas: 155
+    -
+      resumen: hito3/datos/fk_real_procedencia.json
+      sha256: a3e3f90a40d82d12f53feee82939e424d5c62981bc7bf2f53f5094fb2ccfb0a1
+tiempo:
+  reloj: "PC de adquisición (UTC) + 'stamp' ROS; el IRC5 no entrega marca propia"
+  timestamp_q: "q_before y q_after (RWS), dos lecturas consecutivas"
+  timestamp_pose: received_at_utc de cada muestra (pose entre las dos lecturas de q)
+  latencia: window_ms 11-54 ms (ver FK-N1/N2)
+  estado_robot: estacionario (Δq <= 1e-3 °)
+referencia:
+  descripcion: "IRC5 RWS (S1), sesiones 1 y 2"
+  independencia: "IRC5 físico: independiente del modelo"
+  limitaciones: ver notes de validation_cases.csv
+seguridad:
+  condicion: offline; sin movimiento del robot; lectura RWS pasiva en los datos S1
+  go_firmado: null
+  nivel_alcanzado: S1
+  nota: NO-GO físico en W14-S02; S3 (movimiento ROS→IRC5) no verificado
+tolerancias:
+  version_criterio: W14-S02 (propuesta normativa)
+  umbral_propuesto: estricto del proyecto 1e-6 m / 1e-6 rad (IRC5) y cribado sintético 1e-6 m / 1e-5 rad (offline)
+  umbral_aprobado: null
+  incertidumbre: ver tolerancias_incertidumbres_irc5.csv
+  estado: pendiente de aprobación
+nivel_evidencia: S1
+estado_P5: parcial
+justificacion_estado: Clasificadas con el árbol del Bloque C; causa raíz indeterminada por datos (falta registro simultáneo y repetición controlada).
+validation_cases_row:
+  case_id: FK-FUERA
+  case_type: FK diagnóstico de muestras FUERA
+  q_rad_vector: ""
+  base_frame: base_link (modelo propio)
+  tcp_frame: tool0 (brida)
+  model_version: "hito2/irb120/dh.py sha256:6af5c24c5d4e @ 6e82c45680+hito3 sin versionar"
+  reference_version: "IRC5 RWS (S1), sesiones 1 y 2"
+  position_error_m: "2.444258e-06"
+  orientation_error_rad: "1.316361e-05"
+  jacobian_error_fro: ""
+  rank_threshold: ""
+  rank_observed: ""
+  acceptance_result: parcial
+  evidence_link: hito3/datos/fk_real_fuera.csv; hito3/resultados/fk_fuera_diagnostico.csv; hito3/resultados/figuras/fk_fuera_diagnostico.png
+  notes: "155 muestras FUERA (todas con Δq=0 y ventana<=20 ms): C=106; D=23; E=26; fallan e_R>1e-6 rad: 155, e_p>1e-6 m: 39. La pose del IRC5 fluctúa a q constante (Δq equivalente mediana 2.3e-04° ≫ semi-ulp float32): causa no determinable con estos datos."

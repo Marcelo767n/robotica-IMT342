@@ -4,7 +4,7 @@
   ./iniciar.sh panel --simulado   sin robot
   ./iniciar.sh panel --web        además, abre la página local http://127.0.0.1:8770/
   ./iniciar.sh panel --auto       guía la puesta en marcha en AUTO (./brazo.sh sesion)
-  ./iniciar.sh panel --analisis   abre también la ventana de análisis del Hito 2
+  ./iniciar.sh panel --analisis   abre también el Estudio de trayectorias (o la ventana de análisis del Hito 2)
 
 No arranca RAPID ni motores: el operador arranca ServidorPC en el FlexPendant.
 Cerrar el panel NO detiene el robot: habilitador, Stop o paro de emergencia.
@@ -35,7 +35,8 @@ def argumentos(argv):
     parser.add_argument('--host', default='192.168.125.1')
     parser.add_argument('--user', default='Default User')
     parser.add_argument('--http-port', type=int, default=80, help='Puerto RWS; distinto de 80 solo en 127.0.0.1')
-    parser.add_argument('--paso', type=float, default=40., help='Máximo cambio por eje en cada orden (≤40°)')
+    parser.add_argument('--paso', type=float, default=MAX_STEP_DEG,
+                        help=f'Máximo cambio por eje en cada orden (≤{MAX_STEP_DEG:g}°)')
     parser.add_argument('--timeout', type=float, default=120., help='Segundos de espera por orden')
     parser.add_argument('--simulado', action='store_true', help='Sin robot: practicar con un robot ficticio')
     parser.add_argument('--web', action='store_true', help='Abrir también la página local en el navegador')
@@ -82,9 +83,12 @@ def leer_en_segundo_plano(panel, stop):
 
 
 def abrir_analisis(port):
-    """Ventana de análisis (tkinter + matplotlib, Python del sistema): lee el estado por HTTP local."""
+    """Estudio CustomTkinter si existe irb120_control/estudio/__main__.py (lee el testigo de ~/.cache/irb120);
+    si no, la ventana de análisis antigua (tkinter + matplotlib). Python del sistema; estado por HTTP local."""
     here = Path(__file__).resolve().parents[3]   # ros2_ws/src
     env = dict(os.environ, PYTHONPATH=f"{here / 'irb120_control'}:{here / 'irb120_conexion'}")
+    if (here / 'irb120_control/irb120_control/estudio/__main__.py').is_file():
+        return subprocess.Popen(['/usr/bin/python3', '-m', 'irb120_control.estudio', '--puerto', str(port)], env=env)
     return subprocess.Popen(['/usr/bin/python3', '-m', 'irb120_control.analisis',
                              '--url', f'http://127.0.0.1:{port}/estado'], env=env)
 
@@ -143,7 +147,7 @@ def main(argv=None):
         con_panel = vista.panel_disponible()
         with tempfile.TemporaryDirectory(prefix='irb120_panel_') as directory:
             children = vista.lanzar(vista.preparar(directory, con_panel), rviz=not args.no_rviz)
-            if args.analisis:   # aparte: cerrar la ventana de análisis no cierra el panel
+            if args.analisis:   # aparte: cerrar el Estudio / la ventana de análisis no cierra el panel
                 extras.append(abrir_analisis(server.server_address[1]))
             instrucciones(con_panel, url)
 
@@ -173,6 +177,7 @@ def main(argv=None):
             keeper.set()
         if server is not None:
             server.shutdown()
+            server.server_close()   # borra el testigo de ~/.cache/irb120
         if mover is not None:
             conexion.cerrar(mover, session)
         vista.detener(children + extras)

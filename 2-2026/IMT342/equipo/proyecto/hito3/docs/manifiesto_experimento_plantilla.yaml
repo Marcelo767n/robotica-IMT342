@@ -1,0 +1,114 @@
+# Manifiesto obligatorio por experimento (Bloque B de w14_s02_criterios_unificados_validacion_hito3.tex).
+# Copiar este archivo por cada experimento como manifiesto_<ID>.yaml y rellenar.
+# Regla de bloqueo oficial: si joint_order, el cero/offset o el punto TCP es desconocido, el experimento
+# puede conservarse como resultado exploratorio pero NO pasa a conformidad de FK/IK/J.
+# Lo desconocido se deja en null (no se inventa). Los comentarios "Proyecto:" dan el valor conocido hoy,
+# con su fuente, para que el equipo lo confirme; no sustituyen la medición de la sesión.
+
+# 1. ID prueba, equipo y operador
+prueba:
+  id: null                       # p. ej. G3-2026-11-NN-01; unico y no ambiguo
+  fecha_hora_local: null         # ISO 8601 con zona (Bolivia UTC-4)
+  equipo: null                   # Proyecto: Dayana Andrade, Mirko Ayala, Marcelo Navarro (README.md del proyecto)
+  responsable_prueba: null       # por completar por el equipo
+  operador_autorizado: null      # nombre y cargo; por completar
+  responsable_laboratorio: null  # firma del GO; ver checklist_seguridad.md
+  archivos_vinculados: []        # logs, CSV, fotos, informes de esta prueba
+  nivel_evidencia: null          # S0 | S1 | S2 | S3
+  estado_P5: null                # verificado | parcial | fallido | no ejecutado | bloqueado por acceso
+
+# 2. Código / modelo
+codigo_modelo:
+  repositorio: null
+  commit: null                   # Proyecto (ultimo auditado en el manifiesto): 19639122be7aeb98a6e96b8aea44530f94885c31
+  urdf: {ruta: null, hash_o_version: null}   # Proyecto: hito2/datos/irb120.urdf
+  parametros_dh_propios: {ruta: null, hash_o_version: null}  # Proyecto: hito2/irb120/dh.py
+  version_software: {ros: null, python: null, so: null, paquetes: null}  # Proyecto: ROS 2 Jazzy, Ubuntu 26.04.1 LTS
+  modelo_cambiado_durante_comparacion: false   # prohibido cambiar el modelo a mitad de una comparacion
+
+# 3. Juntas
+juntas:
+  nombres: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+  joint_order: null              # confirmar; Proyecto: [joint_1..joint_6] (model_manifest.yaml); mapeo con controlador sin verificar (controller_joint_mapping_verified: false)
+  tipos: [revoluta, revoluta, revoluta, revoluta, revoluta, revoluta]
+  q: null                        # vector completo de 6 valores usado en ambos calculos (misma configuracion fisica)
+  signos: null                   # signo de cada junta frente al controlador
+  offsets: null                  # offsets de cero modelo vs controlador
+  cero_mecanico_modelado: null   # documentar la referencia de cero
+
+# 4. Unidades (normalizar al SI antes de calcular metricas)
+unidades:
+  angulos: null                  # rad | grados (el controlador RWS entrega grados; el modelo trabaja en rad)
+  longitudes: null               # m | mm (el robtarget de RWS entrega mm)
+  velocidad_articular: null      # rad/s
+
+# 5. Frames
+frames:
+  base_propia: base_link
+  base_referencia: null          # Proyecto: Base del controlador (correspondencia observada en una postura; confirmar)
+  world: null
+  flange: tool0
+  tool: null
+  tcp: null                      # Proyecto: gripper_tcp = 0.150 m (convencion, no medido)
+  transformaciones_para_igualar_base_y_punto: null
+
+# 6. Herramienta
+herramienta:
+  tool_tcp_activo: null          # Proyecto: tool0 en las comparaciones fisicas (tcp_verified_on_robot: false)
+  pose_relativa_flange_a_tcp: null
+  fuente: null                   # IRC5 | ROS | modelo
+  # Prohibido comparar flange (brida) contra TCP.
+
+# 7. Datos
+datos:
+  origen: null                   # IRC5 | RWS | EGM | ROS | simulador | archivo
+  endpoint_o_variable: null      # Proyecto: /rw/motionsystem/mechunits/ROB_1/jointtarget ; .../robtarget?tool=tool0&wobj=wobj0&coordinate=Base
+  ros_es_fuente_primaria: false  # ROS no es fuente primaria por defecto
+  archivo_crudo: null
+  sha256: null
+
+# 8. Tiempo
+tiempo:
+  reloj_y_dominio: null          # reloj de la PC en UTC; sin sincronia con el controlador
+  timestamp_q: null
+  timestamp_pose: null
+  latencia_estimada_ms: null
+  robot_quieto_o_sincronizado: null   # registrar; si hubo movimiento entre q y pose -> "inconcluso por tiempo"
+
+# 9. Referencia
+referencia:
+  tipo: null                     # calculo independiente | MoveIt | controlador | patron geometrico
+  independiente: null            # true | false; justificar
+  limitaciones: null             # Proyecto: referencia ROS-Industrial local = hito2/irb120/rosi_model.py
+
+# 10. Seguridad
+seguridad:
+  tipo_prueba: null              # offline | lectura sin movimiento | movimiento supervisado
+  modo_controlador: null         # manual reducido | AUTO
+  habilitador: null              # sostenido | no aplica (AUTO)
+  velocidad_maxima: null
+  go_firmado: false
+  go_referencia: null            # archivo escaneado de checklist_seguridad.md con firma del responsable
+  condiciones_aborto: null
+  observador_independiente: null # video / foto fechada
+
+# 11. Tolerancias
+tolerancias:
+  version_criterio: null
+  umbral_posicion_m: null
+  umbral_orientacion_rad: null
+  estado_aprobacion: pendiente   # propuesto | aprobado por el docente (ninguna cifra se presume aprobada)
+  incertidumbre: null
+  # Proyecto: criterio estricto propuesto 1e-6 m / 1e-6 rad (VALIDACION_FK_EN_VIVO.md); NO aprobado.
+
+# Resultado (P1: tabla de caso)
+resultado:
+  p_propia: null
+  p_ref: null
+  R_propia: null
+  R_ref: null
+  e_p_m: null
+  e_R_rad: null
+  decision: null                 # estado P5
+  evidencia: null
+  firma_revision_P7: pendiente   # ver checklist_P6_P7.md

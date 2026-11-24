@@ -1,0 +1,19 @@
+% Generado por hito3.validacion; requiere \usepackage{booktabs,array}
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\caption{Diagnóstico de las 155 muestras FUERA de las dos sesiones. Todas con $\Delta q=0$ y ventana $\le20$ ms. Mediana de $e_p$: 3.33e-07 m; máx. $e_R$: 1.32e-05 rad.}
+\label{tab:fuera}
+\begin{tabular}{p{11cm}r}
+\toprule
+\textbf{Clasificación (árbol del Bloque C)} & \textbf{Muestras} \\
+\midrule
+C: q id\'entico y pose del IRC5 distinta a la pose modal de esa q (indeterminada por datos) & 106 \\
+D: pose modal repetida de esa q queda fuera de criterio (error reproducible; revisar pasos 2-6) & 23 \\
+E: q con <3 lecturas estacionarias: sin pose modal con que contrastar (indeterminada por datos) & 26 \\
+Lecturas inv\'alidas (ConnectTimeout/ConnectionError/ReadTimeout; sin datos q-pose) & 6263 \\
+\bottomrule
+\end{tabular}
+\end{table}

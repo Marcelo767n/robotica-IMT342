@@ -1,0 +1,15 @@
+// TG_ORDEN  PLC -> PC. Contrato v2: docs/PLC_S7_1200.md  3.1
+// Completo = 36 bytes; nucleo = solo los 4 primeros (mando + valor). Big-endian (nativo S7).
+// Usar SOLO en un bloque con ACCESO ESTANDAR (no optimizado); todos los offsets son pares, sin relleno.
+TYPE "UDT_IRB120_Orden"
+VERSION : 0.1
+   STRUCT
+      mando : Word;           // byte 0  NUCLEO. bit0 habilitar, bits1..8 ordenes, bit15 vida (alterna)
+      valor : UInt;           // byte 2  NUCLEO. trayectoria (ejecutar) / velocidad % (fijar velocidad)
+      velocidad_pct : UInt;   // byte 4  extendido, 1..100 (0 = la del panel)
+      repeticiones : UInt;    // byte 6  extendido, 1..1000 (0 = las del archivo)
+      reservado1 : UInt;      // byte 8  = 0
+      reservado2 : UInt;      // byte 10 = 0
+      pose : Array[0..5] of Real;  // byte 12..35 extendido: X,Y,Z [mm], roll,pitch,yaw [grados]
+   END_STRUCT;
+END_TYPE

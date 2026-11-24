@@ -1,0 +1,99 @@
+# Manifiesto por experimento (Bloque B, W14-S02). Generado por hito3.validacion.
+id_prueba: IK-REAL
+equipo: "Dayana Andrade, Mirko Ayala, Marcelo Navarro (IMT-342, UCB, 2-2026)"
+operador: por completar por el equipo
+generado_utc: "2026-11-24T14:11:45Z"
+tipo: IK con movimiento físico
+codigo_modelo:
+  repositorio: robotica-IMT342 (rama claude/proyecto-hito3-4-objetivos-9709f0)
+  commit: 6e82c45680df44e3fdd1cdff2d5a6ab727dd0060
+  hito3_sin_versionar: true
+  modelo_propio:
+    archivos:
+      hito2/irb120/dh.py: 6af5c24c5d4e4bace33c4f023927f3ad9a2305ea1f47bf66a802ee10ea3f3173
+      hito2/irb120/pieper.py: 9ffd1dbe9b24c371a8a90a29d07532936cd408d014fcd52578b3fd3b600237c1
+      hito2/irb120/jacobian.py: a28195757e03eaae3382d2a08c12730558e465c410f80212fec1d20c9d77c22b
+      hito2/irb120/dynamics.py: fc304619cd482e1eab3dd0a157f8ff8e52cd9147f8aaa2541e774cd3f33dfe84
+      hito2/irb120/urdf_chain.py: 06b16d63c38c206c30fcc65af3415680bf6b6688929ee3deee5738cd3670f277
+    parametros_DH: "hito2/irb120/dh.py (Bahani et al. 2023, tabla I): d=[0.290,0,0,0.302,0,0.072] a=[0,0.270,0.070,0,0,0] alpha=[-90,0,-90,90,-90,0]°, offsets θ2=-90°, θ6=+180°"
+    tcp_z_m: 0.15
+  referencia_codigo:
+    hito2/irb120/rosi_model.py: c626eb8728a440129999712d28b8258259f9fa06315331db0baf09d42d04c24c
+  urdf:
+    archivo: hito2/datos/irb120.urdf
+    sha256: 0cf27d2c4524530d889bba7ee133c5583fdd3cdbe381774c7bc818796eb9041c
+    uso: "solo comprobación de implementación (no independiente: generado de la tabla DH)"
+  software:
+    python: "3.14.4"
+    numpy: "2.3.5"
+    scipy: "1.16.3"
+    matplotlib: 3.10.7+dfsg1
+    so: Linux-7.0.0-44-generic-x86_64-desconocido-with-glibc2.43
+juntas:
+  nombres: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+  joint_order: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+  tipos: [revolute, revolute, revolute, revolute, revolute, revolute]
+  q_rad: null
+  signos: positivos según ABB (eje 1..6); coincidencia empírica con el IRC5 en las posturas de FK-N1/N2
+  offsets: "los de dh.py (θ2 −90°, θ6 +180°) internos al modelo; cero mecánico ABB = q=0"
+  cero_mecanico: calibración de fábrica del robot no consultada
+unidades:
+  angulos: rad (los datos del IRC5 llegan en grados y se convierten)
+  longitudes: m (los datos del IRC5 llegan en mm)
+  velocidad: rad/s
+  cuaternion: "(w, x, y, z)"
+frames:
+  base_propia: base_link
+  base_referencia: base_link de rosi_model
+  world: no usado (wobj0)
+  flange: tool0
+  tool: tool0
+  tcp: "-"
+herramienta:
+  activo_en_irc5: no aplica
+  pose_relativa: identidad (tool0) / Tz(0.150) solo en FK-D-TCP y Jacobiano-TCP
+  fuente: IRC5 (tool0 por definición) / convención del modelo (0.150 m); tooldata real NO leído
+datos:
+  origen: archivo offline del repositorio (sin acceso al robot en esta ejecución)
+  endpoint_variable: null
+  archivos: []
+tiempo:
+  reloj: no aplica (offline)
+  timestamp_q: null
+  timestamp_pose: null
+  latencia: null
+  estado_robot: no aplica
+referencia:
+  descripcion: IRC5
+  independencia: "rosi_model/DLS/FD: independiente de la tabla DH y del código propio; comparte geometría nominal ABB"
+  limitaciones: ver notes de validation_cases.csv
+seguridad:
+  condicion: offline; sin movimiento del robot; lectura RWS pasiva en los datos S1
+  go_firmado: null
+  nivel_alcanzado: S3 (no alcanzado)
+  nota: NO-GO físico en W14-S02; S3 (movimiento ROS→IRC5) no verificado
+tolerancias:
+  version_criterio: W14-S02 (propuesta normativa)
+  umbral_propuesto: estricto del proyecto 1e-6 m / 1e-6 rad (IRC5) y cribado sintético 1e-6 m / 1e-5 rad (offline)
+  umbral_aprobado: null
+  incertidumbre: ver tolerancias_incertidumbres_irc5.csv
+  estado: pendiente de aprobación
+nivel_evidencia: S3 (no alcanzado)
+estado_P5: bloqueado por acceso
+justificacion_estado: "NO-GO físico; plan alternativo: IK offline (IK-1..IK-5)."
+validation_cases_row:
+  case_id: IK-REAL
+  case_type: IK con movimiento físico
+  q_rad_vector: ""
+  base_frame: "-"
+  tcp_frame: "-"
+  model_version: "-"
+  reference_version: IRC5
+  position_error_m: ""
+  orientation_error_rad: ""
+  jacobian_error_fro: ""
+  rank_threshold: ""
+  rank_observed: ""
+  acceptance_result: bloqueado por acceso
+  evidence_link: "-"
+  notes: "Ejecutar una solución IK en el robot (cadena ROS→IRC5→movimiento, nivel S3) requiere GO firmado y supervisor; no verificado."

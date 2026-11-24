@@ -10,13 +10,19 @@ import time
 
 from irb120_control.rws_j6 import Refused
 from irb120_control.rws_mover import CODES, MAX_STEP_DEG, SPEED_MAX_DEG_S, SPEED_MAX_MM_S, move_to, split_path
-from irb120_control.panel.cinematica import clean_tool, pose_of, solve_pose
+from irb120_control.panel.buzon import Buzon
+from irb120_control.panel.cinematica import clean_tool, convertir_herramienta, pose_of, solve_pose
 from irb120_control.panel.limites import BOUNDS, EXT, clean_target
 from irb120_control.panel import verificacion
+from irb120_control.panel.trayectoria import Ejecutor
 
 FRESH_S = 3.0            # una medida más antigua no se dibuja como postura actual
 ACTIONS = ('objetivo', 'enviar', 'cancelar', 'sincronizar', 'paso', 'terminar', 'ik', 'herramienta', 'posicion',
-           'velocidad')
+           'velocidad', 'trayectoria', 'vista_previa', 'pausar', 'reanudar', 'buzon_tomar', 'buzon_vaciar',
+           'punto_externo')
+ACCIONES_GRANDES = ('trayectoria', 'vista_previa')   # llevan la trayectoria entera: hasta 64 KiB
+MAX_ORDEN_BYTES = 4096
+MAX_ORDEN_GRANDE_BYTES = 65536
 DEFAULT_SPEED_PCT = 20
 # Posición 0 = calibración ABB (todos los ejes en 0°). Reposo = igual con la muñeca doblada (J5 30°),
 # fuera de la singularidad de muñeca de J5 = 0°, cómoda para empezar a arrastrar la pose.
@@ -26,7 +32,7 @@ POSICIONES = {'cero': [0.] * 6, 'reposo': [0., 0., 0., 0., 30., 0.]}
 class Panel:
     """Estado compartido entre la página, RViz y el hilo que envía. Sin ROS ni HTTP: se prueba solo."""
 
-    def __init__(self, mover, step=40., timeout=120., simulated=False, clock=time.monotonic):
+    def __init__(self, mover, step=MAX_STEP_DEG, timeout=120., simulated=False, clock=time.monotonic):
         self.mover, self.timeout, self.simulated, self.clock = mover, timeout, simulated, clock
         self.step = self.clean_step(step)
         self.mutex = threading.Lock()
@@ -46,6 +52,8 @@ class Panel:
         self.abb = None            # (q leído, pose tool0 del ABB, instante) para la verificación 3
         self.start = None          # ejes al empezar la última orden (base del error en %)
         self.speed_pct = None      # velocidad en % de vMax; se lee del robot (pcVelPct)
+        self.buzon = Buzon()
+        self.ejecutor = Ejecutor(self)
         mover.on_joints = self._measured
 
     # ---------- lectura ----------
@@ -102,8 +110,8 @@ class Panel:
         """desired: pose [mm, °] que se pidió por IK; None si el objetivo se dio en ángulos."""
         target = clean_target(values)
         with self.mutex:
-            if self.busy:
-                raise Refused('Hay un envío en curso: el objetivo no se cambia hasta que termine.')
+            if self.busy or self.ejecutor.previsualizando:
+                raise Refused('Hay un envío o una vista previa en curso: el objetivo no se cambia hasta que termine.')
             self.target, self.desired, self.reachable = target, desired, True
             self.start = None   # el error en % se mide desde el inicio de la próxima orden
         return target
@@ -117,7 +125,7 @@ class Panel:
 
     def sync(self):
         with self.mutex:
-            if self.busy:
+            if self.busy or self.ejecutor.previsualizando:
                 raise Refused('Hay un envío en curso.')
             if self.measured is None:
                 raise Refused('Todavía no hay lectura del robot.')
@@ -134,8 +142,8 @@ class Panel:
         if not check['envio_permitido']:
             raise Refused('Envío bloqueado por la verificación: ' + check['motivo'])
         with self.mutex:
-            if self.busy:
-                raise Refused('Ya hay un envío en curso.')
+            if self.busy or self.ejecutor.previsualizando:
+                raise Refused('Ya hay un envío o una vista previa en curso.')
             if self.problems:
                 raise Refused('El robot no está listo: ' + '; '.join(self.problems))
             self.busy, self.progress = True, ''
@@ -194,7 +202,7 @@ class Panel:
 
     def request_cancel(self):
         with self.mutex:
-            if not self.busy:
+            if not self.busy and not self.ejecutor.previsualizando:
                 raise Refused('No hay ningún envío en curso.')
         self.cancel.set()
         self.say('Cancelación pedida: se detendrá al terminar la orden en curso. '
@@ -231,7 +239,7 @@ class Panel:
 
         quiet=True no escribe en el registro (se usa mientras se arrastra el control de RViz)."""
         with self.mutex:
-            if self.busy:
+            if self.busy or self.ejecutor.previsualizando:
                 raise Refused('Hay un envío en curso.')
             reference, tool = self.measured or self.target, self.tool
         if reference is None:
@@ -272,7 +280,58 @@ class Panel:
                 self.desired = pose_of(self.target, tool)   # la misma pose, vista desde el otro punto
             self.tool = tool
 
+    # ---------- buzón de puntos ----------
+    def agregar_desde_rviz(self, medida=False):
+        """Mete en el buzón la pose del objetivo naranja (o, con medida=True, la postura real del robot)."""
+        with self.mutex:
+            q = self.measured if medida else self.target
+            q, tool = None if q is None else list(q), self.tool
+        if q is None:
+            raise Refused('Todavía no hay lectura del robot.' if medida else 'Todavía no hay objetivo.')
+        entry = self.buzon.agregar('rviz', pose_of(q, tool), tool, q=q)
+        self.say(f"Buzón: punto {entry['nombre']} ({'postura medida' if medida else 'objetivo'}) desde RViz.")
+        return entry
+
+    def punto_externo(self, pose, nombre=None, origen='vision', herramienta='tcp'):
+        """Punto de la visión o de un script. `pose` [x, y, z mm, roll, pitch, yaw °] en base_link y referida al
+        punto `herramienta` (por defecto el TCP del proyecto). Debe ser alcanzable por IK; si no, se registra como
+        rechazado y no entra al buzón. En el buzón queda referida al punto de referencia del panel."""
+        try:
+            clean_tool(herramienta)
+            with self.mutex:
+                reference, tool = self.measured or self.target, self.tool
+            if reference is None:
+                raise Refused('Todavía no hay lectura del robot para evaluar la cinemática inversa.')
+            result = solve_pose(pose, reference, herramienta)
+            if result['elegida'] is None:
+                raise Refused('Pose no alcanzable: ' + result['veredicto'])
+            entry = self.buzon.agregar(origen, convertir_herramienta(result['pose'], herramienta, tool), tool,
+                                       nombre=nombre)
+        except Refused as exc:
+            self.buzon.rechazar(origen, str(exc))
+            self.say(f'Buzón: punto de {origen} rechazado: {exc}')
+            raise
+        self.say(f"Buzón: punto {entry['nombre']} de {origen}.")
+        return entry
+
     def handle(self, action, body):
+        if action == 'trayectoria':
+            return {'trayectoria': self.ejecutor.preparar(body)}
+        if action == 'vista_previa':
+            return self.ejecutor.vista_previa(body)
+        if action == 'pausar':
+            return {'trayectoria': self.ejecutor.pausar()}
+        if action == 'reanudar':
+            return {'trayectoria': self.ejecutor.reanudar()}
+        if action == 'buzon_tomar':
+            entries, last = self.buzon.tomar(body.get('desde_id', 0))
+            return {'entradas': entries, 'ultimo_id': last}
+        if action == 'buzon_vaciar':
+            self.buzon.vaciar()
+            return {}
+        if action == 'punto_externo':
+            return {'punto': self.punto_externo(body.get('pose'), body.get('nombre'), 'http',
+                                                body.get('herramienta', 'tcp'))}
         if action == 'objetivo':
             return {'objetivo': self.set_target(body.get('q'))}
         if action == 'ik':
@@ -345,4 +404,6 @@ class Panel:
                     'velocidad_mm_s': None if self.speed_pct is None else SPEED_MAX_MM_S * self.speed_pct / 100,
                     'velocidad_deg_s': None if self.speed_pct is None else SPEED_MAX_DEG_S * self.speed_pct / 100, 'ordenes': orders, 'ocupado': self.busy,
                     'faltas': list(self.problems), 'listo': not self.problems and not self.busy,
-                    'progreso': self.progress, 'registro': list(self.log)}
+                    'progreso': self.progress, 'registro': list(self.log),
+                    'buzon': self.buzon.ultimas(), 'buzon_rechazados': self.buzon.ultimos_rechazos(),
+                    'trayectoria': self.ejecutor.estado()}

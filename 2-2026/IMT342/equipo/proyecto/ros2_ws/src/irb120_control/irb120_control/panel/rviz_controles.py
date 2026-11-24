@@ -85,6 +85,8 @@ class RvizControls:
                                  callback=lambda f, i=i, d=delta: self.run(f'J{i + 1} {d:+g}°',
                                                                            lambda: panel.nudge(i, d)))
         self.menu.insert('Copiar postura actual', callback=lambda f: self.run('Objetivo = postura actual', panel.sync))
+        self.menu.insert('Añadir a la trayectoria', callback=lambda f: self.add_point(False))
+        self.menu.insert('Añadir postura actual del robot', callback=lambda f: self.add_point(True))
         places = self.menu.insert('Posiciones fijas')
         for name, label in (('cero', 'Posición 0 (calibración)'), ('reposo', 'Reposo (J5 30°)')):
             self.menu.insert(label, parent=places,
@@ -112,6 +114,17 @@ class RvizControls:
             self.note('RECHAZADO: ' + str(exc))
             self.panel.say('RViz: ' + str(exc))
         except Exception as exc:  # p. ej. error de red al leer: se muestra y se sigue
+            self.note('FALLO: ' + str(exc))
+
+    def add_point(self, measured):
+        """Buzón de puntos: pose del objetivo naranja (o postura medida) → /trayectoria del Estudio."""
+        try:
+            entry = self.panel.agregar_desde_rviz(measured)
+            self.note(f"Punto {entry['nombre']} añadido al buzón")
+        except Refused as exc:
+            self.note('RECHAZADO: ' + str(exc))
+            self.panel.say('RViz: ' + str(exc))
+        except Exception as exc:
             self.note('FALLO: ' + str(exc))
 
     def marker(self, pose):

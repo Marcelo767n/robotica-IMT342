@@ -1,5 +1,14 @@
 # Mover el IRB 120 desde la PC · guía de la próxima sesión
 
+## Novedades v5 (20/11/2026)
+
+- **Módulo v5.** `LabJointRws` pasa de v4 a **v5**. Etiquetas: `servidor_v5` (manual) y `servidor_v5_auto` (AUTO). La primera `./brazo.sh sesion` con el robot aún en v4 reinstala la v5 sola: pide una vez **Stop** y **Motors Off** en el FlexPendant.
+- **Una orden por tramo, sin paradas intermedias.** Desaparecen los cortes cada 40°: antes la PC dividía en órdenes de como máximo 40° y el RAPID rechazaba más de 45°. Ahora `maxPasoDeg := 360` en el RAPID y 355° de tope en la PC. El robot solo se detiene (`fine`) al final de cada orden.
+- **Variables nuevas.** `pcTipo` (0 = `MoveAbsJ` articular, 1 = `MoveL` lineal) y `pcPose` (robtarget de tool0 en wobj0, usado con `MoveL` y `ConfL \Off`). La PC escribe `pcTarget`, `pcPose` y `pcTipo`, los relee y solo entonces sube `pcSeq`. Nuevo código de rechazo **-5** (tipo no válido).
+- **Llegada lineal comprobada.** Tras un tramo lineal, si el robot termina a más de 5° de los ángulos previstos, la PC **no corrige a ciegas**: se detiene y pide revisar (posible otra configuración del brazo).
+- **Estudio de trayectorias.** `./brazo.sh estudio` (CustomTkinter) diseña y verifica trayectorias A→B→C→A. El panel las vuelve a verificar con la postura real y las ejecuta tramo a tramo; pausa y cancelar actúan al terminar el tramo en curso. Para parar **ya**: habilitador, Stop o paro de emergencia.
+- **Punto externo para visión.** `./brazo.sh punto X Y Z ROLL PITCH YAW` publica un punto (mm, °, TCP en base_link) en `/irb120/trayectoria/punto_externo`. Aparece en el buzón del Estudio.
+
 Preparado el **11/11/2026**. Sustituye la prueba puntual J6 de ±0,1° ([cierre del 10/11](CIERRE_PRUEBA_J6_2026-11-10.md)) por una ruta pensada para **mover el brazo desde Linux, orden tras orden**, sin volver a tocar el puntero de programa en cada movimiento.
 
 > **Estado (16/11/2026): probado en el IRC5 real.** Se instaló el módulo v2 por RWS, se concedió RMMP en manual reducido y la PC ejecutó **24 órdenes** con llegada confirmada (error máximo por orden ≤ 0,016°). Se movieron J6, J1, J4, J3 y J2. J5 dio `HTTP 403` tras detener RAPID: ya se corrigió en `rws_mover` (vuelve a pedir RMMP), pero falta repetirlo en el robot. Quedan sin probar en el robot real: J5, el modo AUTO (§6) y el **panel «IRB 120» dentro de RViz** (§7), que es la forma principal de mover el brazo y se probó solo con el robot simulado.
@@ -18,7 +27,7 @@ Preparado el **11/11/2026**. Sustituye la prueba puntual J6 de ±0,1° ([cierre 
 cd ros2_ws && ./brazo.sh sesion
 ```
 
-Pide la contraseña **una vez**, comprueba el enlace y guía en la terminal hasta dejar el robot aceptando órdenes en **AUTO** (sin sostener el habilitador): llave en AUTO → si el módulo no es la v4, pide Stop y Motors Off e instala `LabJointRws` v4 → pide **Motors On** → pone el puntero en `ServidorPC` por RWS, lo comprueba y arranca → pide **«Iniciar»** en el FlexPendant. Después abre RViz con el panel «IRB 120» y la **ventana de análisis del Hito 2** (cinemática con matrices T e ida y vuelta, 8 ramas de Pieper, LSPB, Jacobiano, dinámica). La velocidad se elige en el panel en % (100 % = 250 mm/s y 60°/s; empieza en 20 %). Sin robot: `./brazo.sh simulado --analisis`.
+Pide la contraseña **una vez**, comprueba el enlace y guía en la terminal hasta dejar el robot aceptando órdenes en **AUTO** (sin sostener el habilitador): llave en AUTO → si el módulo no es la v5, pide Stop y Motors Off e instala `LabJointRws` v5 → pide **Motors On** → pone el puntero en `ServidorPC` por RWS, lo comprueba y arranca → pide **«Iniciar»** en el FlexPendant. Después abre RViz con el panel «IRB 120» y el **Estudio de trayectorias** (CustomTkinter: trayectorias A→B→C→A con las reglas del Hito 2, gráficas y la matemática en LaTeX; la ventana anterior sigue en `./brazo.sh analisis`). La velocidad se elige en el panel en % (100 % = 250 mm/s y 60°/s; empieza en 20 %). Sin robot: `./brazo.sh simulado --analisis`.
 
 ## 1. Por qué no se movió el 10/11
 
@@ -44,7 +53,7 @@ Pide la contraseña **una vez**, comprueba el enlace y guía en la terminal hast
 
 | Archivo | Qué es |
 |---|---|
-| [`rapid/rws_mover/LabJointRws.mod`](../../ros2_ws/src/irb120_control/rapid/rws_mover/LabJointRws.mod) | Módulo v2: `ServidorPC` (bucle de órdenes) y `MostrarObjetivo` |
+| [`rapid/rws_mover/LabJointRws.mod`](../../ros2_ws/src/irb120_control/rapid/rws_mover/LabJointRws.mod) | Módulo v5: `ServidorPC` (bucle de órdenes) y `MostrarObjetivo` |
 | [`irb120_control/rws_mover.py`](../../ros2_ws/src/irb120_control/irb120_control/rws_mover.py) | Cliente: `estado`, `instalar`, `interactivo`, `mover`, `terminar` |
 | [`test/test_rws_mover.py`](../../ros2_ws/src/irb120_control/test/test_rws_mover.py) | 16 pruebas con un IRC5 simulado que replica `Validar()` del RAPID |
 | [`iniciar.sh`](../../ros2_ws/iniciar.sh) | Entradas `rws_mover` y `panel`. Las herramientas `rws_*` no necesitan ROS: basta Python 3 con `requests`. En el modo `panel` aísla ROS 2 a `localhost` |
@@ -55,8 +64,9 @@ Pide la contraseña **una vez**, comprueba el enlace y guía en la terminal hast
 ### Protocolo PC ↔ robot
 
 ```text
-PC:    escribe pcTarget (6 ángulos absolutos, grados) → lo lee de vuelta → pcSeq := pcSeq + 1
-Robot: ve pcSeq ≠ rbSeq → valida → rbCodigo := 1 → MoveAbsJ (vPc, fine, tool0) → rbCodigo := 2 → rbSeq := pcSeq
+PC:    escribe pcTarget (6 ángulos absolutos, grados), pcPose y pcTipo → los lee de vuelta → pcSeq := pcSeq + 1
+Robot: ve pcSeq ≠ rbSeq → valida → rbCodigo := 1 → pcTipo 0: MoveAbsJ (vOrden, fine, tool0)
+       / pcTipo 1: MoveL pcPose (vOrden, fine, tool0, wobj0; ConfL \Off) → rbCodigo := 2 → rbSeq := pcSeq
 PC:    espera rbSeq = pcSeq y lee rbCodigo
 ```
 
@@ -67,10 +77,11 @@ PC:    espera rbSeq = pcSeq y lee rbCodigo
 | 2 | Llegada |
 | −1 | Objetivo vacío o no válido |
 | −2 | Fuera de límites (margen de 2° respecto a los nominales) |
-| −3 | Algún eje cambia más de 10° en una sola orden |
+| −3 | Algún eje cambia más de `maxPasoDeg` (360°) en una sola orden |
 | −4 | Modo no permitido (AUTO con `permitirAuto := FALSE`) |
+| −5 | Tipo de movimiento no válido (`pcTipo` distinto de 0 y 1) |
 
-**Doble protección.** La PC valida límites y paso antes de escribir, y el robot vuelve a validar con su propia lectura `CJointT()`. La velocidad es fija en el RAPID (`vPc := [20,5,20,5]`: 20 mm/s de TCP y 5°/s de orientación). La PC no puede subirla.
+**Doble protección.** La PC valida límites y paso antes de escribir, y el robot vuelve a validar con su propia lectura `CJointT()`. La velocidad la fija el PERS `pcVelPct`, porcentaje de `vMax` (100 % = 250 mm/s y 60°/s; 20 % si el valor no es válido).
 
 ## 3. Antes de ir
 
@@ -108,9 +119,11 @@ Todas las órdenes de la PC se ejecutan desde `proyecto/ros2_ws/`.
 ./iniciar.sh rws_mover estado
 ```
 
-`estado` muestra el modo, los motores, RAPID, la versión del módulo y los ángulos, más una lista **FALTA:** con lo que impide mover. En este punto es normal ver `módulo J6_revisado` y varias líneas FALTA.
+`estado` muestra el modo, los motores, RAPID, la versión del módulo y los ángulos, más una lista **FALTA:** con lo que impide mover. En este punto es normal ver un módulo distinto de `servidor_v5` y varias líneas FALTA.
 
-### Paso 2 · Instalar el módulo v2 (una sola vez)
+### Paso 2 · Instalar el módulo v5 (una sola vez)
+
+Con `./brazo.sh sesion` esto se hace solo: si el robot tiene la v4, pide una vez Stop y Motors Off y reinstala la v5. Los pasos siguientes son la forma manual.
 
 **FlexPendant / controlador:**
 
@@ -130,7 +143,7 @@ El comando respalda `LabJointRws` y `Module1` en `proyecto/salidas/control_artic
 3. **Menú ABB → Editor de programas → Depurar → Comprobar programa.** Debe mostrar «sin errores». Si aparece un error, **fotografiarlo** (línea y mensaje) y no seguir.
 4. El puntero puede haberse restablecido a `main`. **No pulsar Start.**
 
-Si se repite `./iniciar.sh rws_mover estado`, debe decir `módulo servidor_v2`.
+Si se repite `./iniciar.sh rws_mover estado`, debe decir `módulo servidor_v5`.
 
 ### Paso 3 · Pasar a manual reducido y apuntar a `ServidorPC`
 
@@ -171,10 +184,10 @@ En el prompt `irb120 (paso 5.0°)>`:
 estado                 # debe terminar sin líneas FALTA
 j6 +5                  # primera prueba: 5° de la muñeca, fácil de ver y de bajo riesgo
 j6 -5
-j1 +10                 # se envía como dos órdenes de 5°
+j1 +10                 # con paso 5 se parte en dos órdenes; con paso ≥ 10, en una
 j3= 20                 # valor absoluto de un eje
 abs 0 -10 20 0 30 0    # seis ángulos absolutos (grados)
-paso 10                # hasta 10° por orden (límite del RAPID)
+paso 10                # tamaño máximo por orden (0 a 355°; el RAPID admite 360°)
 fin                    # termina ServidorPC en el robot
 salir
 ```
@@ -202,14 +215,16 @@ Este modo pide RMMP en cada ejecución. Para la sesión conviene `interactivo`.
 | Mensaje | Causa probable | Acción |
 |---|---|---|
 | `HTTP 401` | Usuario o contraseña | Revisar las credenciales RWS |
-| `FALTA: módulo J6_revisado` / `original_v5` | Falta instalar la v2 | Paso 2 |
+| `FALTA: módulo servidor_v5` | Falta instalar la v5 (o hay una versión anterior) | `./brazo.sh sesion` o paso 2 |
 | `FALTA: modo AUTO` | Llave en AUTO | Paso 3.1 |
 | `FALTA: motores motoroff` | Habilitador no presionado | Mantenerlo en la posición media |
 | `FALTA: RAPID detenido` | `ServidorPC` no está corriendo | Paso 5 (puntero en `ServidorPC`, Start) |
 | `FALTA: ServidorPC no está activo` | Corre otra rutina (por ejemplo `main`) o no se pulsó «Iniciar» | Pasos 3.2–3.3 y 5 |
 | `RMMP no concedido` / `Se perdió RMMP` | El diálogo se rechazó, caducó o la terminal se cerró | Repetir; el operador acepta en el FlexPendant |
 | `POST ...: HTTP 403` | Escritura sin RMMP, o el usuario no tiene permiso de modificar datos | Comprobar RMMP; si persiste, revisar los permisos UAS de `Default User` con el responsable |
-| Código −3 | El paso supera 10° | Usar `paso 5` (la PC ya divide los recorridos) |
+| Código −3 | Algún eje cambia más de 360° en una orden | La PC ya divide por `paso` (máx. 355°); revisar el destino |
+| Código −5 | `pcTipo` no válido | Versión del módulo o de la PC distinta; no reintentar sin revisar |
+| Parada tras un tramo lineal (desviación > 5°) | Posible otra configuración del brazo; la PC no corrige a ciegas | Mirar el modelo y el FlexPendant; no enviar más órdenes hasta revisar |
 | Código −2 | Destino fuera de límites con 2° de margen | Elegir otro destino |
 | `Sin respuesta del robot` | RAPID detenido mucho tiempo, o rutina distinta | Mirar el FlexPendant y la ventana de producción; ejecutar `estado`. No enviar más órdenes |
 | Error de RAPID o del movimiento en el FlexPendant | Por ejemplo, colisión, límite o configuración | Fotografiar **Registro de eventos** (código y hora) y detenerse |
@@ -226,7 +241,7 @@ La única manera de tener los motores en ON fijos es el **modo automático** con
    ```bash
    ./brazo.sh instalar-auto
    ```
-   Pide escribir `AUTO` para continuar. Instala la v3 con `permitirAuto := TRUE` (se reconoce como `servidor_v3_auto`). Se hace por RWS y no editando la línea en el FlexPendant, que puede reformatearla y romper la huella.
+   Pide escribir `AUTO` para continuar. Instala la v5 con `permitirAuto := TRUE` (se reconoce como `servidor_v5_auto`). Se hace por RWS y no editando la línea en el FlexPendant, que puede reformatearla y romper la huella.
 2. Llave en **Manual**: **Editor de programas → Depurar → Comprobar programa**.
 3. Llave en **AUTO**, confirmar el diálogo y pulsar el botón **Motors On**.
 4. En la PC, `./brazo.sh arrancar`: pone el puntero en `ServidorPC`, lo verifica y arranca RAPID. En el FlexPendant, pulsar **Iniciar**.
@@ -234,7 +249,7 @@ La única manera de tener los motores en ON fijos es el **modo automático** con
 
 > **Nota:** en AUTO el controlador lleva el puntero a `main`. **Nunca pulsar Start en el FlexPendant con el puntero en `main`**: es el programa de otro grupo.
 
-La velocidad sigue limitada por `vPc` en el RAPID (20 mm/s, 5°/s) aunque el FlexPendant marque 100 %. Para parar: **Stop**, botón de **Motors Off** o paro de emergencia. Al terminar: llave en AUTO, motores OFF y `./brazo.sh instalar` para devolver el módulo a solo manual.
+La velocidad la fija `pcVelPct` (% de `vMax`, 20 % por defecto), y el % del FlexPendant se aplica encima. Para parar: **Stop**, botón de **Motors Off** o paro de emergencia. Al terminar: llave en AUTO, motores OFF y `./brazo.sh instalar` para devolver el módulo a solo manual.
 
 ## 7. Panel de RViz: la forma principal de mover el brazo
 
@@ -257,12 +272,12 @@ Abre RViz con dos modelos (**blanco sólido = gemelo digital con la postura medi
 - **Estado:** modo, motores, RAPID, ServidorPC, módulo, último resultado y la lista **FALTA**. Una nota recuerda que en manual los motores solo quedan en ON con el habilitador.
 - **Ángulos J1–J6:** casilla y deslizador por eje (grados, con los mismos límites y 2° de margen), con la medida y el cambio. El modelo naranja sigue al objetivo en vivo; nada se mueve hasta pulsar **Enviar al robot** y confirmar el resumen.
 - **Pose cartesiana:** punto de referencia (TCP de 150 mm o brida `tool0`, que es lo que muestra el FlexPendant), X, Y, Z en mm y roll, pitch, yaw en grados (R = Rz·Ry·Rx, respecto a la base). **Calcular ángulos (IK)** usa la cinemática inversa de Pieper del Hito 2 (`hito2/irb120/pieper.py`): muestra las 8 ramas, propone la más cercana a la postura medida con el criterio del proyecto y permite usar otra (doble clic en la fila).
-- **Acciones:** paso máximo por orden (5, 10, 20 o 40°; 40 por defecto), **Enviar al robot** (con confirmación), **Copiar postura actual**, **Cancelar tras la orden en curso** y **Terminar ServidorPC en el robot**. Más abajo, progreso, errores y registro.
-- **Botones de posición:** «Posición 0 (calibración)» y «Reposo (J5 30°)». Con la v3 un movimiento normal es una sola orden de hasta 40°.
+- **Acciones:** paso máximo por orden (355° por defecto, tope de la PC), **Enviar al robot** (con confirmación), **Copiar postura actual**, **Cancelar tras la orden en curso** y **Terminar ServidorPC en el robot**. Más abajo, progreso, errores y registro.
+- **Botones de posición:** «Posición 0 (calibración)» y «Reposo (J5 30°)». Con la v5 un movimiento normal es una sola orden, sin cortes intermedios.
 - **Control 3D:** herramienta **Interact**; arrastrar el marcador recalcula la IK y mueve el modelo naranja. Clic derecho: ajustar un eje (±1°, ±5°), copiar la postura actual, cambiar el punto de referencia, enviar (dos niveles) o cancelar.
 - **Si el panel no está compilado**, el arranque lo avisa y quedan el control 3D y `--web`.
 
-El envío usa el mismo `Mover.send` que la terminal: mismas validaciones, división en órdenes de como máximo el paso elegido y mismo registro en `salidas/control_articular/rws_mover/panel_*.jsonl`.
+El envío usa el mismo `Mover.send` que la terminal: mismas validaciones, división en órdenes de como máximo el paso elegido (en v5 un tramo de hasta 355° va en una sola orden) y mismo registro en `salidas/control_articular/rws_mover/panel_*.jsonl`.
 
 - El panel de RViz **no habla con el robot**: publica órdenes JSON en `/irb120/panel/orden` y el nodo Python las ejecuta. En el modo `panel` ROS 2 se limita a `localhost` (`ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST`): nadie en la red Wi-Fi puede publicar órdenes.
 - El robot se mueve con `MoveAbsJ` orden a orden: **el TCP no sigue una línea recta** entre la pose actual y la pedida. Revisar el modelo naranja antes de enviar.

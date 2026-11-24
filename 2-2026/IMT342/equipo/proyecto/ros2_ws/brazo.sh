@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# brazo.sh · todos los comandos para mover el ABB IRB 120 desde la PC (RWS + LabJointRws v2).
+# brazo.sh · todos los comandos para mover el ABB IRB 120 desde la PC (RWS + LabJointRws v5).
 # Uso: ./brazo.sh <comando> [opciones]     ·     ./brazo.sh ayuda
 # Cada comando que habla con el robot pide la contraseña RWS de "Default User"; no se guarda.
 set -eo pipefail
@@ -19,13 +19,22 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
     ./brazo.sh eventos         estado + puntero de programa + últimos mensajes del FlexPendant (solo lectura)
     ./brazo.sh respaldar       copia los módulos RAPID del robot a rapid/respaldo_controlador/ (solo lectura)
     ./brazo.sh limpiar         vacía un objetivo pendiente     (llave AUTO, motores OFF)
-    ./brazo.sh instalar        instala LabJointRws v4 (manual) (llave AUTO, motores OFF)
-    ./brazo.sh instalar-auto   v4 que acepta modo AUTO         (llave AUTO, motores OFF, con autorización)
+    ./brazo.sh instalar        instala LabJointRws v5 (manual) (llave AUTO, motores OFF)
+    ./brazo.sh instalar-auto   v5 que acepta modo AUTO         (llave AUTO, motores OFF, con autorización)
 
   TODO EN UNO (jueves)
     ./brazo.sh sesion          una contraseña: comprueba el enlace, guía AUTO (llave, módulo, Motors On,
-                               arranque, «Iniciar») y abre RViz + panel + ventana de análisis del Hito 2
-    ./brazo.sh analisis        solo la ventana de análisis (lee el panel abierto)
+                               arranque, «Iniciar») y abre RViz + panel + Estudio de trayectorias
+    ./brazo.sh estudio         solo el Estudio (CustomTkinter): trayectorias A→B→C→A, reglas, gráficas,
+                               matemática en LaTeX. --demo sin panel · --puerto 8771 con el simulado
+    ./brazo.sh analisis        la ventana de análisis anterior (tkinter, solo lectura)
+    ./brazo.sh punto X Y Z R P Y  añade un punto al buzón del panel por el tópico de visión (mm, °, TCP;
+                               --simulado para el panel simulado)
+
+  CELDA CON PLC S7-1200 (nodos ROS 2 independientes; ver docs/PLC_S7_1200.md)
+    ./brazo.sh plc             nodo irb120_plc_s7 (telegrama TCP, puerto 2000) + nodo irb120_celda (traductor)
+                               junto al panel ya abierto (sesion/panel). --simulado con ./brazo.sh simulado
+    ./brazo.sh plc-simulador   PLC simulado en esta PC (sin hardware): habilitar on · ejecutar 1 40 · pausar…
 
   MOVER (todo en RViz: panel «IRB 120» + control 3D de la pose)
     ./brazo.sh panel           robot real: ángulos, pose con cinemática inversa, Enviar al robot
@@ -86,10 +95,38 @@ case "$cmd" in
   sesion)
     "$0" enlace || { echo; echo 'Sin enlace con el robot: revisar cable y adaptador USB (conectarlo directo a la PC).'; exit 2; }
     run panel --auto --analisis --host "$host" "$@" ;;
+  estudio)
+    export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
+    exec /usr/bin/python3 -m irb120_control.estudio "$@" ;;
   analisis)
     export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
+    [[ "${IRB120_CON_XIM:-}" == 1 ]] || export XMODIFIERS=@im=none   # Tk + ibus (XIM) es muy lento; ver estudio/__init__.py
     exec /usr/bin/python3 -m irb120_control.analisis "$@" ;;
   simulado) run panel --simulado "$@" ;;
+  punto)
+    # Punto para la trayectoria por el tópico de visión: ./brazo.sh punto X Y Z ROLL PITCH YAW [--simulado]
+    dominio=120; args=()
+    for a in "$@"; do [[ "$a" == --simulado ]] && dominio=121 || args+=("$a"); done
+    [[ ${#args[@]} -eq 6 ]] || { echo 'Uso: ./brazo.sh punto X Y Z ROLL PITCH YAW [--simulado]   (mm y grados, TCP en base_link)'; exit 2; }
+    source /opt/ros/jazzy/setup.bash
+    export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST ROS_DOMAIN_ID=$dominio
+    export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
+    exec "${ROS_PY312:-$HOME/ros_py312/bin/python}" -m irb120_control.vision.publicar_punto -- "${args[@]}" ;;
+  plc)
+    # Dos procesos independientes: irb120_plc_s7 (transporte) e irb120_celda (traductor). Ctrl+C cierra ambos.
+    dominio=120; args=()
+    for a in "$@"; do [[ "$a" == --simulado ]] && dominio=121 || args+=("$a"); done
+    source /opt/ros/jazzy/setup.bash
+    export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST ROS_DOMAIN_ID=$dominio
+    export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
+    py="${ROS_PY312:-$HOME/ros_py312/bin/python}"
+    "$py" -m irb120_control.celda.nodo_celda &
+    celda=$!
+    trap 'kill $celda 2>/dev/null; wait $celda 2>/dev/null' EXIT INT TERM
+    "$py" -m irb120_control.plc.nodo_plc "${args[@]}" ;;
+  plc-simulador)
+    export PYTHONPATH="$here/src/irb120_control:$here/src/irb120_conexion${PYTHONPATH:+:$PYTHONPATH}"
+    exec /usr/bin/python3 -m irb120_control.plc.simulador "$@" ;;
   terminal) run rws_mover interactivo --host "$host" "$@" ;;
   arrancar) run rws_mover arrancar --host "$host" "$@" ;;
   eventos)  run rws_mover eventos --host "$host" "$@" ;;
@@ -109,6 +146,10 @@ case "$cmd" in
     "$py" -m unittest discover -s src/irb120_control/test -p 'test_r[we]*.py' \
       && "$py" -m unittest discover -s src/irb120_control/test -p 'test_panel*.py' \
       && "$py" -m unittest discover -s src/irb120_control/test -p 'test_sesion.py' \
-      && /usr/bin/python3 -m unittest discover -s src/irb120_control/test -p 'test_analisis.py' ;;
+      && "$py" -m unittest discover -s src/irb120_control/test -p 'test_trayectorias.py' \
+      && /usr/bin/python3 -m unittest discover -s src/irb120_control/test -p 'test_analisis.py' \
+      && /usr/bin/python3 -m unittest discover -s src/irb120_control/test -p 'test_estudio*.py' \
+      && "$py" -m unittest discover -s src/irb120_control/test -p 'test_plc.py' \
+      && "$py" -m unittest discover -s src/irb120_control/test -p 'test_celda.py' ;;
   *) echo "Comando desconocido: $cmd"; echo; ayuda; exit 2 ;;
 esac

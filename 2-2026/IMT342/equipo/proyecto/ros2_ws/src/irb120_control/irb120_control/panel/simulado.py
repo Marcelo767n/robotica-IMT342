@@ -3,13 +3,14 @@ import threading
 import time
 import types
 
-from irb120_control.rws_mover import MAX_STEP_DEG, check_target
+from irb120_control.rws_mover import MAX_STEP_DEG, check_target, check_tipo
 from irb120_control.panel.limites import EXT
 
 
 class SimulatedMover:
     """Robot ficticio para practicar con el panel sin conexión: 5°/s y los mismos rechazos locales."""
     module_version = 'simulado'
+    last_order = None
 
     def __init__(self, start=(0., 0., 0., 0., 30., 0.), speed=None, sleep=time.sleep):
         self.q, self.sleep = list(start), sleep
@@ -29,7 +30,7 @@ class SimulatedMover:
         return {'opmode': 'SIMULADO', 'ctrlstate': 'motoron', 'execution': 'running',
                 'joints_deg': self.joints()[0], 'module': self.module_version, 'pcSeq': float(self.seq),
                 'rbSeq': float(self.seq), 'rbCodigo': 2. if self.seq else 0., 'rbActivo': 1., 'pcFin': 0.,
-                'pcVelPct': float(self.pct)}
+                'pcVelPct': float(self.pct), 'pcTipo': 0.}
 
     def ready(self, state):
         return []
@@ -40,11 +41,15 @@ class SimulatedMover:
     def start_keeper(self):
         return threading.Event()
 
-    def send(self, target, step=MAX_STEP_DEG, timeout=120., echo=print):
+    def send(self, target, step=MAX_STEP_DEG, timeout=120., echo=print, tipo='articular', pose_tool0=None):
+        """Un «lineal» se simula interpolando en articular hasta target: el simulador no resuelve la
+        cinemática inversa de pose_tool0 (se valida igual que en el robot real y se anota en self.last_order)."""
+        tipo_num, pose = check_tipo(tipo, pose_tool0)
+        self.last_order = {'tipo': tipo, 'pose_tool0': pose}
         start = self.joints()
         target = check_target(target, start, step)
         self.seq += 1
-        speed = self.fixed_speed or 0.6 * self.pct    # 100 % ≈ 60°/s, como vMax del RAPID v4
+        speed = self.fixed_speed or 0.6 * self.pct    # 100 % ≈ 60°/s, como vMax del RAPID v4/v5
         duration = max(abs(a - b) for a, b in zip(target[0], start[0])) / speed
         began = time.monotonic()
         while True:

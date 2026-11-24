@@ -1,0 +1,25 @@
+% Generado por hito3.validacion; requiere \usepackage{booktabs,array,graphicx}
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\caption{P3a. Jacobiano propio frente a referencia independiente (FD central sobre la FK de ROS-Industrial, $h=1e-05$ rad). $\dot{q}_{test}=[0.1, -0.2, 0.15, 0.3, -0.25, 0.4]$ rad/s. Errores de $J_v$ y $J_\omega$ por separado.}
+\label{tab:P3a}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llllllll}
+\toprule
+\textbf{ID} & \textbf{$\mathbf{q}$ [rad]} & \textbf{Frame/TCP/Twist} & \textbf{$e_{J_v}$ [m/rad]} & \textbf{$e_{J_\omega}$ [rad/rad]} & \textbf{$\lVert J\dot q-\mathrm{FD}\rVert$ lin./ang.} & \textbf{$J\dot{\mathbf{q}}$ [m/s, rad/s]} & \textbf{Decisión} \\
+\midrule
+J-N1-tcp & $[-1.278,\,-0.212,\,0.173,\,1.604,\,0.5541,\,-2.347]$ & B; TCP; [v;w] & $1.2\times10^{-11}$ & $1.8\times10^{-11}$ & $6.7\times10^{-11}$ / $2.9\times10^{-10}$ & $[-0.0169,\,0.038,\,0.0476,\,0.349,\,-0.573,\,-0.118]$ & verificado \\
+J-N1-tool0 & $[-1.278,\,-0.212,\,0.173,\,1.604,\,0.5541,\,-2.347]$ & B; tool0; [v;w] & $9.2\times10^{-12}$ & $1.8\times10^{-11}$ & $7.6\times10^{-11}$ / $2.9\times10^{-10}$ & $[-0.000932,\,0.0538,\,0.0179,\,0.349,\,-0.573,\,-0.118]$ & verificado \\
+J-N2-tcp & $[0.05143,\,-0.03364,\,0.04518,\,-0.228,\,1.565,\,-2.338]$ & B; TCP; [v;w] & $8.0\times10^{-12}$ & $9.7\times10^{-12}$ & $5.6\times10^{-11}$ / $1.9\times10^{-10}$ & $[0.009,\,0.0948,\,-0.00211,\,0.318,\,-0.368,\,-0.237]$ & verificado \\
+J-N2-tool0 & $[0.05143,\,-0.03364,\,0.04518,\,-0.228,\,1.565,\,-2.338]$ & B; tool0; [v;w] & $7.8\times10^{-12}$ & $9.7\times10^{-12}$ & $4.2\times10^{-11}$ / $1.9\times10^{-10}$ & $[-0.0368,\,0.0486,\,0.00832,\,0.318,\,-0.368,\,-0.237]$ & verificado \\
+J-N3-tcp & $[0.3,\,-0.5,\,0.6,\,-0.8,\,1.1,\,0.4]$ & B; TCP; [v;w] & $1.0\times10^{-11}$ & $1.6\times10^{-11}$ & $7.4\times10^{-11}$ / $6.4\times10^{-11}$ & $[-0.00731,\,0.0876,\,-0.036,\,0.593,\,-0.319,\,-0.0167]$ & verificado \\
+J-N3-tool0 & $[0.3,\,-0.5,\,0.6,\,-0.8,\,1.1,\,0.4]$ & B; tool0; [v;w] & $8.5\times10^{-12}$ & $1.6\times10^{-11}$ & $8.6\times10^{-11}$ / $6.4\times10^{-11}$ & $[-0.0378,\,0.03,\,-0.0188,\,0.593,\,-0.319,\,-0.0167]$ & verificado \\
+J-N4-tcp & $[2.793,\,-1.833,\,1.134,\,-2.705,\,2.007,\,-6.894]$ & B; TCP; [v;w] & $8.9\times10^{-12}$ & $4.2\times10^{-11}$ & $8.6\times10^{-11}$ / $2.5\times10^{-10}$ & $[-0.0134,\,0.102,\,-0.0232,\,0.16,\,-0.0831,\,0.517]$ & verificado \\
+J-N4-tool0 & $[2.793,\,-1.833,\,1.134,\,-2.705,\,2.007,\,-6.894]$ & B; tool0; [v;w] & $6.0\times10^{-12}$ & $4.2\times10^{-11}$ & $5.2\times10^{-11}$ / $2.5\times10^{-10}$ & $[-0.00364,\,0.0381,\,-0.0365,\,0.16,\,-0.0831,\,0.517]$ & verificado \\
+\bottomrule
+\end{tabular}
+}
+\end{table}

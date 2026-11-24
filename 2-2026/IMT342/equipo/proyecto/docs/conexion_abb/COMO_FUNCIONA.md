@@ -10,7 +10,7 @@ Rutas relativas a `proyecto/`. `C` = `ros2_ws/src/irb120_control/irb120_control/
 
 - El 16/11/2026 la PC envió **24 órdenes reales** al IRB 120 (J6, J1, J4, J3 y J2). Las 24 terminaron con código de llegada `2`; el error final por orden fue ≤ 0,016° (registro `salidas/control_articular/rws_mover/interactivo_20261117_012222_264923Z.jsonl`). J5 también se probó, pero dio `HTTP 403` tras detener RAPID; ya está corregido (§9) y falta repetirlo.
 - **La PC no mueve motores.** Escribe un objetivo articular en variables RAPID del controlador mediante **RWS** (REST sobre HTTP).
-- Un programa RAPID que corre **dentro del controlador** (`ServidorPC`, módulo `LabJointRws`) ve el objetivo nuevo, lo valida y ejecuta `MoveAbsJ`. Planificación, servocontrol y seguridad siguen siendo del IRC5.
+- Un programa RAPID que corre **dentro del controlador** (`ServidorPC`, módulo `LabJointRws`) ve el objetivo nuevo, lo valida y ejecuta `MoveAbsJ` (articular) o `MoveL` (lineal), según `pcTipo`. Desde la v5 cada tramo va en una sola orden, sin paradas intermedias. Planificación, servocontrol y seguridad siguen siendo del IRC5.
 - La PC lee la postura real por RWS y la dibuja en RViz junto al objetivo. **Todo el control está dentro de RViz**: un panel «IRB 120» (C++) y un marcador 3D arrastrable. La página web es opcional (`--web`).
 - Es un sistema **orden a orden** (una orden cada pocos segundos), no de control en tiempo real.
 
@@ -42,8 +42,8 @@ flowchart LR
   end
   subgraph IRC5["Controlador IRC5 Compact · RobotWare 6.12.01"]
     RWS["Servidor RWS 1.0<br/>HTTP :80, Digest"]
-    PERS["Variables PERS<br/>T_ROB1 / LabJointRws<br/>pcTarget pcSeq pcFin<br/>rbSeq rbCodigo rbActivo"]
-    RAPID["Rutina RAPID ServidorPC<br/>Validar → MoveAbsJ"]
+    PERS["Variables PERS<br/>T_ROB1 / LabJointRws<br/>pcTarget pcPose pcTipo pcVelPct<br/>pcSeq pcFin rbSeq rbCodigo rbActivo"]
+    RAPID["Rutina RAPID ServidorPC<br/>Validar → MoveAbsJ / MoveL"]
     MC["Sistema de movimiento<br/>planificador + servos"]
   end
   FP["FlexPendant<br/>modo, habilitador, Start,<br/>«Iniciar», «Conceder» RMMP"]
@@ -91,7 +91,7 @@ Versión en texto:
                                     │ IPv4 192.168.125.203 → 192.168.125.1, TCP 80, HTTP Digest
                                     ▼
  IRC5: servidor RWS → variables PERS de LabJointRws (T_ROB1)
-                     → rutina ServidorPC (Validar, MoveAbsJ)
+                     → rutina ServidorPC (Validar, MoveAbsJ / MoveL)
                      → planificador y servos → motores del IRB 120
                      ← resolvers ← posición real → jointtarget (se lee por RWS)
  FlexPendant: modo de operación, habilitador, Start, «Iniciar», «Conceder» RMMP
@@ -109,7 +109,7 @@ Versión en texto:
 | `robot_state_publisher` ×2 | PC | Convierte ángulos en transformadas TF para los dos modelos |
 | RViz2 | PC | Dibuja el robot medido (sólido) y el objetivo (naranja) y aloja el panel |
 | Servidor RWS | IRC5 | API REST de RobotWare para leer y escribir el controlador |
-| `LabJointRws` / `ServidorPC` (`MOD`) | IRC5, tarea `T_ROB1` | Recibe objetivos y ejecuta `MoveAbsJ` |
+| `LabJointRws` / `ServidorPC` (`MOD`) | IRC5, tarea `T_ROB1` | Recibe objetivos y ejecuta `MoveAbsJ` o `MoveL` |
 | FlexPendant | Operador | Modo, motores, arranque, permisos. Siempre manda sobre la PC |
 
 ---
@@ -148,8 +148,9 @@ Versión en texto:
 | GET | `/rw/panel/ctrlstate` | Motores: `motoron`, `motoroff` o `guardstop` | Estado, antes de cada orden | Login |
 | GET | `/rw/rapid/execution` | RAPID `running` o `stopped` | Estado, durante cada orden | Login |
 | GET | `/rw/rapid/tasks/T_ROB1/motion?resource=jointtarget` | **Postura medida**: 6 ejes en grados más 6 ejes externos (`9E+09` = sin eje) | Cada 0,3 s en el panel y cada 0,25 s durante una orden | Login |
-| GET | `/rw/rapid/symbol/data/RAPID/T_ROB1/LabJointRws/{pcTarget,pcSeq,pcFin,rbSeq,rbCodigo,rbActivo}` | Leer el protocolo PC ↔ RAPID | Estado, durante cada orden | Login |
+| GET | `/rw/rapid/symbol/data/RAPID/T_ROB1/LabJointRws/{pcTarget,pcPose,pcTipo,pcVelPct,pcSeq,pcFin,rbSeq,rbCodigo,rbActivo}` | Leer el protocolo PC ↔ RAPID | Estado, durante cada orden | Login |
 | POST | `…/LabJointRws/pcTarget?action=set` · `value=[[q1..q6],[9000000000×6]]` | Escribir el objetivo | Cada orden | Manual: RMMP · Auto: nada |
+| POST | `…/LabJointRws/{pcPose,pcTipo,pcVelPct}?action=set` | Escribir pose, tipo y velocidad antes de `pcSeq` | Cada orden | Ídem |
 | POST | `…/LabJointRws/pcSeq?action=set` · `value=N` | "Disparo" de la orden N | Cada orden | Ídem |
 | POST | `…/LabJointRws/pcFin?action=set` · `value=1` | Terminar `ServidorPC` | `terminar` | Ídem |
 | GET | `/rw/rapid/modules/LabJointRws?resource=module-text` (+ `/fileservice/…` temporal) | Texto del módulo para calcular su huella | Al conectar e instalar | Login |
@@ -207,17 +208,17 @@ Ejemplo real del registro de hoy, **orden 1**: J6 de 3,565° a 8,565°, con los 
 |---|---|---|
 | 0 | Panel de RViz (o marcador 3D, o `--web`) | El usuario pone J6 = 8,565 (casilla, deslizador, marcador o pose + IK). El panel C++ publica `{"accion":"objetivo","q":[…]}`. Solo cambia el **objetivo naranja**; nada viaja al robot |
 | 0 | «Enviar al robot» + confirmación → JSON `enviar` → `Ordenes.atender` → `Panel.handle` (`PN/estado.py:208`) → `Panel.send` (`:95`) → `clean_target` (`PN/limites.py:11`) | El panel pide confirmar el resumen antes de publicar la orden. Después comprueba 6 números finitos dentro de los límites con 2° de margen; si no, rechaza sin escribir nada |
-| 0 | `split_path` (`C/rws_mover.py:62`) | Divide el recorrido en tramos de como máximo el *paso* elegido (5° por defecto). Aquí sale un tramo |
+| 0 | `split_path` (`C/rws_mover.py:62`) | Divide el recorrido en tramos de como máximo el *paso* elegido (5° en la terminal, 355° en el panel por defecto); con v5 un tramo de hasta ese tamaño va en una sola orden. Aquí sale un tramo |
 | ~0,0–0,1 | `Mover.send` (`C/rws_mover.py:263`), dentro de `Panel._run` (`PN/estado.py:108`) | Lee modo, motores, RAPID y las PERS. `ready()` exige motores ON, RAPID en ejecución, `rbActivo=1` y `pcSeq == rbSeq`. `check_target` repite límites y paso |
 | ~0,1 | **POST** `pcTarget` | `value=[[0.386061,4.13907,-3.71913,2.66563,31.3818,8.56515],[9000000000,…]]`, en **grados**. Respuesta `204` |
-| ~0,1 | **GET** `pcTarget` | Lectura de vuelta: si no coincide con lo enviado, se detiene sin disparar la orden (`:272-274`) |
+| ~0,1 | **GET** `pcTarget`, `pcPose` y `pcTipo` | Lectura de vuelta: si alguno no coincide con lo enviado, se detiene sin disparar la orden (`:272-274`) |
 | ~0,1 | **POST** `pcSeq` | `value=1`, que es `pcSeq + 1`. Este es el *disparo*. Respuesta `204` (`:277`) |
-| ≤ 0,1 | RAPID `ServidorPC` (`MOD:52`) | El bucle `WHILE pcFin = 0`, con `WaitTime 0.1`, ve `pcSeq <> rbSeq`. Copia `pcTarget` y lee `CJointT()` |
-| | `Validar` (`MOD:97`) | Devuelve `0` si todo es correcto. Si no, `-4` modo no permitido, `-1` objetivo vacío, `-2` fuera de límites con margen o `-3` salto > 10° |
-| | RAPID | `rbCodigo := 1`. `MoveAbsJ objetivo, vPc, fine, tool0` (`MOD:62`), con `vPc = [20,5,20,5]`: 20 mm/s y 5°/s de orientación, más el % de velocidad del FlexPendant |
+| ≤ 0,1 | RAPID `ServidorPC` (`MOD:52`) | El bucle `WHILE pcFin = 0`, con `WaitTime 0.1`, ve `pcSeq <> rbSeq`. Copia `pcTarget`, `pcTipo` y `pcPose`, y lee `CJointT()` |
+| | `Validar` (`MOD:113`) | Devuelve `0` si todo es correcto. Si no: `-4` modo no permitido, `-5` tipo no válido, `-1` objetivo vacío (o pose lineal fuera de ±2000 mm), `-2` fuera de límites con margen o `-3` salto > 360° |
+| | RAPID | `rbCodigo := 1`. `pcTipo` 0: `MoveAbsJ objetivo, vOrden, fine, tool0` (`MOD:72`); `pcTipo` 1: `ConfL\Off` y `MoveL pcPose, vOrden, fine, tool0\WObj:=wobj0` (`MOD:74-75`). `vOrden` = `vMax` (250 mm/s y 60°/s) × `pcVelPct` (`MOD:66-70`), además del % del FlexPendant |
 | 0,1 → ~4,3 | IRC5 | El planificador interpola en espacio articular. Los servos llevan los motores y los resolvers miden la posición real |
 | cada 0,25 | PC | Sondea `jointtarget`, `rbSeq`, `rbCodigo` y el estado de ejecución. Muestra «falta x° · robot: moviendo» |
-| ~4,3 | RAPID | Al llegar (`fine`): `rbCodigo := 2` y después `rbSeq := 1` (`MOD:63`, `MOD:67`) |
+| ~4,3 | RAPID | Al llegar (`fine`): `rbCodigo := 2` y después `rbSeq := 1` (`MOD:78`, `MOD:82`) |
 | 4,37 | PC | Ve `rbSeq == 1` con código 2: **LLEGADA**, error 0,004° (registro: orden a las 01:23:26,57, resultado a las 01:23:30,94). El `Panel` lo deja en `ultimo` y `progreso`; el panel de RViz lo muestra en el siguiente `estado` |
 | continuo | PC → RViz | El nodo publica la postura medida a 10 Hz y el `estado` a 4 Hz; `robot_state_publisher` la convierte en TF y RViz mueve el modelo sólido |
 
@@ -236,13 +237,13 @@ sequenceDiagram
   W-->>P: MANR, motoron, running, rbActivo=1, pcSeq=rbSeq=0
   P->>W: POST pcTarget = [[…, 8.56515], [9e9…]]
   W-->>P: 204
-  P->>W: GET pcTarget (lectura de vuelta)
+  P->>W: GET pcTarget, pcPose, pcTipo (lectura de vuelta)
   W-->>P: mismo valor
   P->>W: POST pcSeq = 1
   W-->>P: 204
   R->>R: ve pcSeq ≠ rbSeq → Validar → 0
   R->>R: rbCodigo := 1
-  R->>M: MoveAbsJ objetivo, vPc, fine, tool0
+  R->>M: MoveAbsJ (pcTipo 0) o MoveL (pcTipo 1), vOrden, fine
   loop cada 0,25 s
     P->>W: GET jointtarget, rbSeq, rbCodigo, execution
     W-->>P: J6 = 4,1…8,5°, rbCodigo = 1
@@ -257,12 +258,12 @@ sequenceDiagram
 
 **Por qué este orden en el handshake**
 
-- **Primero el objetivo, después la secuencia.** RAPID solo reacciona al cambio de `pcSeq`. Si se escribiera la secuencia primero, el robot podría leer un `pcTarget` viejo o a medio escribir. Además, la PC lee `pcTarget` de vuelta *antes* de disparar.
+- **Primero el objetivo, después la secuencia.** RAPID solo reacciona al cambio de `pcSeq`. Si se escribiera la secuencia primero, el robot podría leer un `pcTarget` viejo o a medio escribir. Además, la PC lee `pcTarget`, `pcPose` y `pcTipo` de vuelta *antes* de disparar.
 - **El robot escribe `rbCodigo` antes que `rbSeq`.** Cuando la PC ve el `rbSeq` nuevo, el código ya es el definitivo de esa orden (2 si llegó, negativo si la rechazó).
 - **Números de secuencia.**
   - Al arrancar, `ServidorPC` hace `rbSeq := pcSeq`, de modo que cualquier orden escrita antes de pulsar «Iniciar» se ignora.
   - Una orden nunca se ejecuta dos veces.
-  - Si la PC se cae a mitad, el robot completa como mucho la orden ya validada (≤ 10°) y se queda esperando.
+  - Si la PC se cae a mitad, el robot completa como mucho la orden ya validada y se queda esperando.
 - **Una orden a la vez.** La PC no escribe otra hasta ver `rbSeq == seq`. Si no llega respuesta en 120 s, se detiene y pide revisar el FlexPendant.
 
 ---
@@ -283,7 +284,7 @@ sequenceDiagram
   3. Cada rama se verifica con la cinemática directa y se elige con el criterio del proyecto: admisible, lejos de singularidad, ≥ 5° de los topes, menor ‖W·(q − q_medido)‖.
   4. El panel exige además los 2° de margen del RAPID.
   5. La rama elegida pasa a ser el objetivo naranja; **no se envía sola**.
-- **El movimiento es articular.** `MoveAbsJ` interpola cada eje de su valor actual al pedido; el TCP **no** sigue una línea recta hacia la pose. Además, un recorrido largo se divide en varias órdenes. Por eso hay que revisar el modelo naranja antes de enviar.
+- **Articular o lineal, según `pcTipo`.** `MoveAbsJ` (0) interpola cada eje de su valor actual al pedido; el TCP **no** sigue una línea recta hacia la pose. `MoveL` (1) lleva el TCP en línea recta hasta `pcPose`. Tras un tramo lineal, si algún eje termina a más de 5° de lo previsto, la PC se detiene y no corrige. Un recorrido se divide en varias órdenes solo si supera el paso (tope 355°). Por eso hay que revisar el modelo naranja antes de enviar.
 
 ---
 
@@ -292,8 +293,10 @@ sequenceDiagram
 | Capa | Dónde | Qué impide |
 |---|---|---|
 | Límites articulares con 2° de margen | PC (`clean_target`, `check_target`) **y** RAPID (`Validar` → −2) | Objetivos fuera de rango, aunque la PC tuviera un error |
-| Paso máximo por orden: 10° en RAPID (−3) y 5° por defecto en la PC | Ambos | Saltos grandes; los recorridos largos se dividen |
-| Velocidad fija `vPc = [20,5,20,5]` | RAPID (`MOD:17`) | La PC no puede pedir más velocidad |
+| Salto máximo por orden: 360° en RAPID (`maxPasoDeg`, −3) y 355° en la PC | Ambos | Saltos excesivos; los recorridos largos se dividen |
+| Tipo de movimiento válido (0 o 1) | RAPID (`Validar` → −5) | Movimientos no previstos |
+| Tramo lineal con desviación > 5° | PC (`LINEAL_CORRECTION_MAX_DEG`) | Corregir a ciegas si el brazo toma otra configuración |
+| Velocidad limitada: `vOrden` = `vMax` × `pcVelPct` (1 a 100 %) | RAPID (`MOD:10`, `MOD:66-70`) | La PC solo elige un porcentaje de `vMax` |
 | Modo permitido: solo manual reducido, salvo la variante `permitirAuto := TRUE` | RAPID (`Validar` → −4) | Moverse en un modo no previsto |
 | Confirmación del resumen antes de enviar | Panel de RViz (cuadro «¿Enviar este objetivo al robot?», con «Cancelar» por defecto), submenú del control 3D y página | Envíos accidentales |
 | «¿Aceptar objetivos enviados por la PC?» → **Iniciar**, con 30 s de plazo | FlexPendant (`MOD:41`) | Que el servidor arranque sin que el operador lo sepa |
@@ -328,7 +331,7 @@ Plugin de RViz `irb120_rviz_panel/PanelIRB120` (paquete `ros2_ws/src/irb120_rviz
 | Estado | Modo, motores, RAPID, ServidorPC, módulo, último resultado, lista **FALTA** y una nota: en manual los motores solo quedan en ON con el habilitador; para motores fijos, modo AUTO (`./brazo.sh instalar-auto`) |
 | Ángulos J1–J6 | Casilla y deslizador por eje, valor medido y cambio respecto a la medida. Respetan los límites con 2° de margen |
 | Pose cartesiana | Punto de referencia (TCP o brida), X Y Z en mm, roll pitch yaw en grados, **Calcular ángulos (IK)**. Tabla de las 8 ramas de Pieper con su estado; doble clic en una rama utilizable la carga como objetivo. «Copiar pose medida» |
-| Acciones | Paso (≤ 10°), **Enviar al robot** (cuadro de confirmación con el resumen), **Copiar postura actual**, **Cancelar tras la orden en curso**, **Terminar ServidorPC en el robot** (también con confirmación) |
+| Acciones | Paso máximo por orden (≤ 355°), **Enviar al robot** (cuadro de confirmación con el resumen), **Copiar postura actual**, **Cancelar tras la orden en curso**, **Terminar ServidorPC en el robot** (también con confirmación) |
 | Progreso, errores y registro | Orden en curso, rechazos y las últimas líneas del registro |
 
 - **El panel no habla con el robot ni con RWS.** Publica órdenes JSON en `/irb120/panel/orden` y pinta lo que llega en `/irb120/panel/estado` (§3.4).
@@ -364,7 +367,7 @@ Un solo script para todo lo que se hace con el brazo, por encima de `iniciar.sh`
 | `./brazo.sh enlace` | Ping al controlador y comprobación del puerto 80 | Sí (solo red) |
 | `./brazo.sh estado` | Modo, motores, RAPID, módulo, ángulos y lo que falta | Lectura |
 | `./brazo.sh limpiar` | Vacía un `pcTarget` pendiente (AUTO, motores OFF) | Escribe 1 variable |
-| `./brazo.sh instalar` | Instala `LabJointRws` v2, solo manual (AUTO, motores OFF) | Edita el módulo |
+| `./brazo.sh instalar` | Instala `LabJointRws` v5, solo manual (AUTO, motores OFF) | Edita el módulo |
 | `./brazo.sh instalar-auto` | Instala la variante que admite AUTO; pide escribir `AUTO` para confirmar | Edita el módulo |
 | `./brazo.sh panel [--web]` | RViz con el panel «IRB 120» y el control 3D, robot real; `--web` añade la página local | Sí |
 | `./brazo.sh simulado [--web]` | Lo mismo con un robot ficticio, para practicar | No |
@@ -373,6 +376,9 @@ Un solo script para todo lo que se hace con el brazo, por encima de `iniciar.sh`
 | `./brazo.sh terminar` | `pcFin = 1`: termina `ServidorPC` | Escribe 1 variable |
 | `./brazo.sh compilar` | `colcon build --packages-select irb120_rviz_panel`: compila el panel de RViz (una vez, o tras cambiarlo) | No |
 | `./brazo.sh pruebas` | Pruebas offline, sin robot ni red | No |
+| `./brazo.sh sesion` | Arranque guiado: instala la v5 si hace falta, pide RMMP, arranca `ServidorPC` y abre el panel | Sí |
+| `./brazo.sh estudio` | Estudio de trayectorias (CustomTkinter): diseña y verifica A→B→C→A; al ejecutar, mueve el robot tramo a tramo | Sí, al ejecutar |
+| `./brazo.sh punto X Y Z ROLL PITCH YAW` | Publica un punto (mm, °, TCP en base_link) en `/irb120/trayectoria/punto_externo` para visión; aparece en el buzón del Estudio | No |
 | `./brazo.sh ayuda` | Pasos a seguir en el FlexPendant (manual y AUTO) | No |
 
 `./brazo.sh panel` ejecuta `./iniciar.sh panel` (módulo `irb120_control.panel.arranque`). En ese modo `iniciar.sh` hace `source install/setup.bash` si existe (para encontrar el panel compilado) y exporta `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST`.
@@ -389,6 +395,7 @@ Un solo script para todo lo que se hace con el brazo, por encima de `iniciar.sh`
 | 16/11 | `estado` decía `módulo no_verificado`; `limpiar` e `instalar` se negaban | El IRC5 devuelve el texto del módulo con el **valor actual** de cada PERS en su declaración (p. ej. un `pcTarget` pendiente), y la huella cambiaba | `source_fingerprint` restituye el valor inicial de las PERS antes del hash (`C/rws_j6.py:100`). Sigue detectando cualquier cambio de código |
 | 16/11 | Un `j6 +5` salió como dos órdenes de 2,5° | La lectura dio 5,000004° y `ceil(5,000004/5) = 2` | Tolerancia de 0,05° en `check_target` y `split_path` (`C/rws_mover.py:41`), sin superar nunca los 10° del RAPID |
 | 16/11 | `HTTP 403` al escribir `pcTarget` de **J5**, tras detener y reanudar RAPID | El sondeo seguía en `GRANTED`, pero el controlador ya no aceptaba el permiso | Ante un 403 se descarta el permiso y el siguiente envío vuelve a pedir «Conceder» (`C/rws_mover.py:228-237`). Pendiente repetir J5 en el robot |
+| 20/11 | Un movimiento de más de 40° se partía en órdenes con paradas | El RAPID rechazaba más de 45° por orden y la PC dividía en tramos de 40° | v5: `maxPasoDeg` 360 en el RAPID y 355 en la PC; una orden por tramo, `fine` solo al final |
 
 ---
 
@@ -397,7 +404,7 @@ Un solo script para todo lo que se hace con el brazo, por encima de `iniciar.sh`
 - **No es control en tiempo real ni *streaming*.** Cada orden pasa por varias peticiones HTTP, la validación RAPID y un `MoveAbsJ` con parada `fine`.
   - Hoy, una orden de 5° tardó unos **4,4 s** de principio a fin.
   - Para seguimiento continuo hace falta **EGM** (Externally Guided Motion, UDP a 4 ms). La opción 689-1 está instalada en el controlador; el plan está en `docs/hitos_3_4/PLAN_CONTROL_EGM_IK_VISION.md`.
-- **No hay trayectoria cartesiana.** La IK solo elige los ángulos finales.
+- **Trayectoria cartesiana solo tramo a tramo.** `MoveL` (`pcTipo` 1) lleva el TCP en línea recta hasta un destino; el Estudio encadena tramos A→B→C, pero no hay control continuo a lo largo de la trayectoria. La IK solo elige los ángulos finales.
 - **Una orden a la vez.** No hay cola ni mezcla de movimientos (zona `fine`).
 - **No detecta colisiones.** Los límites son articulares; el modelo no conoce la mesa ni los objetos.
 
@@ -413,8 +420,9 @@ Un solo script para todo lo que se hace con el brazo, por encima de `iniciar.sh`
 | `PN/web.py`, `PN/web.html` | Página local opcional (`--web`) |
 | `ros2_ws/src/irb120_rviz_panel/` | Panel «IRB 120» de RViz en C++ (`CPP/`), `CMakeLists.txt`, `plugins_description.xml` |
 | `C/rws_mover.py` | Cliente RWS de órdenes (`Mover`, `Rmmp`), prompt `interactivo`, `instalar [--auto]` |
+| `C/estudio/`, `C/trayectorias/` | Estudio de trayectorias (`./brazo.sh estudio`): diseño y verificación de tramos A→B→C |
 | `C/rws_j6.py` | Base RWS: lecturas permitidas, huella del módulo, instalación con mastership, `limpiar` |
-| `ros2_ws/src/irb120_control/rapid/rws_mover/LabJointRws.mod` | Módulo RAPID v2: `ServidorPC`, `Validar`, PERS del protocolo |
+| `ros2_ws/src/irb120_control/rapid/rws_mover/LabJointRws.mod` | Módulo RAPID v5: `ServidorPC`, `Validar`, PERS del protocolo (incluye `pcPose` y `pcTipo`) |
 | `C/arranque.py` | Modelos URDF `medido/objetivo` y configuración de RViz (los reutiliza `PN/vista.py`) |
 | `ros2_ws/src/irb120_conexion/…/lectura_rws.py`, `puente_rws.py` | Lectura RWS de solo lectura y puente al gemelo ROS 2 (`./iniciar.sh comunicacion`) |
 | `hito2/irb120/dh.py`, `pieper.py`, `transforms.py` | DH, cinemática directa e inversa (Pieper), conversiones de pose |

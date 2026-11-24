@@ -4,19 +4,29 @@ Publica  /irb120/control/{medido,objetivo}/joint_states  (sensor_msgs/JointState
          /irb120/control/tf_static  base_link → medido/base_link y objetivo/base_link
          /irb120/panel/estado       (std_msgs/String JSON, 4 Hz y tras cada orden)
 Escucha  /irb120/panel/orden        (std_msgs/String JSON, ver ordenes.py)
+         /irb120/trayectoria/punto_externo  (geometry_msgs/PoseStamped, visión → buzón de puntos)
+
+punto_externo: frame_id 'base_link' (otro marco se rechaza: sin TF por ahora), posición en metros y cuaternión.
+La pose es la del TCP DEL PROYECTO (150 mm sobre z de la brida), no la de tool0: así el nodo de visión pide
+«lleva la punta de la herramienta aquí». Debe ser alcanzable por IK; si no, se registra como rechazada
+(estado['buzon_rechazados']) y no entra al buzón. Origen del punto: 'vision'.
 """
 import math
 
-from geometry_msgs.msg import TransformStamped
+from geometry_msgs.msg import PoseStamped, TransformStamped
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import String
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
 
+from irb120_control.panel.cinematica import pose_desde_cuaternion
+from irb120_control.panel.despacho import Despachador
 from irb120_control.panel.ordenes import Ordenes
+from irb120_control.rws_j6 import Refused
 
 STATE_TOPIC = '/irb120/panel/estado'
 ORDER_TOPIC = '/irb120/panel/orden'
+POINT_TOPIC = '/irb120/trayectoria/punto_externo'
 TF_REMAP = ['--ros-args', '-r', '/tf:=/irb120/control/tf', '-r', '/tf_static:=/irb120/control/tf_static']
 
 
@@ -28,6 +38,7 @@ class PuenteRos:
     def __init__(self, node, panel):
         self.node, self.panel = node, panel
         self.ordenes = Ordenes(panel)
+        self.despacho = Despachador(self.ordenes, self.publish_state)
         self.static = StaticTransformBroadcaster(node)
         anchors = []
         for prefix in ('medido/', 'objetivo/'):
@@ -41,12 +52,25 @@ class PuenteRos:
         self.target_pub = node.create_publisher(JointState, '/irb120/control/objetivo/joint_states', 10)
         self.state_pub = node.create_publisher(String, STATE_TOPIC, 10)
         node.create_subscription(String, ORDER_TOPIC, self.on_order, 10)
+        node.create_subscription(PoseStamped, POINT_TOPIC, self.on_point, 10)
         node.create_timer(.1, self.publish_joints)
         node.create_timer(.25, self.publish_state)
 
     def on_order(self, message):
-        self.ordenes.atender(message.data)
-        self.publish_state()
+        self.despacho.atender(message.data)   # 'trayectoria' y 'vista_previa' en un hilo aparte
+
+    def on_point(self, message):
+        p, q = message.pose.position, message.pose.orientation
+        try:
+            pose = pose_desde_cuaternion(message.header.frame_id, (p.x, p.y, p.z), (q.x, q.y, q.z, q.w))
+        except Refused as exc:
+            self.panel.buzon.rechazar('vision', str(exc))
+            self.panel.say(f'Buzón: punto de vision rechazado: {exc}')
+            return
+        try:
+            self.panel.punto_externo(pose, origen='vision')   # el rechazo ya queda registrado
+        except Refused:
+            pass
 
     def publish_state(self):
         self.state_pub.publish(String(data=self.ordenes.estado()))

@@ -121,6 +121,8 @@ QWidget * PanelIRB120::construirAcciones()
       "QPushButton:disabled{background:#9ca3af; color:#eee;}"));
   paso_ = new QComboBox;
   paso_->setToolTip(QStringLiteral("Paso máx. por orden"));
+  // v5: por defecto una sola orden por movimiento (355° = MAX_STEP_DEG de rws_mover.py), sin paradas intermedias.
+  paso_->addItem(QStringLiteral("Sin cortes: una orden"), 355);
   for (int paso : {5, 10, 20, 40}) {
     paso_->addItem(QStringLiteral("Paso máx. por orden: %1°").arg(paso), paso);
   }

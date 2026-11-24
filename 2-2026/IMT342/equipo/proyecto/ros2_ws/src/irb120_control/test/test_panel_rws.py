@@ -118,7 +118,7 @@ class PanelLogic(unittest.TestCase):
         panel = self.sim()
         panel.handle('paso', {'valor': 2})
         self.assertEqual(panel.snapshot()['paso'], 2.)
-        for bad in (0, 41, 'x', None, True):
+        for bad in (0, 356, 'x', None, True):
             with self.assertRaises(Refused):
                 panel.handle('paso', {'valor': bad})
         with self.assertRaises(Refused):
@@ -419,6 +419,28 @@ class PanelHttp(unittest.TestCase):
         with self.assertRaises(urllib.error.HTTPError) as caught:
             urllib.request.urlopen(request, timeout=3)
         self.assertEqual(caught.exception.code, 400)
+
+
+class SimulatedTramo(unittest.TestCase):
+    def test_move_tramo_with_simulated_mover(self):
+        from irb120_control.rws_mover import move_tramo, MAX_STEP_DEG
+        robot = SimulatedMover(speed=5000., sleep=lambda _: None)
+        goal = [120., 30., -40., 90., 50., 200.]   # un solo tramo largo: sin cortes cada 40°
+        pose = [300., 50., 250., 0., 1., 0., 0.]
+        orders = []
+        original = robot.send
+        robot.send = lambda *a, **k: (orders.append(k.get('tipo', 'articular')), original(*a, **k))[1]
+        result = move_tramo(robot, 'lineal', goal, pose, echo=lambda *_: None)
+        self.assertEqual(orders, ['lineal'])
+        self.assertEqual(robot.last_order['tipo'], 'lineal')
+        self.assertEqual(robot.last_order['pose_tool0'], pose)
+        self.assertEqual(set(result), {'seq', 'code', 'joints_deg', 'max_error_deg'})
+        self.assertLess(result['max_error_deg'], 0.02)
+        self.assertEqual(robot.q, goal)
+        self.assertEqual(MAX_STEP_DEG, 355.)
+        with self.assertRaises(Refused):
+            robot.send([goal, [9e9] * 6], tipo='lineal', echo=lambda *_: None)   # sin pose
+        self.assertEqual(Panel(SimulatedMover(), simulated=True).step, 355.)
 
 
 if __name__ == '__main__':

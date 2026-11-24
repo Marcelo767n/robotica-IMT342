@@ -8,7 +8,7 @@ Tarea `T_ROB1` del IRC5 (`120-101516`, RobotWare 6.12.01.00), según la lectura 
 
 | Módulo | De quién | Para qué | Copia en git |
 |---|---|---|---|
-| `LabJointRws` | Equipo | Servidor de objetivos `ServidorPC` (v2) que mueve el robot desde la PC | [rapid/rws_mover/LabJointRws.mod](../../ros2_ws/src/irb120_control/rapid/rws_mover/LabJointRws.mod) |
+| `LabJointRws` | Equipo | Servidor de objetivos `ServidorPC` (v5) que mueve el robot desde la PC | [rapid/rws_mover/LabJointRws.mod](../../ros2_ws/src/irb120_control/rapid/rws_mover/LabJointRws.mod) |
 | `Module1` | Laboratorio | Programa principal (`main`, ajedrez por socket) | [respaldo_controlador/2026-11-16/Module1.mod](../../ros2_ws/src/irb120_control/rapid/respaldo_controlador/2026-11-16/Module1.mod) |
 | `EGM_ROS` | Laboratorio / otro grupo | Apareció entre el 10/11 y el 16/11; contenido aún no copiado | Pendiente: `./brazo.sh respaldar` |
 | `user`, `BASE`, `CalibData` | Sistema ABB | Datos de sistema y calibración | Solo en la copia completa del FlexPendant (§2.1) |
@@ -51,7 +51,7 @@ El instalador respalda el módulo anterior en `salidas/`, sustituye solo `LabJoi
 3. Si aparece un `LabJointRws` viejo: seleccionarlo → **Archivo → Eliminar módulo…** → **Aceptar** (sin guardar).
 4. **Archivo → Cargar módulo…** → aceptar el aviso de que se pierde el puntero → elegir la USB → `LabJointRws.mod` → **Aceptar**.
 5. **Depurar → Comprobar programa**: debe decir que no hay errores.
-6. En la PC: `./brazo.sh estado` debe mostrar `módulo servidor_v2`.
+6. En la PC: `./brazo.sh estado` debe mostrar `módulo servidor_v5`.
 
 ### 3.2 Volver a cargar el programa del laboratorio (`Module1`)
 
@@ -70,6 +70,6 @@ Solo si se perdió más que los módulos (configuración, calibración) y con la
 | Comprobación | Esperado |
 |---|---|
 | `./brazo.sh enlace` | Ping y puerto 80 abiertos |
-| `./brazo.sh estado` | Controlador `120-101516`, RobotWare `6.12.01.00`, módulo `servidor_v2` |
+| `./brazo.sh estado` | Controlador `120-101516`, RobotWare `6.12.01.00`, módulo `servidor_v5` |
 | FlexPendant → Comprobar programa | Sin errores |
 | `./brazo.sh simulado` | Sigue funcionando (no depende del robot) |

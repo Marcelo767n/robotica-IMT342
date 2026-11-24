@@ -1,0 +1,6416 @@
+{
+  "contexto": {
+    "git": {
+      "commit": "6e82c45680df44e3fdd1cdff2d5a6ab727dd0060",
+      "hito3_sin_versionar": true
+    },
+    "sha": {
+      "hito2/irb120/dh.py": "6af5c24c5d4e4bace33c4f023927f3ad9a2305ea1f47bf66a802ee10ea3f3173",
+      "hito2/irb120/pieper.py": "9ffd1dbe9b24c371a8a90a29d07532936cd408d014fcd52578b3fd3b600237c1",
+      "hito2/irb120/jacobian.py": "a28195757e03eaae3382d2a08c12730558e465c410f80212fec1d20c9d77c22b",
+      "hito2/irb120/dynamics.py": "fc304619cd482e1eab3dd0a157f8ff8e52cd9147f8aaa2541e774cd3f33dfe84",
+      "hito2/irb120/urdf_chain.py": "06b16d63c38c206c30fcc65af3415680bf6b6688929ee3deee5738cd3670f277",
+      "hito2/irb120/rosi_model.py": "c626eb8728a440129999712d28b8258259f9fa06315331db0baf09d42d04c24c",
+      "hito2/datos/irb120.urdf": "0cf27d2c4524530d889bba7ee133c5583fdd3cdbe381774c7bc818796eb9041c"
+    },
+    "py": "3.14.4",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "matplotlib": "3.10.7+dfsg1",
+    "so": "Linux-7.0.0-44-generic-x86_64-desconocido-with-glibc2.43",
+    "generado_utc": "2026-11-24T14:11:45Z"
+  },
+  "estados": {
+    "verificado": 21,
+    "parcial": 9,
+    "fallido": 0,
+    "no ejecutado": 0,
+    "bloqueado por acceso": 4
+  },
+  "casos": {
+    "FK-N1": {
+      "tipo": "FK nominal (real)",
+      "nivel": "S1",
+      "estado": "parcial",
+      "justificacion": "Observación del controlador por RWS con unidad, fuente y marca temporal (S1). No es S2 (no trazada por ROS) ni S3. Parcial: umbral no aprobado; una sola postura por caso; J6 casi constante en ambas posturas; TCP físico no medido (se usa la brida); 155 lecturas FUERA sin causa demostrada.",
+      "q": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.5541037878570434,
+        -2.34744334285034
+      ],
+      "evidencia": "hito3/datos/fk_real_N1_estacionarias.csv; hito3/resultados/fk_real_errores_por_muestra.csv; hito3/resultados/figuras/fk_real_errores_N1_N2.png"
+    },
+    "FK-N1-S0": {
+      "tipo": "FK nominal (offline, ref. independiente)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Modelo vs modelo. rosi_model es independiente de la TABLA DH y del código propio, no de la geometría nominal ABB: no demuestra exactitud física.",
+      "q": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.5541037878570434,
+        -2.34744334285034
+      ],
+      "evidencia": "hito3/resultados/fk_offline_propia_vs_rosi.csv"
+    },
+    "FK-N2": {
+      "tipo": "FK nominal (real)",
+      "nivel": "S1",
+      "estado": "parcial",
+      "justificacion": "Observación del controlador por RWS con unidad, fuente y marca temporal (S1). No es S2 (no trazada por ROS) ni S3. Parcial: umbral no aprobado; una sola postura por caso; J6 casi constante en ambas posturas; TCP físico no medido (se usa la brida); 155 lecturas FUERA sin causa demostrada.",
+      "q": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "evidencia": "hito3/datos/fk_real_N2_estacionarias.csv; hito3/resultados/fk_real_errores_por_muestra.csv; hito3/resultados/figuras/fk_real_errores_N1_N2.png"
+    },
+    "FK-N2-S0": {
+      "tipo": "FK nominal (offline, ref. independiente)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Modelo vs modelo. rosi_model es independiente de la TABLA DH y del código propio, no de la geometría nominal ABB: no demuestra exactitud física.",
+      "q": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "evidencia": "hito3/resultados/fk_offline_propia_vs_rosi.csv"
+    },
+    "FK-N3": {
+      "tipo": "FK nominal (real, complementario 29/10)",
+      "nivel": "S1",
+      "estado": "parcial",
+      "justificacion": "Lectura de pantalla del controlador (S1 limitado): sin tiempo simultáneo ni registro automático; solo apoyo complementario.",
+      "q": [
+        0.9651857051646889,
+        0.2957704709271184,
+        0.011228310556775506,
+        -0.7928715260484291,
+        -1.1112165482717136,
+        0.15938047070326364
+      ],
+      "evidencia": "docs/conexion_abb/evidencias/g2_fk_vs_controlador_pose1_2026-10-29.json"
+    },
+    "FK-L": {
+      "tipo": "FK cerca de límites (offline)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Offline contra rosi_model; los límites son los documentados de la hoja ABB (dh.py), no leídos del controlador.",
+      "q": [
+        2.8623399732707004,
+        1.9024088846738192,
+        1.2042771838760873,
+        2.775073510670984,
+        2.076941809873252,
+        6.963863715457375
+      ],
+      "evidencia": "hito3/resultados/fk_offline_propia_vs_rosi.csv"
+    },
+    "FK-L-REAL": {
+      "tipo": "FK cerca de límites (real)",
+      "nivel": "S1 (pendiente)",
+      "estado": "bloqueado por acceso",
+      "justificacion": "Depende de permiso/hardware no disponibles.",
+      "q": null,
+      "evidencia": "-"
+    },
+    "FK-D-TCP": {
+      "tipo": "FK diagnóstico TCP",
+      "nivel": "S1",
+      "estado": "verificado",
+      "justificacion": "Datos reales S1 + perturbación offline declarada: demuestra la sensibilidad a la herramienta y la regla de no comparar brida con TCP.",
+      "q": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.5541037878570434,
+        -2.34744334285034
+      ],
+      "evidencia": "hito3/resultados/fk_d_tcp.csv; hito3/resultados/figuras/fk_d_tcp_d_ord.png"
+    },
+    "FK-D-ORD": {
+      "tipo": "FK diagnóstico orden articular",
+      "nivel": "S1",
+      "estado": "verificado",
+      "justificacion": "Datos reales S1 con permutación offline intencional; el error emerge y desaparece al invertir la permutación.",
+      "q": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "evidencia": "hito3/resultados/fk_d_ord.csv; hito3/resultados/figuras/fk_d_tcp_d_ord.png"
+    },
+    "FK-FUERA": {
+      "tipo": "FK diagnóstico de muestras FUERA",
+      "nivel": "S1",
+      "estado": "parcial",
+      "justificacion": "Clasificadas con el árbol del Bloque C; causa raíz indeterminada por datos (falta registro simultáneo y repetición controlada).",
+      "q": null,
+      "evidencia": "hito3/datos/fk_real_fuera.csv; hito3/resultados/fk_fuera_diagnostico.csv; hito3/resultados/figuras/fk_fuera_diagnostico.png"
+    },
+    "FK-INV": {
+      "tipo": "FK diagnóstico lecturas inválidas",
+      "nivel": "S1",
+      "estado": "parcial",
+      "justificacion": "Sin datos que comparar; clasificadas por tipo de excepción.",
+      "q": null,
+      "evidencia": "hito3/datos/fk_real_procedencia.json"
+    },
+    "FK-TCP-REAL": {
+      "tipo": "FK con TCP físico",
+      "nivel": "S1 (pendiente)",
+      "estado": "bloqueado por acceso",
+      "justificacion": "Depende de acceso al controlador.",
+      "q": null,
+      "evidencia": "-"
+    },
+    "IK-1": {
+      "tipo": "IK (regular)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "IK propia vs FK propia/independiente y DLS independiente; offline.",
+      "q": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.5541037878570434,
+        -2.34744334285034
+      ],
+      "evidencia": "hito3/resultados/ik_ramas.csv; hito3/resultados/ik_dls_intentos.csv; hito3/resultados/figuras/ik_ramas_residuos.png",
+      "pose": "IK-1"
+    },
+    "IK-2": {
+      "tipo": "IK (regular)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "IK propia vs FK propia/independiente y DLS independiente; offline.",
+      "q": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "evidencia": "hito3/resultados/ik_ramas.csv; hito3/resultados/ik_dls_intentos.csv; hito3/resultados/figuras/ik_ramas_residuos.png",
+      "pose": "IK-2"
+    },
+    "IK-3": {
+      "tipo": "IK (cerca singularidad)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "IK propia vs FK propia/independiente y DLS independiente; offline.",
+      "q": [
+        0.17453292519943295,
+        0.5235987755982988,
+        -0.17453292519943295,
+        0.3490658503988659,
+        0.008726646259971648,
+        0.6981317007977318
+      ],
+      "evidencia": "hito3/resultados/ik_ramas.csv; hito3/resultados/ik_dls_intentos.csv; hito3/resultados/figuras/ik_ramas_residuos.png",
+      "pose": "IK-3"
+    },
+    "IK-4": {
+      "tipo": "IK (singular)",
+      "nivel": "S0",
+      "estado": "parcial",
+      "justificacion": "IK propia vs FK propia/independiente y DLS independiente; offline.",
+      "q": [
+        0.17453292519943295,
+        0.5235987755982988,
+        -0.17453292519943295,
+        0.3490658503988659,
+        0.0,
+        0.6981317007977318
+      ],
+      "evidencia": "hito3/resultados/ik_ramas.csv; hito3/resultados/ik_dls_intentos.csv; hito3/resultados/figuras/ik_ramas_residuos.png",
+      "pose": "IK-4"
+    },
+    "IK-5": {
+      "tipo": "IK (inalcanzable)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "IK propia vs FK propia/independiente y DLS independiente; offline.",
+      "q": [
+        0.17453292519943295,
+        0.5235987755982988,
+        -0.17453292519943295,
+        0.3490658503988659,
+        0.5235987755982988,
+        0.6981317007977318
+      ],
+      "evidencia": "hito3/resultados/ik_ramas.csv; hito3/resultados/ik_dls_intentos.csv; hito3/resultados/figuras/ik_ramas_residuos.png",
+      "pose": "IK-5"
+    },
+    "IK-REAL": {
+      "tipo": "IK con movimiento físico",
+      "nivel": "S3 (no alcanzado)",
+      "estado": "bloqueado por acceso",
+      "justificacion": "NO-GO físico; plan alternativo: IK offline (IK-1..IK-5).",
+      "q": null,
+      "evidencia": "-"
+    },
+    "S3-MOV": {
+      "tipo": "Movimiento ROS→IRC5 (Gate 3)",
+      "nivel": "S3 técnico (registrado); S3 autorizado no acreditado",
+      "estado": "parcial",
+      "justificacion": "Ver hito3/docs/evidencia_gate3_movimiento.md y gate3_ordenes.csv; firmar checklist_seguridad.md en la próxima sesión.",
+      "q": null,
+      "evidencia": "hito3/docs/evidencia_gate3_movimiento.md"
+    },
+    "J-N1": {
+      "tipo": "Jacobiano (offline, ref. independiente)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "J propio vs diferenciación numérica de la FK independiente; dominado por el error de FD, no por el J.",
+      "q": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.5541037878570434,
+        -2.34744334285034
+      ],
+      "evidencia": "hito3/resultados/jacobiano_errores.csv; hito3/resultados/figuras/jacobiano_errores_separados.png"
+    },
+    "J-N2": {
+      "tipo": "Jacobiano (offline, ref. independiente)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "J propio vs diferenciación numérica de la FK independiente; dominado por el error de FD, no por el J.",
+      "q": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "evidencia": "hito3/resultados/jacobiano_errores.csv; hito3/resultados/figuras/jacobiano_errores_separados.png"
+    },
+    "J-N3": {
+      "tipo": "Jacobiano (offline, ref. independiente)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "J propio vs diferenciación numérica de la FK independiente; dominado por el error de FD, no por el J.",
+      "q": [
+        0.3,
+        -0.5,
+        0.6,
+        -0.8,
+        1.1,
+        0.4
+      ],
+      "evidencia": "hito3/resultados/jacobiano_errores.csv; hito3/resultados/figuras/jacobiano_errores_separados.png"
+    },
+    "J-N4": {
+      "tipo": "Jacobiano (offline, ref. independiente)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "J propio vs diferenciación numérica de la FK independiente; dominado por el error de FD, no por el J.",
+      "q": [
+        2.792526803190927,
+        -1.8325957145940461,
+        1.1344640137963142,
+        -2.705260340591211,
+        2.007128639793479,
+        -6.894050545377602
+      ],
+      "evidencia": "hito3/resultados/jacobiano_errores.csv; hito3/resultados/figuras/jacobiano_errores_separados.png"
+    },
+    "J-FD": {
+      "tipo": "Jacobiano curva h→E(h)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Caracterización numérica de la referencia por FD (autoconvergencia).",
+      "q": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "evidencia": "hito3/resultados/jacobiano_fd_curva.csv; hito3/resultados/figuras/jacobiano_fd_curva_visual4.png"
+    },
+    "J-REAL": {
+      "tipo": "Jacobiano vs controlador",
+      "nivel": "S1/S3 (no alcanzado)",
+      "estado": "bloqueado por acceso",
+      "justificacion": "Depende de hardware y GO.",
+      "q": null,
+      "evidencia": "-"
+    },
+    "F-reg": {
+      "tipo": "Singularidad (ninguna)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Análisis algebraico del modelo; sin datos físicos.",
+      "q": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.5541037878570434,
+        -2.34744334285034
+      ],
+      "evidencia": "hito3/resultados/singularidad_svd.csv; hito3/resultados/singularidad_sigma.csv; hito3/resultados/figuras/singularidad_svd_tau.png"
+    },
+    "F-q5": {
+      "tipo": "Singularidad (muñeca)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Análisis algebraico del modelo; sin datos físicos.",
+      "q": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.008726646259971648,
+        -2.34744334285034
+      ],
+      "evidencia": "hito3/resultados/singularidad_svd.csv; hito3/resultados/singularidad_sigma.csv; hito3/resultados/figuras/singularidad_svd_tau.png"
+    },
+    "F-q5-0": {
+      "tipo": "Singularidad (muñeca)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Análisis algebraico del modelo; sin datos físicos.",
+      "q": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.0,
+        -2.34744334285034
+      ],
+      "evidencia": "hito3/resultados/singularidad_svd.csv; hito3/resultados/singularidad_sigma.csv; hito3/resultados/figuras/singularidad_svd_tau.png"
+    },
+    "F-codo": {
+      "tipo": "Singularidad (codo)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Análisis algebraico del modelo; sin datos físicos.",
+      "q": [
+        -1.2776709740414718,
+        0.35,
+        -1.3430303610541365,
+        0.5,
+        0.9,
+        0.3
+      ],
+      "evidencia": "hito3/resultados/singularidad_svd.csv; hito3/resultados/singularidad_sigma.csv; hito3/resultados/figuras/singularidad_svd_tau.png"
+    },
+    "F-hombro": {
+      "tipo": "Singularidad (hombro)",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Análisis algebraico del modelo; sin datos físicos.",
+      "q": [
+        -1.2776709740414718,
+        -0.5235987755982988,
+        -0.3688659291138775,
+        0.5,
+        0.9,
+        0.3
+      ],
+      "evidencia": "hito3/resultados/singularidad_svd.csv; hito3/resultados/singularidad_sigma.csv; hito3/resultados/figuras/singularidad_svd_tau.png"
+    },
+    "F-TAU": {
+      "tipo": "Esfuerzo estático vs dinámica",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Demostración algebraica sobre el modelo propio.",
+      "q": null,
+      "evidencia": "hito3/resultados/singularidad_svd.csv; hito3/resultados/singularidad_barrido_q5.csv"
+    },
+    "MET-SINT": {
+      "tipo": "Verificación del código de métricas",
+      "nivel": "S0",
+      "estado": "verificado",
+      "justificacion": "Valores esperados del documento.",
+      "q": null,
+      "evidencia": "hito3/resultados/verificacion_metricas_sinteticas.csv"
+    },
+    "TOL-OFF": {
+      "tipo": "Presupuesto de tolerancia offline",
+      "nivel": "S0",
+      "estado": "parcial",
+      "justificacion": "Presupuesto numérico declarado, sin aprobación; K y N_ops son estimaciones.",
+      "q": null,
+      "evidencia": "hito3/resultados/tolerancias_presupuesto.csv"
+    },
+    "TOL-IRC5": {
+      "tipo": "Incertidumbres FK vs IRC5",
+      "nivel": "S1",
+      "estado": "parcial",
+      "justificacion": "No se inventa ninguna tolerancia física.",
+      "q": null,
+      "evidencia": "hito3/resultados/tolerancias_incertidumbres_irc5.csv"
+    }
+  },
+  "sint": {
+    "filas": [
+      [
+        "Ejemplo 1: p(q) [m]",
+        "[1.34898832, 0.37059048]",
+        "[1.34898832, 0.370590477]",
+        3.0710269882661123e-09,
+        5e-09,
+        true
+      ],
+      [
+        "Ejemplo 1: Jp(q) [m/rad]",
+        "[-0.37059048, 0.12940952, 1.34898832, 0.48296291]",
+        "[-0.370590477, 0.129409523, 1.34898832, 0.482962913]",
+        3.144534133081578e-09,
+        5e-09,
+        true
+      ],
+      [
+        "Ejemplo 1: ṗ = Jp q̇ [m/s]",
+        "[-0.06294095, 0.03830625]",
+        "[-0.0629409523, 0.0383062491]",
+        2.2551260442371657e-09,
+        5e-09,
+        true
+      ],
+      [
+        "Ejemplo 1: det Jp = a1 a2 sin q2",
+        "[-0.35355339]",
+        "[-0.353553391]",
+        5.932737079383799e-10,
+        5e-09,
+        true
+      ],
+      [
+        "Ejemplo 1: det Jp (fórmula cerrada)",
+        "[-0.353553391]",
+        "[-0.353553391]",
+        0.0,
+        1e-14,
+        true
+      ],
+      [
+        "Ejemplo 1: E(h=1e-02) Visual 4",
+        "[2.33e-05]",
+        "[2.33159889e-05]",
+        1.598885393179177e-08,
+        2.33e-07,
+        true
+      ],
+      [
+        "Ejemplo 1: E(h=1e-03) Visual 4",
+        "[2.33e-07]",
+        "[2.33161039e-07]",
+        1.610394102057543e-10,
+        2.33e-09,
+        true
+      ],
+      [
+        "Ejemplo 1: E(h=1e-04) Visual 4",
+        "[2.33e-09]",
+        "[2.33138451e-09]",
+        1.3845145118668667e-12,
+        2.33e-11,
+        true
+      ],
+      [
+        "Ejemplo 2: e_R arccos [rad]",
+        "[0.174532925]",
+        "[0.174532925]",
+        4.163336342344337e-16,
+        1e-12,
+        true
+      ],
+      [
+        "Ejemplo 2: e_R atan2 [rad]",
+        "[0.174532925]",
+        "[0.174532925]",
+        2.7755575615628914e-17,
+        1e-15,
+        true
+      ],
+      [
+        "Ejemplo 2: tr(R_err) = 1 + 2 cos 10°",
+        "[2.96961551]",
+        "[2.96961551]",
+        0.0,
+        1e-15,
+        true
+      ],
+      [
+        "Clip: e_R con tr/3 ligeramente > 1 no es NaN",
+        "[0]",
+        "[0]",
+        0.0,
+        1e-07,
+        true
+      ],
+      [
+        "Ejemplo 3: rank_num(Jp) = 1",
+        "[1]",
+        "[1]",
+        0.0,
+        0,
+        true
+      ],
+      [
+        "Ejemplo 3: dirección perdida ±[-2,1]/√5",
+        "[0.894427191, 0.447213595]",
+        "[0.894427191, 0.447213595]",
+        5.551115123125783e-17,
+        1e-12,
+        true
+      ],
+      [
+        "Ejemplo 3: Jpᵀ F finito (= [-11, -22])",
+        "[-11, -22]",
+        "[-11, -22]",
+        0.0,
+        1e-12,
+        true
+      ],
+      [
+        "Ejemplo 3: τ_num = max(m,n) ε σ_max",
+        "[2.22044605e-15]",
+        "[2.22044605e-15]",
+        3.944304526105059e-31,
+        1e-30,
+        true
+      ],
+      [
+        "log(Rz(0.3)) = [0,0,0.3]",
+        "[0, 0, 0.3]",
+        "[0, 0, 0.3]",
+        0.0,
+        1e-14,
+        true
+      ],
+      [
+        "cuaternión (w,x,y,z) de Rz(0.3) -> R",
+        "[0.955336489, -0.295520207, 0, 0.295520207, 0.955336489, 0, 0, 0, 1]",
+        "[0.955336489, -0.295520207, 0, 0.295520207, 0.955336489, 0, 0, 0, 1]",
+        1.1102230246251565e-16,
+        1e-15,
+        true
+      ],
+      [
+        "R -> cuaternión canónico w>=0",
+        "[0.988771078, 0, 0, 0.149438132]",
+        "[0.988771078, 0, 0, 0.149438132]",
+        1.1102230246251565e-16,
+        1e-14,
+        true
+      ]
+    ],
+    "todas_ok": true,
+    "n": 19
+  },
+  "fk": {
+    "criterios": {
+      "estricto_proyecto": {
+        "e_p_m": 1e-06,
+        "e_R_rad": 1e-06,
+        "estado": "criterio numérico estricto del proyecto (nodo validacion_fk); propuesto, NO aprobado"
+      },
+      "cribado_sintetico": {
+        "e_p_m": 1e-06,
+        "e_R_rad": 1e-05,
+        "estado": "cribado exploratorio sintético del documento W14-S02; solo modelo artificial, pendiente de aprobación"
+      }
+    },
+    "FK-N1": {
+      "caso": "FK-N1",
+      "n_muestras": 1804,
+      "sesion_archivo": "comunicacion_20261104_223936_186467Z_fk.jsonl",
+      "linea_representativa": 208,
+      "seq_representativa": 208,
+      "t_representativa_utc": "2026-11-04T22:40:21.297358+00:00",
+      "stamp_representativo": [
+        1793832021,
+        283377016
+      ],
+      "q_deg": [
+        -73.2051544189453,
+        -12.1486206054688,
+        9.91144466400146,
+        91.8839874267578,
+        31.7478084564209,
+        -134.498596191406
+      ],
+      "q_rad": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.5541037878570434,
+        -2.34744334285034
+      ],
+      "p_own_m": [
+        0.12390051690136965,
+        -0.2794678289764906,
+        0.6393235334668496
+      ],
+      "p_ref_m": [
+        0.1239005,
+        -0.2794678,
+        0.6393236000000001
+      ],
+      "R_own": [
+        [
+          -0.4330958980525163,
+          0.5017323302816299,
+          0.7487941051051684
+        ],
+        [
+          -0.5455181999016319,
+          0.5154132440361733,
+          -0.6608775086566281
+        ],
+        [
+          -0.7175220112764261,
+          -0.6947041504282766,
+          0.050480755853678505
+        ]
+      ],
+      "R_ref": [
+        [
+          -0.4330957253894714,
+          0.5017323829129581,
+          0.7487941697061029
+        ],
+        [
+          -0.5455181939849267,
+          0.5154133508572114,
+          -0.6608774302316315
+        ],
+        [
+          -0.7175221199940744,
+          -0.6947040331642144,
+          0.0504808243255086
+        ]
+      ],
+      "quat_own_wxyz": [
+        0.5321649419675575,
+        -0.015891051394038794,
+        0.6888447550491714,
+        -0.4919764755224639
+      ],
+      "quat_ref_wxyz_registrado": [
+        0.532165,
+        -0.01589103,
+        0.6888447,
+        -0.4919764
+      ],
+      "e_p_m_rep": 7.451143150356348e-08,
+      "e_R_rad_rep": 2.0647654623614315e-07,
+      "e_R_atan2_rad_rep": 2.0568284452128297e-07,
+      "estadistica_e_p_m": {
+        "n": 1804,
+        "min": 5.975381424168058e-08,
+        "mediana": 7.451143150356348e-08,
+        "p95": 7.451143150356348e-08,
+        "max": 1.7064033804599188e-06,
+        "media": 7.960611093724534e-08,
+        "desv": 5.7810519057269965e-08
+      },
+      "estadistica_e_R_rad": {
+        "n": 1804,
+        "min": 1.8250120749944311e-07,
+        "mediana": 2.0647654623614315e-07,
+        "p95": 2.0647654623614315e-07,
+        "max": 7.5943019161931515e-06,
+        "media": 2.8475437479586654e-07,
+        "desv": 7.457683971774385e-07
+      },
+      "estadistica_e_R_atan2_rad": {
+        "n": 1804,
+        "min": 1.8427844525513472e-07,
+        "mediana": 2.0568284452128297e-07,
+        "p95": 2.0568284452128297e-07,
+        "max": 7.5942923502841786e-06,
+        "media": 2.8400416719000985e-07,
+        "desv": 7.45851118641292e-07
+      },
+      "rosi_vs_controlador": {
+        "e_p_m": {
+          "n": 1804,
+          "min": 5.975381428198048e-08,
+          "mediana": 7.45114315004156e-08,
+          "p95": 7.45114315004156e-08,
+          "max": 1.7064033805910846e-06,
+          "media": 7.96061109348599e-08,
+          "desv": 5.781051906012292e-08
+        },
+        "e_R_atan2_rad": {
+          "n": 1804,
+          "min": 1.8427844523304254e-07,
+          "mediana": 2.056828444767739e-07,
+          "p95": 2.056828444767739e-07,
+          "max": 7.594292350375095e-06,
+          "media": 2.840041671462126e-07,
+          "desv": 7.458511186449769e-07
+        }
+      },
+      "propia_vs_rosi_e_p_m": {
+        "n": 1804,
+        "min": 1.3877787807814457e-17,
+        "mediana": 1.3877787807814457e-17,
+        "p95": 1.3877787807814457e-17,
+        "max": 1.576213700060856e-16,
+        "media": 1.4708054002321476e-17,
+        "desv": 6.798442423458993e-18
+      },
+      "ortogonalidad_max_R_own": 2.220446049250313e-16,
+      "ortogonalidad_max_R_ref": 4.440892098500626e-16,
+      "det_dev_max_R_own": 2.220446049250313e-16,
+      "det_dev_max_R_ref": 6.661338147750939e-16,
+      "n_poses_controlador_distintas": 4,
+      "n_estados_registro": {
+        "DENTRO": 1772,
+        "NO_EVALUABLE": 25,
+        "FUERA": 7
+      },
+      "n_dentro_criterio_estricto_proyecto": 1784,
+      "cuantizacion": {
+        "semi_ulp_q_deg": [
+          3.814697265625e-06,
+          4.76837158203125e-07,
+          4.76837158203125e-07,
+          3.814697265625e-06,
+          9.5367431640625e-07,
+          7.62939453125e-06
+        ],
+        "cota_e_p_m": 1.1760752045592732e-07,
+        "cota_e_R_rad": 4.996056203130593e-07,
+        "cota_e_p_solo_xyz_m": 8.660254037844388e-08
+      },
+      "razon_e_p_max_sobre_cota_cuantizacion": 14.509304964892808,
+      "razon_e_R_mediana_sobre_cota_cuantizacion": 0.41169041371552123,
+      "max_dif_vs_registro_hito1_mm": 0.0007080403598161522,
+      "ventana_ms": {
+        "n": 1804,
+        "min": 10.335716000099637,
+        "mediana": 14.223369999967872,
+        "p95": 17.544225500057564,
+        "max": 54.25624400004381,
+        "media": 14.587579292684147,
+        "desv": 1.906257863785071
+      },
+      "t_primera_utc": "2026-11-04T22:40:16.491790+00:00",
+      "t_ultima_utc": "2026-11-04T22:46:17.094911+00:00"
+    },
+    "FK-N1-S0": {
+      "caso": "FK-N1-S0",
+      "q_rad": [
+        -1.2776709740414718,
+        -0.2120334291410576,
+        0.17298734301604857,
+        1.6036781104579958,
+        0.5541037878570434,
+        -2.34744334285034
+      ],
+      "p_own_m": [
+        0.12390051690136965,
+        -0.2794678289764906,
+        0.6393235334668496
+      ],
+      "p_ref_m": [
+        0.12390051690136963,
+        -0.2794678289764906,
+        0.6393235334668496
+      ],
+      "R_own": [
+        [
+          -0.4330958980525163,
+          0.5017323302816299,
+          0.7487941051051684
+        ],
+        [
+          -0.5455181999016319,
+          0.5154132440361733,
+          -0.6608775086566281
+        ],
+        [
+          -0.7175220112764261,
+          -0.6947041504282766,
+          0.050480755853678505
+        ]
+      ],
+      "R_ref": [
+        [
+          -0.43309589805251625,
+          0.5017323302816299,
+          0.7487941051051683
+        ],
+        [
+          -0.5455181999016318,
+          0.5154132440361733,
+          -0.6608775086566281
+        ],
+        [
+          -0.7175220112764261,
+          -0.6947041504282765,
+          0.050480755853678554
+        ]
+      ],
+      "e_p_m": 1.3877787807814457e-17,
+      "e_R_rad": 0.0,
+      "e_R_atan2_rad": 8.435423392137348e-17,
+      "e_p_urdf_m": 4.163336342344337e-17,
+      "e_R_urdf_atan2_rad": 1.585748875643913e-16,
+      "ortogonalidad_own": 2.220446049250313e-16,
+      "ortogonalidad_ref": 2.220446049250313e-16,
+      "det_dev_own": 2.220446049250313e-16,
+      "det_dev_ref": 2.220446049250313e-16
+    },
+    "FK-N2": {
+      "caso": "FK-N2",
+      "n_muestras": 1487,
+      "sesion_archivo": "comunicacion_20261104_225612_309539Z_fk.jsonl",
+      "linea_representativa": 1793,
+      "seq_representativa": 1793,
+      "t_representativa_utc": "2026-11-04T23:02:23.336385+00:00",
+      "stamp_representativo": [
+        1793833343,
+        324364721
+      ],
+      "q_deg": [
+        2.94653606414795,
+        -1.92747604846954,
+        2.58878517150879,
+        -13.0647773742676,
+        89.6627731323242,
+        -133.982666015625
+      ],
+      "q_rad": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "p_own_m": [
+        0.29376960095702165,
+        -0.0011760946277306773,
+        0.5562216656153752
+      ],
+      "p_ref_m": [
+        0.2937696,
+        -0.0011760949999999998,
+        0.5562217
+      ],
+      "R_own": [
+        [
+          0.731368050969259,
+          -0.6819541544916468,
+          0.006269385377418879
+        ],
+        [
+          -0.6632821171830606,
+          -0.7134209606583891,
+          -0.22602514443844057
+        ],
+        [
+          0.15861149720806486,
+          0.1611491981514166,
+          -0.9741012929303459
+        ]
+      ],
+      "R_ref": [
+        [
+          0.7313681397388601,
+          -0.6819540600598964,
+          0.006269301615209236
+        ],
+        [
+          -0.6632820246818106,
+          -0.7134210196057293,
+          -0.22602522982782117
+        ],
+        [
+          0.15861147470759224,
+          0.16114933680454493,
+          -0.9741012736561523
+        ]
+      ],
+      "quat_own_wxyz": [
+        0.10469694047645815,
+        0.9245120746315315,
+        -0.36376925423360684,
+        0.04458591918639834
+      ],
+      "quat_ref_wxyz_registrado": [
+        0.104697,
+        0.9245121,
+        -0.3637692,
+        0.04458589
+      ],
+      "e_p_m_rep": 3.4399954919327145e-08,
+      "e_R_rad_rep": 1.788139343261721e-07,
+      "e_R_atan2_rad_rep": 1.778181340326337e-07,
+      "estadistica_e_p_m": {
+        "n": 1487,
+        "min": 1.820014147087397e-08,
+        "mediana": 3.4399954919327145e-08,
+        "p95": 2.856797356211582e-07,
+        "max": 1.4343850814738499e-06,
+        "media": 9.931530926752032e-08,
+        "desv": 2.617509131693463e-07
+      },
+      "estadistica_e_R_rad": {
+        "n": 1487,
+        "min": 1.1151007970493862e-07,
+        "mediana": 1.788139343261721e-07,
+        "p95": 3.915235796937911e-06,
+        "max": 7.526605872873962e-06,
+        "media": 6.592775005971981e-07,
+        "desv": 1.2833126772507783e-06
+      },
+      "estadistica_e_R_atan2_rad": {
+        "n": 1487,
+        "min": 1.0504970497942112e-07,
+        "mediana": 1.778181340326337e-07,
+        "p95": 3.915203690461262e-06,
+        "max": 7.526577307176534e-06,
+        "media": 6.585994946939614e-07,
+        "desv": 1.2835585881761202e-06
+      },
+      "rosi_vs_controlador": {
+        "e_p_m": {
+          "n": 1487,
+          "min": 1.8200141470776e-08,
+          "mediana": 3.439995491921451e-08,
+          "p95": 2.856797356146371e-07,
+          "max": 1.4343850814738543e-06,
+          "media": 9.931530926763701e-08,
+          "desv": 2.617509131694842e-07
+        },
+        "e_R_atan2_rad": {
+          "n": 1487,
+          "min": 1.0504970500619462e-07,
+          "mediana": 1.7781813402623965e-07,
+          "p95": 3.915203690425533e-06,
+          "max": 7.526577307106645e-06,
+          "media": 6.585994947076541e-07,
+          "desv": 1.2835585881800282e-06
+        }
+      },
+      "propia_vs_rosi_e_p_m": {
+        "n": 1487,
+        "min": 3.469446951953614e-18,
+        "mediana": 1.0408340855860843e-17,
+        "p95": 1.0408340855860843e-17,
+        "max": 1.2432050435751766e-16,
+        "media": 9.147445318790593e-18,
+        "desv": 3.8484078777442885e-18
+      },
+      "ortogonalidad_max_R_own": 2.220446049250313e-16,
+      "ortogonalidad_max_R_ref": 9.992007221626409e-16,
+      "det_dev_max_R_own": 4.440892098500626e-16,
+      "det_dev_max_R_ref": 9.992007221626409e-16,
+      "n_poses_controlador_distintas": 9,
+      "n_estados_registro": {
+        "DENTRO": 1235,
+        "NO_EVALUABLE": 158,
+        "FUERA": 94
+      },
+      "n_dentro_criterio_estricto_proyecto": 1314,
+      "cuantizacion": {
+        "semi_ulp_q_deg": [
+          1.1920928955078125e-07,
+          5.960464477539063e-08,
+          1.1920928955078125e-07,
+          4.76837158203125e-07,
+          3.814697265625e-06,
+          7.62939453125e-06
+        ],
+        "cota_e_p_m": 7.775786086068815e-08,
+        "cota_e_R_rad": 4.13260945014504e-07,
+        "cota_e_p_solo_xyz_m": 7.071244586351118e-08
+      },
+      "razon_e_p_max_sobre_cota_cuantizacion": 18.44681766701003,
+      "razon_e_R_mediana_sobre_cota_cuantizacion": 0.4302805193130286,
+      "max_dif_vs_registro_hito1_mm": 0.0014161849400029759,
+      "ventana_ms": {
+        "n": 1487,
+        "min": 11.786125999606156,
+        "mediana": 14.958560999730253,
+        "p95": 18.472751700073786,
+        "max": 33.66022599993812,
+        "media": 15.231616770006347,
+        "desv": 1.9028165594604691
+      },
+      "t_primera_utc": "2026-11-04T23:00:49.536568+00:00",
+      "t_ultima_utc": "2026-11-04T23:05:48.934734+00:00"
+    },
+    "FK-N2-S0": {
+      "caso": "FK-N2-S0",
+      "q_rad": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "p_own_m": [
+        0.29376960095702165,
+        -0.0011760946277306773,
+        0.5562216656153752
+      ],
+      "p_ref_m": [
+        0.29376960095702165,
+        -0.0011760946277306877,
+        0.5562216656153752
+      ],
+      "R_own": [
+        [
+          0.731368050969259,
+          -0.6819541544916468,
+          0.006269385377418879
+        ],
+        [
+          -0.6632821171830606,
+          -0.7134209606583891,
+          -0.22602514443844057
+        ],
+        [
+          0.15861149720806486,
+          0.1611491981514166,
+          -0.9741012929303459
+        ]
+      ],
+      "R_ref": [
+        [
+          0.7313680509692589,
+          -0.6819541544916468,
+          0.006269385377418758
+        ],
+        [
+          -0.6632821171830606,
+          -0.7134209606583889,
+          -0.2260251444384406
+        ],
+        [
+          0.15861149720806486,
+          0.16114919815141673,
+          -0.9741012929303459
+        ]
+      ],
+      "e_p_m": 1.0408340855860843e-17,
+      "e_R_rad": 0.0,
+      "e_R_atan2_rad": 1.966623303681427e-16,
+      "e_p_urdf_m": 6.206335383118183e-17,
+      "e_R_urdf_atan2_rad": 1.2254544204478367e-16,
+      "ortogonalidad_own": 4.61392196616006e-17,
+      "ortogonalidad_ref": 1.1102230246251565e-16,
+      "det_dev_own": 0.0,
+      "det_dev_ref": 1.1102230246251565e-16
+    },
+    "FK-N3": {
+      "caso": "FK-N3",
+      "q_deg": [
+        55.3010673522949,
+        16.9463996887207,
+        0.643334805965424,
+        -45.4281921386719,
+        -63.6680183410645,
+        9.13182830810547
+      ],
+      "p_own_m": [
+        0.2080502574216254,
+        0.3812258824901591,
+        0.5572570251141731
+      ],
+      "p_ref_m": [
+        0.20805,
+        0.38123,
+        0.55726
+      ],
+      "R_own": [
+        [
+          0.5727804055703359,
+          -0.800591216332712,
+          -0.17600088444547698
+        ],
+        [
+          0.47484445180500273,
+          0.14904741911823258,
+          0.8673566817891013
+        ],
+        [
+          -0.6681656632787171,
+          -0.5803779554610102,
+          0.46552773841116013
+        ]
+      ],
+      "R_ref": [
+        [
+          0.5727822743672379,
+          -0.8005912874915232,
+          -0.17599447878657787
+        ],
+        [
+          0.47484201877002075,
+          0.14905365623866884,
+          0.8673569419635122
+        ],
+        [
+          -0.6681657903403206,
+          -0.5803762555054691,
+          0.4655296753853023
+        ]
+      ],
+      "e_p_m": 5.086265709374456e-06,
+      "e_R_rad": 6.9310104736981165e-06,
+      "e_R_atan2_rad": 6.9309744976326925e-06,
+      "resolucion_pantalla": "0.01 mm en posición; 5 decimales en cuaternión (FlexPendant, transcrito de foto)",
+      "cota_cuantizacion_e_p_m": 8.660254037844387e-06,
+      "archivo": "docs/conexion_abb/evidencias/g2_fk_vs_controlador_pose1_2026-10-29.json",
+      "limitacion": "una postura; sin marca temporal simultánea q-pose; lectura humana de una foto"
+    },
+    "FK-N3-S0": {
+      "caso": "FK-N3-S0",
+      "q_rad": [
+        0.9651857051646889,
+        0.2957704709271184,
+        0.011228310556775506,
+        -0.7928715260484291,
+        -1.1112165482717136,
+        0.15938047070326364
+      ],
+      "p_own_m": [
+        0.2080502574216254,
+        0.3812258824901591,
+        0.5572570251141731
+      ],
+      "p_ref_m": [
+        0.20805025742162542,
+        0.38122588249015915,
+        0.557257025114173
+      ],
+      "R_own": [
+        [
+          0.5727804055703359,
+          -0.800591216332712,
+          -0.17600088444547698
+        ],
+        [
+          0.47484445180500273,
+          0.14904741911823258,
+          0.8673566817891013
+        ],
+        [
+          -0.6681656632787171,
+          -0.5803779554610102,
+          0.46552773841116013
+        ]
+      ],
+      "R_ref": [
+        [
+          0.5727804055703359,
+          -0.8005912163327122,
+          -0.17600088444547698
+        ],
+        [
+          0.47484445180500284,
+          0.14904741911823244,
+          0.8673566817891013
+        ],
+        [
+          -0.6681656632787173,
+          -0.5803779554610102,
+          0.4655277384111601
+        ]
+      ],
+      "e_p_m": 1.2719202621569003e-16,
+      "e_R_rad": 0.0,
+      "e_R_atan2_rad": 1.9008224221407925e-16,
+      "e_p_urdf_m": 1.2412670766236366e-16,
+      "e_R_urdf_atan2_rad": 2.3748351713089477e-16,
+      "ortogonalidad_own": 2.220446049250313e-16,
+      "ortogonalidad_ref": 4.440892098500626e-16,
+      "det_dev_own": 1.1102230246251565e-16,
+      "det_dev_ref": 2.220446049250313e-16
+    },
+    "limites": {
+      "dh_deg": [
+        [
+          -165.0,
+          165.0
+        ],
+        [
+          -110.0,
+          110.0
+        ],
+        [
+          -110.0,
+          70.0
+        ],
+        [
+          -160.0,
+          160.0
+        ],
+        [
+          -120.0,
+          120.0
+        ],
+        [
+          -400.0,
+          400.0
+        ]
+      ],
+      "dh_rad": [
+        [
+          -2.8797932657906435,
+          2.8797932657906435
+        ],
+        [
+          -1.9198621771937625,
+          1.9198621771937625
+        ],
+        [
+          -1.9198621771937625,
+          1.2217304763960306
+        ],
+        [
+          -2.792526803190927,
+          2.792526803190927
+        ],
+        [
+          -2.0943951023931953,
+          2.0943951023931953
+        ],
+        [
+          -6.981317007977318,
+          6.981317007977318
+        ]
+      ],
+      "rosi_rad": [
+        [
+          -2.87979,
+          2.87979
+        ],
+        [
+          -1.91986,
+          1.91986
+        ],
+        [
+          -1.91986,
+          1.22173
+        ],
+        [
+          -2.79253,
+          2.79253
+        ],
+        [
+          -2.094395,
+          2.094395
+        ],
+        [
+          -6.98132,
+          6.98132
+        ]
+      ],
+      "urdf_rad": [
+        [
+          -2.8797932658,
+          2.8797932658
+        ],
+        [
+          -1.9198621772,
+          1.9198621772
+        ],
+        [
+          -1.9198621772,
+          1.2217304764
+        ],
+        [
+          -2.7925268032,
+          2.7925268032
+        ],
+        [
+          -2.0943951024,
+          2.0943951024
+        ],
+        [
+          -6.981317008,
+          6.981317008
+        ]
+      ],
+      "max_dif_dh_rosi_rad": 3.2657906436917017e-06,
+      "max_dif_dh_urdf_rad": 2.2682300482301798e-11,
+      "fuente_dh": "ABB, Product specification IRB 120 (según hito2/irb120/dh.py); no verificado contra el controlador (límites de software del IRC5 sin leer)"
+    },
+    "FK-L": [
+      {
+        "caso": "FK-L1 (todas a 1° del límite superior)",
+        "q_rad": [
+          2.8623399732707004,
+          1.9024088846738192,
+          1.2042771838760873,
+          2.775073510670984,
+          2.076941809873252,
+          6.963863715457375
+        ],
+        "p_own_m": [
+          0.0006490348535953885,
+          -0.023662928279271113,
+          0.06406361330541088
+        ],
+        "p_ref_m": [
+          0.0006490348535953955,
+          -0.023662928279271127,
+          0.06406361330541088
+        ],
+        "R_own": [
+          [
+            -0.44958448890337505,
+            0.6797178217231692,
+            -0.5795321131476682
+          ],
+          [
+            0.8805770583743172,
+            0.44611614890174967,
+            -0.15988879245871568
+          ],
+          [
+            0.14985937275434463,
+            -0.5822062044679549,
+            -0.7991108207731217
+          ]
+        ],
+        "R_ref": [
+          [
+            -0.44958448890337505,
+            0.6797178217231691,
+            -0.5795321131476681
+          ],
+          [
+            0.8805770583743172,
+            0.44611614890174955,
+            -0.15988879245871593
+          ],
+          [
+            0.14985937275434447,
+            -0.582206204467955,
+            -0.7991108207731217
+          ]
+        ],
+        "e_p_m": 1.5515838457795457e-17,
+        "e_R_rad": 0.0,
+        "e_R_atan2_rad": 2.3104042884254613e-16,
+        "e_p_urdf_m": 1.5515838457795457e-17,
+        "e_R_urdf_atan2_rad": 1.8105014495257935e-16,
+        "ortogonalidad_own": 2.8361479849364393e-16,
+        "ortogonalidad_ref": 2.4492908453387125e-16,
+        "det_dev_own": 2.220446049250313e-16,
+        "det_dev_ref": 2.220446049250313e-16
+      },
+      {
+        "caso": "FK-L2 (todas a 1° del límite inferior)",
+        "q_rad": [
+          -2.8623399732707004,
+          -1.9024088846738192,
+          -1.9024088846738192,
+          -2.775073510670984,
+          -2.076941809873252,
+          -6.963863715457375
+        ],
+        "p_own_m": [
+          0.4473060729400051,
+          0.10478613190763324,
+          0.028823695321794948
+        ],
+        "p_ref_m": [
+          0.4473060729400049,
+          0.1047861319076332,
+          0.028823695321794768
+        ],
+        "R_own": [
+          [
+            0.7887228682170719,
+            0.5804779862761091,
+            0.20238958619521125
+          ],
+          [
+            -0.5254981375688449,
+            0.8074714819981352,
+            -0.2680326718357495
+          ],
+          [
+            -0.31901088470945765,
+            0.10504814709726473,
+            0.9419113239728678
+          ]
+        ],
+        "R_ref": [
+          [
+            0.7887228682170719,
+            0.580477986276109,
+            0.20238958619521144
+          ],
+          [
+            -0.5254981375688447,
+            0.8074714819981353,
+            -0.2680326718357495
+          ],
+          [
+            -0.31901088470945793,
+            0.10504814709726461,
+            0.9419113239728677
+          ]
+        ],
+        "e_p_m": 2.4902799884605145e-16,
+        "e_R_rad": 0.0,
+        "e_R_atan2_rad": 3.104921507977415e-16,
+        "e_p_urdf_m": 1.8253379971363983e-16,
+        "e_R_urdf_atan2_rad": 2.1735985930571185e-16,
+        "ortogonalidad_own": 2.220446049250313e-16,
+        "ortogonalidad_ref": 2.220446049250313e-16,
+        "det_dev_own": 2.220446049250313e-16,
+        "det_dev_ref": 2.220446049250313e-16
+      },
+      {
+        "caso": "FK-L3 (alternadas sup/inf a 1°)",
+        "q_rad": [
+          2.8623399732707004,
+          -1.9024088846738192,
+          1.2042771838760873,
+          -2.775073510670984,
+          2.076941809873252,
+          -6.963863715457375
+        ],
+        "p_own_m": [
+          0.13451903184297678,
+          -0.01509589114790975,
+          0.47243999121924085
+        ],
+        "p_ref_m": [
+          0.13451903184297678,
+          -0.015095891147909758,
+          0.47243999121924085
+        ],
+        "R_own": [
+          [
+            0.22336913942284845,
+            0.22707376380508953,
+            0.947915467404603
+          ],
+          [
+            -0.8157108507229601,
+            0.5759097439009014,
+            0.05425656543518755
+          ],
+          [
+            -0.533593511548183,
+            -0.7853441746593581,
+            0.31386699693069153
+          ]
+        ],
+        "R_ref": [
+          [
+            0.2233691394228484,
+            0.2270737638050894,
+            0.947915467404603
+          ],
+          [
+            -0.8157108507229599,
+            0.5759097439009014,
+            0.05425656543518753
+          ],
+          [
+            -0.5335935115481832,
+            -0.7853441746593582,
+            0.3138669969306911
+          ]
+        ],
+        "e_p_m": 6.938893903907228e-18,
+        "e_R_rad": 0.0,
+        "e_R_atan2_rad": 3.2671649426573956e-16,
+        "e_p_urdf_m": 1.1102230246251565e-16,
+        "e_R_urdf_atan2_rad": 3.353913091860979e-16,
+        "ortogonalidad_own": 4.440892098500626e-16,
+        "ortogonalidad_ref": 3.970977384404139e-16,
+        "det_dev_own": 2.220446049250313e-16,
+        "det_dev_ref": 0.0
+      },
+      {
+        "caso": "FK-L4 (exactamente en el límite superior)",
+        "q_rad": [
+          2.8797932657906435,
+          1.9198621771937625,
+          1.2217304763960306,
+          2.792526803190927,
+          2.0943951023931953,
+          6.981317007977318
+        ],
+        "p_own_m": [
+          0.00634481588461501,
+          -0.02377866303991695,
+          0.0690611282449145
+        ],
+        "p_ref_m": [
+          0.006344815884615031,
+          -0.023778663039916936,
+          0.06906112824491448
+        ],
+        "R_own": [
+          [
+            -0.45057043329992114,
+            0.6955620439573129,
+            -0.5596246310178332
+          ],
+          [
+            0.8816829147634714,
+            0.4450636264913726,
+            -0.1566959035474033
+          ],
+          [
+            0.1400768448035233,
+            -0.5640140170069115,
+            -0.8137976813493736
+          ]
+        ],
+        "R_ref": [
+          [
+            -0.4505704332999207,
+            0.6955620439573134,
+            -0.5596246310178333
+          ],
+          [
+            0.8816829147634718,
+            0.44506362649137193,
+            -0.15669590354740343
+          ],
+          [
+            0.14007684480352287,
+            -0.5640140170069119,
+            -0.8137976813493737
+          ]
+        ],
+        "e_p_m": 3.7367087251761353e-17,
+        "e_R_rad": 2.1073424255447017e-08,
+        "e_R_atan2_rad": 8.101627611468364e-16,
+        "e_p_urdf_m": 6.206335383118183e-17,
+        "e_R_urdf_atan2_rad": 1.0256878747011323e-15,
+        "ortogonalidad_own": 5.551115123125783e-16,
+        "ortogonalidad_ref": 9.129235966519261e-17,
+        "det_dev_own": 5.551115123125783e-16,
+        "det_dev_ref": 0.0
+      }
+    ],
+    "FK-D-TCP": {
+      "caso": "FK-D-TCP",
+      "tcp_simulado_m": 0.15,
+      "estadistica_e_p_m": {
+        "n": 1804,
+        "min": 0.1499997721383903,
+        "mediana": 0.15000002844692897,
+        "p95": 0.15000002844692897,
+        "max": 0.15000015449040582,
+        "media": 0.15000002766374027,
+        "desv": 8.324306635482204e-09
+      },
+      "estadistica_e_R_atan2_rad": {
+        "n": 1804,
+        "min": 1.8427844525513472e-07,
+        "mediana": 2.0568284452128297e-07,
+        "p95": 2.0568284452128297e-07,
+        "max": 7.5942923502841786e-06,
+        "media": 2.8400416719000985e-07,
+        "desv": 7.45851118641292e-07
+      },
+      "estadistica_e_p_corregido_m": {
+        "n": 1804,
+        "min": 7.282389261622067e-08,
+        "mediana": 8.723882108114331e-08,
+        "p95": 8.723882108114331e-08,
+        "max": 2.3099206010549273e-06,
+        "media": 1.0421346354185707e-07,
+        "desv": 1.6364694932900952e-07
+      },
+      "barrido": [
+        {
+          "tcp_z_m": 0.0,
+          "e_p_mediana_m": 7.451143150356348e-08,
+          "e_p_max_m": 5.552462086618638e-07,
+          "cos_angulo_con_z6": null
+        },
+        {
+          "tcp_z_m": 0.025,
+          "e_p_mediana_m": 0.025000028447008004,
+          "e_p_max_m": 0.025000028455165326,
+          "cos_angulo_con_z6": 0.9999999999959688
+        },
+        {
+          "tcp_z_m": 0.05,
+          "e_p_mediana_m": 0.050000028446960575,
+          "e_p_max_m": 0.05000002845209045,
+          "cos_angulo_con_z6": 0.9999999999989292
+        },
+        {
+          "tcp_z_m": 0.1,
+          "e_p_mediana_m": 0.10000002844693688,
+          "e_p_max_m": 0.10000002845055303,
+          "cos_angulo_con_z6": 0.999999999999698
+        },
+        {
+          "tcp_z_m": 0.15,
+          "e_p_mediana_m": 0.15000002844692897,
+          "e_p_max_m": 0.1500000284500405,
+          "cos_angulo_con_z6": 0.9999999999998488
+        },
+        {
+          "tcp_z_m": 0.2,
+          "e_p_mediana_m": 0.20000002844692505,
+          "e_p_max_m": 0.20000002844978432,
+          "cos_angulo_con_z6": 0.9999999999999044
+        }
+      ],
+      "n_muestras": 1804,
+      "explicacion": "p_TCP = p_brida + d·z6: con d = 0.150 m la FK propia al TCP queda 0.150 m a lo largo del eje z de la brida respecto a la pose de tool0 del controlador; la orientación no cambia porque tool0->TCP es una traslación pura. Corrección: aplicar la misma transformación tool0->TCP a ambos lados (o comparar brida contra brida)."
+    },
+    "FK-D-ORD": {
+      "caso": "FK-D-ORD",
+      "permutaciones": [
+        {
+          "permutacion": "intercambio q4<->q6",
+          "indices": [
+            0,
+            1,
+            2,
+            5,
+            4,
+            3
+          ],
+          "n": 149,
+          "e_p_mediana_m": 0.12527817471735608,
+          "e_p_max_m": 0.12527960045797348,
+          "e_R_mediana_rad": 2.6412905870282435,
+          "e_R_max_rad": 2.641350914531856,
+          "e_p_corregido_max_m": 1.4343850814738499e-06,
+          "e_R_corregido_max_rad": 4.865086257634453e-06
+        },
+        {
+          "permutacion": "intercambio q1<->q2",
+          "indices": [
+            1,
+            0,
+            2,
+            3,
+            4,
+            5
+          ],
+          "n": 149,
+          "e_p_mediana_m": 0.0417738839183465,
+          "e_p_max_m": 0.041777133083137165,
+          "e_R_mediana_rad": 0.12028554996227094,
+          "e_R_max_rad": 0.12029456255020715,
+          "e_p_corregido_max_m": 1.4343850814738499e-06,
+          "e_R_corregido_max_rad": 4.865086257634453e-06
+        },
+        {
+          "permutacion": "orden invertido",
+          "indices": [
+            5,
+            4,
+            3,
+            2,
+            1,
+            0
+          ],
+          "n": 149,
+          "e_p_mediana_m": 0.903553078756376,
+          "e_p_max_m": 0.9035587329532294,
+          "e_R_mediana_rad": 1.4883930087351473,
+          "e_R_max_rad": 1.4883990484485712,
+          "e_p_corregido_max_m": 1.4343850814738499e-06,
+          "e_R_corregido_max_rad": 4.865086257634453e-06
+        },
+        {
+          "permutacion": "rotación cíclica",
+          "indices": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "n": 149,
+          "e_p_mediana_m": 0.14088727080876898,
+          "e_p_max_m": 0.14088885959014796,
+          "e_R_mediana_rad": 1.2983334146853607,
+          "e_R_max_rad": 1.2983385775495717,
+          "e_p_corregido_max_m": 1.4343850814738499e-06,
+          "e_R_corregido_max_rad": 4.865086257634453e-06
+        }
+      ],
+      "error_unidades_grados_como_rad_e_p_mediana_m": 0.5997687785559105
+    },
+    "FUERA": {
+      "n_fuera": 155,
+      "por_archivo": {
+        "comunicacion_20261104_223936_186467Z_fk.jsonl": 32,
+        "comunicacion_20261104_225612_309539Z_fk.jsonl": 123
+      },
+      "categorias": {
+        "C: q idéntico y pose del IRC5 distinta a la pose modal de esa q (indeterminada por datos)": 106,
+        "D: pose modal repetida de esa q queda fuera de criterio (error reproducible; revisar pasos 2-6)": 23,
+        "E: q con <3 lecturas estacionarias: sin pose modal con que contrastar (indeterminada por datos)": 26
+      },
+      "n_falla_posicion": 39,
+      "n_falla_orientacion": 155,
+      "estadistica_e_p_m": {
+        "n": 155,
+        "min": 3.830757022433197e-08,
+        "mediana": 3.331157521073939e-07,
+        "p95": 1.4343850814738499e-06,
+        "max": 2.4442579225647017e-06,
+        "media": 6.393417182298794e-07,
+        "desv": 4.838634732399249e-07
+      },
+      "estadistica_e_R_rad": {
+        "n": 155,
+        "min": 1.5039103516389515e-06,
+        "mediana": 3.915235796937911e-06,
+        "p95": 7.618366606527048e-06,
+        "max": 1.316360516961549e-05,
+        "media": 4.46023756534742e-06,
+        "desv": 1.8014065676159365e-06
+      },
+      "estadistica_dq_equivalente_deg": {
+        "n": 155,
+        "min": 0.0,
+        "mediana": 0.00022668873378416858,
+        "p95": 0.00044745629504242115,
+        "max": 0.0005445425942232449,
+        "media": 0.00018861595851242077,
+        "desv": 0.0001436105874545722
+      },
+      "estadistica_razon_dq_sobre_semi_ulp": {
+        "n": 155,
+        "min": 0.0,
+        "mediana": 29.712545714558544,
+        "p95": 58.648991503800225,
+        "max": 71.37428691002916,
+        "media": 24.896853679456406,
+        "desv": 18.9700704678362
+      },
+      "estadistica_ventana_ms": {
+        "n": 155,
+        "min": 11.882016000072326,
+        "mediana": 14.83429600011732,
+        "p95": 18.330268299996533,
+        "max": 20.47237899978427,
+        "media": 15.168963954849987,
+        "desv": 1.8099173838926657
+      },
+      "lecturas_invalidas": {
+        "S2": {
+          "ReadTimeout (timed out)": 1,
+          "ConnectTimeout (timed out)": 6130,
+          "ConnectionError": 132
+        }
+      },
+      "lecturas_invalidas_rango_utc": {
+        "S2": {
+          "ReadTimeout (timed out)": [
+            "2026-11-04T23:05:49.784066+00:00",
+            "2026-11-04T23:05:49.784066+00:00"
+          ],
+          "ConnectTimeout (timed out)": [
+            "2026-11-04T23:05:50.449640+00:00",
+            "2026-11-05T03:15:15.430527+00:00"
+          ],
+          "ConnectionError": [
+            "2026-11-04T23:06:09.029759+00:00",
+            "2026-11-05T03:05:31.889862+00:00"
+          ]
+        }
+      },
+      "lecturas_invalidas_total": 6263
+    },
+    "cobertura_posturas": [
+      [
+        "S1",
+        -49.38,
+        -17.59,
+        9.91,
+        -10.25,
+        34.1,
+        -134.5,
+        2035,
+        6,
+        0
+      ],
+      [
+        "S1",
+        -73.21,
+        -12.15,
+        9.91,
+        91.88,
+        31.75,
+        -134.5,
+        1804,
+        4,
+        7
+      ],
+      [
+        "S1",
+        -65.66,
+        -16.27,
+        16.52,
+        91.88,
+        31.75,
+        -134.5,
+        118,
+        6,
+        18
+      ],
+      [
+        "S1",
+        -36.85,
+        -17.67,
+        9.91,
+        91.88,
+        31.75,
+        -134.5,
+        36,
+        4,
+        0
+      ],
+      [
+        "S1",
+        -36.85,
+        -17.67,
+        9.91,
+        157.27,
+        34.34,
+        -134.5,
+        32,
+        4,
+        1
+      ],
+      [
+        "S1",
+        -36.85,
+        -17.67,
+        9.91,
+        -1.39,
+        34.06,
+        -134.5,
+        32,
+        7,
+        2
+      ],
+      [
+        "S2",
+        2.95,
+        -1.93,
+        2.59,
+        -13.06,
+        89.66,
+        -133.98,
+        1487,
+        9,
+        94
+      ],
+      [
+        "S2",
+        15.37,
+        -17.59,
+        9.92,
+        -48.09,
+        29.01,
+        -134.5,
+        160,
+        5,
+        0
+      ],
+      [
+        "S2",
+        -49.38,
+        -17.59,
+        9.91,
+        -10.25,
+        34.1,
+        -134.5,
+        121,
+        3,
+        0
+      ],
+      [
+        "S2",
+        -20.28,
+        -27.95,
+        9.92,
+        -48.1,
+        29.01,
+        -134.5,
+        81,
+        6,
+        1
+      ],
+      [
+        "S2",
+        -11.24,
+        -17.59,
+        9.92,
+        -48.1,
+        29.01,
+        -134.5,
+        70,
+        8,
+        5
+      ],
+      [
+        "S2",
+        13.17,
+        -25.87,
+        -2.2,
+        -48.1,
+        29.01,
+        -134.5,
+        48,
+        5,
+        1
+      ],
+      [
+        "S2",
+        2.95,
+        -1.93,
+        2.59,
+        -13.09,
+        28.86,
+        -126.57,
+        36,
+        1,
+        0
+      ],
+      [
+        "S2",
+        -36.72,
+        -17.59,
+        9.92,
+        -48.09,
+        29.01,
+        -134.5,
+        30,
+        4,
+        1
+      ],
+      [
+        "S2",
+        2.95,
+        -1.93,
+        2.59,
+        -48.1,
+        29.01,
+        -134.5,
+        29,
+        2,
+        0
+      ]
+    ],
+    "figuras": {
+      "fk_real_errores": "hito3/resultados/figuras/fk_real_errores_N1_N2.png",
+      "fk_fuera": "hito3/resultados/figuras/fk_fuera_diagnostico.png",
+      "fk_diagnosticos": "hito3/resultados/figuras/fk_d_tcp_d_ord.png"
+    }
+  },
+  "ik": {
+    "tol_residuo": {
+      "e_p_m": 1e-06,
+      "e_R_rad": 1e-05,
+      "estado": "cribado exploratorio sintético del documento W14-S02; solo modelo artificial, pendiente de aprobación"
+    },
+    "dls": {
+      "metodo": "Levenberg-Marquardt/DLS sobre rosi_forward_kinematics (tool0)",
+      "lambda": 0.001,
+      "tol_p_m": 1e-09,
+      "tol_R_rad": 1e-09,
+      "max_iter": 200,
+      "timeout_s": 2.0,
+      "paso_max_rad": 0.5,
+      "h_fd_rad": 1e-06,
+      "peso_orientacion": 0.5,
+      "limites": "no impuestos durante la iteración; se verifican a posteriori",
+      "semillas_aleatorias": 24,
+      "rng_seed": 12345
+    },
+    "ambiguedad_limite_rad": 3.2657906436917017e-06,
+    "kappa_singular": 100000000.0,
+    "poses": {
+      "IK-1": {
+        "fuente": "FK propia de q de FK-N1 (postura real S1 de la sesión 1)",
+        "tipo": "regular",
+        "q_doc_rad": [
+          -1.2776709740414718,
+          -0.2120334291410576,
+          0.17298734301604857,
+          1.6036781104579958,
+          0.5541037878570434,
+          -2.34744334285034
+        ],
+        "T_d": [
+          [
+            -0.4330958980525163,
+            0.5017323302816299,
+            0.7487941051051684,
+            0.12390051690136965
+          ],
+          [
+            -0.5455181999016319,
+            0.5154132440361733,
+            -0.6608775086566281,
+            -0.2794678289764906
+          ],
+          [
+            -0.7175220112764261,
+            -0.6947041504282766,
+            0.050480755853678505,
+            0.6393235334668496
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ramas": [
+          {
+            "pose": "IK-1",
+            "rama": 1,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              -1.2776709740414718,
+              -0.21203342914105772,
+              0.17298734301604846,
+              1.6036781104579956,
+              0.5541037878570434,
+              -2.3474433428503394
+            ],
+            "q_raw_rad": [
+              -1.2776709740414718,
+              -0.21203342914105772,
+              0.17298734301604846,
+              1.6036781104579956,
+              0.5541037878570434,
+              -2.3474433428503394
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": 1.0487431333799822,
+            "cos_codo": 0.054751231155278565,
+            "muneca_singular": false,
+            "e_p_propia_m": 0.0,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 4.163336342344337e-17,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 10.724607939132317,
+            "estado": "válida en modelo",
+            "es_q_doc": true,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-1",
+            "rama": 2,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              -1.2776709740414718,
+              -0.21203342914105772,
+              0.17298734301604846,
+              -1.5379145431317975,
+              -0.5541037878570434,
+              0.7941493107394528
+            ],
+            "q_raw_rad": [
+              -1.2776709740414718,
+              -0.21203342914105772,
+              0.17298734301604846,
+              -1.5379145431317975,
+              -0.5541037878570434,
+              0.7941493107394528
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": 1.0487431333799822,
+            "cos_codo": 0.054751231155278565,
+            "muneca_singular": false,
+            "e_p_propia_m": 0.0,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 4.163336342344337e-17,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 10.72460793913232,
+            "estado": "válida en modelo",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-1",
+            "rama": 3,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              -1.2776709740414718,
+              1.4343937484580351,
+              -2.8590480651243215,
+              0.5633287602257944,
+              1.3963294296359872,
+              -0.847183218394588
+            ],
+            "q_raw_rad": [
+              -1.2776709740414718,
+              1.4343937484580351,
+              -2.8590480651243215,
+              0.5633287602257944,
+              1.3963294296359872,
+              -0.847183218394588
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3
+            ],
+            "margen_limite_rad": -0.939185887930559,
+            "cos_codo": 0.054751231155278565,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.6883057536160649e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.1188630228279524e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 7.014172195909606,
+            "estado": "no válida (viola límites de junta J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-1",
+            "rama": 4,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              -1.2776709740414718,
+              1.4343937484580351,
+              -2.8590480651243215,
+              -2.578263893363999,
+              -1.3963294296359872,
+              2.294409435195205
+            ],
+            "q_raw_rad": [
+              -1.2776709740414718,
+              1.4343937484580351,
+              -2.8590480651243215,
+              -2.578263893363999,
+              -1.3963294296359872,
+              2.294409435195205
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3
+            ],
+            "margen_limite_rad": -0.939185887930559,
+            "cos_codo": 0.054751231155278565,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.6711069443220838e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.1188630228279524e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 7.0141721959096115,
+            "estado": "no válida (viola límites de junta J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-1",
+            "rama": 5,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              1.863921679548321,
+              -1.434393748458035,
+              0.17298734301604846,
+              -2.5735983609583704,
+              1.7828136288454026,
+              -0.6044975092534481
+            ],
+            "q_raw_rad": [
+              1.863921679548321,
+              -1.434393748458035,
+              0.17298734301604846,
+              -2.5735983609583704,
+              1.7828136288454026,
+              -0.6044975092534481
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": 0.2189284422325568,
+            "cos_codo": 0.054751231155278565,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.3092278833360675e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 9.71445146547012e-17,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 7.049294476184346,
+            "estado": "válida en modelo",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-1",
+            "rama": 6,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              1.863921679548321,
+              -1.434393748458035,
+              0.17298734301604846,
+              0.567994292631423,
+              -1.7828136288454026,
+              -3.7460901628432417
+            ],
+            "q_raw_rad": [
+              1.863921679548321,
+              -1.434393748458035,
+              0.17298734301604846,
+              0.567994292631423,
+              -1.7828136288454026,
+              2.5370951443363445
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": 0.31158147354779264,
+            "cos_codo": 0.054751231155278565,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.3092278833360675e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 8.326672684688674e-17,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 7.049294476184355,
+            "estado": "válida en modelo",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-1",
+            "rama": 7,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              1.863921679548321,
+              0.21203342914105772,
+              -2.8590480651243215,
+              -2.169230905175394,
+              0.6899657362876008,
+              -1.584847092356684
+            ],
+            "q_raw_rad": [
+              1.863921679548321,
+              0.21203342914105772,
+              -2.8590480651243215,
+              -2.169230905175394,
+              0.6899657362876008,
+              -1.584847092356684
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3
+            ],
+            "margen_limite_rad": -0.939185887930559,
+            "cos_codo": 0.054751231155278565,
+            "muneca_singular": false,
+            "e_p_propia_m": 2.607399605677454e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.3092278833360675e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 10.366442323405574,
+            "estado": "no válida (viola límites de junta J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-1",
+            "rama": 8,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              1.863921679548321,
+              0.21203342914105772,
+              -2.8590480651243215,
+              0.9723617484143993,
+              -0.6899657362876008,
+              1.5567455612331091
+            ],
+            "q_raw_rad": [
+              1.863921679548321,
+              0.21203342914105772,
+              -2.8590480651243215,
+              0.9723617484143993,
+              -0.6899657362876008,
+              1.5567455612331091
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3
+            ],
+            "margen_limite_rad": -0.939185887930559,
+            "cos_codo": 0.054751231155278565,
+            "muneca_singular": false,
+            "e_p_propia_m": 2.607399605677454e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.4220500840710912e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 10.366442323405574,
+            "estado": "no válida (viola límites de junta J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          }
+        ],
+        "resumen_dls": {
+          "pose": "IK-1",
+          "n_intentos": 34,
+          "n_convergidos": 34,
+          "n_soluciones_distintas": 8,
+          "n_emparejadas_con_ramas_propias": 8,
+          "n_sin_rama_propia": 0,
+          "ramas_propias_reales": 8,
+          "ramas_reales_halladas_por_DLS": 8,
+          "mejor_residuo_sin_convergencia": null,
+          "iteraciones_mediana": 14.5,
+          "tiempo_total_s": 1.1847704830051953,
+          "sin_rama_propia_q_wrapped": [],
+          "sumas_q4_q6_familia": null,
+          "n_familia_singular_q4_distintos": null,
+          "estado_numerico": "soluciones numéricas halladas"
+        }
+      },
+      "IK-2": {
+        "fuente": "FK propia de q de FK-N2 (postura real S1 de la sesión 2, q5≈89.7°)",
+        "tipo": "regular",
+        "q_doc_rad": [
+          0.05142675584813657,
+          -0.03364080329912328,
+          0.045182824869634486,
+          -0.2280233812210291,
+          1.5649106076277668,
+          -2.3384386625725684
+        ],
+        "T_d": [
+          [
+            0.731368050969259,
+            -0.6819541544916468,
+            0.006269385377418879,
+            0.29376960095702165
+          ],
+          [
+            -0.6632821171830606,
+            -0.7134209606583891,
+            -0.22602514443844057,
+            -0.0011760946277306773
+          ],
+          [
+            0.15861149720806486,
+            0.1611491981514166,
+            -0.9741012929303459,
+            0.5562216656153752
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ramas": [
+          {
+            "pose": "IK-2",
+            "rama": 1,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              0.05142675584813672,
+              -0.03364080329912289,
+              0.04518282486963443,
+              -0.22802338122102908,
+              1.5649106076277663,
+              -2.338438662572568
+            ],
+            "q_raw_rad": [
+              0.05142675584813672,
+              -0.03364080329912289,
+              0.04518282486963443,
+              -0.22802338122102908,
+              1.5649106076277663,
+              -2.338438662572568
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": 0.5294844947654289,
+            "cos_codo": 0.18157038015562535,
+            "muneca_singular": false,
+            "e_p_propia_m": 2.0680348601401538e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.0479290467340455e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 7.259341197858886,
+            "estado": "válida en modelo",
+            "es_q_doc": true,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-2",
+            "rama": 2,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              0.05142675584813672,
+              -0.03364080329912289,
+              0.04518282486963443,
+              2.9135692723687643,
+              -1.5649106076277663,
+              0.8031539910172247
+            ],
+            "q_raw_rad": [
+              0.05142675584813672,
+              -0.03364080329912289,
+              0.04518282486963443,
+              2.9135692723687643,
+              -1.5649106076277663,
+              0.8031539910172247
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              4
+            ],
+            "margen_limite_rad": -0.12104246917783712,
+            "cos_codo": 0.18157038015562535,
+            "muneca_singular": false,
+            "e_p_propia_m": 2.0770370905276122e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.0724682633365815e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 7.259341197858885,
+            "estado": "no válida (viola límites de junta J4)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-2",
+            "rama": 3,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              0.05142675584813672,
+              1.4692587213377735,
+              -2.7312435469779075,
+              -0.6605144933565658,
+              2.7642585533272426,
+              -2.9653227481728246
+            ],
+            "q_raw_rad": [
+              0.05142675584813672,
+              1.4692587213377735,
+              -2.7312435469779075,
+              -0.6605144933565658,
+              2.7642585533272426,
+              -2.9653227481728246
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3,
+              5
+            ],
+            "margen_limite_rad": -0.811381369784145,
+            "cos_codo": 0.18157038015562535,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.2412670766236366e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.343418161679199e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 10.804971849888696,
+            "estado": "no válida (viola límites de junta J3,J5)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-2",
+            "rama": 4,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              0.05142675584813672,
+              1.4692587213377735,
+              -2.7312435469779075,
+              2.4810781602332277,
+              -2.7642585533272426,
+              0.17626990541696763
+            ],
+            "q_raw_rad": [
+              0.05142675584813672,
+              1.4692587213377735,
+              -2.7312435469779075,
+              2.4810781602332277,
+              -2.7642585533272426,
+              0.17626990541696763
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3,
+              5
+            ],
+            "margen_limite_rad": -0.811381369784145,
+            "cos_codo": 0.18157038015562535,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.3206704001701902e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.35928770306483e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 10.804971849888682,
+            "estado": "no válida (viola límites de junta J3,J5)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-2",
+            "rama": 5,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              -3.090165897741656,
+              -1.469258721337774,
+              0.04518282486963443,
+              0.9920094085482758,
+              2.8681694098708777,
+              1.7763341036733022
+            ],
+            "q_raw_rad": [
+              -3.090165897741656,
+              -1.469258721337774,
+              0.04518282486963443,
+              0.9920094085482758,
+              2.8681694098708777,
+              1.7763341036733022
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              5
+            ],
+            "margen_limite_rad": -0.7737743074776824,
+            "cos_codo": 0.18157038015562535,
+            "muneca_singular": false,
+            "e_p_propia_m": 2.558996431703337e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.604628232417064e-16,
+            "e_R_ref_rad": 2.1073424255447017e-08,
+            "kappa_Js": 16.865121382850823,
+            "estado": "no válida (viola límites de junta J1,J5)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-2",
+            "rama": 6,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              -3.090165897741656,
+              -1.469258721337774,
+              0.04518282486963443,
+              -2.1495832450415175,
+              -2.8681694098708777,
+              -1.3652585499164909
+            ],
+            "q_raw_rad": [
+              -3.090165897741656,
+              -1.469258721337774,
+              0.04518282486963443,
+              -2.1495832450415175,
+              -2.8681694098708777,
+              -1.3652585499164909
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              5
+            ],
+            "margen_limite_rad": -0.7737743074776824,
+            "cos_codo": 0.18157038015562535,
+            "muneca_singular": false,
+            "e_p_propia_m": 2.6198919378218295e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.604628232417064e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 16.865121382850823,
+            "estado": "no válida (viola límites de junta J1,J5)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-2",
+            "rama": 7,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              -3.090165897741656,
+              0.03364080329912289,
+              -2.7312435469779075,
+              2.889429379327229,
+              2.0078361082211025,
+              -2.4484269754822647
+            ],
+            "q_raw_rad": [
+              -3.090165897741656,
+              0.03364080329912289,
+              -2.7312435469779075,
+              2.889429379327229,
+              2.0078361082211025,
+              -2.4484269754822647
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              3,
+              4
+            ],
+            "margen_limite_rad": -0.811381369784145,
+            "cos_codo": 0.18157038015562535,
+            "muneca_singular": false,
+            "e_p_propia_m": 2.322457222533819e-16,
+            "e_R_propia_rad": 2.1073424255447017e-08,
+            "e_p_ref_m": 2.482534153247273e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 7.270011841006653,
+            "estado": "no válida (viola límites de junta J1,J3,J4)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-2",
+            "rama": 8,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              -3.090165897741656,
+              0.03364080329912289,
+              -2.7312435469779075,
+              -0.25216327426256435,
+              -2.0078361082211025,
+              0.6931656781075279
+            ],
+            "q_raw_rad": [
+              -3.090165897741656,
+              0.03364080329912289,
+              -2.7312435469779075,
+              -0.25216327426256435,
+              -2.0078361082211025,
+              0.6931656781075279
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              3
+            ],
+            "margen_limite_rad": -0.811381369784145,
+            "cos_codo": 0.18157038015562535,
+            "muneca_singular": false,
+            "e_p_propia_m": 2.1544120232613906e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.420669712248692e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 7.270011841006655,
+            "estado": "no válida (viola límites de junta J1,J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          }
+        ],
+        "resumen_dls": {
+          "pose": "IK-2",
+          "n_intentos": 34,
+          "n_convergidos": 34,
+          "n_soluciones_distintas": 8,
+          "n_emparejadas_con_ramas_propias": 8,
+          "n_sin_rama_propia": 0,
+          "ramas_propias_reales": 8,
+          "ramas_reales_halladas_por_DLS": 8,
+          "mejor_residuo_sin_convergencia": null,
+          "iteraciones_mediana": 12.0,
+          "tiempo_total_s": 0.9382868409993534,
+          "sin_rama_propia_q_wrapped": [],
+          "sumas_q4_q6_familia": null,
+          "n_familia_singular_q4_distintos": null,
+          "estado_numerico": "soluciones numéricas halladas"
+        }
+      },
+      "IK-3": {
+        "fuente": "FK propia de q sintética con q5 = 0.5° (cerca de singularidad de muñeca)",
+        "tipo": "cerca singularidad",
+        "q_doc_rad": [
+          0.17453292519943295,
+          0.5235987755982988,
+          -0.17453292519943295,
+          0.3490658503988659,
+          0.008726646259971648,
+          0.6981317007977318
+        ],
+        "T_d": [
+          [
+            -0.3249711433093521,
+            0.2100558757943406,
+            0.9221010167332455,
+            0.5023938127560779
+          ],
+          [
+            0.8220739308975126,
+            0.5447603245129213,
+            0.1656219821620558,
+            0.08880379409596906
+          ],
+          [
+            -0.46753417859545227,
+            0.8118575724108565,
+            -0.349712845008911,
+            0.46113593435181854
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ramas": [
+          {
+            "pose": "IK-3",
+            "rama": 1,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              0.17453292519943275,
+              0.5235987755982987,
+              -0.17453292519943275,
+              0.3490658503988905,
+              0.008726646259971561,
+              0.698131700797699
+            ],
+            "q_raw_rad": [
+              0.17453292519943275,
+              0.5235987755982987,
+              -0.17453292519943275,
+              0.3490658503988905,
+              0.008726646259971561,
+              0.698131700797699
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": 1.3962634015954634,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.4946834900704541e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.4752290795525882e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 571.8794558313049,
+            "estado": "válida en modelo",
+            "es_q_doc": true,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-3",
+            "rama": 2,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              0.17453292519943275,
+              0.5235987755982987,
+              -0.17453292519943275,
+              -2.7925268031909027,
+              -0.008726646259971561,
+              3.839724354387493
+            ],
+            "q_raw_rad": [
+              0.17453292519943275,
+              0.5235987755982987,
+              -0.17453292519943275,
+              -2.7925268031909027,
+              -0.008726646259971561,
+              -2.443460952792093
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": 2.4424906541753444e-14,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.4946834900704541e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.4752290795525882e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 571.8794558313168,
+            "estado": "indeterminada por datos (límite de junta: las fuentes difieren en 3.3e-06 rad)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-3",
+            "rama": 3,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              0.17453292519943275,
+              1.783254714702462,
+              -2.5115277969088403,
+              0.003374185374878534,
+              1.0855416707348815,
+              1.0456114752374566
+            ],
+            "q_raw_rad": [
+              0.17453292519943275,
+              1.783254714702462,
+              -2.5115277969088403,
+              0.003374185374878534,
+              1.0855416707348815,
+              1.0456114752374566
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3
+            ],
+            "margen_limite_rad": -0.5916656197150778,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.7772239894833365e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.3592239273284576e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 8.828433040591044,
+            "estado": "no válida (viola límites de junta J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-3",
+            "rama": 4,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              0.17453292519943275,
+              1.783254714702462,
+              -2.5115277969088403,
+              -3.1382184682149146,
+              -1.0855416707348815,
+              -2.0959811783523365
+            ],
+            "q_raw_rad": [
+              0.17453292519943275,
+              1.783254714702462,
+              -2.5115277969088403,
+              -3.1382184682149146,
+              -1.0855416707348815,
+              -2.0959811783523365
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3,
+              4
+            ],
+            "margen_limite_rad": -0.5916656197150778,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.7772239894833365e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.2887833992611187e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 8.82843304059104,
+            "estado": "no válida (viola límites de junta J3,J4)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-3",
+            "rama": 5,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              -2.9670597283903604,
+              -1.7832547147024624,
+              -0.17453292519943275,
+              -3.1386066791679577,
+              1.5410713859687257,
+              1.047096568344382
+            ],
+            "q_raw_rad": [
+              -2.9670597283903604,
+              -1.7832547147024624,
+              -0.17453292519943275,
+              -3.1386066791679577,
+              1.5410713859687257,
+              1.047096568344382
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              4
+            ],
+            "margen_limite_rad": -0.3460798759770305,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 5.721958498152797e-17,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.249000902703301e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 8.828429403395994,
+            "estado": "no válida (viola límites de junta J1,J4)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-3",
+            "rama": 6,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              -2.9670597283903604,
+              -1.7832547147024624,
+              -0.17453292519943275,
+              0.00298597442183541,
+              -1.5410713859687257,
+              -2.094496085245411
+            ],
+            "q_raw_rad": [
+              -2.9670597283903604,
+              -1.7832547147024624,
+              -0.17453292519943275,
+              0.00298597442183541,
+              -1.5410713859687257,
+              -2.094496085245411
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1
+            ],
+            "margen_limite_rad": -0.08726646259971682,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 6.938893903907228e-17,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.2719202621569003e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 8.828429403395992,
+            "estado": "no válida (viola límites de junta J1)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-3",
+            "rama": 7,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              -2.9670597283903604,
+              -0.5235987755982987,
+              -2.5115277969088403,
+              -3.1349199710524176,
+              0.4637412271220169,
+              1.0412173464244887
+            ],
+            "q_raw_rad": [
+              -2.9670597283903604,
+              -0.5235987755982987,
+              -2.5115277969088403,
+              -3.1349199710524176,
+              0.4637412271220169,
+              1.0412173464244887
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              3,
+              4
+            ],
+            "margen_limite_rad": -0.5916656197150778,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.6653345369377348e-16,
+            "e_R_propia_rad": 2.1073424255447017e-08,
+            "e_p_ref_m": 1.3092278833360675e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 10.916879503810799,
+            "estado": "no válida (viola límites de junta J1,J3,J4)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-3",
+            "rama": 8,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              -2.9670597283903604,
+              -0.5235987755982987,
+              -2.5115277969088403,
+              0.006672682537375793,
+              -0.4637412271220169,
+              -2.100375307165305
+            ],
+            "q_raw_rad": [
+              -2.9670597283903604,
+              -0.5235987755982987,
+              -2.5115277969088403,
+              0.006672682537375793,
+              -0.4637412271220169,
+              -2.100375307165305
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              3
+            ],
+            "margen_limite_rad": -0.5916656197150778,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.6243534171511178e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.3092278833360675e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 10.916879503810804,
+            "estado": "no válida (viola límites de junta J1,J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          }
+        ],
+        "resumen_dls": {
+          "pose": "IK-3",
+          "n_intentos": 34,
+          "n_convergidos": 34,
+          "n_soluciones_distintas": 8,
+          "n_emparejadas_con_ramas_propias": 8,
+          "n_sin_rama_propia": 0,
+          "ramas_propias_reales": 8,
+          "ramas_reales_halladas_por_DLS": 8,
+          "mejor_residuo_sin_convergencia": null,
+          "iteraciones_mediana": 17.0,
+          "tiempo_total_s": 0.781065658998159,
+          "sin_rama_propia_q_wrapped": [],
+          "sumas_q4_q6_familia": null,
+          "n_familia_singular_q4_distintos": null,
+          "estado_numerico": "soluciones numéricas halladas"
+        }
+      },
+      "IK-4": {
+        "fuente": "FK propia de q sintética con q5 = 0 exacto (singularidad de muñeca)",
+        "tipo": "singular",
+        "q_doc_rad": [
+          0.17453292519943295,
+          0.5235987755982988,
+          -0.17453292519943295,
+          0.3490658503988659,
+          0.0,
+          0.6981317007977318
+        ],
+        "T_d": [
+          [
+            -0.3187957775971679,
+            0.20487412870286198,
+            0.9254165783983234,
+            0.5026325331959635
+          ],
+          [
+            0.8231729446455008,
+            0.5438381424823256,
+            0.16317591116653488,
+            0.08862767698429155
+          ],
+          [
+            -0.46984631039295416,
+            0.8137976813493737,
+            -0.3420201433256686,
+            0.46168980887301203
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ramas": [
+          {
+            "pose": "IK-4",
+            "rama": 1,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              0.17453292519943275,
+              0.5235987755982987,
+              -0.17453292519943275,
+              0.3490658503988659,
+              0.0,
+              0.698131700797731
+            ],
+            "q_raw_rad": [
+              0.17453292519943275,
+              0.5235987755982987,
+              -0.17453292519943275,
+              0.3490658503988659,
+              0.0,
+              0.698131700797731
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": 1.3962634015954634,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": true,
+            "e_p_propia_m": 1.576213700060856e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.6653345369377348e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 2.399097235518608e+17,
+            "estado": "numéricamente singular (q4 y q6 solo determinados en suma)",
+            "es_q_doc": true,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-4",
+            "rama": 2,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              0.17453292519943275,
+              0.5235987755982987,
+              -0.17453292519943275,
+              -2.7925268031909276,
+              0.0,
+              3.839724354387524
+            ],
+            "q_raw_rad": [
+              0.17453292519943275,
+              0.5235987755982987,
+              -0.17453292519943275,
+              -2.7925268031909276,
+              0.0,
+              -2.443460952792062
+            ],
+            "dentro_limites": true,
+            "fuera_de_limites": [],
+            "margen_limite_rad": -4.440892098500626e-16,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": true,
+            "e_p_propia_m": 1.576213700060856e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.6653345369377348e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 4.485677777010314e+16,
+            "estado": "numéricamente singular (q4 y q6 solo determinados en suma)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-4",
+            "rama": 3,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              0.17453292519943275,
+              1.783254714702462,
+              -2.5115277969088403,
+              2.090023034943807e-16,
+              1.077338932605244,
+              1.0471975511965974
+            ],
+            "q_raw_rad": [
+              0.17453292519943275,
+              1.783254714702462,
+              -2.5115277969088403,
+              2.090023034943807e-16,
+              1.077338932605244,
+              1.0471975511965974
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3
+            ],
+            "margen_limite_rad": -0.5916656197150778,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.4946834900704541e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.0062885096040707e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 8.831102790818619,
+            "estado": "no válida (viola límites de junta J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-4",
+            "rama": 4,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              0.17453292519943275,
+              1.783254714702462,
+              -2.5115277969088403,
+              -3.141592653589793,
+              -1.077338932605244,
+              -2.0943951023931957
+            ],
+            "q_raw_rad": [
+              0.17453292519943275,
+              1.783254714702462,
+              -2.5115277969088403,
+              -3.141592653589793,
+              -1.077338932605244,
+              -2.0943951023931957
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              3,
+              4
+            ],
+            "margen_limite_rad": -0.5916656197150778,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.576213700060856e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 2.0062885096040707e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 8.831102790818619,
+            "estado": "no válida (viola límites de junta J3,J4)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-4",
+            "rama": 5,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              -2.9670597283903604,
+              -1.783254714702462,
+              -0.17453292519943275,
+              -3.141592653589793,
+              1.5328708640867645,
+              1.0471975511965974
+            ],
+            "q_raw_rad": [
+              -2.9670597283903604,
+              -1.783254714702462,
+              -0.17453292519943275,
+              -3.141592653589793,
+              1.5328708640867645,
+              1.0471975511965974
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              4
+            ],
+            "margen_limite_rad": -0.34906585039886595,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.7554167342883506e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.7554167342883506e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 8.831102790818614,
+            "estado": "no válida (viola límites de junta J1,J4)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-4",
+            "rama": 6,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              -2.9670597283903604,
+              -1.783254714702462,
+              -0.17453292519943275,
+              1.4685463922533505e-16,
+              -1.5328708640867645,
+              -2.0943951023931957
+            ],
+            "q_raw_rad": [
+              -2.9670597283903604,
+              -1.783254714702462,
+              -0.17453292519943275,
+              1.4685463922533505e-16,
+              -1.5328708640867645,
+              -2.0943951023931957
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1
+            ],
+            "margen_limite_rad": -0.08726646259971682,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.8041124150158794e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.7554167342883506e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 8.831102790818619,
+            "estado": "no válida (viola límites de junta J1)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-4",
+            "rama": 7,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": true,
+            "q_rad": [
+              -2.9670597283903604,
+              -0.5235987755982987,
+              -2.5115277969088403,
+              -3.1415926535897927,
+              0.4555319314815201,
+              1.0471975511965974
+            ],
+            "q_raw_rad": [
+              -2.9670597283903604,
+              -0.5235987755982987,
+              -2.5115277969088403,
+              -3.1415926535897927,
+              0.4555319314815201,
+              1.0471975511965974
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              3,
+              4
+            ],
+            "margen_limite_rad": -0.5916656197150778,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.3092278833360675e-16,
+            "e_R_propia_rad": 2.1073424255447017e-08,
+            "e_p_ref_m": 1.3092278833360675e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 11.10784211298976,
+            "estado": "no válida (viola límites de junta J1,J3,J4)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          },
+          {
+            "pose": "IK-4",
+            "rama": 8,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": true,
+            "q_rad": [
+              -2.9670597283903604,
+              -0.5235987755982987,
+              -2.5115277969088403,
+              4.356800112595562e-16,
+              -0.4555319314815201,
+              -2.0943951023931957
+            ],
+            "q_raw_rad": [
+              -2.9670597283903604,
+              -0.5235987755982987,
+              -2.5115277969088403,
+              4.356800112595562e-16,
+              -0.4555319314815201,
+              -2.0943951023931957
+            ],
+            "dentro_limites": false,
+            "fuera_de_limites": [
+              1,
+              3
+            ],
+            "margen_limite_rad": -0.5916656197150778,
+            "cos_codo": 0.3915347302001127,
+            "muneca_singular": false,
+            "e_p_propia_m": 1.3597399555105182e-16,
+            "e_R_propia_rad": 0.0,
+            "e_p_ref_m": 1.3092278833360675e-16,
+            "e_R_ref_rad": 0.0,
+            "kappa_Js": 11.107842112989758,
+            "estado": "no válida (viola límites de junta J1,J3)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": true
+          }
+        ],
+        "resumen_dls": {
+          "pose": "IK-4",
+          "n_intentos": 34,
+          "n_convergidos": 34,
+          "n_soluciones_distintas": 20,
+          "n_emparejadas_con_ramas_propias": 20,
+          "n_sin_rama_propia": 0,
+          "ramas_propias_reales": 8,
+          "ramas_reales_halladas_por_DLS": 8,
+          "mejor_residuo_sin_convergencia": null,
+          "iteraciones_mediana": 13.5,
+          "tiempo_total_s": 0.51399855499767,
+          "sin_rama_propia_q_wrapped": [],
+          "sumas_q4_q6_familia": [
+            1.047198
+          ],
+          "n_familia_singular_q4_distintos": 14,
+          "estado_numerico": "soluciones numéricas halladas"
+        }
+      },
+      "IK-5": {
+        "fuente": "FK propia de q sintética desplazada +0.8 m en x_base (fuera del alcance)",
+        "tipo": "inalcanzable",
+        "q_doc_rad": [
+          0.17453292519943295,
+          0.5235987755982988,
+          -0.17453292519943295,
+          0.3490658503988659,
+          0.5235987755982988,
+          0.6981317007977318
+        ],
+        "T_d": [
+          [
+            -0.6346718537204755,
+            0.4699256276756558,
+            0.6134831232794071,
+            1.2801733244274016
+          ],
+          [
+            0.7318322730223819,
+            0.6204820663527698,
+            0.28182180451038724,
+            0.09717018130504892
+          ],
+          [
+            -0.24821998762772784,
+            0.6278311156578956,
+            -0.7377092435057683,
+            0.43320019366004486
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "ramas": [
+          {
+            "pose": "IK-5",
+            "rama": 1,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": false,
+            "q_rad": null,
+            "q_raw_rad": null,
+            "dentro_limites": false,
+            "fuera_de_limites": [],
+            "margen_limite_rad": NaN,
+            "cos_codo": 8.38183476841631,
+            "muneca_singular": false,
+            "e_p_propia_m": NaN,
+            "e_R_propia_rad": NaN,
+            "e_p_ref_m": NaN,
+            "e_R_ref_rad": NaN,
+            "kappa_Js": NaN,
+            "estado": "sin solución: inexistente en el modelo (|cos θ3| > 1: pose fuera del alcance de la rama)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": false
+          },
+          {
+            "pose": "IK-5",
+            "rama": 2,
+            "brazo": "frente",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": false,
+            "q_rad": null,
+            "q_raw_rad": null,
+            "dentro_limites": false,
+            "fuera_de_limites": [],
+            "margen_limite_rad": NaN,
+            "cos_codo": 8.38183476841631,
+            "muneca_singular": false,
+            "e_p_propia_m": NaN,
+            "e_R_propia_rad": NaN,
+            "e_p_ref_m": NaN,
+            "e_R_ref_rad": NaN,
+            "kappa_Js": NaN,
+            "estado": "sin solución: inexistente en el modelo (|cos θ3| > 1: pose fuera del alcance de la rama)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": false
+          },
+          {
+            "pose": "IK-5",
+            "rama": 3,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": false,
+            "q_rad": null,
+            "q_raw_rad": null,
+            "dentro_limites": false,
+            "fuera_de_limites": [],
+            "margen_limite_rad": NaN,
+            "cos_codo": 8.38183476841631,
+            "muneca_singular": false,
+            "e_p_propia_m": NaN,
+            "e_R_propia_rad": NaN,
+            "e_p_ref_m": NaN,
+            "e_R_ref_rad": NaN,
+            "kappa_Js": NaN,
+            "estado": "sin solución: inexistente en el modelo (|cos θ3| > 1: pose fuera del alcance de la rama)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": false
+          },
+          {
+            "pose": "IK-5",
+            "rama": 4,
+            "brazo": "frente",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": false,
+            "q_rad": null,
+            "q_raw_rad": null,
+            "dentro_limites": false,
+            "fuera_de_limites": [],
+            "margen_limite_rad": NaN,
+            "cos_codo": 8.38183476841631,
+            "muneca_singular": false,
+            "e_p_propia_m": NaN,
+            "e_R_propia_rad": NaN,
+            "e_p_ref_m": NaN,
+            "e_R_ref_rad": NaN,
+            "kappa_Js": NaN,
+            "estado": "sin solución: inexistente en el modelo (|cos θ3| > 1: pose fuera del alcance de la rama)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": false
+          },
+          {
+            "pose": "IK-5",
+            "rama": 5,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5+",
+            "real": false,
+            "q_rad": null,
+            "q_raw_rad": null,
+            "dentro_limites": false,
+            "fuera_de_limites": [],
+            "margen_limite_rad": NaN,
+            "cos_codo": 8.38183476841631,
+            "muneca_singular": false,
+            "e_p_propia_m": NaN,
+            "e_R_propia_rad": NaN,
+            "e_p_ref_m": NaN,
+            "e_R_ref_rad": NaN,
+            "kappa_Js": NaN,
+            "estado": "sin solución: inexistente en el modelo (|cos θ3| > 1: pose fuera del alcance de la rama)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": false
+          },
+          {
+            "pose": "IK-5",
+            "rama": 6,
+            "brazo": "atras",
+            "codo": "arriba",
+            "muneca": "q5-",
+            "real": false,
+            "q_rad": null,
+            "q_raw_rad": null,
+            "dentro_limites": false,
+            "fuera_de_limites": [],
+            "margen_limite_rad": NaN,
+            "cos_codo": 8.38183476841631,
+            "muneca_singular": false,
+            "e_p_propia_m": NaN,
+            "e_R_propia_rad": NaN,
+            "e_p_ref_m": NaN,
+            "e_R_ref_rad": NaN,
+            "kappa_Js": NaN,
+            "estado": "sin solución: inexistente en el modelo (|cos θ3| > 1: pose fuera del alcance de la rama)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": false
+          },
+          {
+            "pose": "IK-5",
+            "rama": 7,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5+",
+            "real": false,
+            "q_rad": null,
+            "q_raw_rad": null,
+            "dentro_limites": false,
+            "fuera_de_limites": [],
+            "margen_limite_rad": NaN,
+            "cos_codo": 8.38183476841631,
+            "muneca_singular": false,
+            "e_p_propia_m": NaN,
+            "e_R_propia_rad": NaN,
+            "e_p_ref_m": NaN,
+            "e_R_ref_rad": NaN,
+            "kappa_Js": NaN,
+            "estado": "sin solución: inexistente en el modelo (|cos θ3| > 1: pose fuera del alcance de la rama)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": false
+          },
+          {
+            "pose": "IK-5",
+            "rama": 8,
+            "brazo": "atras",
+            "codo": "abajo",
+            "muneca": "q5-",
+            "real": false,
+            "q_rad": null,
+            "q_raw_rad": null,
+            "dentro_limites": false,
+            "fuera_de_limites": [],
+            "margen_limite_rad": NaN,
+            "cos_codo": 8.38183476841631,
+            "muneca_singular": false,
+            "e_p_propia_m": NaN,
+            "e_R_propia_rad": NaN,
+            "e_p_ref_m": NaN,
+            "e_R_ref_rad": NaN,
+            "kappa_Js": NaN,
+            "estado": "sin solución: inexistente en el modelo (|cos θ3| > 1: pose fuera del alcance de la rama)",
+            "es_q_doc": false,
+            "encontrada_por_DLS": false
+          }
+        ],
+        "resumen_dls": {
+          "pose": "IK-5",
+          "n_intentos": 26,
+          "n_convergidos": 0,
+          "n_soluciones_distintas": 0,
+          "n_emparejadas_con_ramas_propias": 0,
+          "n_sin_rama_propia": 0,
+          "ramas_propias_reales": 0,
+          "ramas_reales_halladas_por_DLS": 0,
+          "mejor_residuo_sin_convergencia": 0.66915716390363,
+          "iteraciones_mediana": null,
+          "tiempo_total_s": 5.93874249199871,
+          "sin_rama_propia_q_wrapped": [],
+          "sumas_q4_q6_familia": null,
+          "n_familia_singular_q4_distintos": null,
+          "estado_numerico": "sin solución encontrada por DLS (no demuestra inexistencia)"
+        }
+      }
+    },
+    "figuras": {
+      "ik_ramas": "hito3/resultados/figuras/ik_ramas_residuos.png"
+    }
+  },
+  "jac": {
+    "qd_test_rad_s": [
+      0.1,
+      -0.2,
+      0.15,
+      0.3,
+      -0.25,
+      0.4
+    ],
+    "h_fijo": 1e-06,
+    "pasos": [
+      0.1,
+      0.01,
+      0.001,
+      0.0001,
+      1e-05,
+      1e-06,
+      1e-07,
+      1e-08,
+      1e-09,
+      1e-10
+    ],
+    "puntos": {
+      "tcp": "TCP a 0.15 m sobre z de tool0",
+      "tool0": "origen de tool0"
+    },
+    "curva": {
+      "punto": "tcp",
+      "q_rad": [
+        0.05142675584813657,
+        -0.03364080329912328,
+        0.045182824869634486,
+        -0.2280233812210291,
+        1.5649106076277668,
+        -2.3384386625725684
+      ],
+      "h_min": 1e-05,
+      "E_min": 7.959984877340248e-12,
+      "pendiente_truncamiento": 1.9998914509999475,
+      "pendiente_redondeo": -1.1822398521674984,
+      "region_estable_h": [
+        1e-05,
+        1e-05
+      ],
+      "criterio_estable": "E(h) <= 3·E_min",
+      "autoconvergencia_E_h_min_vs_vecinos": [
+        1.0547233972294912e-09,
+        7.959984877340248e-12,
+        9.568350958883177e-11
+      ],
+      "h_teorico_cbrt_eps": 6.0554544523933395e-06
+    },
+    "h_usado": 1e-05,
+    "casos": [
+      {
+        "id": "J-N1",
+        "descripcion": "q de FK-N1 (real S1)",
+        "punto": "tcp",
+        "q_rad": [
+          -1.2776709740414718,
+          -0.2120334291410576,
+          0.17298734301604857,
+          1.6036781104579958,
+          0.5541037878570434,
+          -2.34744334285034
+        ],
+        "J_own": [
+          [
+            0.3785994552749848,
+            0.10312345315349147,
+            0.02685527422863664,
+            -0.004993349483570737,
+            0.1468358582133751,
+            2.2551405187698492e-17
+          ],
+          [
+            0.2362196326671449,
+            -0.34167243984047085,
+            -0.08897788803315038,
+            0.00325340379813268,
+            0.1664948508866741,
+            2.6020852139652106e-17
+          ],
+          [
+            -0.0,
+            -0.43070512399991345,
+            -0.48752614449747045,
+            0.11666014019008639,
+            0.0016417584980020859,
+            1.3877787807814457e-17
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.28872543895095903,
+            -0.042746789119280454,
+            0.7487941051051684
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.9566158051704565,
+            0.027851558665425487,
+            -0.6608775086566281
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.03903616529137183,
+            0.998697653296481,
+            0.050480755853678505
+          ]
+        ],
+        "J_ref": [
+          [
+            0.37859945526963473,
+            0.10312345315177661,
+            0.02685527422802147,
+            -0.00499334948389496,
+            0.14683585820990386,
+            0.0
+          ],
+          [
+            0.23621963266273746,
+            -0.34167243983529433,
+            -0.08897788803252647,
+            0.0032534037991416294,
+            0.1664948508839359,
+            0.0
+          ],
+          [
+            0.0,
+            -0.43070512399934197,
+            -0.4875261444936551,
+            0.11666014018696379,
+            0.0016417585013694944,
+            0.0
+          ],
+          [
+            -6.773877204761919e-13,
+            0.9573454954179119,
+            0.9573454954150216,
+            0.28872543895537156,
+            -0.04274678911747551,
+            0.7487941051164136
+          ],
+          [
+            -1.6949339633933845e-12,
+            0.2889456737983606,
+            0.2889456737994783,
+            -0.9566158051813342,
+            0.02785155866285951,
+            -0.6608775086628484
+          ],
+          [
+            1.0000000000015403,
+            1.005367709894437e-12,
+            5.588450754412004e-13,
+            0.039036165291197585,
+            0.9986976532947714,
+            0.050480755853822556
+          ]
+        ],
+        "eJv_h": 1.1627441844118534e-11,
+        "eJw_h": 1.8124659297597692e-11,
+        "eJv_1e6": 9.075642902921803e-11,
+        "eJw_1e6": 1.9244751927481071e-10,
+        "V_own": [
+          -0.016943423367319313,
+          0.03796207644760741,
+          0.047599705557887534,
+          0.3489546962363857,
+          -0.5727459183700891,
+          -0.11777126139523729
+        ],
+        "V_ref_J": [
+          -0.016943423366833077,
+          0.037962076447212154,
+          0.04759970555656691,
+          0.3489546962411489,
+          -0.5727459183751744,
+          -0.11777126139476778
+        ],
+        "V_fd_dir": [
+          -0.016943423372661748,
+          0.03796207642681182,
+          0.04759970562151494,
+          0.3489546960460802,
+          -0.5727459181578662,
+          -0.11777126138795739
+        ],
+        "e_v_own_vs_fd_m_s": 6.715240301926148e-11,
+        "e_w_own_vs_fd_rad_s": 2.851451202672443e-10,
+        "e_v_own_vs_Jref_m_s": 1.4617451335513858e-12,
+        "e_w_own_vs_Jref_rad_s": 6.9834336728928935e-12,
+        "norma_Jv": 0.9062382619015544,
+        "norma_Jw": 2.449489742783178
+      },
+      {
+        "id": "J-N1",
+        "descripcion": "q de FK-N1 (real S1)",
+        "punto": "tool0",
+        "q_rad": [
+          -1.2776709740414718,
+          -0.2120334291410576,
+          0.17298734301604857,
+          1.6036781104579958,
+          0.5541037878570434,
+          -2.34744334285034
+        ],
+        "J_own": [
+          [
+            0.2794678289764906,
+            0.10093552375138869,
+            0.024667344826533866,
+            -0.0016194646973743017,
+            0.047622440501635166,
+            5.204170427930421e-18
+          ],
+          [
+            0.12390051690136965,
+            -0.3344233112072154,
+            -0.08172875939989489,
+            0.0010551579885835693,
+            0.05399833001729971,
+            6.071532165918825e-18
+          ],
+          [
+            -0.0,
+            -0.3033477855243709,
+            -0.3601688060219278,
+            0.03783572114273072,
+            0.0005324622155682441,
+            6.938893903907228e-18
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.28872543895095903,
+            -0.042746789119280454,
+            0.7487941051051684
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.9566158051704565,
+            0.027851558665425487,
+            -0.6608775086566281
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.03903616529137183,
+            0.998697653296481,
+            0.050480755853678505
+          ]
+        ],
+        "J_ref": [
+          [
+            0.27946782897303457,
+            0.10093552375092794,
+            0.024667344825785028,
+            -0.0016194646977607528,
+            0.047622440500771905,
+            0.0
+          ],
+          [
+            0.12390051689903368,
+            -0.3344233112018147,
+            -0.08172875939904678,
+            0.0010551579887607687,
+            0.05399833001851206,
+            0.0
+          ],
+          [
+            0.0,
+            -0.3033477855240996,
+            -0.36016880601841267,
+            0.03783572113946754,
+            0.0005324622187607986,
+            0.0
+          ],
+          [
+            -6.773877204761919e-13,
+            0.9573454954179119,
+            0.9573454954150216,
+            0.28872543895537156,
+            -0.04274678911747551,
+            0.7487941051164136
+          ],
+          [
+            -1.6949339633933845e-12,
+            0.2889456737983606,
+            0.2889456737994783,
+            -0.9566158051813342,
+            0.02785155866285951,
+            -0.6608775086628484
+          ],
+          [
+            1.0000000000015403,
+            1.005367709894437e-12,
+            5.588450754412004e-13,
+            0.039036165291197585,
+            0.9986976532947714,
+            0.050480755853822556
+          ]
+        ],
+        "eJv_h": 9.150264202791876e-12,
+        "eJw_h": 1.8124659297597692e-11,
+        "eJv_1e6": 1.0447003535593019e-10,
+        "eJw_1e6": 1.9244751927481071e-10,
+        "V_own": [
+          -0.0009316696632696835,
+          0.053832364913845965,
+          0.01786183699051218,
+          0.3489546962363857,
+          -0.5727459183700891,
+          -0.11777126139523729
+        ],
+        "V_ref_J": [
+          -0.0009316696635355819,
+          0.0538323649124095,
+          0.017861836989208076,
+          0.3489546962411489,
+          -0.5727459183751744,
+          -0.11777126139476778
+        ],
+        "V_fd_dir": [
+          -0.0009316696650274459,
+          0.053832364899086826,
+          0.01786183706498079,
+          0.3489546960460802,
+          -0.5727459181578662,
+          -0.11777126138795739
+        ],
+        "e_v_own_vs_fd_m_s": 7.59374448147224e-11,
+        "e_w_own_vs_fd_rad_s": 2.851451202672443e-10,
+        "e_v_own_vs_Jref_m_s": 1.9582691369011744e-12,
+        "e_w_own_vs_Jref_rad_s": 6.9834336728928935e-12,
+        "norma_Jv": 0.6716616188240475,
+        "norma_Jw": 2.449489742783178
+      },
+      {
+        "id": "J-N2",
+        "descripcion": "q de FK-N2 (real S1)",
+        "punto": "tcp",
+        "q_rad": [
+          0.05142675584813657,
+          -0.03364080329912328,
+          0.045182824869634486,
+          -0.2280233812210291,
+          1.5649106076277668,
+          -2.3384386625725684
+        ],
+        "J_own": [
+          [
+            0.03507986629349676,
+            0.11994768320981315,
+            -0.14954279583858912,
+            -0.011694557093826666,
+            -0.22168738231899346,
+            -1.3877787807814457e-17
+          ],
+          [
+            0.29471000876363446,
+            0.006173963962777298,
+            -0.007697287748237831,
+            0.21593414108015635,
+            -0.011706480235148132,
+            5.204170427930421e-18
+          ],
+          [
+            -0.0,
+            -0.2925171345841696,
+            -0.3015984383579832,
+            -0.050179445881884874,
+            0.0012895119450744492,
+            -1.2468324983583301e-18
+          ],
+          [
+            0.0,
+            -0.051404090692475625,
+            -0.051404090692475625,
+            0.9986114154722315,
+            -0.05267909755117966,
+            0.006269385377418879
+          ],
+          [
+            0.0,
+            0.9986779358031695,
+            0.9986779358031695,
+            0.05140066674867775,
+            0.9726931589907343,
+            -0.22602514443844057
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            -0.011541765304209384,
+            -0.22603745515692608,
+            -0.9741012929303459
+          ]
+        ],
+        "J_ref": [
+          [
+            0.03507986629236459,
+            0.11994768320811032,
+            -0.1495427958408957,
+            -0.011694557094932277,
+            -0.221687382317981,
+            0.0
+          ],
+          [
+            0.29471000875941344,
+            0.006173963962990968,
+            -0.007697287748159586,
+            0.2159341410765819,
+            -0.011706480235185166,
+            0.0
+          ],
+          [
+            0.0,
+            -0.2925171345813382,
+            -0.30159843835697586,
+            -0.05017944588459055,
+            0.001289511947222266,
+            0.0
+          ],
+          [
+            5.812012871051657e-13,
+            -0.051404090692635934,
+            -0.051404090692635934,
+            0.9986114154734258,
+            -0.052679097552104856,
+            0.006269385375847162
+          ],
+          [
+            6.974544850885237e-13,
+            0.9986779358029683,
+            0.9986779358031584,
+            0.05140066674840763,
+            0.9726931589974379,
+            -0.22602514443922186
+          ],
+          [
+            1.0000000000037992,
+            -1.317203917323821e-12,
+            -4.136871871716584e-12,
+            -0.011541765303123069,
+            -0.2260374551557023,
+            -0.9741012929329947
+          ]
+        ],
+        "eJv_h": 7.959984877340248e-12,
+        "eJw_h": 9.709193175032199e-12,
+        "eJv_1e6": 9.568350958883177e-11,
+        "eJw_1e6": 1.524065502670344e-10,
+        "V_own": [
+          0.009000509063199033,
+          0.09478847730440625,
+          -0.00211255058769763,
+          0.3178311577150557,
+          -0.368097044288615,
+          -0.2365936829741697
+        ],
+        "V_ref_J": [
+          0.009000509062495603,
+          0.09478847730289007,
+          -0.0021125505894614705,
+          0.3178311577150827,
+          -0.3680970442905761,
+          -0.23659368297518643
+        ],
+        "V_fd_dir": [
+          0.009000509115786315,
+          0.0947884773103147,
+          -0.0021125506066699273,
+          0.31783115773247794,
+          -0.3680970442782434,
+          -0.23659368278347542
+        ],
+        "e_v_own_vs_fd_m_s": 5.6216368588016465e-11,
+        "e_w_own_vs_fd_rad_s": 1.9176915054271616e-10,
+        "e_v_own_vs_Jref_m_s": 2.429966469374754e-12,
+        "e_w_own_vs_Jref_rad_s": 2.2091622398667297e-12,
+        "norma_Jv": 0.6324765858377001,
+        "norma_Jw": 2.449489742783178
+      },
+      {
+        "id": "J-N2",
+        "descripcion": "q de FK-N2 (real S1)",
+        "punto": "tool0",
+        "q_rad": [
+          0.05142675584813657,
+          -0.03364080329912328,
+          0.045182824869634486,
+          -0.2280233812210291,
+          1.5649106076277668,
+          -2.3384386625725684
+        ],
+        "J_own": [
+          [
+            0.0011760946277306773,
+            0.2658697034828446,
+            -0.0036207755655576867,
+            -0.003792829327727567,
+            -0.0718986104818357,
+            -3.469446951953614e-18
+          ],
+          [
+            0.29376960095702165,
+            0.013684882643594687,
+            -0.0001863690674204418,
+            0.07003269440437503,
+            -0.003796696292480479,
+            -1.7401444868392346e-17
+          ],
+          [
+            -0.0,
+            -0.29332076261057244,
+            -0.302402066384386,
+            -0.016274414880611314,
+            0.00041822009029439687,
+            4.0115480381963664e-18
+          ],
+          [
+            0.0,
+            -0.051404090692475625,
+            -0.051404090692475625,
+            0.9986114154722315,
+            -0.05267909755117966,
+            0.006269385377418879
+          ],
+          [
+            0.0,
+            0.9986779358031695,
+            0.9986779358031695,
+            0.05140066674867775,
+            0.9726931589907343,
+            -0.22602514443844057
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            -0.011541765304209384,
+            -0.22603745515692608,
+            -0.9741012929303459
+          ]
+        ],
+        "J_ref": [
+          [
+            0.001176094627242108,
+            0.2658697034807478,
+            -0.0036207755682582383,
+            -0.0037928293283862042,
+            -0.07189861048195745,
+            0.0
+          ],
+          [
+            0.2937696009524919,
+            0.013684882643402728,
+            -0.00018636906748761836,
+            0.07003269440319232,
+            -0.0037966962926003207,
+            0.0
+          ],
+          [
+            0.0,
+            -0.2933207626065748,
+            -0.30240206638221245,
+            -0.01627441488238901,
+            0.000418220091891186,
+            0.0
+          ],
+          [
+            5.812012871051657e-13,
+            -0.051404090692635934,
+            -0.051404090692635934,
+            0.9986114154734258,
+            -0.052679097552104856,
+            0.006269385375847162
+          ],
+          [
+            6.974544850885237e-13,
+            0.9986779358029683,
+            0.9986779358031584,
+            0.05140066674840763,
+            0.9726931589974379,
+            -0.22602514443922186
+          ],
+          [
+            1.0000000000037992,
+            -1.317203917323821e-12,
+            -4.136871871716584e-12,
+            -0.011541765303123069,
+            -0.2260374551557023,
+            -0.9741012929329947
+          ]
+        ],
+        "eJv_h": 7.795227041920416e-12,
+        "eJw_h": 9.709193175032199e-12,
+        "eJv_1e6": 6.266712433947558e-11,
+        "eJw_1e6": 1.524065502670344e-10,
+        "V_own": [
+          -0.036762643746488854,
+          0.048571010601302776,
+          0.008316963077699597,
+          0.3178311577150557,
+          -0.368097044288615,
+          -0.2365936829741697
+        ],
+        "V_ref_J": [
+          -0.03676264374669058,
+          0.04857101060055328,
+          0.008316963076293593,
+          0.3178311577150827,
+          -0.3680970442905761,
+          -0.23659368297518643
+        ],
+        "V_fd_dir": [
+          -0.03676264370700011,
+          0.04857101060327246,
+          0.008316963062693361,
+          0.31783115773247794,
+          -0.3680970442782434,
+          -0.23659368278347542
+        ],
+        "e_v_own_vs_fd_m_s": 4.2289807143923134e-11,
+        "e_w_own_vs_fd_rad_s": 1.9176915054271616e-10,
+        "e_v_own_vs_Jref_m_s": 1.606016008783711e-12,
+        "e_w_own_vs_Jref_rad_s": 2.2091622398667297e-12,
+        "norma_Jv": 0.5874018910326368,
+        "norma_Jw": 2.449489742783178
+      },
+      {
+        "id": "J-N3",
+        "descripcion": "sintética genérica",
+        "punto": "tcp",
+        "q_rad": [
+          0.3,
+          -0.5,
+          0.6,
+          -0.8,
+          1.1,
+          0.4
+        ],
+        "J_own": [
+          [
+            0.05743265977313107,
+            0.12346904029008189,
+            -0.1028953534803531,
+            -0.05427137631575003,
+            -0.17341102009942855,
+            0.0
+          ],
+          [
+            0.29459906532128183,
+            0.03819344986623342,
+            -0.03182926274786889,
+            0.12749828538379143,
+            -0.12925605657965797,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.2644687252784524,
+            -0.39391362070158714,
+            -0.14121844592118177,
+            -0.050054869349063544,
+            0.0
+          ],
+          [
+            0.0,
+            -0.29552020666133955,
+            -0.29552020666133955,
+            0.9505637859220634,
+            -0.2743083933497844,
+            0.5608829662099635
+          ],
+          [
+            0.0,
+            0.955336489125606,
+            0.955336489125606,
+            0.2940438365518559,
+            0.6444253341762113,
+            -0.4957005027001519
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            -0.0998334166468282,
+            -0.7137722984325872,
+            -0.6630922332815621
+          ]
+        ],
+        "J_ref": [
+          [
+            0.05743265976965172,
+            0.12346904028626147,
+            -0.10289535347929311,
+            -0.054271376315195845,
+            -0.17341102009627016,
+            0.0
+          ],
+          [
+            0.29459906531609237,
+            0.03819344986527584,
+            -0.03182926274804265,
+            0.1274982853797374,
+            -0.12925605657881922,
+            0.0
+          ],
+          [
+            0.0,
+            -0.2644687252778555,
+            -0.39391362069707275,
+            -0.14121844592041022,
+            -0.050054869349391844,
+            0.0
+          ],
+          [
+            -4.2582768348310355e-13,
+            -0.2955202066589855,
+            -0.29552020665897355,
+            0.9505637859203622,
+            -0.2743083933506491,
+            0.5608829662120172
+          ],
+          [
+            6.72078709568811e-13,
+            0.9553364891251451,
+            0.9553364891175845,
+            0.29404383655239924,
+            0.6444253341830737,
+            -0.4957005027003865
+          ],
+          [
+            0.9999999999961298,
+            1.6812011372862356e-12,
+            -2.49406326867668e-12,
+            -0.09983341664848505,
+            -0.7137722984423939,
+            -0.6630922332812785
+          ]
+        ],
+        "eJv_h": 1.022560481721302e-11,
+        "eJw_h": 1.5957880069951388e-11,
+        "eJv_1e6": 1.009678968133777e-10,
+        "eJw_1e6": 1.740890164389794e-10,
+        "V_own": [
+          -0.007313502972624113,
+          0.08761032690675308,
+          -0.03604511448863623,
+          0.5928754309311175,
+          -0.3189402081148372,
+          -0.01674384369852651
+        ],
+        "V_ref_J": [
+          -0.00731350297267231,
+          0.0876103269049737,
+          -0.036045114487764915,
+          0.5928754309314863,
+          -0.31894020811752744,
+          -0.01674384369755584
+        ],
+        "V_fd_dir": [
+          -0.00731350294214117,
+          0.08761032690637882,
+          -0.03604511442101277,
+          0.5928754308838294,
+          -0.31894020815851737,
+          -0.016743843701822317
+        ],
+        "e_v_own_vs_fd_m_s": 7.417737201953456e-11,
+        "e_w_own_vs_fd_rad_s": 6.445913818089332e-11,
+        "e_v_own_vs_Jref_m_s": 1.981846906633428e-12,
+        "e_w_own_vs_Jref_rad_s": 2.883677574231975e-12,
+        "norma_Jv": 0.6572142045867517,
+        "norma_Jw": 2.449489742783178
+      },
+      {
+        "id": "J-N3",
+        "descripcion": "sintética genérica",
+        "punto": "tool0",
+        "q_rad": [
+          0.3,
+          -0.5,
+          0.6,
+          -0.8,
+          1.1,
+          0.4
+        ],
+        "J_own": [
+          [
+            -0.016922415631891716,
+            0.21849047120653162,
+            -0.007873922563903367,
+            -0.01760152745375675,
+            -0.05624141192413898,
+            -1.3877787807814457e-17
+          ],
+          [
+            0.2104666203897873,
+            0.06758702293846787,
+            -0.002435689675634435,
+            0.04135079525960796,
+            -0.0419208832150242,
+            -1.0408340855860843e-17
+          ],
+          [
+            0.0,
+            -0.20606735796605682,
+            -0.3355122533891916,
+            -0.045800577055518404,
+            -0.016234011680777358,
+            -3.469446951953614e-18
+          ],
+          [
+            0.0,
+            -0.29552020666133955,
+            -0.29552020666133955,
+            0.9505637859220634,
+            -0.2743083933497844,
+            0.5608829662099635
+          ],
+          [
+            0.0,
+            0.955336489125606,
+            0.955336489125606,
+            0.2940438365518559,
+            0.6444253341762113,
+            -0.4957005027001519
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            -0.0998334166468282,
+            -0.7137722984325872,
+            -0.6630922332815621
+          ]
+        ],
+        "J_ref": [
+          [
+            -0.016922415634057497,
+            0.21849047120159334,
+            -0.007873922563961244,
+            -0.01760152745361454,
+            -0.056241411923452216,
+            0.0
+          ],
+          [
+            0.21046662038587402,
+            0.06758702293663266,
+            -0.002435689676685837,
+            0.041350795258396356,
+            -0.04192088321475218,
+            0.0
+          ],
+          [
+            0.0,
+            -0.20606735796624417,
+            -0.33551225338546153,
+            -0.04580057705316775,
+            -0.016234011679383542,
+            0.0
+          ],
+          [
+            -4.2582768348310355e-13,
+            -0.2955202066589855,
+            -0.29552020665897355,
+            0.9505637859203622,
+            -0.2743083933506491,
+            0.5608829662120172
+          ],
+          [
+            6.72078709568811e-13,
+            0.9553364891251451,
+            0.9553364891175845,
+            0.29404383655239924,
+            0.6444253341830737,
+            -0.4957005027003865
+          ],
+          [
+            0.9999999999961298,
+            1.6812011372862356e-12,
+            -2.49406326867668e-12,
+            -0.09983341664848505,
+            -0.7137722984423939,
+            -0.6630922332812785
+          ]
+        ],
+        "eJv_h": 8.504024806335184e-12,
+        "eJw_h": 1.5957880069951388e-11,
+        "eJv_1e6": 8.655144723187578e-11,
+        "eJw_1e6": 1.740890164389794e-10,
+        "V_own": [
+          -0.03779152944417329,
+          0.030049363381578424,
+          -0.018795036611628554,
+          0.5928754309311175,
+          -0.3189402081148372,
+          -0.01674384369852651
+        ],
+        "V_ref_J": [
+          -0.03779152944353992,
+          0.03004936338096495,
+          -0.01879503661067483,
+          0.5928754309314863,
+          -0.31894020811752744,
+          -0.01674384369755584
+        ],
+        "V_fd_dir": [
+          -0.0377915294336173,
+          0.03004936338993347,
+          -0.01879503652713055,
+          0.5928754308838294,
+          -0.31894020815851737,
+          -0.016743843701822317
+        ],
+        "e_v_own_vs_fd_m_s": 8.556371180452455e-11,
+        "e_w_own_vs_fd_rad_s": 6.445913818089332e-11,
+        "e_v_own_vs_Jref_m_s": 1.2988853886285774e-12,
+        "e_w_own_vs_Jref_rad_s": 2.883677574231975e-12,
+        "norma_Jv": 0.511165543104113,
+        "norma_Jw": 2.449489742783178
+      },
+      {
+        "id": "J-N4",
+        "descripcion": "sintética a 5° de límites alternados",
+        "punto": "tcp",
+        "q_rad": [
+          2.792526803190927,
+          -1.8325957145940461,
+          1.1344640137963142,
+          -2.705260340591211,
+          2.007128639793479,
+          -6.894050545377602
+        ],
+        "J_own": [
+          [
+            0.010230614687367176,
+            -0.241730712135618,
+            -0.30739750577207536,
+            0.011006556261660194,
+            0.07991139872384109,
+            -1.734723475976807e-18
+          ],
+          [
+            0.27672219944048637,
+            0.08798278392533687,
+            0.11188354218870862,
+            0.19004614570210412,
+            -0.07128063144058412,
+            0.0
+          ],
+          [
+            -0.0,
+            0.26353288512355444,
+            0.0027329120255059867,
+            -0.06513747386051466,
+            -0.19446655222796252,
+            5.204170427930421e-18
+          ],
+          [
+            0.0,
+            -0.3420201433256689,
+            -0.3420201433256689,
+            -0.7198463103929541,
+            0.05470446460781175,
+            0.9313620757157891
+          ],
+          [
+            0.0,
+            -0.9396926207859083,
+            -0.9396926207859083,
+            0.262002630229385,
+            0.944561805187523,
+            0.0686156616630202
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.6427876096865394,
+            -0.3237443709670646,
+            0.35757037753835674
+          ]
+        ],
+        "J_ref": [
+          [
+            0.01023061468874431,
+            -0.24173071213051675,
+            -0.30739750576935787,
+            0.011006556258075227,
+            0.07991139872320918,
+            0.0
+          ],
+          [
+            0.27672219943793497,
+            0.08798278392395038,
+            0.11188354218762477,
+            0.1900461457008881,
+            -0.0712806314395395,
+            0.0
+          ],
+          [
+            0.0,
+            0.2635328851197105,
+            0.002732912024461242,
+            -0.06513747385916702,
+            -0.19446655222798978,
+            0.0
+          ],
+          [
+            1.2057732633706586e-12,
+            -0.3420201433263724,
+            -0.34202014332662045,
+            -0.7198463103972517,
+            0.05470446460691435,
+            0.9313620756793439
+          ],
+          [
+            -6.637177793507646e-13,
+            -0.9396926207910158,
+            -0.9396926207947839,
+            0.2620026302303866,
+            0.9445618051890269,
+            0.06861566166124233
+          ],
+          [
+            1.000000000005024,
+            -2.45253093352973e-13,
+            5.914548256080943e-13,
+            0.6427876096927304,
+            -0.323744370968103,
+            0.35757037752371795
+          ]
+        ],
+        "eJv_h": 8.855292207952712e-12,
+        "eJw_h": 4.17308017444043e-11,
+        "eJv_1e6": 1.2900053792891417e-10,
+        "eJw_1e6": 3.381241568918792e-10,
+        "V_own": [
+          -0.013416304772413207,
+          0.10169219605806482,
+          -0.023221244322048758,
+          0.16001582818275997,
+          -0.08310876652356175,
+          0.5168005266630706
+        ],
+        "V_ref_J": [
+          -0.01341630477380562,
+          0.10169219605729843,
+          -0.023221244321025576,
+          0.16001582816723547,
+          -0.08310876652472457,
+          0.5168005266599722
+        ],
+        "V_fd_dir": [
+          -0.013416304789348743,
+          0.10169219599037715,
+          -0.023221244371818273,
+          0.16001582834633948,
+          -0.08310876643522412,
+          0.5168005264967738
+        ],
+        "e_v_own_vs_fd_m_s": 8.570552175409485e-11,
+        "e_w_own_vs_fd_rad_s": 2.494322362384941e-10,
+        "e_v_own_vs_Jref_m_s": 1.890255556052793e-12,
+        "e_w_own_vs_Jref_rad_s": 1.587332183956688e-11,
+        "norma_Jv": 0.6396001288243087,
+        "norma_Jw": 2.449489742783178
+      },
+      {
+        "id": "J-N4",
+        "descripcion": "sintética a 5° de límites alternados",
+        "punto": "tool0",
+        "q_rad": [
+          2.792526803190927,
+          -1.8325957145940461,
+          1.1344640137963142,
+          -2.705260340591211,
+          2.007128639793479,
+          -6.894050545377602
+        ],
+        "J_own": [
+          [
+            0.020522963936820206,
+            -0.19132977535795426,
+            -0.25699656899441164,
+            0.003569693922700609,
+            0.02591721039692146,
+            1.0842021724855044e-18
+          ],
+          [
+            0.13701788808311804,
+            0.06963834315913453,
+            0.09353910142250628,
+            0.061636587795277045,
+            -0.023118042629378634,
+            -2.0816681711721685e-17
+          ],
+          [
+            -0.0,
+            0.13577396541451425,
+            -0.12502600768353422,
+            -0.02112566719800476,
+            -0.06307023315501488,
+            1.734723475976807e-18
+          ],
+          [
+            0.0,
+            -0.3420201433256689,
+            -0.3420201433256689,
+            -0.7198463103929541,
+            0.05470446460781175,
+            0.9313620757157891
+          ],
+          [
+            0.0,
+            -0.9396926207859083,
+            -0.9396926207859083,
+            0.262002630229385,
+            0.944561805187523,
+            0.0686156616630202
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.6427876096865394,
+            -0.3237443709670646,
+            0.35757037753835674
+          ]
+        ],
+        "J_ref": [
+          [
+            0.02052296393662001,
+            -0.19132977535502024,
+            -0.2569965689910858,
+            0.003569693922400585,
+            0.025917210397241593,
+            0.0
+          ],
+          [
+            0.13701788808204163,
+            0.06963834315813072,
+            0.09353910142163162,
+            0.06163658779496233,
+            -0.023118042629007015,
+            0.0
+          ],
+          [
+            0.0,
+            0.1357739654150869,
+            -0.12502600768016237,
+            -0.021125667198917952,
+            -0.06307023315554883,
+            0.0
+          ],
+          [
+            1.2057732633706586e-12,
+            -0.3420201433263724,
+            -0.34202014332662045,
+            -0.7198463103972517,
+            0.05470446460691435,
+            0.9313620756793439
+          ],
+          [
+            -6.637177793507646e-13,
+            -0.9396926207910158,
+            -0.9396926207947839,
+            0.2620026302303866,
+            0.9445618051890269,
+            0.06861566166124233
+          ],
+          [
+            1.000000000005024,
+            -2.45253093352973e-13,
+            5.914548256080943e-13,
+            0.6427876096927304,
+            -0.323744370968103,
+            0.35757037752371795
+          ]
+        ],
+        "eJv_h": 5.990583527596549e-12,
+        "eJw_h": 4.17308017444043e-11,
+        "eJv_1e6": 7.861524298748161e-11,
+        "eJw_1e6": 3.381241568918792e-10,
+        "V_own": [
+          -0.0036396283063090517,
+          0.03807547238578861,
+          -0.0364788361060807,
+          0.16001582818275997,
+          -0.08310876652356175,
+          0.5168005266630706
+        ],
+        "V_ref_J": [
+          -0.0036396283065870385,
+          0.03807547238556322,
+          -0.036478836105829915,
+          0.16001582816723547,
+          -0.08310876652472457,
+          0.5168005266599722
+        ],
+        "V_fd_dir": [
+          -0.0036396283209505498,
+          0.038075472356610685,
+          -0.03647883614621428,
+          0.16001582834633948,
+          -0.08310876643522412,
+          0.5168005264967738
+        ],
+        "e_v_own_vs_fd_m_s": 5.1734212251497273e-11,
+        "e_w_own_vs_fd_rad_s": 2.494322362384941e-10,
+        "e_v_own_vs_Jref_m_s": 4.370015090321186e-13,
+        "e_w_own_vs_Jref_rad_s": 1.587332183956688e-11,
+        "norma_Jv": 0.4230326857534606,
+        "norma_Jw": 2.449489742783178
+      }
+    ],
+    "figuras": {
+      "fd_curva": "hito3/resultados/figuras/jacobiano_fd_curva_visual4.png",
+      "jacobiano_errores": "hito3/resultados/figuras/jacobiano_errores_separados.png"
+    }
+  },
+  "sing": {
+    "L_m": 0.5800064515457702,
+    "justificacion_L": "L = L2 + L3 = 0.270 + 0.310 m: palanca máxima hombro→centro de muñeca; hace comparables las columnas de Jv/L y Jω.",
+    "F_peso": [
+      0.0,
+      0.0,
+      -10.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "qd_declarado": [
+      0.2,
+      -0.3,
+      0.25,
+      0.4,
+      -0.35,
+      0.5
+    ],
+    "qdd_declarado": [
+      0.5,
+      -0.4,
+      0.6,
+      1.0,
+      -0.8,
+      1.2
+    ],
+    "casos": [
+      {
+        "id": "F-reg",
+        "descripcion": "regular (q de FK-N1)",
+        "tipo": "ninguna",
+        "q_rad": [
+          -1.2776709740414718,
+          -0.2120334291410576,
+          0.17298734301604857,
+          1.6036781104579958,
+          0.5541037878570434,
+          -2.34744334285034
+        ],
+        "J": [
+          [
+            0.3785994552749848,
+            0.10312345315349147,
+            0.02685527422863664,
+            -0.004993349483570737,
+            0.1468358582133751,
+            2.2551405187698492e-17
+          ],
+          [
+            0.2362196326671449,
+            -0.34167243984047085,
+            -0.08897788803315038,
+            0.00325340379813268,
+            0.1664948508866741,
+            2.6020852139652106e-17
+          ],
+          [
+            -0.0,
+            -0.43070512399991345,
+            -0.48752614449747045,
+            0.11666014019008639,
+            0.0016417584980020859,
+            1.3877787807814457e-17
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.28872543895095903,
+            -0.042746789119280454,
+            0.7487941051051684
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.9566158051704565,
+            0.027851558665425487,
+            -0.6608775086566281
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.03903616529137183,
+            0.998697653296481,
+            0.050480755853678505
+          ]
+        ],
+        "Js": [
+          [
+            0.6527504207340843,
+            0.17779707946119916,
+            0.04630168191589055,
+            -0.008609127485156421,
+            0.2531624567658586,
+            3.888130059173813e-17
+          ],
+          [
+            0.4072706985199871,
+            -0.5890838609292751,
+            -0.15340844536473028,
+            0.005609254499604377,
+            0.28705689469996426,
+            4.486303914431323e-17
+          ],
+          [
+            -0.0,
+            -0.7425867813229403,
+            -0.840552968330212,
+            0.20113593543516015,
+            0.0028305866143844595,
+            2.3926954210300392e-17
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.28872543895095903,
+            -0.042746789119280454,
+            0.7487941051051684
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.9566158051704565,
+            0.027851558665425487,
+            -0.6608775086566281
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.03903616529137183,
+            0.998697653296481,
+            0.050480755853678505
+          ]
+        ],
+        "L": 0.5800064515457702,
+        "sigma_J": [
+          1.6947048747843374,
+          1.4919455791257517,
+          1.2833021031705507,
+          0.19888055283844477,
+          0.16349647931855624,
+          0.1009589153806262
+        ],
+        "tau_num_J": 2.2578004463160772e-15,
+        "rango_J": 6,
+        "kappa_J_mixto": 16.78608440270098,
+        "sigma_min_J": 0.1009589153806262,
+        "sigma_Js": [
+          1.9455650406334921,
+          1.6288237173969435,
+          1.3425263676241066,
+          0.3344037475208854,
+          0.2583246872387083,
+          0.14853991905584377
+        ],
+        "tau_num_Js": 2.5920133248204973e-15,
+        "rango_Js": 6,
+        "kappa_Js": 13.097927163283659,
+        "sigma_min_Js": 0.14853991905584377,
+        "ratio_sigma": 0.07634795853829586,
+        "dir_perdida_escalada": [
+          -0.029809517005726704,
+          0.018286592109644253,
+          0.7641566060743942,
+          0.4976062909842792,
+          0.4088061896281571,
+          0.010351479717410378
+        ],
+        "dir_perdida_fisica": [
+          -0.022106546227603333,
+          0.013561219181763862,
+          0.5666936278795385,
+          0.6362371079268515,
+          0.5226977080155765,
+          0.013235354209733477
+        ],
+        "dir_perdida_dominante": "ωx",
+        "q_dot_nulo_v_min": [
+          -0.01116940091564837,
+          0.0739124221354586,
+          -0.3500455042447257,
+          -0.6256649667988274,
+          0.0021440036991205794,
+          0.6931227134238724
+        ],
+        "dir_perdida_analitica": null,
+        "dir_perdida_analitica_texto": "",
+        "cos_dir_perdida_vs_analitica": null,
+        "amplificacion_qdot_dir_min": 6.732197017180606,
+        "twist_max_dir_min_escalado": 1.325954711607266,
+        "twist_max_dir_max_escalado": 12.197148586663703,
+        "tau_ext_peso": [
+          0.0,
+          4.307051239999135,
+          4.875261444974704,
+          -1.166601401900864,
+          -0.01641758498002086,
+          -1.3877787807814457e-16
+        ],
+        "norma_tau_ext_peso": 6.609091685613732,
+        "norma_tau_ext_dir_perdida": 1.0095891538062625,
+        "norma_F_dir_perdida": 10.0,
+        "tau_act": [
+          0.10396999185505214,
+          -4.064179864446684,
+          -8.748404981819071,
+          0.07676329373275233,
+          0.0018014358986707549,
+          9.564079642511666e-06
+        ],
+        "norma_tau_act": 9.647219978015658,
+        "tau_gravedad": [
+          0.0,
+          -3.8849221427436222,
+          -8.802702826514807,
+          0.07276447653541386,
+          0.0010240146935366111,
+          0.0
+        ],
+        "norma_tau_g": 9.622135564663544,
+        "dif_tau_ext_vs_tau_act": 16.038668728138155,
+        "dif_tau_ext_vs_gravedad": 15.991606126519647,
+        "finito": true
+      },
+      {
+        "id": "F-q5",
+        "descripcion": "cerca de q5 = 0 (q5 = 0.5°)",
+        "tipo": "muñeca",
+        "q_rad": [
+          -1.2776709740414718,
+          -0.2120334291410576,
+          0.17298734301604857,
+          1.6036781104579958,
+          0.008726646259971648,
+          -2.34744334285034
+        ],
+        "J": [
+          [
+            0.44368342135221683,
+            0.10240762274603764,
+            0.026139443821182808,
+            -8.281296473733324e-05,
+            0.21176606329796605,
+            5.204170427930421e-17
+          ],
+          [
+            0.13593488392997854,
+            -0.33930072405373596,
+            -0.08660617224641548,
+            5.395657061412623e-05,
+            0.0662348072993732,
+            1.734723475976807e-17
+          ],
+          [
+            -0.0,
+            -0.4640361214521326,
+            -0.5208571419496895,
+            0.0019347678562468829,
+            0.007216975633652569,
+            2.7755575615628914e-17
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.28872543895095903,
+            -0.042746789119280454,
+            0.2970610026855
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.9566158051704565,
+            0.027851558665425487,
+            -0.9540485270225383
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.03903616529137183,
+            0.998697653296481,
+            0.03932135259131533
+          ]
+        ],
+        "Js": [
+          [
+            0.7649629071707046,
+            0.17656290283170464,
+            0.04506750528639604,
+            -0.00014277938549929765,
+            0.36510984099157884,
+            8.972607828862646e-17
+          ],
+          [
+            0.2343678825773397,
+            -0.5849947412644609,
+            -0.1493193256999161,
+            9.302753524607706e-05,
+            0.1141966733694968,
+            2.990869276287549e-17
+          ],
+          [
+            -0.0,
+            -0.8000533790881703,
+            -0.8980195660954418,
+            0.0033357695437534352,
+            0.012442923030284696,
+            4.7853908420600784e-17
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.28872543895095903,
+            -0.042746789119280454,
+            0.2970610026855
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.9566158051704565,
+            0.027851558665425487,
+            -0.9540485270225383
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.03903616529137183,
+            0.998697653296481,
+            0.03932135259131533
+          ]
+        ],
+        "L": 0.5800064515457702,
+        "sigma_J": [
+          1.6089257471398966,
+          1.4968320514661888,
+          1.4119336146021952,
+          0.19004670506879665,
+          0.16190592201772078,
+          0.00168842317240952
+        ],
+        "tau_num_J": 2.143519691264335e-15,
+        "rango_J": 6,
+        "kappa_J_mixto": 952.9161725752828,
+        "sigma_min_J": 0.00168842317240952,
+        "sigma_Js": [
+          1.9340594138437088,
+          1.6498521273757671,
+          1.4135248939655192,
+          0.32575184973675375,
+          0.25314646549890407,
+          0.002434177314477709
+        ],
+        "tau_num_Js": 2.5766847506907836e-15,
+        "rango_Js": 6,
+        "kappa_Js": 794.5433565338651,
+        "sigma_min_Js": 0.002434177314477709,
+        "ratio_sigma": 0.0012585845590131466,
+        "dir_perdida_escalada": [
+          -0.07446913809844444,
+          0.13989244432562334,
+          0.7222245049827044,
+          0.64263198566301,
+          0.1992880081215601,
+          0.02417926210045747
+        ],
+        "dir_perdida_fisica": [
+          -0.05410929625017475,
+          0.10164588857158195,
+          0.524768524211794,
+          0.8050541101929416,
+          0.24965708777302942,
+          0.03029045358724687
+        ],
+        "dir_perdida_dominante": "ωx",
+        "q_dot_nulo_v_min": [
+          -0.00023429215988260505,
+          0.0005165328144868521,
+          -0.005043120244346175,
+          -0.7070846929615892,
+          9.05944420863108e-05,
+          0.7071106518864632
+        ],
+        "dir_perdida_analitica": [
+          0.0,
+          0.0,
+          0.0,
+          -0.9564571777777445,
+          -0.2900180890530549,
+          -0.03285080059064883
+        ],
+        "dir_perdida_analitica_texto": "parte angular de la dirección perdida ∥ z3×z4 (⟂ al plano de los ejes 4 y 5)",
+        "cos_dir_perdida_vs_analitica": 0.9999904812091351,
+        "amplificacion_qdot_dir_min": 410.8164159004849,
+        "twist_max_dir_min_escalado": 0.01922684923619913,
+        "twist_max_dir_max_escalado": 11.656078283891068,
+        "tau_ext_peso": [
+          0.0,
+          4.6403612145213256,
+          5.208571419496895,
+          -0.01934767856246883,
+          -0.0721697563365257,
+          -2.7755575615628914e-16
+        ],
+        "norma_tau_ext_peso": 6.976227579403439,
+        "norma_tau_ext_dir_perdida": 0.016884231724095797,
+        "norma_F_dir_perdida": 9.999999999999998,
+        "tau_act": [
+          0.10387538476744056,
+          -4.081949394693717,
+          -8.76522702257294,
+          0.005828261935008837,
+          0.004865924128351297,
+          9.270556247909046e-06
+        ],
+        "norma_tau_act": 9.669662008549453,
+        "tau_gravedad": [
+          0.0,
+          -3.9057116992970613,
+          -8.823492383068245,
+          0.0012067735393421057,
+          0.004501447137779049,
+          1.8242907184884417e-17
+        ],
+        "norma_tau_g": 9.649280980022189,
+        "dif_tau_ext_vs_tau_act": 16.473102430413945,
+        "dif_tau_ext_vs_gravedad": 16.42986542143613,
+        "finito": true
+      },
+      {
+        "id": "F-q5-0",
+        "descripcion": "q5 = 0 exacto",
+        "tipo": "muñeca",
+        "q_rad": [
+          -1.2776709740414718,
+          -0.2120334291410576,
+          0.17298734301604857,
+          1.6036781104579958,
+          0.0,
+          -2.34744334285034
+        ],
+        "J": [
+          [
+            0.44425335710105474,
+            0.10238932913872555,
+            0.026121150213870716,
+            -4.163336342344337e-17,
+            0.21233349346665928,
+            -3.2959746043559335e-17
+          ],
+          [
+            0.13408438878091042,
+            -0.33924011299725304,
+            -0.08654556118993252,
+            -1.3010426069826053e-17,
+            0.06438401576977816,
+            -1.0408340855860843e-17
+          ],
+          [
+            -0.0,
+            -0.4640470543062499,
+            -0.5208680748038068,
+            -2.7755575615628914e-17,
+            0.0072928777311240395,
+            -2.0816681711721685e-17
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.28872543895095903,
+            -0.042746789119280454,
+            0.28872543895095903
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.9566158051704565,
+            0.027851558665425487,
+            -0.9566158051704565
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.03903616529137183,
+            0.998697653296481,
+            0.03903616529137183
+          ]
+        ],
+        "Js": [
+          [
+            0.7659455440833096,
+            0.17653136248027693,
+            0.04503596493496833,
+            -7.178086263090117e-17,
+            0.3660881579864691,
+            -5.682651624946343e-17
+          ],
+          [
+            0.23117740918840343,
+            -0.5848902406053366,
+            -0.14921482504079167,
+            -2.2431519572156616e-17,
+            0.11100568898533605,
+            -1.7945215657725293e-17
+          ],
+          [
+            -0.0,
+            -0.8000722286269782,
+            -0.8980384156342498,
+            -4.7853908420600784e-17,
+            0.012573787259931081,
+            -3.5890431315450586e-17
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.28872543895095903,
+            -0.042746789119280454,
+            0.28872543895095903
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.9566158051704565,
+            0.027851558665425487,
+            -0.9566158051704565
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.03903616529137183,
+            0.998697653296481,
+            0.03903616529137183
+          ]
+        ],
+        "L": 0.5800064515457702,
+        "sigma_J": [
+          1.608849511150993,
+          1.496787210904945,
+          1.4120574325108624,
+          0.19005277250893,
+          0.16190062662506588,
+          1.3424431248557607e-16
+        ],
+        "tau_num_J": 2.143418124524112e-15,
+        "rango_J": 5,
+        "kappa_J_mixto": 1.1984489185147836e+16,
+        "sigma_min_J": 1.3424431248557607e-16,
+        "sigma_Js": [
+          1.9339679153543532,
+          1.6499050345146191,
+          1.4135547176173766,
+          0.32576960092457286,
+          0.25313428264201565,
+          7.91159986756909e-17
+        ],
+        "tau_num_Js": 2.5765628502152625e-15,
+        "rango_Js": 5,
+        "kappa_Js": 2.444471342998521e+16,
+        "sigma_min_Js": 7.91159986756909e-17,
+        "ratio_sigma": 4.0908640752292315e-17,
+        "dir_perdida_escalada": [
+          -0.07462953739246815,
+          0.13987151478753432,
+          0.7222085821661601,
+          0.6438246445877149,
+          0.19533202780482192,
+          0.024827027214920083
+        ],
+        "dir_perdida_fisica": [
+          -0.05422570295155052,
+          0.10163041976751831,
+          0.5247556050046619,
+          0.8065461334329356,
+          0.2447006231991635,
+          0.031101858204963386
+        ],
+        "dir_perdida_dominante": "ωx",
+        "q_dot_nulo_v_min": [
+          -0.0,
+          -1.817990202823694e-15,
+          1.8859358381904844e-15,
+          0.7071067811865477,
+          3.3036285194208994e-18,
+          -0.7071067811865475
+        ],
+        "dir_perdida_analitica": [
+          0.0,
+          0.0,
+          0.0,
+          -0.9564571777777445,
+          -0.2900180890530549,
+          -0.03285080059064883
+        ],
+        "dir_perdida_analitica_texto": "parte angular de la dirección perdida ∥ z3×z4 (⟂ al plano de los ejes 4 y 5)",
+        "cos_dir_perdida_vs_analitica": 1.0,
+        "amplificacion_qdot_dir_min": 1.2639668546676122e+16,
+        "twist_max_dir_min_escalado": 6.248944367139322e-16,
+        "twist_max_dir_max_escalado": 11.654685934362373,
+        "tau_ext_peso": [
+          0.0,
+          4.640470543062499,
+          5.208680748038068,
+          2.7755575615628914e-16,
+          -0.0729287773112404,
+          2.0816681711721685e-16
+        ],
+        "norma_tau_ext_peso": 6.976362992460562,
+        "norma_tau_ext_dir_perdida": 1.4226773829897958e-15,
+        "norma_F_dir_perdida": 10.0,
+        "tau_act": [
+          0.10387436307634014,
+          -4.0819150753125015,
+          -8.76517777930276,
+          0.004643408758312355,
+          0.00490413609453267,
+          9.254903990902234e-06
+        ],
+        "norma_tau_act": 9.669602250353023,
+        "tau_gravedad": [
+          0.0,
+          -3.905718518450592,
+          -8.823499202221777,
+          -1.3927234365773701e-16,
+          0.00454878958380605,
+          -9.121453592442208e-18
+        ],
+        "norma_tau_g": 9.649289922500147,
+        "dif_tau_ext_vs_tau_act": 16.47317827332708,
+        "dif_tau_ext_vs_gravedad": 16.430015958755863,
+        "finito": true
+      },
+      {
+        "id": "F-codo",
+        "descripcion": "codo extendido (q3 = δ − π/2)",
+        "tipo": "codo",
+        "q_rad": [
+          -1.2776709740414718,
+          0.35,
+          -1.3430303610541365,
+          0.5,
+          0.9,
+          0.3
+        ],
+        "J": [
+          [
+            0.3608493827823163,
+            0.16674819039142388,
+            0.09346271639668954,
+            0.12592116730482006,
+            0.06520745648280413,
+            -2.42861286636753e-17
+          ],
+          [
+            0.19599746007981203,
+            -0.5524762729310545,
+            -0.30966412943759847,
+            0.11095612994201104,
+            0.012920834743916938,
+            -2.0816681711721685e-17
+          ],
+          [
+            -0.0,
+            -0.4020901492958514,
+            -0.3095077412828795,
+            0.04553362351395,
+            -0.2118136908902812,
+            0.0
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.15780880217251805,
+            0.7241069576005872,
+            0.6240139406167313
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.5228579611888309,
+            0.6380508329068645,
+            -0.7677914213353854
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.8376848657928196,
+            0.2618401202666966,
+            0.1452684936239351
+          ]
+        ],
+        "Js": [
+          [
+            0.622147187881479,
+            0.28749368209099174,
+            0.16114082205051833,
+            0.21710304595617624,
+            0.11242539856068892,
+            -4.1872169868025685e-17
+          ],
+          [
+            0.33792289647375623,
+            -0.9525347027755549,
+            -0.5338977327102401,
+            0.19130154439886454,
+            0.022277053487046103,
+            -3.5890431315450586e-17
+          ],
+          [
+            -0.0,
+            -0.693251166817618,
+            -0.5336281009599343,
+            0.07850537419471582,
+            -0.36519195661665205,
+            0.0
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.15780880217251805,
+            0.7241069576005872,
+            0.6240139406167313
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.5228579611888309,
+            0.6380508329068645,
+            -0.7677914213353854
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.8376848657928196,
+            0.2618401202666966,
+            0.1452684936239351
+          ]
+        ],
+        "L": 0.5800064515457702,
+        "sigma_J": [
+          1.878504596758068,
+          1.489112217946229,
+          1.0258517233112505,
+          0.3640162999508032,
+          0.11032373517546869,
+          8.566039516200343e-17
+        ],
+        "tau_num_J": 2.5026708662220027e-15,
+        "rango_J": 5,
+        "kappa_J_mixto": 2.192967465542723e+16,
+        "sigma_min_J": 8.566039516200343e-17,
+        "sigma_Js": [
+          2.182546101261571,
+          1.599932598973749,
+          1.0705829856556932,
+          0.5522412139344579,
+          0.17200925952835686,
+          6.99376329721544e-17
+        ],
+        "tau_num_Js": 2.9077355207117575e-15,
+        "rango_Js": 5,
+        "kappa_Js": 3.120703416042905e+16,
+        "sigma_min_Js": 6.99376329721544e-17,
+        "ratio_sigma": 3.204405759481027e-17,
+        "dir_perdida_escalada": [
+          0.09375512442198668,
+          -0.31063294652407825,
+          0.8888982484271679,
+          0.24395357228052666,
+          0.2070950787378236,
+          0.046640498020976716
+        ],
+        "dir_perdida_fisica": [
+          0.08536299794189807,
+          -0.28282784261979155,
+          0.8093319679201515,
+          0.38295610929511864,
+          0.32509597980555527,
+          0.07321583156470826
+        ],
+        "dir_perdida_dominante": "vz",
+        "q_dot_nulo_v_min": [
+          0.0,
+          0.4272336587832787,
+          -0.7993326499375132,
+          -0.1415645724193146,
+          0.32654758593395644,
+          0.2277385814985418
+        ],
+        "dir_perdida_analitica": [
+          0.09907883801937821,
+          -0.32827167135542756,
+          0.9393727128473788,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "dir_perdida_analitica_texto": "v del centro de muñeca a lo largo de hombro→muñeca",
+        "cos_dir_perdida_vs_analitica": 1.0,
+        "amplificacion_qdot_dir_min": 1.4298453600769548e+16,
+        "twist_max_dir_min_escalado": 3.817690815303441e-16,
+        "twist_max_dir_max_escalado": 13.529556778099284,
+        "tau_ext_peso": [
+          0.0,
+          4.020901492958514,
+          3.095077412828795,
+          -0.45533623513950006,
+          2.118136908902812,
+          0.0
+        ],
+        "norma_tau_ext_peso": 5.517335231737,
+        "norma_tau_ext_dir_perdida": 2.0397633703712683e-15,
+        "norma_F_dir_perdida": 10.000000000000002,
+        "tau_act": [
+          0.07603190202620602,
+          -9.734904980266958,
+          -1.5186423590701326,
+          0.03733632903300255,
+          -0.13328491326580627,
+          8.917372403746757e-06
+        ],
+        "norma_tau_act": 9.853912385918788,
+        "tau_gravedad": [
+          0.0,
+          -9.467598411726616,
+          -1.454719132256586,
+          0.028400705453932938,
+          -0.1321146392894103,
+          -9.121453592442208e-18
+        ],
+        "norma_tau_g": 9.57966013580161,
+        "dif_tau_ext_vs_tau_act": 14.691018657311464,
+        "dif_tau_ext_vs_gravedad": 14.42005241801145,
+        "finito": true
+      },
+      {
+        "id": "F-hombro",
+        "descripcion": "hombro: centro de muñeca sobre el eje 1",
+        "tipo": "hombro",
+        "q_rad": [
+          -1.2776709740414718,
+          -0.5235987755982988,
+          -0.3688659291138775,
+          0.5,
+          0.9,
+          0.3
+        ],
+        "J": [
+          [
+            0.1725664261387071,
+            0.1515752310022017,
+            0.08401197166986961,
+            0.12734401184848582,
+            0.0590534931575533,
+            7.45931094670027e-17
+          ],
+          [
+            0.13916996568751128,
+            -0.5022046625884522,
+            -0.27835157239671054,
+            0.10624190876456058,
+            0.03331037368708621,
+            5.984795992119984e-17
+          ],
+          [
+            -0.0,
+            -0.20541825023203952,
+            -0.3404182502320395,
+            0.05231513629746688,
+            -0.21139324480862076,
+            0.0
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.18131192638481683,
+            0.7322889944709922,
+            0.6268917373311319
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.6007293817815564,
+            0.6109418056692392,
+            -0.77732624386805
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.7786207004793642,
+            0.3008370633121406,
+            0.0526370616575784
+          ]
+        ],
+        "Js": [
+          [
+            0.2975250114525481,
+            0.26133369826876895,
+            0.14484661583672048,
+            0.21955619891658512,
+            0.10181523498604256,
+            1.286073788803646e-16
+          ],
+          [
+            0.23994554770315155,
+            -0.865860476637856,
+            -0.4799111659101,
+            0.18317366726079715,
+            0.05743103994500582,
+            1.0318499003192044e-16
+          ],
+          [
+            -0.0,
+            -0.35416545744375966,
+            -0.5869214891054982,
+            0.09019750755882501,
+            -0.3644670576426149,
+            0.0
+          ],
+          [
+            0.0,
+            0.95734549541579,
+            0.95734549541579,
+            0.18131192638481683,
+            0.7322889944709922,
+            0.6268917373311319
+          ],
+          [
+            0.0,
+            0.2889456737988921,
+            0.2889456737988921,
+            -0.6007293817815564,
+            0.6109418056692392,
+            -0.77732624386805
+          ],
+          [
+            1.0,
+            6.123233995736766e-17,
+            6.123233995736766e-17,
+            0.7786207004793642,
+            0.3008370633121406,
+            0.0526370616575784
+          ]
+        ],
+        "L": 0.5800064515457702,
+        "sigma_J": [
+          1.8345022342715784,
+          1.4308803982783014,
+          1.054451914408734,
+          0.33274495006868343,
+          0.10521590713483378,
+          7.685452896400918e-17
+        ],
+        "tau_num_J": 2.444047943057519e-15,
+        "rango_J": 5,
+        "kappa_J_mixto": 2.38697999844703e+16,
+        "sigma_min_J": 7.685452896400918e-17,
+        "sigma_Js": [
+          2.053646833935641,
+          1.49130655227298,
+          1.081472669938345,
+          0.5307110719583038,
+          0.17031154016668726,
+          1.5327462565213196e-16
+        ],
+        "tau_num_Js": 2.7360071993806848e-15,
+        "rango_Js": 5,
+        "kappa_Js": 1.339847887540462e+16,
+        "sigma_min_Js": 1.5327462565213196e-16,
+        "ratio_sigma": 7.463533803346024e-17,
+        "dir_perdida_escalada": [
+          -0.9022575796193766,
+          -0.27231905882635477,
+          -9.367506770274758e-17,
+          -0.005486429782796419,
+          0.01817784211619962,
+          0.3337859424294999
+        ],
+        "dir_perdida_fisica": [
+          -0.8167039929210699,
+          -0.2464973059974894,
+          -8.479263966090433e-17,
+          -0.008562313809675341,
+          0.028368974860424164,
+          0.5209179917514409
+        ],
+        "dir_perdida_dominante": "vx",
+        "q_dot_nulo_v_min": [
+          -0.5714355952384961,
+          1.1102230246251565e-16,
+          -2.7755575615628914e-17,
+          0.6946441361857554,
+          0.17190900634357412,
+          -0.40171902879392696
+        ],
+        "dir_perdida_analitica": [
+          0.95734549541579,
+          0.2889456737988921,
+          6.123233995736766e-17,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "dir_perdida_analitica_texto": "v del centro de muñeca a lo largo del eje de la junta 2 (⟂ plano del brazo)",
+        "cos_dir_perdida_vs_analitica": 1.0,
+        "amplificacion_qdot_dir_min": 6524237105426528.0,
+        "twist_max_dir_min_escalado": 1.1703623731537741e-15,
+        "twist_max_dir_max_escalado": 13.708451031204405,
+        "tau_ext_peso": [
+          0.0,
+          2.054182502320395,
+          3.4041825023203947,
+          -0.5231513629746688,
+          2.1139324480862074,
+          0.0
+        ],
+        "norma_tau_ext_peso": 4.533268357994883,
+        "norma_tau_ext_dir_perdida": 7.860881774054642e-16,
+        "norma_F_dir_perdida": 10.0,
+        "tau_act": [
+          0.13273617473628002,
+          9.057728790659747,
+          -2.42902111719386,
+          0.04004629080413099,
+          -0.13201445469808548,
+          8.73635292483721e-06
+        ],
+        "norma_tau_act": 9.37972520102463,
+        "tau_gravedad": [
+          0.0,
+          9.260284695058365,
+          -2.4237784649416314,
+          0.0326305411716581,
+          -0.13185239428444515,
+          9.121453592442208e-18
+        ],
+        "norma_tau_g": 9.573193014179893,
+        "dif_tau_ext_vs_tau_act": 9.405052528249609,
+        "dif_tau_ext_vs_gravedad": 9.552250045476772,
+        "finito": true
+      }
+    ],
+    "barrido_q5": [
+      {
+        "q5_deg": 30.0,
+        "norma_qdot": 0.2125992349127153,
+        "sigma_min": 0.09615802034933439,
+        "kappa": 17.562968048734696,
+        "norma_tau_ext": 6.647527537610537
+      },
+      {
+        "q5_deg": 10.0,
+        "norma_qdot": 0.28542012659546956,
+        "sigma_min": 0.03361434770417834,
+        "kappa": 48.287643899152116,
+        "norma_tau_ext": 6.938624287046382
+      },
+      {
+        "q5_deg": 3.0,
+        "norma_qdot": 1.0772497376601902,
+        "sigma_min": 0.010126859223455246,
+        "kappa": 159.0239405388694,
+        "norma_tau_ext": 6.972779079935148
+      },
+      {
+        "q5_deg": 1.0,
+        "norma_qdot": 3.4820707601572516,
+        "sigma_min": 0.0033767577076976403,
+        "kappa": 476.51523214320224,
+        "norma_tau_ext": 6.97590736204117
+      },
+      {
+        "q5_deg": 0.3,
+        "norma_qdot": 11.93181065480473,
+        "sigma_min": 0.0010130579800972303,
+        "kappa": 1588.1482894962285,
+        "norma_tau_ext": 6.9763039220262995
+      },
+      {
+        "q5_deg": 0.1,
+        "norma_qdot": 36.082041228465954,
+        "sigma_min": 0.00033768610331117924,
+        "kappa": 4764.361847512597,
+        "norma_tau_ext": 6.976350694894749
+      },
+      {
+        "q5_deg": 0.03,
+        "norma_qdot": 120.61055212230659,
+        "sigma_min": 0.00010130575402981486,
+        "kappa": 15881.15103308338,
+        "norma_tau_ext": 6.976360079417491
+      },
+      {
+        "q5_deg": 0.01,
+        "norma_qdot": 362.1213444462845,
+        "sigma_min": 3.3768574537052874e-05,
+        "kappa": 47643.41777445708,
+        "norma_tau_ext": 6.9763620953727
+      },
+      {
+        "q5_deg": 0.003,
+        "norma_qdot": 1207.4093826808426,
+        "sigma_min": 1.0130571207896766e-05,
+        "kappa": 158811.3555442835,
+        "norma_tau_ext": 6.976362731096489
+      },
+      {
+        "q5_deg": 0.001,
+        "norma_qdot": 3622.5181390104676,
+        "sigma_min": 3.3768569567122225e-06,
+        "kappa": 476434.036071714,
+        "norma_tau_ext": 6.97636290607847
+      }
+    ],
+    "sensibilidad_L": {
+      "F-reg": [
+        {
+          "L_m": 0.1,
+          "kappa": 33.68827160656264,
+          "sigma_min": 0.22323833839140614,
+          "sigma_max": 7.520513776727429
+        },
+        {
+          "L_m": 0.3,
+          "kappa": 14.547040979874557,
+          "sigma_min": 0.19568571563870743,
+          "sigma_max": 2.8466481245723565
+        },
+        {
+          "L_m": 0.5800064515457702,
+          "kappa": 13.097927163283659,
+          "sigma_min": 0.14853991905584377,
+          "sigma_max": 1.9455650406334921
+        },
+        {
+          "L_m": 1.0,
+          "kappa": 16.78608440270098,
+          "sigma_min": 0.1009589153806262,
+          "sigma_max": 1.6947048747843374
+        }
+      ],
+      "F-q5": [
+        {
+          "L_m": 0.1,
+          "kappa": 2190.8458707513487,
+          "sigma_min": 0.003552391341784679,
+          "sigma_max": 7.782741902441807
+        },
+        {
+          "L_m": 0.3,
+          "kappa": 927.6787161418221,
+          "sigma_min": 0.003143706024692375,
+          "sigma_max": 2.9163491689139334
+        },
+        {
+          "L_m": 0.5800064515457702,
+          "kappa": 794.5433565338651,
+          "sigma_min": 0.002434177314477709,
+          "sigma_max": 1.9340594138437088
+        },
+        {
+          "L_m": 1.0,
+          "kappa": 952.9161725752828,
+          "sigma_min": 0.00168842317240952,
+          "sigma_max": 1.6089257471398966
+        }
+      ],
+      "F-q5-0": [
+        {
+          "L_m": 0.1,
+          "kappa": 2.1242252668289373e+17,
+          "sigma_min": 3.663625513490806e-17,
+          "sigma_max": 7.7823658839563095
+        },
+        {
+          "L_m": 0.3,
+          "kappa": 2.1417513506646938e+17,
+          "sigma_min": 1.3616025870089753e-17,
+          "sigma_max": 2.916214179795014
+        },
+        {
+          "L_m": 0.5800064515457702,
+          "kappa": 2.444471342998521e+16,
+          "sigma_min": 7.91159986756909e-17,
+          "sigma_max": 1.9339679153543532
+        },
+        {
+          "L_m": 1.0,
+          "kappa": 1.1984489185147836e+16,
+          "sigma_min": 1.3424431248557607e-16,
+          "sigma_max": 1.608849511150993
+        }
+      ],
+      "F-codo": [
+        {
+          "L_m": 0.1,
+          "kappa": 2.7158146257263184e+16,
+          "sigma_min": 3.179666740967199e-16,
+          "sigma_max": 8.635385440054257
+        },
+        {
+          "L_m": 0.3,
+          "kappa": 1.0770244584890652e+16,
+          "sigma_min": 2.998135360401871e-16,
+          "sigma_max": 3.2290651130137435
+        },
+        {
+          "L_m": 0.5800064515457702,
+          "kappa": 3.120703416042905e+16,
+          "sigma_min": 6.99376329721544e-17,
+          "sigma_max": 2.182546101261571
+        },
+        {
+          "L_m": 1.0,
+          "kappa": 2.192967465542723e+16,
+          "sigma_min": 8.566039516200343e-17,
+          "sigma_max": 1.878504596758068
+        }
+      ],
+      "F-hombro": [
+        {
+          "L_m": 0.1,
+          "kappa": 2.690003064976881e+17,
+          "sigma_min": 2.7196524009800043e-17,
+          "sigma_max": 7.315873294307945
+        },
+        {
+          "L_m": 0.3,
+          "kappa": 2.3022204248948605e+17,
+          "sigma_min": 1.2407897258324888e-17,
+          "sigma_max": 2.8565714498112498
+        },
+        {
+          "L_m": 0.5800064515457702,
+          "kappa": 1.339847887540462e+16,
+          "sigma_min": 1.5327462565213196e-16,
+          "sigma_max": 2.053646833935641
+        },
+        {
+          "L_m": 1.0,
+          "kappa": 2.38697999844703e+16,
+          "sigma_min": 7.685452896400918e-17,
+          "sigma_max": 1.8345022342715784
+        }
+      ]
+    },
+    "figuras": {
+      "singularidad": "hito3/resultados/figuras/singularidad_svd_tau.png"
+    }
+  },
+  "tol": {
+    "presupuesto": {
+      "eps_mach": 2.220446049250313e-16,
+      "K": 10.0,
+      "N_ops": 700,
+      "desglose_N_ops": {
+        "matrices DH (6 x ~16 operaciones + 12 trig. contadas como 1)": 108,
+        "productos 4x4x4 (5 x 112)": 560,
+        "margen declarado": 32
+      },
+      "L_ref_m": 0.9420064515457702,
+      "tau_p_m": 1.4641721525921785e-12,
+      "tau_R_rad": 1.5543122344752192e-12,
+      "piso_arccos_rad": 2.1073424255447017e-08,
+      "nota_arccos": "e_R por arccos tiene piso ≈ sqrt(2 eps) ≈ 2.1e-8 rad: para comparar con tau_R se usa la forma atan2.",
+      "cribado_exploratorio_sintetico": {
+        "e_p_m": 1e-06,
+        "e_R_rad": 1e-05,
+        "estado": "pendiente de aprobación"
+      },
+      "estado": "pendiente de aprobación",
+      "L_justificacion": "L_ref = d1 + a2 + sqrt(d4²+a3²) + d6 = 0.942 m, cota del alcance de tool0 (declarada).",
+      "observado_max_e_p_m": 2.4902799884605145e-16,
+      "observado_max_e_R_atan2_rad": 8.101627611468364e-16,
+      "cumple_p": true,
+      "cumple_R": true,
+      "sensibilidad_K": [
+        {
+          "K": 1,
+          "tau_p_m": 1.4641721525921785e-13,
+          "tau_R_rad": 1.5543122344752192e-13
+        },
+        {
+          "K": 4,
+          "tau_p_m": 5.856688610368714e-13,
+          "tau_R_rad": 6.217248937900877e-13
+        },
+        {
+          "K": 10,
+          "tau_p_m": 1.4641721525921785e-12,
+          "tau_R_rad": 1.5543122344752192e-12
+        },
+        {
+          "K": 100,
+          "tau_p_m": 1.4641721525921785e-11,
+          "tau_R_rad": 1.554312234475219e-11
+        }
+      ]
+    },
+    "irc5": {
+      "filas": [
+        {
+          "fuente": "Resolución de la posición del robtarget (xyz)",
+          "valor": "7 cifras significativas: 4 decimales en mm (1e-4 mm = 1e-7 m) si |v| ≥ 100 mm; hasta 6 decimales si |v| < 10 mm",
+          "efecto_e_p_m": 8.660254037844388e-08,
+          "origen": "observado en los registros S1 (FK-N1; cota de FK-N2: 7.1e-08 m)",
+          "estado": "cota derivada; umbral pendiente"
+        },
+        {
+          "fuente": "Resolución del cuaternión (w,x,y,z)",
+          "valor": "≤ 7 cifras significativas observadas (componentes ≤ 1)",
+          "efecto_e_R_rad": 2e-07,
+          "origen": "observado; cota 2·||δq||, |δq_i| ≤ 5e-8",
+          "estado": "cota derivada; umbral pendiente"
+        },
+        {
+          "fuente": "Resolución de q (RWS entrega float32)",
+          "valor": "semi-ulp float32 hasta 7.6e-06 ° en FK-N1",
+          "efecto_e_p_m": 3.100498007748345e-08,
+          "origen": "derivado: Σ‖Jv_i‖·semi-ulp (FK-N1)",
+          "estado": "cota derivada; umbral pendiente"
+        },
+        {
+          "fuente": "Cota total de cuantización de los datos (FK-N1 / FK-N2)",
+          "valor": "e_p ≤ 1.18e-07 / 7.78e-08 m; e_R ≤ 5.00e-07 / 4.13e-07 rad",
+          "origen": "suma de las tres fuentes anteriores",
+          "estado": "piso de resolución, no tolerancia"
+        },
+        {
+          "fuente": "TCP / herramienta activa",
+          "valor": "tooldata del IRC5 NO leído; se compara tool0 (brida) ⇒ TCP no interviene; TCP de 0.150 m es convención del modelo (tcp_verified_on_robot: false)",
+          "origen": "no medido",
+          "estado": "bloqueado por datos"
+        },
+        {
+          "fuente": "Sincronía q ↔ pose",
+          "valor": "ventana q→pose→q: mediana 14.2 / 15.0 ms, máx 54.3 / 33.7 ms (N1/N2); sin reloj común, robot estacionario",
+          "origen": "observado (window_ms)",
+          "estado": "mitigada con q_antes ≈ q_después; no medible por debajo de la ventana"
+        },
+        {
+          "fuente": "Fluctuación de la pose del IRC5 con q constante",
+          "valor": "hasta e_p = 2.44e-06 m y e_R = 1.32e-05 rad en las 155 muestras FUERA",
+          "origen": "observado (diagnóstico FUERA)",
+          "estado": "causa indeterminada por datos"
+        },
+        {
+          "fuente": "Base y ceros mecánicos del controlador frente al modelo",
+          "valor": "coincidencia empírica en 2 posturas distintas (error ≤ ~1e-6 m); calibración de fábrica del robot no consultada",
+          "origen": "no medido directamente",
+          "estado": "parcial"
+        },
+        {
+          "fuente": "Repetibilidad / exactitud absoluta del IRB 120",
+          "valor": "no medida en este trabajo; el repositorio cita 0.01 mm de repetibilidad (hito2/irb120/validation.py, de la hoja ABB) sin verificación local",
+          "origen": "cita no verificada",
+          "estado": "bloqueada por datos"
+        }
+      ],
+      "estado_global": "pendiente de aprobación; sin umbral numérico aprobado para FK propia vs IRC5",
+      "tau_real_propuesto": null,
+      "decimales_xyz_observados": 6,
+      "cifras_significativas_cuaternion_max": 7
+    }
+  }
+}

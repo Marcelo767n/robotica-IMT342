@@ -81,3 +81,34 @@ def solve_pose(pose, reference_deg, tool='tcp'):
         verdict = f'NO UTILIZABLE: las ramas admisibles quedan a menos de {MARGIN_DEG:g}° de un límite articular.'
     return {'veredicto': verdict, 'ramas': rows, 'elegida': None if chosen is None else chosen['rama'],
             'pose': list(pose), 'herramienta': tool}
+
+
+def convertir_herramienta(pose, de, a):
+    """La misma pose vista desde otro punto de referencia: 'tcp' (150 mm sobre z de la brida) o 'brida'."""
+    clean_tool(de), clean_tool(a)
+    if de == a:
+        return [float(v) for v in pose]
+    np, dh, _, transforms = kinematics()
+    T = transforms.pose_from_xyz_rpy_deg(*(v / 1000. for v in pose[:3]), *pose[3:])
+    offset = dh.tcp_transform()
+    T = T @ offset if (de, a) == ('brida', 'tcp') else T @ np.linalg.inv(offset)
+    return [float(v) for v in (*(T[:3, 3] * 1000.), *transforms.matrix_to_rpy_deg(T[:3, :3]))]
+
+
+def pose_desde_cuaternion(frame_id, xyz_m, quat_xyzw):
+    """Pose de un mensaje ROS (metros, cuaternión x y z w) → [x, y, z mm, roll, pitch yaw °], Refused si no vale.
+
+    Solo se acepta frame_id 'base_link' (no hay TF en el panel). El cuaternión se normaliza si es
+    finito y no nulo."""
+    if frame_id != 'base_link':
+        raise Refused(f"Marco «{frame_id}» no admitido: la pose debe venir en «base_link» (sin TF por ahora).")
+    values = [*xyz_m, *quat_xyzw]
+    if len(values) != 7 or not all(isinstance(v, (int, float)) and math.isfinite(v) for v in values):
+        raise Refused('La pose contiene valores no finitos.')
+    norm = math.sqrt(sum(v * v for v in quat_xyzw))
+    if norm < 1e-6:
+        raise Refused('Cuaternión nulo: no se puede normalizar.')
+    np, _, _, transforms = kinematics()
+    x, y, z, w = (v / norm for v in quat_xyzw)
+    rotation = transforms.quaternion_to_matrix(x, y, z, w)
+    return [*(v * 1000. for v in xyz_m), *(float(v) for v in transforms.matrix_to_rpy_deg(rotation))]

@@ -1,0 +1,35 @@
+case_id,tipo,nivel_evidencia,estado_P5,justificacion
+FK-N1,FK nominal (real),S1,parcial,"Observación del controlador por RWS con unidad, fuente y marca temporal (S1). No es S2 (no trazada por ROS) ni S3. Parcial: umbral no aprobado; una sola postura por caso; J6 casi constante en ambas posturas; TCP físico no medido (se usa la brida); 155 lecturas FUERA sin causa demostrada."
+FK-N1-S0,"FK nominal (offline, ref. independiente)",S0,verificado,"Modelo vs modelo. rosi_model es independiente de la TABLA DH y del código propio, no de la geometría nominal ABB: no demuestra exactitud física."
+FK-N2,FK nominal (real),S1,parcial,"Observación del controlador por RWS con unidad, fuente y marca temporal (S1). No es S2 (no trazada por ROS) ni S3. Parcial: umbral no aprobado; una sola postura por caso; J6 casi constante en ambas posturas; TCP físico no medido (se usa la brida); 155 lecturas FUERA sin causa demostrada."
+FK-N2-S0,"FK nominal (offline, ref. independiente)",S0,verificado,"Modelo vs modelo. rosi_model es independiente de la TABLA DH y del código propio, no de la geometría nominal ABB: no demuestra exactitud física."
+FK-N3,"FK nominal (real, complementario 29/10)",S1,parcial,Lectura de pantalla del controlador (S1 limitado): sin tiempo simultáneo ni registro automático; solo apoyo complementario.
+FK-L,FK cerca de límites (offline),S0,verificado,"Offline contra rosi_model; los límites son los documentados de la hoja ABB (dh.py), no leídos del controlador."
+FK-L-REAL,FK cerca de límites (real),S1 (pendiente),bloqueado por acceso,Depende de permiso/hardware no disponibles.
+FK-D-TCP,FK diagnóstico TCP,S1,verificado,Datos reales S1 + perturbación offline declarada: demuestra la sensibilidad a la herramienta y la regla de no comparar brida con TCP.
+FK-D-ORD,FK diagnóstico orden articular,S1,verificado,Datos reales S1 con permutación offline intencional; el error emerge y desaparece al invertir la permutación.
+FK-FUERA,FK diagnóstico de muestras FUERA,S1,parcial,Clasificadas con el árbol del Bloque C; causa raíz indeterminada por datos (falta registro simultáneo y repetición controlada).
+FK-INV,FK diagnóstico lecturas inválidas,S1,parcial,Sin datos que comparar; clasificadas por tipo de excepción.
+FK-TCP-REAL,FK con TCP físico,S1 (pendiente),bloqueado por acceso,Depende de acceso al controlador.
+IK-1,IK (regular),S0,verificado,IK propia vs FK propia/independiente y DLS independiente; offline.
+IK-2,IK (regular),S0,verificado,IK propia vs FK propia/independiente y DLS independiente; offline.
+IK-3,IK (cerca singularidad),S0,verificado,IK propia vs FK propia/independiente y DLS independiente; offline.
+IK-4,IK (singular),S0,parcial,IK propia vs FK propia/independiente y DLS independiente; offline.
+IK-5,IK (inalcanzable),S0,verificado,IK propia vs FK propia/independiente y DLS independiente; offline.
+IK-REAL,IK con movimiento físico,S3 (no alcanzado),bloqueado por acceso,NO-GO físico; plan alternativo: IK offline (IK-1..IK-5).
+S3-MOV,Movimiento ROS→IRC5 (Gate 3),S3 técnico (registrado); S3 autorizado no acreditado,parcial,Ver hito3/docs/evidencia_gate3_movimiento.md y gate3_ordenes.csv; firmar checklist_seguridad.md en la próxima sesión.
+J-N1,"Jacobiano (offline, ref. independiente)",S0,verificado,"J propio vs diferenciación numérica de la FK independiente; dominado por el error de FD, no por el J."
+J-N2,"Jacobiano (offline, ref. independiente)",S0,verificado,"J propio vs diferenciación numérica de la FK independiente; dominado por el error de FD, no por el J."
+J-N3,"Jacobiano (offline, ref. independiente)",S0,verificado,"J propio vs diferenciación numérica de la FK independiente; dominado por el error de FD, no por el J."
+J-N4,"Jacobiano (offline, ref. independiente)",S0,verificado,"J propio vs diferenciación numérica de la FK independiente; dominado por el error de FD, no por el J."
+J-FD,Jacobiano curva h→E(h),S0,verificado,Caracterización numérica de la referencia por FD (autoconvergencia).
+J-REAL,Jacobiano vs controlador,S1/S3 (no alcanzado),bloqueado por acceso,Depende de hardware y GO.
+F-reg,Singularidad (ninguna),S0,verificado,Análisis algebraico del modelo; sin datos físicos.
+F-q5,Singularidad (muñeca),S0,verificado,Análisis algebraico del modelo; sin datos físicos.
+F-q5-0,Singularidad (muñeca),S0,verificado,Análisis algebraico del modelo; sin datos físicos.
+F-codo,Singularidad (codo),S0,verificado,Análisis algebraico del modelo; sin datos físicos.
+F-hombro,Singularidad (hombro),S0,verificado,Análisis algebraico del modelo; sin datos físicos.
+F-TAU,Esfuerzo estático vs dinámica,S0,verificado,Demostración algebraica sobre el modelo propio.
+MET-SINT,Verificación del código de métricas,S0,verificado,Valores esperados del documento.
+TOL-OFF,Presupuesto de tolerancia offline,S0,parcial,"Presupuesto numérico declarado, sin aprobación; K y N_ops son estimaciones."
+TOL-IRC5,Incertidumbres FK vs IRC5,S1,parcial,No se inventa ninguna tolerancia física.

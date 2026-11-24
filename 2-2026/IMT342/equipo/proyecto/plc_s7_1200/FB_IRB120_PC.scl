@@ -1,0 +1,385 @@
+// =============================================================================
+// FB_IRB120_PC  -  Enlace S7-1200 <-> PC (ROS 2) <-> IRB 120   (contrato v2)
+// Contrato: docs/PLC_S7_1200.md. PENDIENTE DE COMPILAR EN TIA PORTAL (V17+).
+//
+// Telegrama estilo variador: palabra de mando (un bit por orden, con saludo
+// aceptada/rechazada) + valor; parte extendida opcional (Completo = TRUE).
+// Acceso ESTANDAR (no optimizado): los UDT son estaticos del FB y van directo a
+// TSEND/TRCV (big-endian nativo, sin Serialize). El FB que lo use como
+// multiinstancia y su DB de instancia tambien deben ser no optimizados.
+// Conexion: TCON + TSEND + TRCV + TDISCON con reintentos. Sin bucles bloqueantes.
+// =============================================================================
+FUNCTION_BLOCK "FB_IRB120_PC"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.2
+   VAR_INPUT
+      // --- Comunicacion
+      Conectar : Bool := TRUE;        // FALSE = cierra la conexion
+      Completo : Bool := TRUE;        // TRUE: envia 36 B y recibe 68 B; FALSE: 4 B y 4 B (debe coincidir con plc.formato de la PC; cambiar con Conectar = FALSE)
+      IpPC : Array[1..4] of Byte := [192, 168, 125, 100];
+      PuertoPC : UInt := 2000;
+      InterfaceId : HW_ANY := 64;     // HW ID de la interfaz PROFINET local (64 por defecto)
+      ConnID : CONN_OUC := 1;         // ID de conexion; si TIA exige Word, usar Word
+      TimeoutOrden : Time := T#5s;    // espera maxima del saludo de una orden
+      ReintentoConexion : Time := T#3s;
+      // --- Nivel
+      Habilitar : Bool;               // mando bit 0
+      // --- Ordenes por flanco ascendente (una a la vez; las demas esperan)
+      Ejecutar : Bool;                // usa Trayectoria (+VelocidadPct, Repeticiones en completo)
+      Pausar : Bool;
+      Reanudar : Bool;
+      Cancelar : Bool;
+      Reposo : Bool;
+      FijarVelocidad : Bool;          // usa VelocidadPct
+      AnadirPunto : Bool;             // usa Pose (solo Completo)
+      AcusarError : Bool;
+      // --- Parametros (se copian en el instante del flanco)
+      Trayectoria : UInt := 1;        // 1..99
+      VelocidadPct : UInt := 20;      // 1..100
+      Repeticiones : UInt := 1;       // 0..1000
+      Pose : Array[0..5] of Real;
+   END_VAR
+
+   VAR_OUTPUT
+      EnlacePC : Bool;                // conectado Y el bit 15 de la PC alterna en < 1 s
+      AlarmaEnlace : Bool;
+      OrdenPendiente : Bool;          // orden retenida, en saludo o esperando que la PC baje su respuesta
+      OrdenAceptada : Bool;           // resultado de la ULTIMA orden (se borra con el siguiente flanco)
+      OrdenRechazada : Bool;
+      CodigoRechazo : UInt;           // codigo de la PC (contrato 3.3); local: 1 parametro invalido, 100 sin saludo
+      // --- Bits de estado (3.2)
+      EnlaceBrazo : Bool;             // bit 0
+      RobotListo : Bool;              // bit 1
+      Moviendo : Bool;                // bit 2
+      Terminado : Bool;               // bit 3
+      ErrorCelda : Bool;              // bit 4
+      Pausada : Bool;                 // bit 5
+      MotoresOn : Bool;               // bit 6
+      ServidorActivo : Bool;          // bit 7
+      ModoAuto : Bool;                // bit 8
+      Simulado : Bool;                // bit 9
+      HabilitarRecibido : Bool;       // bit 12
+      // --- Extendido (solo Completo; en nucleo quedan en 0, salvo Tramo = valor)
+      Fase : UInt;
+      Tramo : UInt;
+      Tramos : UInt;
+      Vuelta : UInt;
+      VelocidadVigente : UInt;
+      Codigo : UInt;
+      Q : Array[0..5] of Real;
+      PoseTCP : Array[0..5] of Real;
+      // --- Para la tabla de observacion (formato hex)
+      EstadoWord : Word;
+      MandoWord : Word;
+      // --- Diagnostico de la comunicacion
+      ComBusy : Bool;                 // TCON/TSEND/TDISCON ocupados (TRCV ocupado esperando datos es normal)
+      ComError : Bool;
+      ComStatus : Word;
+      ComStatusUltimo : Word;
+      ComEstado : Int;                // 0 reposo, 1 conectando, 2 conectado, 3 desconectando, 4 espera reintento
+   END_VAR
+
+   VAR
+      tx : "UDT_IRB120_Orden";
+      rx : "UDT_IRB120_Estado";       // buffer de TRCV
+      est : "UDT_IRB120_Estado";      // ultimo telegrama recibido
+      conn : TCON_IP_v4;
+      tcon : TCON;
+      tdiscon : TDISCON;
+      tsend : TSEND;
+      trcv : TRCV;
+      tTick : TON_TIME;               // 100 ms
+      tWd : TON_TIME;                 // perro guardian 1 s
+      tWdRec : TON_TIME;              // 5 s sin vida: reconectar
+      tRetry : TON_TIME;
+      tOrd : TON_TIME;                // timeout del saludo
+      rtEj : R_TRIG;
+      rtPa : R_TRIG;
+      rtRe : R_TRIG;
+      rtCa : R_TRIG;
+      rtRp : R_TRIG;
+      rtVel : R_TRIG;
+      rtPt : R_TRIG;
+      rtAc : R_TRIG;
+      pEj : Bool;
+      pPa : Bool;
+      pRe : Bool;
+      pCa : Bool;
+      pRp : Bool;
+      pVel : Bool;
+      pPt : Bool;
+      pAc : Bool;
+      pTray : UInt;
+      pVelEj : UInt;
+      pRep : UInt;
+      pVelFj : UInt;
+      pPose : Array[0..5] of Real;
+      state : Int;
+      reqTcon : Bool;
+      reqDiscon : Bool;
+      sendNow : Bool;
+      vidaTx : Bool;                  // bit 15 que alterna en cada envio
+      vidaInit : Bool;
+      vidaPrev : Bool;
+      hs : Int;                       // saludo: 0 libre, 1 esperando aceptada/rechazada, 2 esperando que la PC baje la respuesta
+      ordMask : Word;                 // unico bit de orden a 1 (0 = ninguna)
+   END_VAR
+
+   VAR_TEMP
+      cambio : Bool;
+      codigo : UInt;
+      valido : Bool;
+      lenTx : UInt;
+      lenRx : UInt;
+   END_VAR
+
+BEGIN
+// ---- 1. Flancos de orden: se retienen ---------------------------------------
+#rtEj(CLK := #Ejecutar);
+#rtPa(CLK := #Pausar);
+#rtRe(CLK := #Reanudar);
+#rtCa(CLK := #Cancelar);
+#rtRp(CLK := #Reposo);
+#rtVel(CLK := #FijarVelocidad);
+#rtPt(CLK := #AnadirPunto);
+#rtAc(CLK := #AcusarError);
+
+IF #rtEj.Q OR #rtPa.Q OR #rtRe.Q OR #rtCa.Q OR #rtRp.Q OR #rtVel.Q OR #rtPt.Q OR #rtAc.Q THEN
+    // Flanco nuevo: borra el resultado anterior (esperar OrdenAceptada/Rechazada antes de la siguiente)
+    #OrdenAceptada := FALSE;
+    #OrdenRechazada := FALSE;
+    #CodigoRechazo := 0;
+END_IF;
+IF #rtEj.Q THEN #pEj := TRUE; #pTray := #Trayectoria; #pVelEj := #VelocidadPct; #pRep := #Repeticiones; END_IF;
+IF #rtPa.Q THEN #pPa := TRUE; END_IF;
+IF #rtRe.Q THEN #pRe := TRUE; END_IF;
+IF #rtCa.Q THEN #pCa := TRUE; END_IF;
+IF #rtRp.Q THEN #pRp := TRUE; END_IF;
+IF #rtVel.Q THEN #pVel := TRUE; #pVelFj := #VelocidadPct; END_IF;
+IF #rtPt.Q THEN #pPt := TRUE; #pPose := #Pose; END_IF;
+IF #rtAc.Q THEN #pAc := TRUE; END_IF;
+
+// ---- 2. Maquina de estados de la conexion (lee resultados del ciclo anterior)
+CASE #state OF
+    0:
+        IF #Conectar THEN
+            #reqTcon := TRUE;
+            #state := 1;
+        END_IF;
+    1:  // conectando: REQ se mantiene hasta DONE/ERROR
+        IF #tcon.DONE THEN
+            #reqTcon := FALSE;
+            #state := 2;
+            #vidaInit := FALSE;
+            #est.estado := 16#0000;        // descarta saludos viejos
+            #hs := 0;
+            #ordMask := 16#0000;
+        ELSIF #tcon.ERROR THEN
+            #reqTcon := FALSE;
+            #reqDiscon := TRUE;
+            #state := 3;
+        END_IF;
+    2:
+        IF (NOT #Conectar) OR #trcv.ERROR OR #tsend.ERROR OR #tWdRec.Q THEN
+            #reqDiscon := TRUE;
+            #state := 3;
+        END_IF;
+    3:
+        IF #tdiscon.DONE OR #tdiscon.ERROR THEN
+            #reqDiscon := FALSE;
+            #state := 4;
+        END_IF;
+    4:
+        IF #tRetry.Q THEN
+            #state := 0;
+        END_IF;
+    ELSE
+        #state := 3;
+        #reqDiscon := TRUE;
+END_CASE;
+#tRetry(IN := (#state = 4), PT := #ReintentoConexion);
+
+// ---- 3. Recepcion + perro guardian (bit 15 de estado) -----------------------
+#cambio := FALSE;
+IF (#state = 2) AND #trcv.NDR THEN
+    #est := #rx;
+    IF (NOT #vidaInit) OR (#est.estado.%X15 <> #vidaPrev) THEN
+        #cambio := TRUE;
+        #vidaPrev := #est.estado.%X15;
+        #vidaInit := TRUE;
+    END_IF;
+END_IF;
+#tWd(IN := (#state = 2) AND (NOT #cambio), PT := T#1s);
+#tWdRec(IN := (#state = 2) AND #tWd.Q, PT := T#5s);
+
+#EnlacePC := (#state = 2) AND #vidaInit AND (NOT #tWd.Q);
+#AlarmaEnlace := #Conectar AND (NOT #EnlacePC);
+
+// ---- 4. Sin enlace: se descartan ordenes retenidas y se baja el bit de orden -
+IF NOT #EnlacePC THEN
+    #pEj := FALSE; #pPa := FALSE; #pRe := FALSE; #pCa := FALSE;
+    #pRp := FALSE; #pVel := FALSE; #pPt := FALSE; #pAc := FALSE;
+    IF #hs <> 0 THEN
+        #hs := 0;
+        #ordMask := 16#0000;
+        #OrdenRechazada := TRUE;
+        #CodigoRechazo := 100;          // orden en vuelo perdida por el enlace
+    END_IF;
+END_IF;
+
+// ---- 5. Saludo: mantener el bit hasta aceptada/rechazada, bajarlo, esperar que la PC baje la respuesta
+IF #hs = 1 THEN
+    IF #est.estado.%X10 THEN             // aceptada
+        #OrdenAceptada := TRUE;
+        #ordMask := 16#0000;
+        #hs := 2;
+    ELSIF #est.estado.%X11 THEN          // rechazada: codigo en valor
+        #OrdenRechazada := TRUE;
+        #CodigoRechazo := #est.valor;
+        #ordMask := 16#0000;
+        #hs := 2;
+    END_IF;
+END_IF;
+#tOrd(IN := (#hs <> 0), PT := #TimeoutOrden);
+IF #tOrd.Q THEN
+    IF #hs = 1 THEN                      // la PC no respondio
+        #OrdenRechazada := TRUE;
+        #CodigoRechazo := 100;           // codigo local: sin saludo
+    END_IF;
+    #ordMask := 16#0000;                 // en hs=2 solo se libera
+    #hs := 0;
+ELSIF (#hs = 2) AND (NOT #est.estado.%X10) AND (NOT #est.estado.%X11) THEN
+    #hs := 0;                            // la PC bajo su respuesta: se puede enviar otra orden
+END_IF;
+
+// ---- 6. Cargar UNA orden (hs = 0 y TSEND libre) ------------------------------
+IF (#state = 2) AND #EnlacePC AND (#hs = 0) AND (NOT #tsend.BUSY) THEN
+    #codigo := 0;
+    IF #pCa THEN #codigo := 16#0010; #pCa := FALSE;
+    ELSIF #pPa THEN #codigo := 16#0004; #pPa := FALSE;
+    ELSIF #pRp THEN #codigo := 16#0020; #pRp := FALSE;
+    ELSIF #pRe THEN #codigo := 16#0008; #pRe := FALSE;
+    ELSIF #pAc THEN #codigo := 16#0040; #pAc := FALSE;
+    ELSIF #pVel THEN #codigo := 16#0080; #pVel := FALSE;
+    ELSIF #pPt THEN #codigo := 16#0100; #pPt := FALSE;
+    ELSIF #pEj THEN #codigo := 16#0002; #pEj := FALSE;
+    END_IF;
+
+    IF #codigo <> 0 THEN
+        #valido := TRUE;
+        IF #codigo = 16#0002 THEN
+            #valido := (#pTray >= 1) AND (#pTray <= 99) AND (#pRep <= 1000)
+                       AND (#pVelEj <= 100);
+        ELSIF #codigo = 16#0080 THEN
+            #valido := (#pVelFj >= 1) AND (#pVelFj <= 100);
+        ELSIF #codigo = 16#0100 THEN
+            #valido := #Completo;        // punto solo en formato completo
+        END_IF;
+
+        IF NOT #valido THEN
+            #OrdenRechazada := TRUE;
+            #CodigoRechazo := 1;
+        ELSE
+            #tx.valor := 0;
+            #tx.velocidad_pct := 0;
+            #tx.repeticiones := 0;
+            IF #codigo = 16#0002 THEN
+                #tx.valor := #pTray;
+                IF #Completo THEN #tx.velocidad_pct := #pVelEj; #tx.repeticiones := #pRep; END_IF;
+            ELSIF #codigo = 16#0080 THEN
+                #tx.valor := #pVelFj;    // en nucleo la velocidad viaja en valor
+                IF #Completo THEN #tx.velocidad_pct := #pVelFj; END_IF;
+            ELSIF #codigo = 16#0100 THEN
+                #tx.pose := #pPose;
+            END_IF;
+            #ordMask := UINT_TO_WORD(#codigo);   // SOLO este bit de orden a 1
+            #hs := 1;
+        END_IF;
+    END_IF;
+END_IF;
+#OrdenPendiente := (#hs <> 0) OR #pEj OR #pPa OR #pRe OR #pCa OR #pRp OR #pVel OR #pPt OR #pAc;
+
+// ---- 7. Envio cada 100 ms ----------------------------------------------------
+#tTick(IN := (#state = 2) AND (NOT #tTick.Q), PT := T#100ms);   // Q = pulso de 1 ciclo
+#sendNow := (#state = 2) AND #tTick.Q AND (NOT #tsend.BUSY);
+IF #sendNow THEN
+    #vidaTx := NOT #vidaTx;              // bit 15 alterna en cada envio
+    #tx.mando := #ordMask;               // solo el bit de la orden en curso
+    #tx.mando.%X0 := #Habilitar;
+    #tx.mando.%X15 := #vidaTx;
+    #tx.reservado1 := 0;
+    #tx.reservado2 := 0;
+END_IF;
+IF #Completo THEN #lenTx := 36; #lenRx := 68; ELSE #lenTx := 4; #lenRx := 4; END_IF;
+
+// ---- 8. Llamadas de comunicacion (siempre, cada ciclo) ----------------------
+#conn.InterfaceId := #InterfaceId;
+#conn.ID := #ConnID;
+#conn.ConnectionType := 16#0B;          // TCP
+#conn.ActiveEstablished := TRUE;
+#conn.RemoteAddress.ADDR[1] := #IpPC[1];
+#conn.RemoteAddress.ADDR[2] := #IpPC[2];
+#conn.RemoteAddress.ADDR[3] := #IpPC[3];
+#conn.RemoteAddress.ADDR[4] := #IpPC[4];
+#conn.RemotePort := #PuertoPC;
+#conn.LocalPort := 0;
+// Firmware: los campos de TCON_IP_v4 pueden variar segun version; verificar en el editor de tipos.
+
+#tcon(REQ := #reqTcon, ID := #ConnID, CONNECT := #conn);
+#tdiscon(REQ := #reqDiscon, ID := #ConnID);
+#tsend(REQ := #sendNow, ID := #ConnID, LEN := #lenTx, DATA := #tx);
+#trcv(EN_R := (#state = 2), ID := #ConnID, LEN := #lenRx, ADHOC := FALSE, DATA := #rx);
+// LEN es UInt en S7-1200 (UDInt en S7-1500). Con LEN=4, TRCV rellena solo los 4 primeros bytes de rx
+// y TSEND envia los 4 primeros de tx (los primeros bytes son iguales en los dos formatos).
+
+// ---- 9. Salidas ---------------------------------------------------------------
+#MandoWord := #tx.mando;
+IF #EnlacePC THEN
+    #EstadoWord := #est.estado;
+    #EnlaceBrazo := #est.estado.%X0;
+    #RobotListo := #est.estado.%X1;
+    #Moviendo := #est.estado.%X2;
+    #Terminado := #est.estado.%X3;
+    #ErrorCelda := #est.estado.%X4;
+    #Pausada := #est.estado.%X5;
+    #MotoresOn := #est.estado.%X6;
+    #ServidorActivo := #est.estado.%X7;
+    #ModoAuto := #est.estado.%X8;
+    #Simulado := #est.estado.%X9;
+    #HabilitarRecibido := #est.estado.%X12;
+    IF #Completo THEN
+        #Fase := #est.fase;
+        #Tramo := #est.tramo;
+        #Tramos := #est.tramos;
+        #Vuelta := #est.vuelta;
+        #VelocidadVigente := #est.velocidad_pct;
+        #Codigo := #est.codigo;
+        #Q := #est.q;
+        #PoseTCP := #est.pose;
+    ELSE
+        // nucleo: valor = tramo actual salvo con rechazada/error (entonces es un codigo)
+        IF #est.estado.%X10 OR #est.estado.%X11 OR #est.estado.%X4 THEN
+            #Codigo := #est.valor;
+        ELSE
+            #Tramo := #est.valor;
+        END_IF;
+    END_IF;
+ELSE
+    // Sin enlace: booleanos a FALSE (fallo seguro); numericos conservan el ultimo valor
+    #EstadoWord := 16#0000;
+    #EnlaceBrazo := FALSE; #RobotListo := FALSE; #Moviendo := FALSE; #Terminado := FALSE;
+    #ErrorCelda := FALSE; #Pausada := FALSE; #MotoresOn := FALSE; #ServidorActivo := FALSE;
+    #ModoAuto := FALSE; #Simulado := FALSE; #HabilitarRecibido := FALSE;
+END_IF;
+
+#ComBusy := #tcon.BUSY OR #tdiscon.BUSY OR #tsend.BUSY;
+#ComError := #tcon.ERROR OR #tdiscon.ERROR OR #tsend.ERROR OR #trcv.ERROR;
+#ComStatus := 16#0000;
+IF #tcon.ERROR THEN #ComStatus := #tcon.STATUS;
+ELSIF #tsend.ERROR THEN #ComStatus := #tsend.STATUS;
+ELSIF #trcv.ERROR THEN #ComStatus := #trcv.STATUS;
+ELSIF #tdiscon.ERROR THEN #ComStatus := #tdiscon.STATUS;
+END_IF;
+IF #ComError THEN #ComStatusUltimo := #ComStatus; END_IF;
+#ComEstado := #state;
+END_FUNCTION_BLOCK

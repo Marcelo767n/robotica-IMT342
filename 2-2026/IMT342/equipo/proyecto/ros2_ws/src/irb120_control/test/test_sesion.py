@@ -32,7 +32,7 @@ class FakeRobot:
 
     def install(self, folder, auto=False):
         assert auto and self.s['ctrlstate'] == 'motoroff' and self.target == EMPTY
-        self.calls.append('instalar'); self.s['module'] = 'servidor_v4_auto'
+        self.calls.append('instalar'); self.s['module'] = 'servidor_v5_auto'
         return {'passed': True}
 
     def connect(self):
@@ -63,7 +63,7 @@ class Sesion(unittest.TestCase):
 
     def test_missed_confirmation_restarts_and_other_program_is_stopped_first(self):
         # Reconexión: el robot quedó con main de otro grupo en marcha; el primer «Iniciar» se pasa del plazo.
-        robot = FakeRobot(module='servidor_v4_auto', opmode='AUTO', ctrl='motoron', execution='running')
+        robot = FakeRobot(module='servidor_v5_auto', opmode='AUTO', ctrl='motoron', execution='running')
         lines = []
         robot.operator = [lambda s: s.update(execution='stopped'),     # el operador pulsa Stop
                           lambda s: s.update(execution='stopped'),     # nadie pulsa Iniciar: ServidorPC termina
@@ -74,13 +74,27 @@ class Sesion(unittest.TestCase):
         self.assertIn('otro programa', text)
         self.assertIn('intento 1/3', text)
 
+    def test_v4_found_in_auto_is_replaced_even_if_running(self):
+        # La v4 (45° por orden, sin pcTipo) ya no es válida: se reinstala la v5 aunque ServidorPC esté activo.
+        robot = FakeRobot(module='servidor_v4_auto', opmode='AUTO', ctrl='motoron', execution='running')
+        robot.s['rbActivo'] = 1.
+        lines = []
+        robot.operator = [lambda s: s.update(execution='stopped', ctrlstate='motoroff'),   # Stop + Motors Off
+                          lambda s: s.update(ctrlstate='motoroff'),
+                          lambda s: s.update(ctrlstate='motoron'),                          # Motors On
+                          lambda s: s.update(rbActivo=1.)]                                  # «Iniciar»
+        preparar_auto(robot, None, echo=lines.append, sleep=robot.sleep, timeout=5.)
+        self.assertEqual(robot.calls[:3], ['limpiar', 'instalar', 'connect'])
+        self.assertEqual(robot.s['module'], 'servidor_v5_auto')
+        self.assertIn('v5', '\n'.join(lines))
+
     def test_already_running_does_nothing(self):
-        robot = FakeRobot(module='servidor_v4_auto', opmode='AUTO'); robot.s['rbActivo'] = 1.
+        robot = FakeRobot(module='servidor_v5_auto', opmode='AUTO'); robot.s['rbActivo'] = 1.
         preparar_auto(robot, None, echo=lambda _: None, sleep=robot.sleep, timeout=1.)
         self.assertEqual(robot.calls, [])
 
     def test_ready_module_only_needs_motors_and_start(self):
-        robot = FakeRobot(module='servidor_v4_auto', opmode='AUTO', ctrl='motoroff', execution='stopped')
+        robot = FakeRobot(module='servidor_v5_auto', opmode='AUTO', ctrl='motoroff', execution='stopped')
         robot.operator = [lambda s: s.update(ctrlstate='motoron'), lambda s: s.update(rbActivo=1.)]
         preparar_auto(robot, None, echo=lambda _: None, sleep=robot.sleep, timeout=5.)
         self.assertEqual(robot.calls, ['arrancar'])

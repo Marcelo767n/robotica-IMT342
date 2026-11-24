@@ -9,15 +9,18 @@ import unittest
 sys.path[:0] = [str(Path(__file__).resolve().parents[1]),
                 str(Path(__file__).resolve().parents[3] / 'src/irb120_conexion')]
 from irb120_control.rws_j6 import (EMPTY, SYMBOL, MODULE_PATH, MAIN_MODULE_PATH, MASTERSHIP,
-    SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, J6_MODULE_SHA256, literal, source_fingerprint,
-    diagnose_inspection, module_label)
+    SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, SERVER_V4_SHA256, SERVER_V4_AUTO_SHA256, SERVER_LABELS,
+    J6_MODULE_SHA256, literal, source_fingerprint, diagnose_inspection, module_label)
 from irb120_control.rws_j6 import parse_target
 from irb120_control.rws_mover import (Mover, Refused, BASE_SYMBOL, RMMP, RMMP_POLL, split_path,
-    check_target, parse_goal)
+    check_target, parse_goal, format_robtarget, parse_robtarget, same_pose, normalize_pose, move_tramo,
+    MAX_STEP_DEG, RAPID_MAX_STEP_DEG)
 
 ROOT = Path(__file__).resolve().parents[1]
 V2 = (ROOT / 'rapid/rws_mover/LabJointRws.mod').read_text(encoding='utf-8')
 J6 = (ROOT / 'rapid/rws_j6/LabJointRws.mod').read_text(encoding='utf-8')
+V4 = (ROOT / 'test/fixtures/LabJointRws_v4.mod').read_text(encoding='utf-8')   # v4 anterior (45° por orden)
+POSE = [300., 50., 250., 0., 1., 0., 0.]
 LIMITS = ((-165, 165), (-110, 110), (-110, 70), (-160, 160), (-120, 120), (-400, 400))
 
 
@@ -40,7 +43,10 @@ class Abb:
         self.source = V2
         self.current = [-4.28397, -12.4929, .697668, -.640559, 3.30636, 1.73935]
         self.target = copy.deepcopy(EMPTY)
-        self.nums = {'pcSeq': 0., 'pcFin': 0., 'rbSeq': 0., 'rbCodigo': 0., 'rbActivo': 1., 'pcVelPct': 20.}
+        self.nums = {'pcSeq': 0., 'pcFin': 0., 'rbSeq': 0., 'rbCodigo': 0., 'rbActivo': 1., 'pcVelPct': 20., 'pcTipo': 0.}
+        self.pose_text = '[[9E+09,9E+09,9E+09],[1,0,0,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]]'
+        self.max_step = 360        # maxPasoDeg del módulo
+        self.arrival_offset = 0.   # error de llegada (°) en J1 tras un MoveL, p. ej. otra configuración
         self.calls = []; self.rmmp = None; self.rmmp_answer = 'GRANTED'
         self.require_rmmp = mode.startswith('MAN'); self.respond = True; self.reads_until_done = 2
         self.pending = None; self.edit_status = 200
@@ -64,6 +70,7 @@ class Abb:
         if path == '/rw/rapid/modules':
             return Response([{'_type': 'rap-module-info-li', 'name': n} for n in ('LabJointRws', 'Module1')])
         if path == SYMBOL: return Response([{'_type': 'rap-data', 'value': literal(self.target)}])
+        if path == BASE_SYMBOL + 'pcPose': return Response([{'_type': 'rap-data', 'value': self.pose_text}])
         if path.startswith(BASE_SYMBOL):
             return Response([{'_type': 'rap-data', 'value': format(self.nums[path[len(BASE_SYMBOL):]], 'g')}])
         if path == '/rw/rapid/tasks/T_ROB1/motion':
@@ -99,7 +106,9 @@ class Abb:
         if path == SYMBOL:
             self.target = json.loads(data['value']); return Response(status=204)
         name = path[len(BASE_SYMBOL):]
-        assert name in ('pcSeq', 'pcFin', 'pcVelPct'), name
+        assert name in ('pcSeq', 'pcFin', 'pcVelPct', 'pcTipo', 'pcPose'), name
+        if name == 'pcPose':
+            self.pose_text = data['value']; return Response(status=204)
         self.nums[name] = float(data['value'])
         if name == 'pcSeq' and self.respond:
             self.robot(int(self.nums['pcSeq']))
@@ -110,12 +119,15 @@ class Abb:
         q, now = self.target[0], self.current
         if any(abs(v) > 1000 for v in q): code = -1
         elif any(not lo + 2 <= v <= hi - 2 for v, (lo, hi) in zip(q, LIMITS)): code = -2
-        elif any(abs(a - b) > 45 for a, b in zip(q, now)): code = -3
+        elif any(abs(a - b) > self.max_step for a, b in zip(q, now)): code = -3
+        elif self.nums.get('pcTipo', 0.) not in (0., 1.): code = -5
         else: code = 0
         if code:
             self.nums['rbCodigo'] = float(code); self.nums['rbSeq'] = float(seq)
         else:
-            self.nums['rbCodigo'] = 1.; self.pending = [float(seq), self.reads_until_done, list(q)]
+            end = list(q)
+            if self.nums.get('pcTipo', 0.) == 1.: end[0] += self.arrival_offset
+            self.nums['rbCodigo'] = 1.; self.pending = [float(seq), self.reads_until_done, end]
 
 
 def mover(abb):
@@ -133,7 +145,41 @@ class RapidModule(unittest.TestCase):
         self.assertEqual(source_fingerprint(V2), SERVER_MODULE_SHA256)
         auto = V2.replace('CONST bool permitirAuto := FALSE;', 'CONST bool permitirAuto := TRUE;')
         self.assertEqual(source_fingerprint(auto), SERVER_AUTO_MODULE_SHA256)
-        self.assertEqual(module_label(SERVER_MODULE_SHA256), 'servidor_v4')
+        self.assertEqual(module_label(SERVER_MODULE_SHA256), 'servidor_v5')
+        self.assertEqual(module_label(SERVER_AUTO_MODULE_SHA256), 'servidor_v5_auto')
+        self.assertEqual(SERVER_LABELS, ('servidor_v5', 'servidor_v5_auto'))
+
+    def test_v4_is_recognised_for_replacement(self):
+        self.assertEqual(source_fingerprint(V4), SERVER_V4_SHA256)
+        self.assertEqual(source_fingerprint(V4.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')),
+                         SERVER_V4_AUTO_SHA256)
+        self.assertEqual(module_label(SERVER_V4_SHA256), 'servidor_v4')
+        self.assertEqual(module_label(SERVER_V4_AUTO_SHA256), 'servidor_v4_auto')
+
+    def test_v5_size_and_new_pers(self):
+        from irb120_control.rws_j6 import MODULE_TEXT_MAX
+        self.assertLessEqual(len(V2), MODULE_TEXT_MAX)
+        self.assertLessEqual(len(V2.replace('FALSE', 'TRUE')), MODULE_TEXT_MAX)
+        self.assertRegex(V2, r'PERS num pcTipo := 0;')
+        self.assertRegex(V2, r'PERS robtarget pcPose := ')
+        self.assertIn('CONST num maxPasoDeg := 360;', V2)
+        self.assertIn('RETURN -5;', V2)
+
+    def test_v5_moves_with_fine_and_conf_off_only_around_movel(self):
+        code = '\n'.join(line.split('!')[0] for line in V2.splitlines())
+        self.assertEqual(len(re.findall(r'\bMoveL\b', code)), 1)
+        self.assertEqual(len(re.findall(r'\bMoveAbsJ\b', code)), 1)
+        self.assertRegex(code, r'ConfL\\Off;\s*MoveL destino,vOrden,fine,tool0\\WObj:=wobj0;\s*ConfL\\On;')
+        self.assertNotRegex(code, r'\bz\d+\b')   # ninguna zona de paso: siempre fine
+        # pcTipo y pcPose se copian a locales al tomar la orden, junto con pcTarget.
+        self.assertRegex(code, r'tipo := pcTipo;\s*destino := pcPose;')
+        self.assertLess(code.index('tipo := pcTipo'), code.index('Validar(objetivo.robax'))
+
+    def test_fingerprint_ignores_live_values_of_new_pers(self):
+        live = V2.replace('pcTipo := 0;', 'pcTipo := 1;').replace(
+            '[[9E9,9E9,9E9],[1,0,0,0],[0,0,0,0]', '[[300.5,50,250],[0,1,0,0],[0,0,0,0]')
+        self.assertNotEqual(live, V2)
+        self.assertEqual(source_fingerprint(live), SERVER_MODULE_SHA256)
 
     def test_structure(self):
         for routine in ('PROC MostrarObjetivo()', 'PROC ServidorPC()', 'LOCAL FUNC num Validar(',
@@ -142,8 +188,8 @@ class RapidModule(unittest.TestCase):
         self.assertNotRegex(V2, r'PROC\s+main\b')
         code = '\n'.join(line.split('!')[0] for line in V2.splitlines())
         self.assertEqual(len(re.findall(r'\bMoveAbsJ\b', code)), 1)
-        for name in ('pcTarget', 'pcSeq', 'pcFin', 'rbSeq', 'rbCodigo', 'rbActivo'):
-            self.assertRegex(V2, r'PERS (num|jointtarget) ' + name + r' :=')
+        for name in ('pcTarget', 'pcSeq', 'pcFin', 'rbSeq', 'rbCodigo', 'rbActivo', 'pcTipo', 'pcPose'):
+            self.assertRegex(V2, r'PERS (num|jointtarget|robtarget) ' + name + r' :=')
         # Error de la primera carga (40322): NOT después de OR/AND. No debe repetirse.
         self.assertNotRegex(V2, r'\b(OR|AND)\s+NOT\b')
         # Bloques equilibrados.
@@ -166,7 +212,7 @@ class Geometry(unittest.TestCase):
         self.assertAlmostEqual(legs[-1][0][1], 12)
         self.assertLessEqual(max(abs(a - b) for a, b in zip(legs[0][0], current[0])), 5 + 1e-9)
         with self.assertRaises(Refused): split_path(current, [[0, 0, 69, 0, 30, 0], [9e9] * 6], 5)
-        with self.assertRaises(Refused): split_path(current, [[0, 0, 0, 0, 30, 0], [9e9] * 6], 41)
+        with self.assertRaises(Refused): split_path(current, [[0, 0, 0, 0, 30, 0], [9e9] * 6], 356)
         with self.assertRaises(Refused): check_target([[0, 6, 0, 0, 30, 0], [9e9] * 6], current, 5)
 
     def test_parse_goal(self):
@@ -246,8 +292,8 @@ class Protocol(unittest.TestCase):
         client.module_version = 'servidor_v3_auto'
         state = client.status()
         self.assertNotIn('pcVelPct', state)
-        self.assertIn('instalar la v4', ' '.join(client.ready(state)))
-        with self.assertRaisesRegex(Refused, 'instalar la v4'):
+        self.assertIn('instalar la v5', ' '.join(client.ready(state)))
+        with self.assertRaisesRegex(Refused, 'instalar la v5'):
             client.set_speed(50)
 
     def test_speed_percent_is_written_and_validated(self):
@@ -316,6 +362,7 @@ class Protocol(unittest.TestCase):
 
     def test_robot_rejection_is_reported(self):
         abb = Abb('MANR'); client = mover(abb)
+        abb.max_step = 45    # un módulo con corte de 45°
         abb.current[0] = 60  # el robot está lejos de lo que la PC creyó al planificar (> 45° del RAPID)
         target = [[-4.28397 + 1, *abb.current[1:5], abb.current[5]], [9e9] * 6]
         client.joints = lambda: [[-4.28397, *abb.current[1:]], [9e9] * 6]
@@ -325,7 +372,7 @@ class Protocol(unittest.TestCase):
     def test_auto_requires_auto_variant_and_needs_no_rmmp(self):
         abb = Abb('AUTO'); abb.source = V2.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
         client = mover(abb)
-        self.assertEqual(client.module_version, 'servidor_v4_auto')
+        self.assertEqual(client.module_version, 'servidor_v5_auto')
         client.move_to(parse_goal(['j1', '-2'], client.joints()), 5, echo=quiet)
         self.assertFalse([c for c in abb.calls if c[1] == RMMP])
 
@@ -391,6 +438,17 @@ class Protocol(unittest.TestCase):
             self.assertTrue(client.install(Path(folder))['passed'])
         self.assertEqual(source_fingerprint(abb.source), SERVER_MODULE_SHA256)
 
+    def test_install_replaces_v4_with_v5(self):
+        import tempfile
+        for auto, sha in ((False, SERVER_MODULE_SHA256), (True, SERVER_AUTO_MODULE_SHA256)):
+            abb = Abb('AUTO'); abb.source = V4 if not auto else V4.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
+            abb.ctrl = 'motoroff'; abb.execution = 'stopped'; abb.require_rmmp = False
+            client = mover(abb)
+            self.assertEqual(client.module_version, 'servidor_v4_auto' if auto else 'servidor_v4')
+            with tempfile.TemporaryDirectory() as folder:
+                self.assertTrue(client.install(Path(folder), auto=auto)['passed'])
+            self.assertEqual(source_fingerprint(abb.source), sha)
+
     def test_diagnosis_accepts_v2(self):
         rows = lambda key, value: {'ok': True, 'records': [{key: value}]}
         inspection = {'resources': {
@@ -399,8 +457,148 @@ class Protocol(unittest.TestCase):
             'execution': rows('ctrlexecstate', 'stopped'), 'target': rows('value', literal(EMPTY)),
             'module': rows('module-text', V2)}}
         report = diagnose_inspection(inspection)
+        self.assertEqual(report['module_version'], 'servidor_v5')
+        self.assertTrue(report['local_navigation_prerequisites_observed'], report['issues'])
+        inspection['resources']['module'] = rows('module-text', V4)
+        report = diagnose_inspection(inspection)
         self.assertEqual(report['module_version'], 'servidor_v4')
         self.assertTrue(report['local_navigation_prerequisites_observed'], report['issues'])
+
+
+class Lineal(unittest.TestCase):
+    def setUp(self):
+        self.abb = Abb('MANR'); self.client = mover(self.abb)
+        self.goal = [[*self.abb.current[:5], self.abb.current[5] + 30.], [9e9] * 6]
+
+    def posts(self):
+        return [(c[1][len(BASE_SYMBOL):] if c[1].startswith(BASE_SYMBOL) else c[1], c[3].get('value'))
+                for c in self.abb.calls if c[0] == 'POST' and c[1] != RMMP]
+
+    def test_robtarget_format_and_readback(self):
+        text = format_robtarget([300.12349, -50., 250., 0., 1., 0., 0.])
+        self.assertEqual(text, '[[300.123,-50,250],[0,1,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]]')
+        pose = parse_robtarget(text)
+        self.assertEqual(pose, [300.123, -50., 250., 0., 1., 0., 0.])
+        # El ABB devuelve 9E+09 y 6 cifras: sigue coincidiendo
+        back = parse_robtarget('[[300.123,-50,250],[0,1,0,0],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]]')
+        self.assertTrue(same_pose(pose, back))
+        self.assertFalse(same_pose(pose, parse_robtarget(text.replace('300.123', '300.125'))))
+        self.assertFalse(same_pose(pose, parse_robtarget(text.replace('[0,1,0,0]', '[0.01,1,0,0]'))))
+        # cuaternión: se normaliza y redondea a 6 decimales
+        self.assertEqual(normalize_pose([0, 0, 100, 0.7071068, 0.7071068, 0, 0])[3:], [0.707107, 0.707107, 0., 0.])
+        for bad in ('[[1,2,3],[1,0,0,0]]', '[[1,2],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]]',
+                    '[[1,2,3],[2,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]]', 'x'):
+            with self.assertRaises(Refused):
+                parse_robtarget(bad)
+
+    def test_pose_validation(self):
+        for pose in (None, [1, 2, 3], [0, 0, 300, 1, 1, 0, 0], [0, 0, 5000, 1, 0, 0, 0],
+                     [0, 0, -500, 1, 0, 0, 0], [float('nan'), 0, 300, 1, 0, 0, 0], [0, 0, 300, 0, 0, 0, 0],
+                     [True, 0, 300, 1, 0, 0, 0]):
+            with self.assertRaises(Refused, msg=pose):
+                self.client.send(self.goal, tipo='lineal', pose_tool0=pose, echo=quiet)
+        with self.assertRaises(Refused):
+            self.client.send(self.goal, tipo='circular', echo=quiet)
+        self.assertFalse(self.posts())   # nada se escribió
+
+    def test_send_lineal_writes_tipo_and_pose_before_seq(self):
+        result = self.client.send(self.goal, tipo='lineal', pose_tool0=POSE, echo=quiet)
+        self.assertEqual(result['code'], 2)
+        names = [n for n, _ in self.posts()]
+        self.assertEqual(names, ['pcTarget', 'pcPose', 'pcTipo', 'pcSeq'])
+        values = dict(self.posts())
+        self.assertEqual(values['pcTipo'], '1')
+        self.assertEqual(values['pcPose'], '[[300,50,250],[0,1,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]]')
+        self.assertEqual(self.abb.nums['pcTipo'], 1.)
+
+    def test_articular_after_lineal_resets_tipo(self):
+        self.client.send(self.goal, tipo='lineal', pose_tool0=POSE, echo=quiet)
+        back = [list(self.abb.current), [9e9] * 6]; back[0][5] -= 10
+        self.abb.calls.clear()
+        self.client.send(back, echo=quiet)
+        names = [n for n, _ in self.posts()]
+        self.assertEqual(names, ['pcTarget', 'pcTipo', 'pcSeq'])
+        self.assertEqual(self.abb.nums['pcTipo'], 0.)
+        # y una articular seguida de otra articular no reescribe pcTipo ni pcPose
+        self.abb.calls.clear()
+        self.client.send([[*self.abb.current[:5], self.abb.current[5] + 5], [9e9] * 6], echo=quiet)
+        self.assertEqual([n for n, _ in self.posts()], ['pcTarget', 'pcSeq'])
+
+    def test_pose_readback_mismatch_does_not_move(self):
+        original = self.abb.post
+
+        def corrupt(url, **kw):
+            response = original(url, **kw)
+            if url.endswith('pcPose'):
+                self.abb.pose_text = self.abb.pose_text.replace('300', '301')
+            return response
+        self.abb.post = corrupt
+        with self.assertRaisesRegex(Refused, 'pcPose'):
+            self.client.send(self.goal, tipo='lineal', pose_tool0=POSE, echo=quiet)
+        self.assertNotIn('pcSeq', [n for n, _ in self.posts()])
+
+    def test_v4_rejects_lineal_and_does_not_read_pctipo(self):
+        abb = Abb('MANR'); abb.source = V4; del abb.nums['pcTipo']
+        client = mover(abb)
+        self.assertEqual(client.module_version, 'servidor_v4')
+        state = client.status()
+        self.assertNotIn('pcTipo', state)
+        self.assertIn('pcVelPct', state)
+        goal = [[*abb.current[:5], abb.current[5] + 1.], [9e9] * 6]
+        with self.assertRaisesRegex(Refused, 'lineal.*v5'):
+            client.send(goal, tipo='lineal', pose_tool0=POSE, echo=quiet)
+        self.assertFalse([c for c in abb.calls if c[0] == 'POST'])
+        # la v4 ya no es un módulo «listo»: ni siquiera la articular se envía hasta reinstalar
+        with self.assertRaisesRegex(Refused, 'instalar la v5'):
+            client.send(goal, echo=quiet)
+        self.assertFalse([c for c in abb.calls if c[0] == 'POST'])
+
+    def test_one_order_for_a_long_move(self):
+        goal = [[100., 50., -60., 120., -50., 0.], [9e9] * 6]
+        self.abb.current = [-100., -50., 60., -120., 50., 0.]
+        client = mover(self.abb)
+        result = move_tramo(client, 'articular', goal[0], None, echo=quiet)
+        seqs = [v for n, v in self.posts() if n == 'pcSeq']
+        self.assertEqual(seqs, ['1'])     # sin cortes cada 40°: 240° en una sola orden
+        self.assertEqual(result['code'], 2)
+        self.assertLess(result['max_error_deg'], 0.02)
+        self.assertEqual(MAX_STEP_DEG, 355.); self.assertEqual(RAPID_MAX_STEP_DEG, 360.)
+
+    def test_move_tramo_lineal_single_order_and_correction(self):
+        result = move_tramo(self.client, 'lineal', self.goal[0], POSE, echo=quiet)
+        self.assertEqual([v for n, v in self.posts() if n == 'pcSeq'], ['1'])
+        self.assertEqual(set(result), {'seq', 'code', 'joints_deg', 'max_error_deg'})
+        # el MoveL termina 1° corrido: una corrección articular (pcTipo=0) y listo
+        abb = Abb('MANR'); abb.arrival_offset = 1.; client = mover(abb)
+        goal = [*abb.current[:5], abb.current[5] + 20.]
+        result = move_tramo(client, 'lineal', goal, POSE, echo=quiet)
+        seqs = [c[3]['value'] for c in abb.calls if c[0] == 'POST' and c[1].endswith('pcSeq')]
+        self.assertEqual(seqs, ['1', '2'])
+        self.assertEqual(abb.nums['pcTipo'], 0.)
+        self.assertLess(result['max_error_deg'], 0.02)
+
+    def test_move_tramo_does_not_correct_blindly_after_big_lineal_error(self):
+        abb = Abb('MANR'); abb.arrival_offset = 30.; client = mover(abb)
+        goal = [*abb.current[:5], abb.current[5] + 20.]
+        with self.assertRaisesRegex(Refused, 'configuración'):
+            move_tramo(client, 'lineal', goal, POSE, echo=quiet)
+        self.assertEqual([c[3]['value'] for c in abb.calls if c[0] == 'POST' and c[1].endswith('pcSeq')], ['1'])
+
+    def test_move_tramo_cancel(self):
+        import threading
+        stop = threading.Event(); stop.set()
+        with self.assertRaisesRegex(Refused, 'CANCELADO'):
+            move_tramo(self.client, 'articular', self.goal[0], None, echo=quiet, cancel=stop)
+        self.assertFalse(self.posts())
+
+    def test_robot_rejects_invalid_pctipo_with_code_5(self):
+        self.abb.nums['pcTipo'] = 7.   # valor ajeno escrito a mano en el robot
+        self.abb.nums['pcTipo'] = 7.
+        with self.assertRaisesRegex(Refused, 'código -5'):
+            # la PC reescribe pcTipo=0 si difiere; se fuerza que el robot lo vea mal
+            original = self.abb.robot
+            self.abb.robot = lambda seq: (self.abb.nums.__setitem__('pcTipo', 7.), original(seq))[1]
+            self.client.send(self.goal, echo=quiet)
 
 
 if __name__ == '__main__':

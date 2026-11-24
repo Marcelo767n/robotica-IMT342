@@ -1,0 +1,107 @@
+# Manifiesto por experimento (Bloque B, W14-S02). Generado por hito3.validacion.
+id_prueba: FK-N2
+equipo: "Dayana Andrade, Mirko Ayala, Marcelo Navarro (IMT-342, UCB, 2-2026)"
+operador: por completar por el equipo
+generado_utc: "2026-11-24T14:11:45Z"
+tipo: FK nominal (real)
+codigo_modelo:
+  repositorio: robotica-IMT342 (rama claude/proyecto-hito3-4-objetivos-9709f0)
+  commit: 6e82c45680df44e3fdd1cdff2d5a6ab727dd0060
+  hito3_sin_versionar: true
+  modelo_propio:
+    archivos:
+      hito2/irb120/dh.py: 6af5c24c5d4e4bace33c4f023927f3ad9a2305ea1f47bf66a802ee10ea3f3173
+      hito2/irb120/pieper.py: 9ffd1dbe9b24c371a8a90a29d07532936cd408d014fcd52578b3fd3b600237c1
+      hito2/irb120/jacobian.py: a28195757e03eaae3382d2a08c12730558e465c410f80212fec1d20c9d77c22b
+      hito2/irb120/dynamics.py: fc304619cd482e1eab3dd0a157f8ff8e52cd9147f8aaa2541e774cd3f33dfe84
+      hito2/irb120/urdf_chain.py: 06b16d63c38c206c30fcc65af3415680bf6b6688929ee3deee5738cd3670f277
+    parametros_DH: "hito2/irb120/dh.py (Bahani et al. 2023, tabla I): d=[0.290,0,0,0.302,0,0.072] a=[0,0.270,0.070,0,0,0] alpha=[-90,0,-90,90,-90,0]°, offsets θ2=-90°, θ6=+180°"
+    tcp_z_m: 0.15
+  referencia_codigo:
+    hito2/irb120/rosi_model.py: c626eb8728a440129999712d28b8258259f9fa06315331db0baf09d42d04c24c
+  urdf:
+    archivo: hito2/datos/irb120.urdf
+    sha256: 0cf27d2c4524530d889bba7ee133c5583fdd3cdbe381774c7bc818796eb9041c
+    uso: "solo comprobación de implementación (no independiente: generado de la tabla DH)"
+  software:
+    python: "3.14.4"
+    numpy: "2.3.5"
+    scipy: "1.16.3"
+    matplotlib: 3.10.7+dfsg1
+    so: Linux-7.0.0-44-generic-x86_64-desconocido-with-glibc2.43
+juntas:
+  nombres: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+  joint_order: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+  tipos: [revolute, revolute, revolute, revolute, revolute, revolute]
+  q_rad: [0.05142675584813657, -0.03364080329912328, 0.045182824869634486, -0.2280233812210291, 1.5649106076277668, -2.3384386625725684]
+  signos: positivos según ABB (eje 1..6); coincidencia empírica con el IRC5 en las posturas de FK-N1/N2
+  offsets: "los de dh.py (θ2 −90°, θ6 +180°) internos al modelo; cero mecánico ABB = q=0"
+  cero_mecanico: calibración de fábrica del robot no consultada
+unidades:
+  angulos: rad (los datos del IRC5 llegan en grados y se convierten)
+  longitudes: m (los datos del IRC5 llegan en mm)
+  velocidad: rad/s
+  cuaternion: "(w, x, y, z)"
+frames:
+  base_propia: base_link
+  base_referencia: Base del IRC5 (coordinate=Base)
+  world: no usado (wobj0)
+  flange: tool0
+  tool: tool0 (brida); sin TCP
+  tcp: tool0 (brida); sin TCP
+herramienta:
+  activo_en_irc5: "tool0 (brida), wobj0"
+  pose_relativa: identidad (tool0) / Tz(0.150) solo en FK-D-TCP y Jacobiano-TCP
+  fuente: IRC5 (tool0 por definición) / convención del modelo (0.150 m); tooldata real NO leído
+datos:
+  origen: "IRC5 vía RWS (HTTP), capturado el 2026-11-04 por el nodo validacion_fk; solo lectura"
+  endpoint_variable: "RWS rapid/robtarget y jointtarget (tool0, wobj0, Base) vía http://192.168.125.1"
+  archivos:
+    -
+      subconjunto: hito3/datos/fk_real_N2_estacionarias.csv
+      sha256: 0fc7073d6b5eddf531ecb6df15d81d310c03a05f036d8e67b9c946ba6d286380
+      filas: 1487
+      crudo: salidas/prueba_comunicacion/comunicacion_20261104_225612_309539Z_fk.jsonl
+      crudo_sha256: 7dadde162896a7ba8d595b5ceaff9705bc1c76097b1e9f044e2614fb752fc2ff
+      crudo_lineas: 9084
+      crudo_en: checkout principal (solo lectura)
+tiempo:
+  reloj: "PC de adquisición (UTC) + 'stamp' ROS; el IRC5 no entrega marca propia"
+  timestamp_q: "q_before y q_after (RWS), dos lecturas consecutivas"
+  timestamp_pose: received_at_utc de cada muestra (pose entre las dos lecturas de q)
+  latencia: window_ms 11-54 ms (ver FK-N1/N2)
+  estado_robot: estacionario (Δq <= 1e-3 °)
+referencia:
+  descripcion: "IRC5 RWS http://192.168.125.1 (tool0/Base/wobj0) comunicacion_20261104_225612_309539Z_fk.jsonl sha256:7dadde162896"
+  independencia: "IRC5 físico: independiente del modelo"
+  limitaciones: ver notes de validation_cases.csv
+seguridad:
+  condicion: offline; sin movimiento del robot; lectura RWS pasiva en los datos S1
+  go_firmado: null
+  nivel_alcanzado: S1
+  nota: NO-GO físico en W14-S02; S3 (movimiento ROS→IRC5) no verificado
+tolerancias:
+  version_criterio: W14-S02 (propuesta normativa)
+  umbral_propuesto: estricto del proyecto 1e-6 m / 1e-6 rad (IRC5) y cribado sintético 1e-6 m / 1e-5 rad (offline)
+  umbral_aprobado: null
+  incertidumbre: ver tolerancias_incertidumbres_irc5.csv
+  estado: pendiente de aprobación
+nivel_evidencia: S1
+estado_P5: parcial
+justificacion_estado: "Observación del controlador por RWS con unidad, fuente y marca temporal (S1). No es S2 (no trazada por ROS) ni S3. Parcial: umbral no aprobado; una sola postura por caso; J6 casi constante en ambas posturas; TCP físico no medido (se usa la brida); 155 lecturas FUERA sin causa demostrada."
+validation_cases_row:
+  case_id: FK-N2
+  case_type: FK nominal (real)
+  q_rad_vector: "[0.05142675585, -0.0336408033, 0.04518282487, -0.2280233812, 1.564910608, -2.338438663]"
+  base_frame: base_link (modelo propio) = Base del IRC5
+  tcp_frame: tool0 (brida); sin TCP
+  model_version: "hito2/irb120/dh.py sha256:6af5c24c5d4e @ 6e82c45680+hito3 sin versionar"
+  reference_version: "IRC5 RWS http://192.168.125.1 (tool0/Base/wobj0) comunicacion_20261104_225612_309539Z_fk.jsonl sha256:7dadde162896"
+  position_error_m: "1.434385e-06"
+  orientation_error_rad: "7.526606e-06"
+  jacobian_error_fro: ""
+  rank_threshold: ""
+  rank_observed: ""
+  acceptance_result: parcial
+  evidence_link: hito3/datos/fk_real_N2_estacionarias.csv; hito3/resultados/fk_real_errores_por_muestra.csv; hito3/resultados/figuras/fk_real_errores_N1_N2.png
+  notes: "n=1487 lecturas estacionarias (Δq<=1e-3°) de UNA postura; e_p mediana=3.44e-08 m, p95=2.86e-07, max=1.43e-06 (columna = max); e_R(arccos) mediana=1.79e-07 rad, max=7.53e-06; 1314/1487 dentro del criterio estricto del proyecto (1e-6 m, 1e-6 rad; NO aprobado); cota de cuantización de los datos e_p<=7.8e-08 m, e_R<=4.1e-07 rad; R^T R max=1.0e-15, |det-1| max=1.0e-15; cuaternión del IRC5 en orden (w,x,y,z)"

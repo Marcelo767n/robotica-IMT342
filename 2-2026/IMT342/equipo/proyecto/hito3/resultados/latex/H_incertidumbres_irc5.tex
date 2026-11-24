@@ -1,0 +1,28 @@
+% Generado por hito3.validacion; requiere \usepackage{booktabs,longtable,array}
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{p{3.6cm}p{6.2cm}p{3cm}p{2.6cm}}
+\caption{Incertidumbres de la comparación FK propia vs IRC5. No existe umbral numérico aprobado: estado pendiente y bloqueado por datos.}\label{tab:H}\\
+\toprule
+\textbf{Fuente de incertidumbre} & \textbf{Valor / cota} & \textbf{Origen} & \textbf{Estado} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Fuente de incertidumbre} & \textbf{Valor / cota} & \textbf{Origen} & \textbf{Estado} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Resoluci\'on de la posici\'on del robtarget (xyz) & 7 cifras significativas: 4 decimales en mm (1e-4 mm = 1e-7 m) si |v| $\ge$ 100 mm; hasta 6 decimales si |v| < 10 mm & observado en los registros S1 (FK-N1; cota de FK-N2: 7.1e-08 m) & cota derivada; umbral pendiente \\
+Resoluci\'on del cuaterni\'on (w,x,y,z) & $\le$ 7 cifras significativas observadas (componentes $\le$ 1) & observado; cota 2$\cdot$||$\delta$q||, |$\delta$q\_i| $\le$ 5e-8 & cota derivada; umbral pendiente \\
+Resoluci\'on de q (RWS entrega float32) & semi-ulp float32 hasta 7.6e-06 $^\circ$ en FK-N1 & derivado: $\Sigma$$\Vert$Jv\_i$\Vert$$\cdot$semi-ulp (FK-N1) & cota derivada; umbral pendiente \\
+Cota total de cuantizaci\'on de los datos (FK-N1 / FK-N2) & e\_p $\le$ 1.18e-07 / 7.78e-08 m; e\_R $\le$ 5.00e-07 / 4.13e-07 rad & suma de las tres fuentes anteriores & piso de resoluci\'on, no tolerancia \\
+TCP / herramienta activa & tooldata del IRC5 NO le\'ido; se compara tool0 (brida) $\Rightarrow$ TCP no interviene; TCP de 0.150 m es convenci\'on del modelo (tcp\_verified\_on\_robot: false) & no medido & bloqueado por datos \\
+Sincron\'ia q $\leftrightarrow$ pose & ventana q$\to$pose$\to$q: mediana 14.2 / 15.0 ms, m\'ax 54.3 / 33.7 ms (N1/N2); sin reloj com\'un, robot estacionario & observado (window\_ms) & mitigada con q\_antes $\approx$ q\_despu\'es; no medible por debajo de la ventana \\
+Fluctuaci\'on de la pose del IRC5 con q constante & hasta e\_p = 2.44e-06 m y e\_R = 1.32e-05 rad en las 155 muestras FUERA & observado (diagn\'ostico FUERA) & causa indeterminada por datos \\
+Base y ceros mec\'anicos del controlador frente al modelo & coincidencia emp\'irica en 2 posturas distintas (error $\le$ \textasciitilde{}1e-6 m); calibraci\'on de f\'abrica del robot no consultada & no medido directamente & parcial \\
+Repetibilidad / exactitud absoluta del IRB 120 & no medida en este trabajo; el repositorio cita 0.01 mm de repetibilidad (hito2/irb120/validation.py, de la hoja ABB) sin verificaci\'on local & cita no verificada & bloqueada por datos \\
+\end{longtable}
+\endgroup

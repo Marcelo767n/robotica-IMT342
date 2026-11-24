@@ -1,0 +1,22 @@
+% Generado por hito3.validacion; requiere \usepackage{booktabs,array,graphicx}
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\caption{P2a. Poses objetivo de IK y métodos (propio: Pieper por \texttt{atan2}; referencia: DLS numérico sobre la FK de ROS-Industrial).}
+\label{tab:P2a}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llllllll}
+\toprule
+\textbf{ID pose} & \textbf{$T_d$ / fuente} & \textbf{Método propio} & \textbf{Método ref.} & \textbf{Semilla} & \textbf{DLS conv.} & \textbf{Ramas halladas} & \textbf{DLS sin rama} \\
+\midrule
+IK-1 & FK propia de q de FK-N1 (postura real S1 de la sesi\'on 1) & Pieper@6e82c45 & DLS(rosi) $\lambda$=0.001, tol=1e-09, it$\le$200, t$\le$2.0s & 34 semillas (rng=12345) & 34/34 & 8/8 & 0 \\
+IK-2 & FK propia de q de FK-N2 (postura real S1 de la sesi\'on 2, q5$\approx$89.7$^\circ$) & Pieper@6e82c45 & DLS(rosi) $\lambda$=0.001, tol=1e-09, it$\le$200, t$\le$2.0s & 34 semillas (rng=12345) & 34/34 & 8/8 & 0 \\
+IK-3 & FK propia de q sint\'etica con q5 = 0.5$^\circ$ (cerca de singularidad de mu\~neca) & Pieper@6e82c45 & DLS(rosi) $\lambda$=0.001, tol=1e-09, it$\le$200, t$\le$2.0s & 34 semillas (rng=12345) & 34/34 & 8/8 & 0 \\
+IK-4 & FK propia de q sint\'etica con q5 = 0 exacto (singularidad de mu\~neca) & Pieper@6e82c45 & DLS(rosi) $\lambda$=0.001, tol=1e-09, it$\le$200, t$\le$2.0s & 34 semillas (rng=12345) & 34/34 & 8/8 & 0 \\
+IK-5 & FK propia de q sint\'etica desplazada +0.8 m en x\_base (fuera del alcance) & Pieper@6e82c45 & DLS(rosi) $\lambda$=0.001, tol=1e-09, it$\le$200, t$\le$2.0s & 26 semillas (rng=12345) & 0/26 & 0/0 & 0 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}

@@ -4,7 +4,7 @@ Actualizado el **20/11/2026**. Resume dónde está el proyecto para retomarlo en
 
 ## 1. Estado en una frase
 
-El ABB IRB 120 real se controla desde la PC Linux **dentro de RViz**: se escriben ángulos o se arrastra una pose, la cinemática inversa de Pieper del Hito 2 calcula los ángulos, se verifican con la FK propia y con el propio controlador, y solo entonces se envían por RWS a un servidor RAPID (`LabJointRws` v4) que los ejecuta con `MoveAbsJ`. El gemelo digital sigue al robot en tiempo real.
+El ABB IRB 120 real se controla desde la PC Linux **dentro de RViz**: se escriben ángulos o se arrastra una pose, la cinemática inversa de Pieper del Hito 2 calcula los ángulos, se verifican con la FK propia y con el propio controlador, y solo entonces se envían por RWS a un servidor RAPID (`LabJointRws`, v4 en el robot y v5 lista para instalar) que los ejecuta con `MoveAbsJ` (y, en la v5, también `MoveL`). El gemelo digital sigue al robot en tiempo real.
 
 ## 2. Qué funciona (comprobado con el robot real)
 
@@ -105,8 +105,29 @@ Antes de permitir la ejecución, comprobar a lo largo de **toda** la trayectoria
 | Interfaz CustomTkinter | **Solo análisis y trayectorias** (diseñar, verificar, ver la matemática). Para mover se sigue usando el panel de RViz; la trayectoria verificada se envía al panel. |
 | Visión artificial | Dejar el **cimiento**: una entrada de puntos externa (p. ej. un tópico ROS con poses en `base_link`) para que un nodo de visión publique coordenadas que aparezcan como puntos de trayectoria, con la misma verificación. |
 
-## 9. Preguntas abiertas
+## 9. Preguntas abiertas → respuestas del 20/11/2026
 
-1. Tolerancias de las reglas: ¿σ_min ≥ 0,01 y 5° de margen a los límites como en el Hito 2, o más estrictas?
-2. Matemática: ¿basta con *mathtext* de matplotlib (sin instalar nada) o se quiere LaTeX completo (requiere TeX)?
-3. Visión: ¿qué cámara y dónde va montada (fija sobre la mesa o en la pinza)? Define cómo se calibra cámara → base del robot.
+| Pregunta | Respuesta | Cómo quedó |
+|---|---|---|
+| Tolerancias | Más estrictas que el Hito 2 | σ_min bloquea < 0,02 (aviso < 0,04), κ > 500, margen a límites < 10°, más velocidad, aceleración, par, altura del TCP y salto de rama. Tabla en [ARQUITECTURA_TRAYECTORIAS.md](ARQUITECTURA_TRAYECTORIAS.md); valores en `trayectorias/reglas.py` (`TOLERANCIAS`). |
+| Matemática | Libre elección: lo que se vea mejor | LaTeX completo (matplotlib `usetex`, TeX ya instalado), con respaldo automático a *mathtext* si TeX falla (`IRB120_SIN_TEX=1` lo fuerza). |
+| Visión | Aún no se sabe qué cámara ni dónde | Cimiento genérico: tópico `/irb120/trayectoria/punto_externo` (`PoseStamped`, TCP en `base_link`) y `POST /api/punto_externo` → buzón del panel → Estudio. La calibración cámara → base se decide cuando se elija montaje (fija: mano-ojo una vez; en la pinza: FK(q)·T_tool0_cam). |
+
+## 10. Implementado el 20/11/2026 (probado offline y con el panel simulado; falta el robot real)
+
+| Pieza | Dónde | Estado |
+|---|---|---|
+| Planificador y reglas A→B→C→A | `irb120_control/trayectorias/` | Evalúa articular y lineal en cada tramo, elige y explica; muestrea todo el tramo (σ_min, κ, límites, q̇, q̈, τ, z, rama). ~1,5 s para 4 puntos. |
+| RAPID v5 «una orden por tramo» | `rapid/rws_mover/LabJointRws.mod` (4667 caracteres) | `pcTipo` 0 = `MoveAbsJ`, 1 = `MoveL` (`ConfL \Off`); `fine` solo al final; sin cortes de 40°. **Sin probar en el IRC5.** |
+| Ejecución en el panel | `panel/trayectoria.py`, `panel/buzon.py` | Re-planifica con la postura real, exige las mismas órdenes, verifica cada punto (sección 5), pausa/reanuda en los puntos de paso, N vueltas. |
+| Estudio CustomTkinter | `irb120_control/estudio/` · `brazo estudio` | Estado, Trayectoria (editor, capturar, buzón, JSON), Reglas, Gráficas (q, q̇, q̈, τ, σ, κ), Matemática (DH, A_i, T, J, LSPB, τ en LaTeX). |
+| Biblioteca de trayectorias | Estudio → pestaña Trayectoria | Cualquier número de puntos, abiertas o cerradas, editables (insertar, duplicar, reordenar); guardar como `NN_nombre.json` con Nº PLC; papelera en vez de borrar. |
+| Celda PLC S7-1200 | `plc/` (nodo `irb120_plc_s7`), `celda/` (nodo `irb120_celda`), `plc_s7_1200/` (TIA Portal) · `brazo plc`, `brazo plc-simulador` | Telegrama de 2 palabras (mando/estado + valor) con parte extendida opcional; contrato en [PLC_S7_1200.md](PLC_S7_1200.md). Probado con el PLC simulado contra el panel simulado; el FB SCL **no se ha compilado** en TIA Portal. |
+| Puntos desde RViz y visión | menú del control 3D «Añadir a la trayectoria» · `brazo punto X Y Z R P Y` | Comprobado con ROS: el punto alcanzable entra al buzón; el inalcanzable se rechaza con el motivo. |
+
+### Primera sesión con el robot real después de este cambio
+1. `brazo sesion`: encontrará la v4 y pedirá **Stop + Motors Off una vez** para instalar la v5; luego Motors On e «Iniciar» como siempre.
+2. En el FlexPendant, *Comprobar programa* sobre `LabJointRws` (la sintaxis de la v5 no se pudo compilar sin el controlador).
+3. Primero un tramo **articular** corto a velocidad baja (10–20 %) desde el panel; después un tramo **lineal** corto desde el Estudio. Tras un lineal, si el robot acaba a más de 5° de lo previsto, la PC se detiene y no corrige a ciegas.
+4. Pausar y cancelar actúan al terminar el tramo en curso: para parar YA, habilitador, Stop o paro de emergencia.
+5. La duración que muestra el Estudio es la del modelo LSPB del Hito 2; el IRC5 usa su propio perfil con `pcVelPct`, así que la duración real será distinta (se puede medir con el registro).

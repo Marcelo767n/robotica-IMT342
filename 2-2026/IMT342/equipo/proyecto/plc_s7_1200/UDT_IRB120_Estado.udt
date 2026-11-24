@@ -1,0 +1,20 @@
+// TG_ESTADO  PC -> PLC. Contrato v2: docs/PLC_S7_1200.md  3.2
+// Completo = 68 bytes; nucleo = solo los 4 primeros (estado + valor). Big-endian (nativo S7).
+// Usar SOLO en un bloque con ACCESO ESTANDAR (no optimizado).
+TYPE "UDT_IRB120_Estado"
+VERSION : 0.1
+   STRUCT
+      estado : Word;          // byte 0  NUCLEO. bits 0..12 estados/saludo, bit15 vida (alterna)
+      valor : UInt;           // byte 2  NUCLEO. codigo si rechazada/error; si no, tramo actual
+      fase : UInt;            // byte 4  extendido: 0 lista,1 ejecutando,2 pausada,3 terminada,4 cancelada,5 error
+      tramo : UInt;           // byte 6
+      tramos : UInt;          // byte 8
+      vuelta : UInt;          // byte 10
+      velocidad_pct : UInt;   // byte 12
+      codigo : UInt;          // byte 14 ultimo codigo de rechazo/error (0 = ninguno)
+      reservado1 : UInt;      // byte 16
+      reservado2 : UInt;      // byte 18
+      q : Array[0..5] of Real;     // byte 20..43  J1..J6 [grados]
+      pose : Array[0..5] of Real;  // byte 44..67  X,Y,Z [mm], roll,pitch,yaw [grados]
+   END_STRUCT;
+END_TYPE
