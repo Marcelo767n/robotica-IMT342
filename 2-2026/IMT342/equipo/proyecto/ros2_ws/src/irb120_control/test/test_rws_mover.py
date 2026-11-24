@@ -50,6 +50,7 @@ class Abb:
         self.calls = []; self.rmmp = None; self.rmmp_answer = 'GRANTED'
         self.require_rmmp = mode.startswith('MAN'); self.respond = True; self.reads_until_done = 2
         self.pending = None; self.edit_status = 200
+        self.modules = ['LabJointRws', 'Module1']   # otros grupos pueden borrar Module1 (24/11/2026)
         self.cookies = Cookies(); self.auth = None; self.trust_env = True
 
     def close(self):
@@ -68,7 +69,7 @@ class Abb:
         if path == MAIN_MODULE_PATH:
             return Response([{'_type': 'rap-module-text', 'module-text': 'MODULE Module1\nENDMODULE\n'}])
         if path == '/rw/rapid/modules':
-            return Response([{'_type': 'rap-module-info-li', 'name': n} for n in ('LabJointRws', 'Module1')])
+            return Response([{'_type': 'rap-module-info-li', 'name': n} for n in self.modules])
         if path == SYMBOL: return Response([{'_type': 'rap-data', 'value': literal(self.target)}])
         if path == BASE_SYMBOL + 'pcPose': return Response([{'_type': 'rap-data', 'value': self.pose_text}])
         if path.startswith(BASE_SYMBOL):
@@ -448,6 +449,30 @@ class Protocol(unittest.TestCase):
             with tempfile.TemporaryDirectory() as folder:
                 self.assertTrue(client.install(Path(folder), auto=auto)['passed'])
             self.assertEqual(source_fingerprint(abb.source), sha)
+
+    def test_install_without_module1(self):
+        """24/11/2026: el controlador ya no tenía Module1; la instalación no debe bloquearse por eso."""
+        import tempfile
+        abb = Abb('AUTO'); abb.source = V4.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
+        abb.ctrl = 'motoroff'; abb.execution = 'stopped'; abb.require_rmmp = False
+        abb.modules = ['LabJointRws', 'MainModule']
+        client = mover(abb)
+        with tempfile.TemporaryDirectory() as folder:
+            report = client.install(Path(folder), auto=True)
+            self.assertTrue(report['passed'])
+            self.assertIsNone(report['module1_before_sha256'])
+            self.assertFalse(list(Path(folder).glob('*/Module1.mod')))
+        self.assertEqual(source_fingerprint(abb.source), SERVER_AUTO_MODULE_SHA256)
+
+    def test_install_without_labjointrws_refused(self):
+        import tempfile
+        abb = Abb('AUTO'); abb.source = V4
+        abb.ctrl = 'motoroff'; abb.execution = 'stopped'; abb.require_rmmp = False
+        abb.modules = ['Module1']
+        client = mover(abb)
+        with tempfile.TemporaryDirectory() as folder:
+            with self.assertRaises(Refused):
+                client.install(Path(folder))
 
     def test_diagnosis_accepts_v2(self):
         rows = lambda key, value: {'ok': True, 'records': [{key: value}]}

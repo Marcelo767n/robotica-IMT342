@@ -419,17 +419,21 @@ class Client:
                     'note':'Ya coincide; no se hizo POST. Verificar programa localmente antes de mover.'}
         modules_before=self.read('/rw/rapid/modules',task=TASK)
         names_before=sorted(single([row],'name') for row in modules_before)
-        if MODULE not in names_before or 'Module1' not in names_before:
-            raise Refused('No se encontraron LabJointRws y Module1; no se transfiere.')
-        main_before=self.module_source('Module1')
-        main_digest=source_fingerprint(main_before)
+        if MODULE not in names_before:
+            raise Refused('No se encontró LabJointRws en el controlador; no se transfiere.')
+        # Module1 (programa de otro grupo) es solo un testigo: si existe, debe quedar intacto. Otros grupos
+        # lo borran o renombran (observado 24/11/2026), así que su ausencia no bloquea la instalación.
+        tiene_module1='Module1' in names_before
+        main_before=self.module_source('Module1') if tiene_module1 else None
+        main_digest=source_fingerprint(main_before) if tiene_module1 else None
         initial=self.stable_target()
         directory.mkdir(parents=True,exist_ok=True)
         stamp=datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%fZ')
         backup=directory/('respaldo_modulo_'+stamp)
         backup.mkdir()
         for name,source in ((MODULE,before),('Module1',main_before),('LabJointRws_candidato',candidate)):
-            (backup/(name+'.mod')).write_text(source,encoding='utf-8')
+            if source is not None:
+                (backup/(name+'.mod')).write_text(source,encoding='utf-8')
         journal=backup/'transferencia.json'
         report={'action':'update_LabJointRws','identity':identity,'backup_directory':str(backup.resolve()),
                 'motion_command_sent':False,'program_pointer_may_reset':True,
@@ -475,11 +479,13 @@ class Client:
             state=self.assert_stopped_off()
             if state['opmode']!='AUTO' or self.get_target()!=EMPTY:
                 raise Refused('Cambió el modo o pcTarget; transferencia cancelada.')
-            if source_fingerprint(self.module_source())!=digest or source_fingerprint(self.module_source('Module1'))!=main_digest:
+            if source_fingerprint(self.module_source())!=digest or (
+                    tiene_module1 and source_fingerprint(self.module_source('Module1'))!=main_digest):
                 raise Refused('El programa cambió después del respaldo; no se sustituye.')
             post(MODULE_PATH,{'task':TASK,'action':'set-module-text'},{'text':candidate},200)
             report['readback_sha256']=source_fingerprint(self.module_source())
-            report['module1_after_sha256']=source_fingerprint(self.module_source('Module1'))
+            report['module1_after_sha256']=(source_fingerprint(self.module_source('Module1'))
+                                            if tiene_module1 else None)
             report['module_list_unchanged']=names_before==sorted(single([r],'name') for r in self.read('/rw/rapid/modules',task=TASK))
             report['target_empty']=self.get_target()==EMPTY
             report['final_state']=self.assert_stopped_off()
