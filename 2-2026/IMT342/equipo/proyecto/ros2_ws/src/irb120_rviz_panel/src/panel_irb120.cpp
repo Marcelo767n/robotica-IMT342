@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 #include <pluginlib/class_list_macros.hpp>
@@ -19,6 +20,7 @@
 #include "widget_ejes.hpp"
 #include "widget_estado.hpp"
 #include "widget_pose.hpp"
+#include "widget_trayectorias.hpp"
 #include "widget_velocidad.hpp"
 #include "widget_verificacion.hpp"
 
@@ -45,6 +47,7 @@ PanelIRB120::PanelIRB120(QWidget * padre)
   pose_ = new WidgetPose;
   verificacion_ = new WidgetVerificacion;
   velocidad_ = new WidgetVelocidad;
+  trayectorias_ = new WidgetTrayectorias;
 
   contenido_ = new QWidget;
   auto * capa = new QVBoxLayout(contenido_);
@@ -76,10 +79,20 @@ PanelIRB120::PanelIRB120(QWidget * padre)
   // El dock se abre con el ancho del contenido: sin barra horizontal en la columna «Cambio».
   desplazable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   desplazable->setMinimumWidth(contenido_->sizeHint().width() + desplazable->verticalScrollBar()->sizeHint().width() + 4);
+  auto * desplazableTray = new QScrollArea;
+  desplazableTray->setWidgetResizable(true);
+  desplazableTray->setWidget(trayectorias_);
+  desplazableTray->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  auto * pestanas = new QTabWidget;
+  pestanas->addTab(desplazable, QStringLiteral("Mover"));
+  pestanas->addTab(desplazableTray, QStringLiteral("Trayectorias"));
   auto * raiz = new QVBoxLayout(this);
   raiz->setContentsMargins(0, 0, 0, 0);
-  raiz->addWidget(desplazable);
+  raiz->addWidget(pestanas);
 
+  connect(trayectorias_, &WidgetTrayectorias::ordenPedida, this, [this](const QString & a, const QJsonObject & c) {
+      orden(a, c);
+    });
   connect(ejes_, &WidgetEjes::objetivoEditado, this, [this](const QVector<double> & q) {
       orden(QStringLiteral("objetivo"), {{QStringLiteral("q"), arreglo(q)}});
     });
@@ -187,6 +200,7 @@ void PanelIRB120::recibir(const QJsonObject & e)
   pose_->actualizar(e);
   verificacion_->actualizar(e);
   velocidad_->actualizar(e);
+  trayectorias_->actualizar(e);
   const bool ocupado = e.value("ocupado").toBool();
   if (estabaOcupado_ && !ocupado) {
     verificacion_->resaltarLlegada();
@@ -207,7 +221,9 @@ void PanelIRB120::recibir(const QJsonObject & e)
   const QJsonObject respuesta = e.value("respuesta").toObject();
   if (!respuesta.isEmpty() && respuesta.value("id").toInt(-1) != respuestaVista_) {
     respuestaVista_ = respuesta.value("id").toInt(-1);
-    error_->setText(respuesta.value("ok").toBool() ? QString() : respuesta.value("error").toString());
+    const QString fallo = respuesta.value("ok").toBool() ? QString() : respuesta.value("error").toString();
+    error_->setText(fallo);
+    trayectorias_->mostrarError(fallo);
   }
   QStringList lineas;
   for (const auto & linea : e.value("registro").toArray()) {
@@ -227,6 +243,7 @@ void PanelIRB120::vigilar()
     conectado_ = false;
     estado_->sinConexion();
     verificacion_->sinConexion();
+    trayectorias_->sinConexion();
     progreso_->clear();
     habilitar();
   }

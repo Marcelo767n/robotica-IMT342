@@ -21,6 +21,7 @@ add_library(${PROJECT_NAME} SHARED
   src/widget_pose.hpp src/widget_pose.cpp
   src/widget_verificacion.hpp src/widget_verificacion.cpp
   src/widget_velocidad.hpp src/widget_velocidad.cpp
+  src/widget_trayectorias.hpp src/widget_trayectorias.cpp
   src/panel_irb120.hpp src/panel_irb120.cpp
 )
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)

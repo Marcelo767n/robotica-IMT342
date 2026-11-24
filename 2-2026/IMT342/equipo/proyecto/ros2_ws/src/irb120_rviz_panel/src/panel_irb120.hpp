@@ -20,6 +20,7 @@ class ClienteRos;
 class WidgetEjes;
 class WidgetEstado;
 class WidgetPose;
+class WidgetTrayectorias;
 class WidgetVelocidad;
 class WidgetVerificacion;
 
@@ -46,6 +47,7 @@ private:
   WidgetEjes * ejes_;
   WidgetPose * pose_;
   WidgetVerificacion * verificacion_;
+  WidgetTrayectorias * trayectorias_;
   WidgetVelocidad * velocidad_;
   QComboBox * paso_;
   QPushButton * posCero_;

@@ -3,7 +3,7 @@ para no congelar la publicación de ejes; el resto se atiende en el hilo de spin
 import json
 import threading
 
-LENTAS = ('trayectoria', 'vista_previa')
+LENTAS = ('trayectoria', 'vista_previa', 'trayectoria_ejecutar', 'trayectoria_vista_previa')
 OCUPADO = 'ocupado planificando'
 
 

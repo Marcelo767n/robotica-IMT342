@@ -73,6 +73,20 @@ def comparar_ordenes(recibidas, esperadas):
     return None
 
 
+def primera_falla(plan):
+    """« Primera regla en falla: ...» del primer tramo que no es apto ('' si no se encuentra)."""
+    for tramo in plan.tramos:
+        if tramo.ok:
+            continue
+        ev = tramo.opciones.get(tramo.tipo) if tramo.opciones else None
+        reglas = ev.fallas() if ev is not None else []
+        if reglas:
+            r = reglas[0]
+            return f' Primera regla en falla: {r.nombre}' + (f' ({r.detalle})' if r.detalle else '') + '.'
+        return ''
+    return ''
+
+
 class Ejecutor:
     def __init__(self, panel, sleep=time.sleep):
         self.panel, self.sleep = panel, sleep
@@ -120,7 +134,7 @@ class Ejecutor:
         except ValueError as exc:
             raise Refused(f'No se pudo planificar: {exc}') from exc
         if not plan.ok:
-            raise Refused('El plan no es apto con la postura actual: ' + plan.resumen)
+            raise Refused('El plan no es apto con la postura actual: ' + plan.resumen + primera_falla(plan))
         return tray, plan, q0, speed
 
     def _reservar(self, vista):
@@ -138,10 +152,12 @@ class Ejecutor:
             self.panel.cancel.clear()
 
     # ---------- ejecución ----------
-    def preparar(self, body):
-        tray, plan, q0, speed = self._planear(body)
+    def preparar(self, body, planeado=None):
+        """`planeado` = (tray, plan, q0, speed) ya calculado por el propio panel (biblioteca): no hay órdenes
+        recibidas que comparar."""
+        tray, plan, q0, speed = planeado or self._planear(body)
         esperadas = a_ordenes(plan)
-        motivo = comparar_ordenes(body.get('ordenes'), esperadas)
+        motivo = None if planeado else comparar_ordenes(body.get('ordenes'), esperadas)
         if motivo:
             extra = ''
             if isinstance(body.get('velocidad_pct'), (int, float)) and body['velocidad_pct'] != speed:

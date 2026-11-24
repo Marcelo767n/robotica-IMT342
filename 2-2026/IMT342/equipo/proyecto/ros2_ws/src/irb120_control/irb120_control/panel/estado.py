@@ -10,6 +10,7 @@ import time
 
 from irb120_control.rws_j6 import Refused
 from irb120_control.rws_mover import CODES, MAX_STEP_DEG, SPEED_MAX_DEG_S, SPEED_MAX_MM_S, move_to, split_path
+from irb120_control.panel.biblioteca_panel import BibliotecaPanel
 from irb120_control.panel.buzon import Buzon
 from irb120_control.panel.cinematica import clean_tool, convertir_herramienta, pose_of, solve_pose
 from irb120_control.panel.limites import BOUNDS, EXT, clean_target
@@ -20,7 +21,8 @@ FRESH_S = 3.0            # una medida más antigua no se dibuja como postura act
 ACTIONS = ('objetivo', 'enviar', 'cancelar', 'sincronizar', 'paso', 'terminar', 'ik', 'herramienta', 'posicion',
            'velocidad', 'trayectoria', 'vista_previa', 'pausar', 'reanudar', 'detener_al_final', 'buzon_tomar',
            'buzon_vaciar',
-           'punto_externo')
+           'punto_externo', 'trayectorias_listar', 'trayectoria_ejecutar', 'trayectoria_vista_previa', 'grabar_punto',
+           'grabar_borrar_ultimo', 'grabar_vaciar', 'grabar_guardar')
 ACCIONES_GRANDES = ('trayectoria', 'vista_previa')   # llevan la trayectoria entera: hasta 64 KiB
 MAX_ORDEN_BYTES = 4096
 MAX_ORDEN_GRANDE_BYTES = 65536
@@ -33,7 +35,8 @@ POSICIONES = {'cero': [0.] * 6, 'reposo': [0., 0., 0., 0., 30., 0.]}
 class Panel:
     """Estado compartido entre la página, RViz y el hilo que envía. Sin ROS ni HTTP: se prueba solo."""
 
-    def __init__(self, mover, step=MAX_STEP_DEG, timeout=120., simulated=False, clock=time.monotonic):
+    def __init__(self, mover, step=MAX_STEP_DEG, timeout=120., simulated=False, clock=time.monotonic,
+                 carpeta_trayectorias=None):
         self.mover, self.timeout, self.simulated, self.clock = mover, timeout, simulated, clock
         self.step = min(self.clean_step(step), self.limite_paso())
         self.mutex = threading.Lock()
@@ -55,6 +58,7 @@ class Panel:
         self.speed_pct = None      # velocidad en % de vMax; se lee del robot (pcVelPct)
         self.buzon = Buzon()
         self.ejecutor = Ejecutor(self)
+        self.biblioteca = BibliotecaPanel(self, carpeta_trayectorias)
         mover.on_joints = self._measured
 
     # ---------- lectura ----------
@@ -299,6 +303,10 @@ class Panel:
         if q is None:
             raise Refused('Todavía no hay lectura del robot.' if medida else 'Todavía no hay objetivo.')
         entry = self.buzon.agregar('rviz', pose_of(q, tool), tool, q=q)
+        try:
+            self.biblioteca.agregar(q, 'postura medida' if medida else 'objetivo naranja')
+        except Refused:
+            pass
         self.say(f"Buzón: punto {entry['nombre']} ({'postura medida' if medida else 'objetivo'}) desde RViz.")
         return entry
 
@@ -329,6 +337,20 @@ class Panel:
             return {'trayectoria': self.ejecutor.preparar(body)}
         if action == 'vista_previa':
             return self.ejecutor.vista_previa(body)
+        if action == 'trayectorias_listar':
+            return {'biblioteca': self.biblioteca.listar(forzar=True)}
+        if action == 'trayectoria_ejecutar':
+            return self.biblioteca.ejecutar(body)
+        if action == 'trayectoria_vista_previa':
+            return self.biblioteca.vista_previa(body)
+        if action == 'grabar_punto':
+            return self.biblioteca.grabar_punto()
+        if action == 'grabar_borrar_ultimo':
+            return self.biblioteca.borrar_ultimo()
+        if action == 'grabar_vaciar':
+            return self.biblioteca.vaciar()
+        if action == 'grabar_guardar':
+            return self.biblioteca.guardar(body)
         if action == 'pausar':
             return {'trayectoria': self.ejecutor.pausar()}
         if action == 'reanudar':
@@ -384,6 +406,7 @@ class Panel:
 
     def snapshot(self):
         shot = self._snapshot()
+        shot['biblioteca'], shot['grabacion'] = self.biblioteca.listar(), self.biblioteca.estado_grabacion()
         try:
             shot['verificacion'] = self.verification()
         except Exception as exc:  # el panel sigue funcionando aunque falle el modelo
