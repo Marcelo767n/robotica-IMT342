@@ -18,7 +18,8 @@ from irb120_control.panel.trayectoria import Ejecutor
 
 FRESH_S = 3.0            # una medida más antigua no se dibuja como postura actual
 ACTIONS = ('objetivo', 'enviar', 'cancelar', 'sincronizar', 'paso', 'terminar', 'ik', 'herramienta', 'posicion',
-           'velocidad', 'trayectoria', 'vista_previa', 'pausar', 'reanudar', 'buzon_tomar', 'buzon_vaciar',
+           'velocidad', 'trayectoria', 'vista_previa', 'pausar', 'reanudar', 'detener_al_final', 'buzon_tomar',
+           'buzon_vaciar',
            'punto_externo')
 ACCIONES_GRANDES = ('trayectoria', 'vista_previa')   # llevan la trayectoria entera: hasta 64 KiB
 MAX_ORDEN_BYTES = 4096
@@ -34,7 +35,7 @@ class Panel:
 
     def __init__(self, mover, step=MAX_STEP_DEG, timeout=120., simulated=False, clock=time.monotonic):
         self.mover, self.timeout, self.simulated, self.clock = mover, timeout, simulated, clock
-        self.step = self.clean_step(step)
+        self.step = min(self.clean_step(step), self.limite_paso())
         self.mutex = threading.Lock()
         self.measured = None
         self.measured_at = None
@@ -105,6 +106,15 @@ class Panel:
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 < value <= MAX_STEP_DEG:
             raise Refused(f'El paso debe estar entre 0 y {MAX_STEP_DEG:g}°.')
         return float(value)
+
+    def limite_paso(self):
+        """Paso máximo por orden según el módulo del robot (v4: 40°; v5 y simulado: MAX_STEP_DEG)."""
+        return getattr(self.mover, 'step_limit', lambda: MAX_STEP_DEG)()
+
+    def capacidades(self):
+        """Qué admite el módulo instalado: la v4 no hace MoveL y parte los tramos en órdenes de ≤40°."""
+        v4 = str((self.state or {}).get('module') or '').startswith('servidor_v4')
+        return {'lineal': not v4, 'un_solo_paso': not v4}
 
     def set_target(self, values, desired=None):
         """desired: pose [mm, °] que se pidió por IK; None si el objetivo se dio en ángulos."""
@@ -221,7 +231,7 @@ class Panel:
         return pct
 
     def set_step(self, value):
-        value = self.clean_step(value)
+        value = min(self.clean_step(value), self.limite_paso())
         with self.mutex:
             self.step = value
 
@@ -323,6 +333,8 @@ class Panel:
             return {'trayectoria': self.ejecutor.pausar()}
         if action == 'reanudar':
             return {'trayectoria': self.ejecutor.reanudar()}
+        if action == 'detener_al_final':
+            return {'trayectoria': self.ejecutor.detener_al_final()}
         if action == 'buzon_tomar':
             entries, last = self.buzon.tomar(body.get('desde_id', 0))
             return {'entradas': entries, 'ultimo_id': last}
@@ -399,7 +411,8 @@ class Panel:
                     'servidor_activo': state.get('rbActivo') == 1,
                     'ultimo': None if code is None else CODES.get(int(code), str(code)),
                     'medido': self.measured, 'edad_s': age, 'objetivo': self.target, 'limites': BOUNDS,
-                    'paso': self.step, 'paso_max': MAX_STEP_DEG, 'posiciones': POSICIONES,
+                    'paso': self.step, 'paso_max': self.limite_paso(),
+                    'capacidades': self.capacidades(), 'posiciones': POSICIONES,
                     'velocidad_pct': self.speed_pct,
                     'velocidad_mm_s': None if self.speed_pct is None else SPEED_MAX_MM_S * self.speed_pct / 100,
                     'velocidad_deg_s': None if self.speed_pct is None else SPEED_MAX_DEG_S * self.speed_pct / 100, 'ordenes': orders, 'ocupado': self.busy,

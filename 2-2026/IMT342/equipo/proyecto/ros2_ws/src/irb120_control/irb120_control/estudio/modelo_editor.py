@@ -32,6 +32,14 @@ class Editor:
                 return c
         raise ValueError('Demasiados puntos.')
 
+    def nombre_captura(self):
+        """P1, P2… (el menor libre): nombre automático de los puntos capturados del robot."""
+        usados = set(self.nombres())
+        k = 1
+        while f'P{k}' in usados:
+            k += 1
+        return f'P{k}'
+
     def agregar(self, punto):
         punto.nombre = self.nombre_nuevo(punto.nombre)
         self.puntos.append(punto)

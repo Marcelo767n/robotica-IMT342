@@ -443,5 +443,45 @@ class SimulatedTramo(unittest.TestCase):
         self.assertEqual(Panel(SimulatedMover(), simulated=True).step, 355.)
 
 
+class PanelModuloV4(unittest.TestCase):
+    def test_capacidades_v5_and_simulated_unchanged(self):
+        panel = Panel(SimulatedMover(), simulated=True); panel.poll()
+        shot = panel.snapshot()
+        self.assertEqual(shot['capacidades'], {'lineal': True, 'un_solo_paso': True})
+        self.assertEqual(shot['paso'], 355.); self.assertEqual(shot['paso_max'], 355.)
+        abb = Abb('MANR'); panel = Panel(mover(abb)); panel.poll()
+        self.assertEqual(panel.snapshot()['capacidades'], {'lineal': True, 'un_solo_paso': True})
+        self.assertEqual(panel.snapshot()['modulo'], 'servidor_v5')
+
+    def test_v4_panel_reports_capabilities_and_caps_step(self):
+        from irb120_control.rws_mover import Mover
+        from test_rws_mover import V4
+        abb = Abb('MANR'); abb.source = V4; abb.max_step = 45; del abb.nums['pcTipo']
+        client = Mover(abb, 'http://127.0.0.1', session_factory=lambda: abb, sleep=lambda s: None, modulo='v4')
+        client.connect()
+        panel = Panel(client); panel.poll()
+        shot = panel.snapshot()
+        self.assertEqual(shot['modulo'], 'servidor_v4')
+        self.assertEqual(shot['capacidades'], {'lineal': False, 'un_solo_paso': False})
+        self.assertEqual((shot['paso'], shot['paso_max']), (40., 40.))
+        panel.set_step(200)
+        self.assertEqual(panel.step, 40.)
+        self.assertEqual(shot['faltas'], [])
+
+    def test_v4_panel_sends_100_degrees_in_3_orders(self):
+        from irb120_control.rws_mover import Mover
+        from test_rws_mover import V4
+        abb = Abb('MANR'); abb.source = V4; abb.max_step = 45; del abb.nums['pcTipo']
+        abb.current = [0., 0., 0., 0., 30., 0.]
+        client = Mover(abb, 'http://127.0.0.1', session_factory=lambda: abb, sleep=lambda s: None, modulo='v4')
+        client.connect()
+        panel = Panel(client); panel.poll()
+        panel.verification = lambda: {'envio_permitido': True, 'motivo': ''}   # la verificación ABB tiene sus pruebas
+        panel.handle('enviar', {'q': [0., 0., 0., 0., 30., 100.]})
+        wait_idle(panel)
+        seqs = [c[3]['value'] for c in abb.calls if c[0] == 'POST' and c[1].endswith('pcSeq')]
+        self.assertEqual(seqs, ['1', '2', '3'])
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -32,7 +32,7 @@ from irb120_control.rws_j6 import MASTERSHIP
 from irb120_control.rws_j6 import (Client, Refused, EMPTY, LIMITS, SYMBOL, SERVER_CANDIDATE,
     SERVER_MODULE_SHA256, SERVER_AUTO_MODULE_SHA256, ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
     SERVER_V2_SHA256, SERVER_V2_AUTO_SHA256, SERVER_V3_SHA256, SERVER_V3_AUTO_SHA256, SERVER_LABELS,
-    SERVER_V4_SHA256, SERVER_V4_AUTO_SHA256,
+    SERVER_V4_SHA256, SERVER_V4_AUTO_SHA256, SERVER_V4_CANDIDATE,
     SERVER_V4_CUT_SHA256, SERVER_V4_30S_SHA256, SERVER_V4_30S_AUTO_SHA256,
     measured_target, module_label, parse_target, literal, same_target, single, source_fingerprint)
 
@@ -42,6 +42,9 @@ SPEED_MAX_MM_S, SPEED_MAX_DEG_S = 250., 60.   # vMax del RAPID v4/v5: 100 %
 RMMP = '/users/rmmp'
 RMMP_POLL = '/users/rmmp/poll'
 RAPID_MAX_STEP_DEG = 360.0  # maxPasoDeg del módulo RAPID v5 (la v3/v4 admitían 45°)
+V4_STEP_DEG = 40.0          # módulo v4 (maxPasoDeg 45): órdenes de como máximo 40° por eje
+MODULOS = ('v4', 'v5')
+V4_LABELS = ('servidor_v4', 'servidor_v4_auto')
 MAX_STEP_DEG = 355.0        # paso máximo de la PC: 5° de margen para el error residual de llegada
 POSE_DECIMALS, QUAT_DECIMALS = 3, 6   # mm y cuaternión de pcPose
 POSE_TOL_MM, POSE_TOL_Q = 1e-3, 1e-6  # lectura de vuelta de pcPose
@@ -233,8 +236,11 @@ class Rmmp:
 
 
 class Mover(Client):
-    def __init__(self, session, base, session_factory=None, timeout=3., log=None, sleep=time.sleep):
+    def __init__(self, session, base, session_factory=None, timeout=3., log=None, sleep=time.sleep, modulo='v5'):
         super().__init__(session, base, timeout)
+        if modulo not in MODULOS:
+            raise Refused("modulo debe ser 'v4' o 'v5'.")
+        self.modulo = modulo   # módulo que el operador ESPERA en el robot (v4 = respaldo)
         self.extra_reads = {BASE_SYMBOL + name for name in NUM_SYMBOLS} | {BASE_SYMBOL + 'pcPose', RMMP_POLL, PCP}
         self.rmmp = Rmmp(self, session_factory or (lambda: type(session)()))
         self.log, self.sleep = log, sleep
@@ -246,6 +252,16 @@ class Mover(Client):
 
     def is_v5(self):
         return self.module_version.startswith('servidor_v5')
+
+    def is_v4(self):
+        return self.module_version.startswith('servidor_v4')
+
+    def step_limit(self):
+        """Paso máximo por eje y orden según el módulo instalado (la v4 solo admite 45°)."""
+        return V4_STEP_DEG if self.is_v4() else MAX_STEP_DEG
+
+    def expected_labels(self):
+        return V4_LABELS if self.modulo == 'v4' else SERVER_LABELS
 
     def start_keeper(self, period=2.):
         """Mantiene RMMP mientras el usuario escribe en el prompt (sin sondeo el ABB lo revoca)."""
@@ -333,12 +349,17 @@ class Mover(Client):
     # ---------- protocolo ----------
     def ready(self, state):
         problems = []
-        if state.get('module') not in SERVER_LABELS:
-            problems.append(f"módulo {state.get('module')}: instalar la v5 ('./brazo.sh instalar' o 'instalar-auto', "
-                            "llave AUTO, motores apagados, RAPID detenido)")
+        auto_label = 'servidor_v4_auto' if self.modulo == 'v4' else 'servidor_v5_auto'
+        if state.get('module') not in self.expected_labels():
+            if self.modulo == 'v4':
+                problems.append(f"módulo {state.get('module')}: se espera la v4; ejecutar `brazo sesion --v4` "
+                                "(llave AUTO, motores apagados, RAPID detenido)")
+            else:
+                problems.append(f"módulo {state.get('module')}: instalar la v5 ('./brazo.sh instalar' o 'instalar-auto', "
+                                "llave AUTO, motores apagados, RAPID detenido)")
         if state['opmode'] == 'MANF':
             problems.append('modo manual 100%: usar manual reducido')
-        elif state['opmode'] == 'AUTO' and state.get('module') != 'servidor_v5_auto':
+        elif state['opmode'] == 'AUTO' and state.get('module') != auto_label:
             problems.append('modo AUTO: el módulo solo acepta manual reducido (permitirAuto := FALSE)')
         if state['ctrlstate'] != 'motoron':
             problems.append(f"motores {state['ctrlstate']}: mantener el habilitador (manual) o Motors On (AUTO)")
@@ -362,6 +383,7 @@ class Mover(Client):
         problems = self.ready(state)
         if problems:
             raise Refused('No listo: ' + '; '.join(problems))
+        step = min(step, self.step_limit())   # v4: nunca más de 40° por eje en una orden
         current = [state['joints_deg'], [9e9] * 6]
         target = check_target(target, current, step)
         self.ensure_rmmp(state)
@@ -447,8 +469,10 @@ class Mover(Client):
         state = self.status()
         if state['opmode'] != 'AUTO':
             raise Refused(f"Solo en AUTO (ahora {state['opmode']}). En manual: PP a rutina en el FlexPendant.")
-        if state['module'] != 'servidor_v5_auto':
-            raise Refused(f"El módulo es {state['module']}: instalar con ./brazo.sh instalar-auto.")
+        auto_label = 'servidor_v4_auto' if self.modulo == 'v4' else 'servidor_v5_auto'
+        if state['module'] != auto_label:
+            raise Refused(f"El módulo es {state['module']}: instalar con ./brazo.sh instalar-auto"
+                          + (' (o `brazo sesion --v4`).' if self.modulo == 'v4' else '.'))
         if state['execution'] != 'stopped':
             raise Refused('RAPID ya está en ejecución: pulsar Stop en el FlexPendant antes de arrancar.')
         if state['ctrlstate'] != 'motoron':
@@ -496,13 +520,16 @@ class Mover(Client):
         """auto=True instala la misma v5 con permitirAuto := TRUE (motores ON sin habilitador,
         solo con autorización del responsable). Se transfiere por RWS para que la huella sea
         exacta: editar la línea en el FlexPendant puede reformatearla."""
-        path, sha = SERVER_CANDIDATE, SERVER_MODULE_SHA256
+        v4 = self.modulo == 'v4'
+        candidate = SERVER_V4_CANDIDATE if v4 else SERVER_CANDIDATE
+        path, sha = candidate, SERVER_V4_SHA256 if v4 else SERVER_MODULE_SHA256
         if auto:
-            source = SERVER_CANDIDATE.read_text(encoding='utf-8')
+            source = candidate.read_text(encoding='utf-8')
             if source.count(AUTO_OFF) != 1:
                 raise Refused('El candidato no contiene exactamente una línea permitirAuto := FALSE.')
             directory.mkdir(parents=True, exist_ok=True)
-            path, sha = directory / 'LabJointRws_auto.mod', SERVER_AUTO_MODULE_SHA256
+            path = directory / ('LabJointRws_v4_auto.mod' if v4 else 'LabJointRws_auto.mod')
+            sha = SERVER_V4_AUTO_SHA256 if v4 else SERVER_AUTO_MODULE_SHA256
             path.write_text(source.replace(AUTO_OFF, AUTO_ON), encoding='utf-8')
         return self.update_module(directory, candidate_path=path, candidate_sha=sha,
                                   accepted=(ORIGINAL_NORMALIZED_SHA256, J6_MODULE_SHA256,
@@ -525,6 +552,10 @@ def move_to(mover, goal, step, timeout=120., echo=print, cancel=None):
     """Va al objetivo replanificando cada tramo desde la postura REAL (no acumula el error residual)
     y termina con una orden de corrección si al final falta más de ARRIVAL_DEG. Sirve para Mover y
     para el robot simulado (solo usa joints() y send())."""
+    limit = getattr(mover, 'step_limit', lambda: MAX_STEP_DEG)()
+    if step > limit:
+        echo(f'Módulo v4: el paso se limita a {limit:g}° por eje y orden.')
+        step = limit
     current = mover.joints()
     planned = len(split_path(current, goal, step))
     echo(f'Recorrido dividido en {planned} orden(es) de como máximo {step}° por eje.')
@@ -551,6 +582,18 @@ def move_tramo(mover, tipo, q_deg, pose_tool0, timeout=120., echo=print, cancel=
     corrige a ciegas más de LINEAL_CORRECTION_MAX_DEG: sería otra configuración del brazo.
     Devuelve {'seq', 'code', 'joints_deg', 'max_error_deg'}."""
     goal = [[float(v) for v in q_deg], [9e9] * 6]
+    if getattr(mover, 'is_v4', lambda: False)():
+        if tipo != 'articular':
+            raise Refused('el módulo v4 no hace MoveL: usar tramos articulares o instalar la v5')
+        if cancel is not None and cancel.is_set():
+            raise Refused('CANCELADO antes del tramo. El robot queda donde está.')
+        count = len(split_path(mover.joints(), goal, mover.step_limit()))
+        if count > 1:
+            echo(f'módulo v4: el tramo se parte en {count} órdenes')
+        echo(f'Tramo {tipo} → ' + ', '.join(f'{v:.3f}' for v in goal[0]))
+        result = move_to(mover, goal, mover.step_limit(), timeout, echo, cancel)
+        return {'seq': result['seq'], 'code': result['code'], 'joints_deg': result['joints_deg'],
+                'max_error_deg': result['max_error_deg']}
     if cancel is not None and cancel.is_set():
         raise Refused('CANCELADO antes del tramo. El robot queda donde está.')
     echo(f'Tramo {tipo} → ' + ', '.join(f'{v:.3f}' for v in goal[0]))
@@ -692,6 +735,8 @@ def main(argv=None):
     parser.add_argument('--http-port', type=int, default=80, help='Distinto de 80 solo en 127.0.0.1')
     parser.add_argument('--paso', type=float, default=5., help=f'Máximo cambio por eje en cada orden (≤{MAX_STEP_DEG:g}°)')
     parser.add_argument('--timeout', type=float, default=120., help='Segundos de espera por orden')
+    parser.add_argument('--modulo', choices=MODULOS, default='v5',
+                        help='módulo esperado en el robot (v4 = respaldo, hasta 45° por orden, sin MoveL)')
     parser.add_argument('--auto', action='store_true',
                         help='instalar: variante con permitirAuto := TRUE (modo AUTO, motores ON sin habilitador)')
     parser.add_argument('--log-dir', type=Path, default=PROJECT / 'salidas/control_articular/rws_mover')
@@ -715,7 +760,7 @@ def main(argv=None):
         with requests.Session() as session:
             session.trust_env = False
             session.auth = HTTPDigestAuth(args.user, password)
-            mover = Mover(session, base, session_factory=requests.Session, log=log)
+            mover = Mover(session, base, session_factory=requests.Session, log=log, modulo=args.modulo)
             identity = mover.connect()
             print(f"Controlador {identity['name']} | RobotWare {identity['rwversionname']} | "
                   f"módulo {mover.module_version}")

@@ -6,7 +6,7 @@ from irb120_control.rws_mover import Mover, logout
 from irb120_control.panel.simulado import SimulatedMover
 
 
-def abrir(base, user, log_dir, simulated=False):
+def abrir(base, user, log_dir, simulated=False, modulo='v5'):
     """Devuelve (mover, session). Pide la contraseña en la terminal; no se guarda."""
     if simulated:
         print('MODO SIMULADO: no se conecta a ningún robot.', flush=True)
@@ -18,7 +18,8 @@ def abrir(base, user, log_dir, simulated=False):
     session.trust_env = False
     session.auth = HTTPDigestAuth(user, password)
     stamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%fZ')
-    mover = Mover(session, base, session_factory=requests.Session, log=log_dir / f'panel_{stamp}.jsonl')
+    mover = Mover(session, base, session_factory=requests.Session, log=log_dir / f'panel_{stamp}.jsonl',
+                  modulo=modulo)
     try:
         identity = mover.connect()
     except BaseException:

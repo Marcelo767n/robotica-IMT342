@@ -193,6 +193,81 @@ class Ejecucion(Base):
         self.terminar(panel)
         self.assertEqual(panel.ejecutor.estado()['fase'], 'cancelada')
 
+    def test_bucle_continuo_tres_vueltas_y_detener_al_final(self):
+        panel = None
+        vistos = []
+
+        def gancho():
+            e = panel.ejecutor.estado()
+            if e['vuelta'] >= 3 and e['resultados'] and not vistos:
+                vistos.append(dict(e))
+                panel.handle('detener_al_final', {})
+        panel = self.panel(gancho)
+        panel.handle('trayectoria', self.cuerpo(panel, tray(repeticiones=0)))
+        self.assertIsNone(panel.ejecutor.estado()['vueltas'])
+        self.assertTrue(panel.ejecutor.estado()['bucle'])
+        self.terminar(panel)
+        estado = panel.ejecutor.estado()
+        self.assertEqual(estado['fase'], 'terminada', estado['mensaje'])
+        self.assertIn('detenida al final de la vuelta', estado['mensaje'])
+        self.assertGreaterEqual(estado['vuelta'], 3)
+        self.assertIsNone(estado['vueltas'])
+        # terminó la vuelta en curso: el último tramo es el cierre a A y el robot está en A
+        self.assertEqual(estado['resultados'][-1]['hasta'], 'A')
+        self.assertEqual(estado['resultados'][-1]['vuelta'], estado['vuelta'])
+        self.assertLess(max(abs(a - b) for a, b in zip(panel.mover.q, A)), .05)
+        self.assertFalse(panel.busy)
+        with self.assertRaises(Refused):
+            panel.handle('detener_al_final', {})   # ya no hay nada en ejecución
+
+    def test_bucle_se_cancela_entre_tramos(self):
+        panel = None
+        pedido = []
+
+        def gancho():
+            e = panel.ejecutor.estado()
+            if e['vuelta'] >= 3 and not pedido:
+                pedido.append(True)
+                panel.handle('cancelar', {})
+        panel = self.panel(gancho)
+        panel.handle('trayectoria', self.cuerpo(panel, tray(repeticiones=0)))
+        self.terminar(panel)
+        estado = panel.ejecutor.estado()
+        self.assertEqual(estado['fase'], 'cancelada', estado['mensaje'])
+        self.assertGreaterEqual(estado['vuelta'], 3)
+
+    def test_bucle_abierto_vuelve_a_a_en_cada_vuelta(self):
+        panel = None
+
+        def gancho():
+            if panel.ejecutor.estado()['vuelta'] >= 3:
+                panel.ejecutor.detener_fin.set()
+        panel = self.panel(gancho)
+        panel.handle('trayectoria', self.cuerpo(panel, tray(cerrar=False, repeticiones=0)))
+        self.terminar(panel)
+        estado = panel.ejecutor.estado()
+        self.assertEqual(estado['fase'], 'terminada', estado['mensaje'])
+        filas = estado['resultados']
+        self.assertEqual(filas[-1]['hasta'], 'C')                 # se queda en el último punto
+        vuelta2 = [f['hasta'] for f in filas if f['vuelta'] == 2]
+        self.assertEqual(vuelta2, ['A', 'B', 'C'])                # la vuelta 2 empezó volviendo a A
+
+    def test_detener_al_final_con_vueltas_finitas_y_en_pausa(self):
+        panel = None
+        pedido = []
+
+        def gancho():
+            if not pedido:
+                pedido.append(True)
+                panel.handle('detener_al_final', {})
+        panel = self.panel(gancho)
+        panel.handle('trayectoria', self.cuerpo(panel, tray(repeticiones=5)))
+        self.terminar(panel)
+        estado = panel.ejecutor.estado()
+        self.assertEqual((estado['fase'], estado['vuelta']), ('terminada', 1), estado['mensaje'])
+        with self.assertRaises(Refused):
+            panel.handle('detener_al_final', {})
+
     def test_la_verificacion_contra_el_controlador_bloquea(self):
         panel = self.panel()
         original = panel.mover.controller_pose

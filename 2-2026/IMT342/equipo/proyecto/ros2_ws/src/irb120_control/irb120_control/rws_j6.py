@@ -32,6 +32,8 @@ SERVER_AUTO_MODULE_SHA256 = 'e912974fd278541413bec7299e40b71179667da1c1e3c156321
 # Versión 4 (17/11/2026, hasta 45° por orden, velocidad en % con pcVelPct): se reconoce para sustituirla.
 SERVER_V4_SHA256 = 'd2a073d6f129dfa973a705474ff5d813703801ea3df0840c9693d9b037544af3'
 SERVER_V4_AUTO_SHA256 = '8cbed67802750bd3c010b64afce428bb9f8e48df9ab49a7449ed832bfec9559e'
+# Copia versionada de esa v4 (modo de respaldo «brazo sesion --v4»); misma huella que la instalada el 17/11.
+SERVER_V4_CANDIDATE = Path(__file__).resolve().parents[1] / 'rapid/rws_mover/LabJointRws_v4.mod'
 # v4 con solo 30 s para pulsar «Iniciar» (instalada el 17/11): se reconoce para sustituirla.
 SERVER_V4_30S_SHA256 = '157f9bcf62af9da55c0786a8d77b8928e043fb5847d9af75a233bd20bdeb8bca'
 SERVER_V4_30S_AUTO_SHA256 = '021ef371c22000d359f3a3f2316567ac4d5198c1160703601759c517dbbc64f7'

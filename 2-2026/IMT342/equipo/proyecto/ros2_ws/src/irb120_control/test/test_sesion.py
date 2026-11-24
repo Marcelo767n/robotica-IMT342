@@ -3,7 +3,7 @@ import threading
 import unittest
 
 from irb120_control.panel.sesion import preparar_auto
-from irb120_control.rws_j6 import EMPTY
+from irb120_control.rws_j6 import EMPTY, Refused
 
 
 class FakeRobot:
@@ -30,10 +30,13 @@ class FakeRobot:
     def set_target(self, target):
         self.calls.append('limpiar'); self.target = target
 
+    install_passes = True
+    modulo = 'v5'
+
     def install(self, folder, auto=False):
         assert auto and self.s['ctrlstate'] == 'motoroff' and self.target == EMPTY
-        self.calls.append('instalar'); self.s['module'] = 'servidor_v5_auto'
-        return {'passed': True}
+        self.calls.append('instalar'); self.s['module'] = f'servidor_{self.modulo}_auto'
+        return {'passed': self.install_passes}
 
     def connect(self):
         self.calls.append('connect')
@@ -98,6 +101,64 @@ class Sesion(unittest.TestCase):
         robot.operator = [lambda s: s.update(ctrlstate='motoron'), lambda s: s.update(rbActivo=1.)]
         preparar_auto(robot, None, echo=lambda _: None, sleep=robot.sleep, timeout=5.)
         self.assertEqual(robot.calls, ['arrancar'])
+
+
+class SesionV4(unittest.TestCase):
+    def robot(self, **kw):
+        robot = FakeRobot(**kw); robot.modulo = 'v4'
+        return robot
+
+    def test_v4_present_is_not_reinstalled(self):
+        robot = self.robot(module='servidor_v4_auto', opmode='AUTO', ctrl='motoroff', execution='stopped')
+        robot.operator = [lambda s: s.update(ctrlstate='motoron'), lambda s: s.update(rbActivo=1.)]
+        lines = []
+        preparar_auto(robot, None, echo=lines.append, sleep=robot.sleep, timeout=5., modulo='v4')
+        self.assertEqual(robot.calls, ['arrancar'])
+        self.assertNotIn('se instalará', '\n'.join(lines))
+
+    def test_v4_already_running_does_nothing(self):
+        robot = self.robot(module='servidor_v4_auto', opmode='AUTO'); robot.s['rbActivo'] = 1.
+        preparar_auto(robot, None, echo=lambda _: None, sleep=robot.sleep, timeout=1., modulo='v4')
+        self.assertEqual(robot.calls, [])
+
+    def test_v4_installed_when_robot_has_another_module(self):
+        for module in ('servidor_v5_auto', 'servidor_v3_auto'):
+            robot = self.robot(module=module, opmode='AUTO', ctrl='motoron', execution='running')
+            robot.s['rbActivo'] = 1.
+            lines = []
+            robot.operator = [lambda s: s.update(execution='stopped', ctrlstate='motoroff'),
+                              lambda s: s.update(ctrlstate='motoroff'),
+                              lambda s: s.update(ctrlstate='motoron'),
+                              lambda s: s.update(rbActivo=1.)]
+            preparar_auto(robot, None, echo=lines.append, sleep=robot.sleep, timeout=5., modulo='v4')
+            self.assertEqual(robot.calls[:3], ['limpiar', 'instalar', 'connect'])
+            self.assertEqual(robot.s['module'], 'servidor_v4_auto')
+            self.assertIn('v4', '\n'.join(lines))
+
+    def test_v5_install_failure_says_to_use_v4(self):
+        robot = FakeRobot(module='servidor_v3_auto', opmode='AUTO', ctrl='motoroff', execution='stopped')
+        robot.install_passes = False
+        with self.assertRaises(Refused) as caught:
+            preparar_auto(robot, None, echo=lambda _: None, sleep=robot.sleep, timeout=5.)
+        self.assertIn('ejecutar `brazo sesion --v4`', str(caught.exception).replace('Ejecutar', 'ejecutar'))
+        self.assertNotIn('arrancar', robot.calls)
+
+    def test_v5_rapid_start_failure_says_to_use_v4(self):
+        robot = FakeRobot(module='servidor_v5_auto', opmode='AUTO', ctrl='motoron', execution='stopped')
+
+        def fails(echo=print):
+            raise Refused('POST: HTTP 400')
+        robot.start_server = fails
+        with self.assertRaises(Refused) as caught:
+            preparar_auto(robot, None, echo=lambda _: None, sleep=robot.sleep, timeout=5.)
+        self.assertIn('brazo sesion --v4', str(caught.exception))
+
+    def test_v4_failure_does_not_point_to_itself(self):
+        robot = self.robot(module='servidor_v3_auto', opmode='AUTO', ctrl='motoroff', execution='stopped')
+        robot.install_passes = False
+        with self.assertRaises(Refused) as caught:
+            preparar_auto(robot, None, echo=lambda _: None, sleep=robot.sleep, timeout=5., modulo='v4')
+        self.assertNotIn('--v4', str(caught.exception))
 
 
 if __name__ == '__main__':

@@ -10,6 +10,11 @@ Flujo de `trayectoria` (el Estudio manda la trayectoria y las órdenes que él c
      empieza en el último punto, algo que el plan de la vuelta 1 no cubre).
   4. Al llegar se registra el error por eje (° y % del recorrido) y dx/dy/dz del TCP real frente al pedido.
 
+BUCLE: `repeticiones = 0` repite vueltas hasta «detener_al_final» (termina la vuelta en curso y se queda en su último
+punto) o «cancelar» (entre tramos). Cada vuelta nueva se re-planifica desde la postura real; el tramo 0 del plan
+lleva siempre al primer punto, así que una trayectoria abierta también vuelve a A antes de repetir.
+`vueltas` es None (∞) en el estado; `vuelta` sigue contando.
+
 PARAR: el robot real solo se detiene ENTRE órdenes. «cancelar» y «pausar» actúan al terminar el tramo en curso
 (un tramo puede durar segundos). Para parar YA: habilitador, Stop o paro de emergencia del FlexPendant.
 
@@ -81,6 +86,8 @@ class Ejecutor:
         self.esperada = None     # postura en la que debe estar el robot entre tramos
         self.pausa = threading.Event()        # «pausar» pedido
         self.continuar = threading.Event()    # «reanudar» aceptado
+        self.detener_fin = threading.Event()  # «detener_al_final» pedido
+        self.bucle = False
         self.previsualizando = False
         self.progreso_vista = 0.
 
@@ -143,11 +150,13 @@ class Ejecutor:
         self._reservar(vista=False)
         with self.mutex:
             self.fase, self.mensaje, self.nombre = 'ejecutando', 'Verificado: empieza la trayectoria.', tray.nombre
-            self.vuelta, self.vueltas, self.tramo, self.total = 1, tray.repeticiones, 0, len(esperadas)
+            self.bucle = tray.repeticiones == 0
+            self.vuelta, self.vueltas, self.tramo, self.total = 1, tray.repeticiones or None, 0, len(esperadas)
             self.actual, self.esperada = None, q0
             self.resultados.clear()
-            self.pausa.clear(), self.continuar.clear()
-        self.panel.say(f'Trayectoria «{tray.nombre}»: {plan.resumen} Velocidad {speed} %, {tray.repeticiones} vuelta(s).')
+            self.pausa.clear(), self.continuar.clear(), self.detener_fin.clear()
+        vueltas = 'en bucle continuo' if self.bucle else f'{tray.repeticiones} vuelta(s)'
+        self.panel.say(f'Trayectoria «{tray.nombre}»: {plan.resumen} Velocidad {speed} %, {vueltas}.')
         hilo = threading.Thread(target=self._ejecutar, args=(tray, plan, esperadas, speed), daemon=True,
                                 name='panel-trayectoria')
         self.panel.worker = hilo
@@ -162,7 +171,9 @@ class Ejecutor:
                 if state['opmode'] in ('MANR', 'MANF') and not panel.mover.rmmp.granted:
                     panel.say('Acceso remoto: pulsar «Conceder» en el FlexPendant.')
                     panel.mover.ensure_rmmp(state)
-            for vuelta in range(1, tray.repeticiones + 1):
+            vuelta = 0
+            while True:
+                vuelta += 1
                 if vuelta > 1:
                     plan = planificar(tray, self.esperada, speed)
                     if not plan.ok:
@@ -176,12 +187,17 @@ class Ejecutor:
                         self.tramo = i + 1
                         self.actual = {'desde': tramo.desde, 'hasta': tramo.hasta, 'tipo': orden['tipo']}
                     self._tramo(tray, vuelta, tramo, orden)
-                    ultimo = vuelta == tray.repeticiones and i == len(ordenes) - 1
+                    fin_vuelta = i == len(ordenes) - 1
+                    ultimo = fin_vuelta and (vuelta == tray.repeticiones or self.detener_fin.is_set())
                     if self.pausa.is_set() and not ultimo:
                         self._esperar_reanudar(vuelta, i + 1, len(ordenes))
+                if vuelta == tray.repeticiones or self.detener_fin.is_set():
+                    break
+            texto = ('Trayectoria detenida al final de la vuelta %d.' % vuelta if self.detener_fin.is_set()
+                     else 'Trayectoria terminada.')
             with self.mutex:
-                self.fase, self.mensaje, self.actual = 'terminada', 'Trayectoria terminada.', None
-            panel.say('Trayectoria terminada.')
+                self.fase, self.mensaje, self.actual = 'terminada', texto, None
+            panel.say(texto)
         except Refused as exc:
             cancelada = panel.cancel.is_set()
             with self.mutex:
@@ -192,7 +208,7 @@ class Ejecutor:
                 self.fase, self.mensaje = 'error', f'Fallo: {exc}'
             panel.say(f'DETENIDO: fallo inesperado: {exc}')
         finally:
-            self.pausa.clear()
+            self.pausa.clear(), self.detener_fin.clear()
             with panel.mutex:
                 panel.busy, panel.progress = False, ''
             panel.poll()
@@ -294,6 +310,16 @@ class Ejecutor:
         self.panel.say(self.mensaje + ' Para parar YA: habilitador, Stop o paro de emergencia.')
         return self.estado()
 
+    def detener_al_final(self):
+        """Termina la vuelta en curso y se para en su último punto (también sirve con vueltas finitas)."""
+        with self.mutex:
+            if self.fase not in ('ejecutando', 'pausada'):
+                raise Refused('No hay ninguna trayectoria en ejecución.')
+            self.detener_fin.set()
+            self.mensaje = f'Se detendrá al terminar la vuelta {self.vuelta}.'
+        self.panel.say(self.mensaje)
+        return self.estado()
+
     def reanudar(self):
         with self.mutex:
             if self.fase != 'pausada':
@@ -359,6 +385,7 @@ class Ejecutor:
     def estado(self):
         with self.mutex:
             return {'fase': self.fase, 'nombre': self.nombre, 'vuelta': self.vuelta, 'vueltas': self.vueltas,
+                    'bucle': self.bucle, 'detener_al_final': self.detener_fin.is_set(),
                     'tramo': self.tramo, 'total': self.total, 'actual': self.actual, 'mensaje': self.mensaje,
                     'resultados': list(self.resultados),
                     'vista_previa': {'activa': self.previsualizando, 'progreso': self.progreso_vista}}

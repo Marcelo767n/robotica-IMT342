@@ -1,0 +1,134 @@
+{
+  "nombre": "Mirar alrededor",
+  "puntos": [
+    {
+      "nombre": "Frente",
+      "pose": [
+        513.993,
+        0.0,
+        549.942,
+        -180.0,
+        55.0,
+        -180.0
+      ],
+      "q": [
+        0.0,
+        10.0,
+        -20.0,
+        0.0,
+        45.0,
+        0.0
+      ],
+      "origen": "angulos",
+      "tipo": "articular"
+    },
+    {
+      "nombre": "Mira izquierda",
+      "pose": [
+        75.775,
+        -528.786,
+        600.255,
+        -125.168,
+        52.961,
+        147.84
+      ],
+      "q": [
+        -75.0,
+        10.0,
+        -20.0,
+        -30.0,
+        35.0,
+        0.0
+      ],
+      "origen": "angulos",
+      "tipo": "articular"
+    },
+    {
+      "nombre": "Izquierda arriba",
+      "pose": [
+        18.297,
+        -439.697,
+        681.901,
+        -132.696,
+        53.902,
+        130.108
+      ],
+      "q": [
+        -75.0,
+        5.0,
+        -35.0,
+        -30.0,
+        60.0,
+        0.0
+      ],
+      "origen": "angulos",
+      "tipo": "articular"
+    },
+    {
+      "nombre": "Mira derecha",
+      "pose": [
+        75.775,
+        528.786,
+        600.255,
+        125.168,
+        52.961,
+        -147.84
+      ],
+      "q": [
+        75.0,
+        10.0,
+        -20.0,
+        30.0,
+        35.0,
+        0.0
+      ],
+      "origen": "angulos",
+      "tipo": "articular"
+    },
+    {
+      "nombre": "Derecha arriba",
+      "pose": [
+        18.297,
+        439.697,
+        681.901,
+        132.696,
+        53.902,
+        -130.108
+      ],
+      "q": [
+        75.0,
+        5.0,
+        -35.0,
+        30.0,
+        60.0,
+        0.0
+      ],
+      "origen": "angulos",
+      "tipo": "articular"
+    },
+    {
+      "nombre": "Vuelve",
+      "pose": [
+        445.131,
+        256.997,
+        549.942,
+        -180.0,
+        55.0,
+        -150.0
+      ],
+      "q": [
+        30.0,
+        10.0,
+        -20.0,
+        0.0,
+        45.0,
+        0.0
+      ],
+      "origen": "angulos",
+      "tipo": "articular"
+    }
+  ],
+  "cerrar": true,
+  "repeticiones": 0,
+  "herramienta": "tcp"
+}

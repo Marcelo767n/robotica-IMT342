@@ -601,5 +601,135 @@ class Lineal(unittest.TestCase):
             self.client.send(self.goal, echo=quiet)
 
 
+def mover_v4(abb):
+    client = Mover(abb, 'http://127.0.0.1', session_factory=lambda: abb, sleep=lambda s: None, modulo='v4')
+    client.connect()
+    return client
+
+
+class ModuloV4(unittest.TestCase):
+    """Modo de respaldo: la v4 (MoveAbsJ, 45° por orden) instalada hoy en el robot."""
+
+    def abb_v4(self, mode='MANR'):
+        abb = Abb(mode); abb.source = V4; abb.max_step = 45; del abb.nums['pcTipo']
+        return abb
+
+    def test_versioned_copy_has_exact_fingerprints(self):
+        from irb120_control.rws_j6 import SERVER_V4_CANDIDATE
+        text = SERVER_V4_CANDIDATE.read_text(encoding='utf-8')
+        self.assertEqual(text, V4)
+        self.assertEqual(source_fingerprint(text), SERVER_V4_SHA256)
+        self.assertEqual(source_fingerprint(text.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')),
+                         SERVER_V4_AUTO_SHA256)
+        self.assertLess(len(text), 4900)
+
+    def test_ready_accepts_v4_only_in_v4_mode(self):
+        abb = self.abb_v4()
+        self.assertEqual(mover_v4(abb).ready(mover_v4(abb).status()), [])
+        client = mover(abb)   # modo v5 por defecto
+        self.assertEqual(client.modulo, 'v5')
+        self.assertTrue(any('instalar la v5' in p for p in client.ready(client.status())))
+
+    def test_v4_mode_rejects_v5_module_and_auto_needs_auto_variant(self):
+        client = mover_v4(Abb('MANR'))   # el robot tiene la v5
+        self.assertTrue(any('brazo sesion --v4' in p for p in client.ready(client.status())))
+        abb = self.abb_v4('AUTO')        # v4 sin variante AUTO
+        client = mover_v4(abb)
+        self.assertTrue(any('modo AUTO' in p for p in client.ready(client.status())))
+        abb.source = V4.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
+        client = mover_v4(abb)
+        self.assertEqual(client.module_version, 'servidor_v4_auto')
+        self.assertEqual(client.ready(client.status()), [])
+
+    def test_v4_splits_100_degrees_in_3_orders(self):
+        abb = self.abb_v4(); abb.current = [0., 0., 0., 0., 30., 0.]
+        client = mover_v4(abb)
+        lines = []
+        result = move_tramo(client, 'articular', [0., 0., 0., 0., 30., 100.], None, echo=lines.append)
+        seqs = [c[3]['value'] for c in abb.calls if c[0] == 'POST' and c[1].endswith('pcSeq')]
+        self.assertEqual(seqs, ['1', '2', '3'])
+        self.assertIn('módulo v4: el tramo se parte en 3 órdenes', lines)
+        self.assertEqual(result['code'], 2)
+        self.assertLess(result['max_error_deg'], 0.02)
+        self.assertNotIn('pcTipo', [c[1].rsplit('/', 1)[-1] for c in abb.calls if c[0] == 'POST'])
+
+    def test_v4_short_tramo_is_one_order_without_notice(self):
+        abb = self.abb_v4(); abb.current = [0., 0., 0., 0., 30., 0.]
+        lines = []
+        move_tramo(mover_v4(abb), 'articular', [0., 0., 0., 0., 30., 35.], None, echo=lines.append)
+        self.assertEqual([c[3]['value'] for c in abb.calls if c[0] == 'POST' and c[1].endswith('pcSeq')], ['1'])
+        self.assertFalse([l for l in lines if 'se parte' in str(l)])
+
+    def test_v4_rejects_lineal_without_touching_the_robot(self):
+        abb = self.abb_v4(); client = mover_v4(abb)
+        with self.assertRaisesRegex(Refused, 'el módulo v4 no hace MoveL: usar tramos articulares o instalar la v5'):
+            move_tramo(client, 'lineal', [*abb.current[:5], abb.current[5] + 5.], POSE, echo=quiet)
+        self.assertFalse([c for c in abb.calls if c[0] == 'POST'])
+
+    def test_v4_send_never_exceeds_40_degrees_even_if_asked_for_more(self):
+        abb = self.abb_v4(); client = mover_v4(abb)
+        goal = [[*abb.current[:5], abb.current[5] + 60.], [9e9] * 6]
+        with self.assertRaisesRegex(Refused, 'paso permitido de 40'):
+            client.send(goal, step=MAX_STEP_DEG, echo=quiet)
+        self.assertFalse([c for c in abb.calls if c[0] == 'POST'])
+
+    def test_move_to_clamps_step_in_v4(self):
+        from irb120_control.rws_mover import move_to
+        abb = self.abb_v4(); abb.current = [0., 0., 0., 0., 30., 0.]
+        client = mover_v4(abb)
+        move_to(client, [[0., 0., 0., 0., 30., 100.], [9e9] * 6], MAX_STEP_DEG, echo=quiet)
+        self.assertEqual(len([c for c in abb.calls if c[0] == 'POST' and c[1].endswith('pcSeq')]), 3)
+
+    def test_install_v4_over_v5_exact_fingerprints(self):
+        import tempfile
+        for auto, sha in ((False, SERVER_V4_SHA256), (True, SERVER_V4_AUTO_SHA256)):
+            abb = Abb('AUTO'); abb.source = V2   # el robot tiene la v5
+            abb.ctrl = 'motoroff'; abb.execution = 'stopped'; abb.require_rmmp = False
+            client = mover_v4(abb)
+            with tempfile.TemporaryDirectory() as folder:
+                self.assertTrue(client.install(Path(folder), auto=auto)['passed'])
+            self.assertEqual(source_fingerprint(abb.source), sha)
+            self.assertEqual(module_label(sha), 'servidor_v4_auto' if auto else 'servidor_v4')
+
+    def test_v5_install_unchanged_in_v5_mode(self):
+        import tempfile
+        abb = Abb('AUTO'); abb.source = V4.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
+        abb.ctrl = 'motoroff'; abb.execution = 'stopped'; abb.require_rmmp = False
+        with tempfile.TemporaryDirectory() as folder:
+            self.assertTrue(mover(abb).install(Path(folder), auto=True)['passed'])
+        self.assertEqual(source_fingerprint(abb.source), SERVER_AUTO_MODULE_SHA256)
+
+    def test_start_server_accepts_v4_auto_only_in_v4_mode(self):
+        class AbbPP(Abb):
+            def __init__(self):
+                super().__init__('AUTO'); self.pp = ('MainModule', 'main')
+                self.source = V4.replace('permitirAuto := FALSE', 'permitirAuto := TRUE')
+                self.max_step = 45; self.execution = 'stopped'; self.require_rmmp = False
+
+            def get(self, url, **kw):
+                if url.endswith('/rw/rapid/tasks/T_ROB1/pcp'):
+                    return Response([{'_type': 'pcp-info', '_title': 'progpointer',
+                                      'modulemame': self.pp[0], 'routinename': self.pp[1]}])
+                return super().get(url, **kw)
+
+            def post(self, url, params=None, data=None, headers=None, **kw):
+                path = url.replace('http://127.0.0.1', '')
+                if path == '/rw/rapid/tasks/T_ROB1/pcp':
+                    self.pp = ('LabJointRws', data['routine']); return Response(status=200)
+                if path == '/rw/rapid/execution':
+                    self.execution = 'running'; return Response(status=204)
+                return super().post(url, params=params, data=data, headers=headers, **kw)
+        abb = AbbPP(); mover_v4(abb).start_server(echo=quiet)
+        self.assertEqual(abb.execution, 'running')
+        other = AbbPP()
+        with self.assertRaisesRegex(Refused, 'instalar'):
+            mover(other).start_server(echo=quiet)   # modo v5 y módulo v4: no arranca
+        self.assertEqual(other.execution, 'stopped')
+
+    def test_invalid_modulo_rejected(self):
+        with self.assertRaises(Refused):
+            Mover(Abb('MANR'), 'http://127.0.0.1', modulo='v6')
+
+
 if __name__ == '__main__':
     unittest.main()

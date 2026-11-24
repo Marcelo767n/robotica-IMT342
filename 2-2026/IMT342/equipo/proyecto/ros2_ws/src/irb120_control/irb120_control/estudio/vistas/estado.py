@@ -1,7 +1,7 @@
 """Pestaña Estado: conexión, velocidad, postura medida, verificaciones, trayectoria en curso y registro."""
 import customtkinter as ctk
 
-from irb120_control.estudio.formato import n, seis
+from irb120_control.estudio.formato import n, seis, texto_vuelta
 from irb120_control.estudio.tema import COLORES, fuente
 from irb120_control.estudio.vistas import Vista
 from irb120_control.estudio.widgets import Indicador, Tarjeta, insignia
@@ -166,7 +166,7 @@ class VistaEstado(Vista):
         self.fase.configure(text=f' {fase} ', text_color=COLORES[estado], fg_color=COLORES[f'{estado}_fondo'])
         total, tramo = tr.get('total'), tr.get('tramo')
         if total:
-            self.l_tr.configure(text=f"Vuelta {n(tr.get('vuelta'), 0)}/{n(tr.get('vueltas'), 0)} · tramo {n(tramo, 0)}/{n(total, 0)}")
+            self.l_tr.configure(text=f"{(texto_vuelta(tr) or 'vuelta —').capitalize()} · tramo {n(tramo, 0)}/{n(total, 0)}")
             try:
                 self.barra.set(max(0., min(1., float(tramo) / float(total))))
             except (TypeError, ValueError):

@@ -58,7 +58,7 @@ class Trayectoria:
     nombre: str
     puntos: list[Punto]
     cerrar: bool = True        # A→B→C→A
-    repeticiones: int = 1
+    repeticiones: int = 1      # 1..1000; 0 = bucle continuo hasta detener
     herramienta: str = 'tcp'   # tcp | brida
     def to_dict(self) -> dict; @classmethod from_dict(d); guardar(path); @classmethod cargar(path)
 
@@ -88,6 +88,7 @@ class Plan:   tramos: list[Tramo]; ok: bool; resumen: str; q_puntos: list[list[f
 ```
 
 - El tramo 0 va desde `q_inicio` (postura medida) hasta el primer punto. Con `cerrar`, el último tramo vuelve al primero. `repeticiones` repite la vuelta (el panel la repite; el plan describe una vuelta).
+- **Bucle continuo** (`repeticiones = 0`): el panel repite hasta `detener_al_final` (termina la vuelta en curso y se queda en su último punto) o `cancelar`/`pausar` (entre tramos). Estado: `vueltas = null`, `bucle = true`, `detener_al_final`; `vuelta` sigue contando. Cada vuelta nueva se re-planifica desde la postura real y su tramo 0 lleva al primer punto, así que también una trayectoria abierta vuelve a A antes de repetir. Las demos `10_saludo`…`14_baile` (`python -m irb120_control.trayectorias.demos`) usan este modo.
 - Rama de IK de cada punto: Pieper del Hito 2 (`rank_candidates`) con referencia = q del punto anterior, `min_sigma` y `min_margin_deg` de `TOLERANCIAS`.
 - `articular`: LSPB del Hito 2 con `default_limits(velocidad_pct/100)`.
 - `lineal`: recta en posición + slerp en orientación, perfil LSPB en el parámetro de camino con v = 250 mm/s · pct/100; IK en cada muestra con la rama más cercana a la muestra anterior; q̇, q̈ por diferencias.

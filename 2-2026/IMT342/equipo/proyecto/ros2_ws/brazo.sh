@@ -25,6 +25,9 @@ brazo.sh · IRB 120 desde la PC        (robot: $host · cambiar con ROBOT_HOST=.
   TODO EN UNO (jueves)
     ./brazo.sh sesion          una contraseña: comprueba el enlace, guía AUTO (llave, módulo, Motors On,
                                arranque, «Iniciar») y abre RViz + panel + Estudio de trayectorias
+    ./brazo.sh sesion --v4     lo mismo con el módulo de RESPALDO v4 (ya probado: solo articular, órdenes de ≤40°,
+                               sin MoveL). Si la v5 no carga o no arranca en el robot, usar este.
+                               También vale: ./brazo.sh panel --modulo v4
     ./brazo.sh estudio         solo el Estudio (CustomTkinter): trayectorias A→B→C→A, reglas, gráficas,
                                matemática en LaTeX. --demo sin panel · --puerto 8771 con el simulado
     ./brazo.sh analisis        la ventana de análisis anterior (tkinter, solo lectura)

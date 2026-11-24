@@ -356,6 +356,33 @@ class ContextoBibliotecaTest(unittest.TestCase):
         print(f'(12 puntos: {time.monotonic() - t0:.1f} s, ok={plan.ok})', end=' ')
 
 
+class BucleYCapturaTest(unittest.TestCase):
+    def test_nombre_de_captura_p1_p2(self):
+        e = Editor([Punto('A', q=[0, 0, 0, 0, 30, 0])])
+        self.assertEqual(e.nombre_captura(), 'P1')
+        e.agregar(Punto('P1', q=[0, 0, 0, 0, 30, 0]))
+        e.agregar(Punto('P3', q=[0, 0, 0, 0, 30, 0]))
+        self.assertEqual(e.nombre_captura(), 'P2')
+
+    def test_texto_de_vuelta(self):
+        from irb120_control.estudio.formato import texto_vuelta
+        self.assertEqual(texto_vuelta({'vuelta': 7, 'vueltas': None, 'bucle': True}), 'vuelta 7 (bucle)')
+        self.assertEqual(texto_vuelta({'vuelta': 2, 'vueltas': 3}), 'vuelta 2/3')
+        self.assertIsNone(texto_vuelta({'vuelta': 0}))
+
+    def test_bucle_se_guarda_como_repeticiones_cero(self):
+        from irb120_control.estudio.contexto import Contexto
+        with tempfile.TemporaryDirectory() as tmp:
+            c = Contexto(cl.Cliente(demo=True), tmp)
+            c.editor.agregar(Punto('A', q=[0, 0, 0, 0, 30, 0]))
+            c.repeticiones = 0
+            ruta = c.guardar()
+            self.assertEqual(json.loads(ruta.read_text())['repeticiones'], 0)
+            c.nueva()
+            c.abrir(ruta)
+            self.assertEqual(c.repeticiones, 0)
+
+
 class ValidacionDatosTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -433,6 +460,7 @@ class HumoTest(unittest.TestCase):
         app = App(cl.Cliente(demo=True), oscuro=True)
         try:
             app.update()
+            self.assertEqual(app.tabs.get(), 'Trayectoria')   # arranca en la pestaña Trayectoria
             app.cargar_demo()
             app.ctx.planificar()
             self.assertTrue(app.ctx.planificando)
@@ -467,6 +495,34 @@ class HumoTest(unittest.TestCase):
             app.sw.deselect()
             app.cambiar_tema()
             app.update()
+            vt = app.vistas[1]
+            # casilla «Bucle continuo»: repeticiones = 0 y el campo se bloquea; al quitarla vuelve la cuenta
+            vt.e_rep.delete(0, 'end')
+            vt.e_rep.insert(0, '4')
+            vt._parametros()
+            self.assertEqual(app.ctx.repeticiones, 4)
+            vt.v_bucle.set(True)
+            vt._bucle()
+            self.assertEqual(app.ctx.repeticiones, 0)
+            self.assertEqual(str(vt.e_rep.cget('state')), 'disabled')
+            vt._parametros()
+            self.assertEqual(app.ctx.repeticiones, 0)
+            vt.v_bucle.set(False)
+            vt._bucle()
+            self.assertEqual((app.ctx.repeticiones, str(vt.e_rep.cget('state'))), (4, 'normal'))
+            # captura de la postura actual: q exacto, origen captura, nombre P1, P2…
+            app.cliente.ultimo = dict(app.cliente.ultimo, medido=[1.234567, 2., -3., 4., 31.5, -6.])
+            n0 = len(app.ctx.editor)
+            vt.capturar()
+            app.event_generate('<F2>')
+            app.update()
+            p = app.ctx.editor.puntos[-1]
+            self.assertEqual(len(app.ctx.editor), n0 + 2)
+            self.assertEqual((p.nombre, p.origen, p.q), ('P2', 'captura', [1.234567, 2., -3., 4., 31.5, -6.]))
+            self.assertEqual(app.ctx.editor.puntos[-2].nombre, 'P1')
+            for _ in range(2):
+                vt.borrar()
+            vt.tabla.selection_remove(*vt.tabla.selection())
             app.vistas[1].borrar()
             app.vistas[1].tabla.selection_set('0')
             app.vistas[1].borrar()

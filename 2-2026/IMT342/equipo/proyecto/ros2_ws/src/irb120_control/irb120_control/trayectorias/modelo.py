@@ -54,10 +54,11 @@ class Punto:
 
 @dataclass
 class Trayectoria:
+    """repeticiones = 0 es «bucle continuo»: el panel repite hasta «detener_al_final» o «cancelar»."""
     nombre: str
     puntos: list = field(default_factory=list)
     cerrar: bool = True          # A→B→C→A
-    repeticiones: int = 1
+    repeticiones: int = 1        # 1..1000 vueltas; 0 = bucle continuo (hasta detener)
     herramienta: str = 'tcp'     # tcp | brida
 
     def __post_init__(self):
@@ -69,8 +70,8 @@ class Trayectoria:
         repetidos = sorted({n for n in nombres if nombres.count(n) > 1})
         if repetidos:
             raise ValueError(f'Nombres de punto repetidos: {", ".join(repetidos)}.')
-        if isinstance(self.repeticiones, bool) or not isinstance(self.repeticiones, int) or not 1 <= self.repeticiones <= 1000:
-            raise ValueError('«repeticiones» debe ser un entero entre 1 y 1000.')
+        if isinstance(self.repeticiones, bool) or not isinstance(self.repeticiones, int) or not 0 <= self.repeticiones <= 1000:
+            raise ValueError('«repeticiones» debe ser un entero entre 0 (bucle continuo) y 1000.')
         if self.herramienta not in HERRAMIENTAS:
             raise ValueError(f'Herramienta «{self.herramienta}» desconocida: usar «tcp» o «brida».')
         self.cerrar = bool(self.cerrar)

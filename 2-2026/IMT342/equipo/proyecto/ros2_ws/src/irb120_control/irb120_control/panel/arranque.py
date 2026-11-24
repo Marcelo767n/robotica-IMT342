@@ -4,6 +4,7 @@
   ./iniciar.sh panel --simulado   sin robot
   ./iniciar.sh panel --web        además, abre la página local http://127.0.0.1:8770/
   ./iniciar.sh panel --auto       guía la puesta en marcha en AUTO (./brazo.sh sesion)
+  ./iniciar.sh panel --auto --v4  igual, con el módulo de respaldo v4 (./brazo.sh sesion --v4)
   ./iniciar.sh panel --analisis   abre también el Estudio de trayectorias (o la ventana de análisis del Hito 2)
 
 No arranca RAPID ni motores: el operador arranca ServidorPC en el FlexPendant.
@@ -23,7 +24,7 @@ import webbrowser
 from irb120_conexion.rutas import PROJECT
 from irb120_conexion.nodos.lectura_articular.puente_rws import build_base_url
 from irb120_control.rws_j6 import Refused
-from irb120_control.rws_mover import MAX_STEP_DEG
+from irb120_control.rws_mover import MAX_STEP_DEG, MODULOS, V4_STEP_DEG
 from irb120_control.panel import conexion, vista
 from irb120_control.panel.estado import Panel
 
@@ -38,6 +39,9 @@ def argumentos(argv):
     parser.add_argument('--paso', type=float, default=MAX_STEP_DEG,
                         help=f'Máximo cambio por eje en cada orden (≤{MAX_STEP_DEG:g}°)')
     parser.add_argument('--timeout', type=float, default=120., help='Segundos de espera por orden')
+    parser.add_argument('--modulo', choices=MODULOS, default='v5',
+                        help='módulo RAPID esperado en el robot; v4 = respaldo (hasta 45° por orden, sin MoveL)')
+    parser.add_argument('--v4', action='store_const', const='v4', dest='modulo', help='atajo de --modulo v4')
     parser.add_argument('--simulado', action='store_true', help='Sin robot: practicar con un robot ficticio')
     parser.add_argument('--web', action='store_true', help='Abrir también la página local en el navegador')
     parser.add_argument('--auto', action='store_true', help='Puesta en marcha guiada en AUTO (una contraseña)')
@@ -50,6 +54,8 @@ def argumentos(argv):
     args = parser.parse_args(argv)
     if not 0 < args.paso <= MAX_STEP_DEG:
         parser.error(f'--paso debe estar entre 0 y {MAX_STEP_DEG:g}')
+    if args.modulo == 'v4' and args.paso > V4_STEP_DEG:
+        args.paso = V4_STEP_DEG   # la v4 rechaza más de 45° por eje: órdenes de 40° como máximo
     if args.panel_port is None:
         args.panel_port = 8771 if args.simulado else 8770
     if not 1024 <= args.panel_port <= 65535:
@@ -119,10 +125,10 @@ def main(argv=None):
     mover = session = keeper = server = node = None
     children, extras, stop = [], [], threading.Event()
     try:
-        mover, session = conexion.abrir(args.base, args.user, args.log_dir, args.simulado)
+        mover, session = conexion.abrir(args.base, args.user, args.log_dir, args.simulado, modulo=args.modulo)
         if args.auto and not args.simulado:
             from irb120_control.panel.sesion import preparar_auto
-            preparar_auto(mover, args.log_dir)
+            preparar_auto(mover, args.log_dir, modulo=args.modulo)
         panel = Panel(mover, step=args.paso, timeout=args.timeout, simulated=args.simulado)
         panel.poll()
         if panel.state is not None:

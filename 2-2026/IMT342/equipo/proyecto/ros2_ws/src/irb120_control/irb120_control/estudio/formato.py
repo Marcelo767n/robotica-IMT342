@@ -17,6 +17,15 @@ def lista(v, dec=2):
         return '—'
 
 
+def texto_vuelta(tr):
+    """«vuelta 7 (bucle)», «vuelta 2/3» o None si no hay vuelta en curso (tr = estado de la trayectoria)."""
+    if not isinstance(tr, dict) or not tr.get('vuelta'):
+        return None
+    if tr.get('bucle') or tr.get('vueltas') in (None, 0):
+        return f"vuelta {n(tr['vuelta'], 0)} (bucle)"
+    return f"vuelta {n(tr['vuelta'], 0)}/{n(tr['vueltas'], 0)}"
+
+
 def seis(v):
     """Lista de 6 números o None."""
     try:

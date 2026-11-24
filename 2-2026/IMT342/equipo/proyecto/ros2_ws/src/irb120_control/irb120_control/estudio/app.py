@@ -49,6 +49,8 @@ class App(ctk.CTk):
             v.frame.pack(fill='both', expand=True)
             self.vistas.append(v)
         self.ctx.escuchas.append(self._avisos)
+        self.tabs.set(VistaTrayectoria.titulo)   # la demo en vivo empieza aquí
+        self.bind('<F2>', lambda _e: self.vistas[1].capturar())   # capturar postura actual
         self._ult_msg = 0.
         self.ciclo()
 

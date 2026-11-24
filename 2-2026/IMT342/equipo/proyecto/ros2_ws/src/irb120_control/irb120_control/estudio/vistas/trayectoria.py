@@ -5,7 +5,7 @@ from tkinter import ttk
 import customtkinter as ctk
 
 from irb120_control.estudio import biblioteca
-from irb120_control.estudio.formato import n, seis
+from irb120_control.estudio.formato import n, seis, texto_vuelta
 from irb120_control.estudio.tema import COLORES, es_oscuro, fuente
 from irb120_control.estudio.vistas import Vista
 from irb120_control.estudio.vistas.dialogo_punto import pedir_punto
@@ -81,15 +81,23 @@ class VistaTrayectoria(Vista):
         self.v_cerrar = ctk.BooleanVar(value=self.ctx.cerrar)
         ctk.CTkCheckBox(fila, text='Cerrar ciclo (volver a A)', font=fuente(), variable=self.v_cerrar,
                         command=self._parametros).pack(side='left', padx=(0, 20))
-        ctk.CTkLabel(fila, text='Repeticiones', font=fuente(0, True)).pack(side='left')
-        self.e_rep = ctk.CTkEntry(fila, font=fuente(), width=64, height=38, justify='center')
-        self.e_rep.insert(0, str(self.ctx.repeticiones))
+        fila3 = ctk.CTkFrame(t.cuerpo, fg_color='transparent')
+        fila3.pack(fill='x', pady=(8, 0))
+        ctk.CTkLabel(fila3, text='Repeticiones', font=fuente(0, True)).pack(side='left')
+        self.e_rep = ctk.CTkEntry(fila3, font=fuente(), width=64, height=38, justify='center')
         self.e_rep.pack(side='left', padx=(8, 20))
         self.e_rep.bind('<KeyRelease>', lambda _e: self._parametros())
-        ctk.CTkLabel(fila, text='Punto', font=fuente(0, True)).pack(side='left')
-        self.o_herr = ctk.CTkOptionMenu(fila, values=['tcp', 'brida'], font=fuente(), width=100, height=38,
+        self.v_bucle = ctk.BooleanVar(value=self.ctx.repeticiones == 0)
+        ctk.CTkCheckBox(fila3, text='Bucle continuo', font=fuente(0, True), variable=self.v_bucle,
+                        command=self._bucle).pack(side='left', padx=(0, 20))
+        ctk.CTkLabel(fila3, text='Punto', font=fuente(0, True)).pack(side='left')
+        self.o_herr = ctk.CTkOptionMenu(fila3, values=['tcp', 'brida'], font=fuente(), width=100, height=38,
                                         command=lambda _v: self._parametros(), dropdown_font=fuente())
         self.o_herr.pack(side='left', padx=8)
+        self.b['cap'] = ctk.CTkButton(fila3, text='Capturar postura actual (F2)', font=fuente(1, True), height=56,
+                                      width=340, fg_color=COLORES['acento'], command=self.capturar)
+        self.b['cap'].pack(side='right')
+        self._poner_repeticiones()
         fila2 = ctk.CTkFrame(t.cuerpo, fg_color='transparent')
         fila2.pack(fill='x', pady=(8, 0))
         ctk.CTkLabel(fila2, text='Velocidad', font=fuente(0, True)).pack(side='left')
@@ -128,21 +136,20 @@ class VistaTrayectoria(Vista):
         self.tabla.bind('<Double-1>', lambda _e: self.editar())
         self.tabla.bind('<<TreeviewSelect>>', lambda _e: self.refrescar_botones())
         pos = {'add': (0, 0, 1), 'ins': (0, 1, 1), 'dupp': (1, 0, 1), 'edit': (1, 1, 1), 'up': (2, 0, 1),
-               'down': (2, 1, 1), 'del': (3, 0, 2), 'cap': (4, 0, 2), 'buz': (5, 0, 2)}
+               'down': (2, 1, 1), 'del': (3, 0, 2), 'buz': (4, 0, 2)}
         for clave, texto, cmd in (('add', 'Añadir al final', self.agregar), ('ins', 'Insertar tras…', self.insertar),
                                   ('dupp', 'Duplicar punto', self.duplicar_punto), ('edit', 'Editar', self.editar),
                                   ('up', 'Subir', self.subir), ('down', 'Bajar', self.bajar),
                                   ('del', 'Borrar', self.borrar),
-                                  ('cap', 'Capturar postura actual', self.capturar),
                                   ('buz', 'Traer del buzón', self.traer_buzon)):
-            self.b[clave] = ctk.CTkButton(der, text=texto, font=fuente(), height=38, width=150, command=cmd,
-                                          fg_color=COLORES['acento'] if clave in ('add', 'ins', 'cap', 'buz') else COLORES['nada'])
+            self.b[clave] = ctk.CTkButton(der, text=texto, font=fuente(), height=34, width=150, command=cmd,
+                                          fg_color=COLORES['acento'] if clave in ('add', 'ins', 'buz') else COLORES['nada'])
             r, col, span = pos[clave]
-            self.b[clave].grid(row=r, column=col, columnspan=span, padx=3, pady=3, sticky='ew')
+            self.b[clave].grid(row=r, column=col, columnspan=span, padx=3, pady=2, sticky='ew')
         self.b['del'].configure(fg_color=COLORES['falla'])
         self.l_buzon = ctk.CTkLabel(der, text='', font=fuente(-1, True), text_color=COLORES['aviso'],
                                     wraplength=240, justify='left')
-        self.l_buzon.grid(row=6, column=0, columnspan=2, pady=4)
+        self.l_buzon.grid(row=5, column=0, columnspan=2, pady=4)
 
     def _acciones(self, f):
         t = Tarjeta(f, 'Verificar y enviar')
@@ -165,11 +172,16 @@ class VistaTrayectoria(Vista):
         self.l_plan.pack(fill='x', pady=(8, 0))
         self.barra = ctk.CTkProgressBar(t.cuerpo, mode='indeterminate', height=10)
         self.fila_ej = ctk.CTkFrame(t.cuerpo, fg_color='transparent')
-        for clave, texto, color in (('pausar', 'Pausar', 'aviso'), ('reanudar', 'Reanudar', 'ok'),
-                                    ('cancelar', 'Cancelar', 'falla')):
-            self.b[clave] = ctk.CTkButton(self.fila_ej, text=texto, font=fuente(0, True), height=42, width=150,
+        botones = ctk.CTkFrame(self.fila_ej, fg_color='transparent')
+        botones.pack(fill='x')
+        for clave, texto, color, ancho in (('pausar', 'Pausar', 'aviso', 130), ('reanudar', 'Reanudar', 'ok', 130),
+                                           ('detener_al_final', 'Detener al terminar la vuelta', 'acento', 290),
+                                           ('cancelar', 'Cancelar', 'falla', 130)):
+            self.b[clave] = ctk.CTkButton(botones, text=texto, font=fuente(0, True), height=42, width=ancho,
                                           fg_color=COLORES[color], command=lambda a=clave: self.control(a))
             self.b[clave].pack(side='left', padx=(0, 10))
+        self.l_ejec = ctk.CTkLabel(self.fila_ej, text='', font=fuente(1, True), anchor='w')
+        self.l_ejec.pack(fill='x', pady=(6, 0))
 
     # ------------------------------------------------------------ parámetros
     def _nombre(self):
@@ -194,11 +206,35 @@ class VistaTrayectoria(Vista):
         c = self.ctx
         c.cerrar = bool(self.v_cerrar.get())
         c.herramienta = self.o_herr.get()
-        try:
-            c.repeticiones = int(self.e_rep.get())
-        except ValueError:
-            pass
+        if not self.v_bucle.get():
+            try:
+                c.repeticiones = int(self.e_rep.get())
+            except ValueError:
+                pass
         c.cambio('lista')
+
+    def _bucle(self):
+        """Casilla «Bucle continuo»: repeticiones = 0 (el campo se bloquea); al quitarla vuelve la cuenta anterior."""
+        c = self.ctx
+        if self.v_bucle.get():
+            if c.repeticiones > 0:
+                self._rep_previa = c.repeticiones
+            c.repeticiones = 0
+        else:
+            c.repeticiones = getattr(self, '_rep_previa', 1) or 1
+        self._poner_repeticiones()
+        c.cambio('lista')
+
+    def _poner_repeticiones(self):
+        c = self.ctx
+        self.v_bucle.set(c.repeticiones == 0)
+        self.e_rep.configure(state='normal')
+        self.e_rep.delete(0, 'end')
+        if c.repeticiones == 0:
+            self.e_rep.insert(0, '∞')
+            self.e_rep.configure(state='disabled')
+        else:
+            self.e_rep.insert(0, str(c.repeticiones))
 
     def _etiqueta_vel(self):
         v = self.ctx.velocidad_efectiva()
@@ -243,6 +279,8 @@ class VistaTrayectoria(Vista):
 
     def seleccionar(self, i):
         if i is not None and 0 <= i < len(self.ctx.editor):
+            if str(i) not in self.tabla.get_children():   # el punto se acaba de insertar: la tabla aún no lo tiene
+                self.refrescar_tabla()
             self.tabla.selection_set(str(i))
             self.tabla.see(str(i))
 
@@ -349,7 +387,7 @@ class VistaTrayectoria(Vista):
         if q is None:
             c.mensaje('No hay postura medida del robot.', 'falla')
             return
-        p = Punto(c.editor.nombre_nuevo(), pose=pose_tcp(q, c.herramienta), q=q, origen='captura')
+        p = Punto(c.editor.nombre_captura(), pose=pose_tcp(q, c.herramienta), q=q, origen='captura')
         self.seleccionar(c.editor.insertar(self.seleccion(), p))
         c.cambio('lista')
         c.mensaje(f'Punto «{p.nombre}» capturado de la postura actual.')
@@ -542,8 +580,7 @@ class VistaTrayectoria(Vista):
         c = self.ctx
         self.e_nombre.delete(0, 'end')
         self.e_nombre.insert(0, c.nombre)
-        self.e_rep.delete(0, 'end')
-        self.e_rep.insert(0, str(c.repeticiones))
+        self._poner_repeticiones()
         self.v_cerrar.set(c.cerrar)
         self.o_herr.set(c.herramienta)
         self.e_num.delete(0, 'end')
@@ -573,7 +610,7 @@ class VistaTrayectoria(Vista):
             lineas.append(f'  {tr.indice + 1}. {tr.desde} → {tr.hasta}: {tr.tipo}'
                           + (f', {n(ev.duracion_s, 1)} s' if ev else ''))
         lineas.append(f'Duración de una vuelta: {n(plan.duracion_s, 1)} s · velocidad {n(c.plan_velocidad, 0)} % · '
-                      f'{t.repeticiones} repetición(es).')
+                      + ('en bucle continuo (hasta detener).' if t.repeticiones == 0 else f'{t.repeticiones} repetición(es).'))
         lineas.append('El robot REAL se moverá. El panel volverá a verificar con la postura medida y se detiene en '
                       'cada punto. Ten el paro de emergencia a mano.')
         return lineas
@@ -604,7 +641,8 @@ class VistaTrayectoria(Vista):
                                          'info' if r and r.get('ok') else 'falla'))
 
     def refrescar_control(self):
-        fase = (self.ctx.estado().get('trayectoria') or {}).get('fase')
+        tr = self.ctx.estado().get('trayectoria') or {}
+        fase = tr.get('fase')
         activa = fase in ('ejecutando', 'pausada')
         if activa or (self.enviada and fase in (None, 'lista')):
             self.fila_ej.pack(fill='x', pady=(8, 0))
@@ -613,7 +651,12 @@ class VistaTrayectoria(Vista):
             self.fila_ej.pack_forget()
         self.b['pausar'].configure(state='normal' if fase == 'ejecutando' else 'disabled')
         self.b['reanudar'].configure(state='normal' if fase == 'pausada' else 'disabled')
+        self.b['detener_al_final'].configure(state='normal' if activa and not tr.get('detener_al_final') else 'disabled')
         self.b['cancelar'].configure(state='normal' if activa else 'disabled')
+        vuelta = texto_vuelta(tr)
+        partes = [fase or '—'] + ([vuelta] if vuelta else []) + (
+            ['se detendrá al terminar la vuelta'] if tr.get('detener_al_final') and activa else [])
+        self.l_ejec.configure(text=' · '.join(partes) + (f"  ·  tramo {tr.get('tramo')}/{tr.get('total')}" if vuelta else ''))
 
     # ------------------------------------------------------------ ganchos
     def actualizar(self, estado, error):

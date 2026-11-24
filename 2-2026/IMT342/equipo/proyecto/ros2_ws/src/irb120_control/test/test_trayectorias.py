@@ -29,6 +29,13 @@ class ModeloTest(unittest.TestCase):
             t.guardar(ruta)
             self.assertEqual(Trayectoria.cargar(ruta), t)
 
+    def test_bucle_continuo_repeticiones_cero(self):
+        t = Trayectoria('bucle', [Punto('A', q=A), Punto('B', q=B)], repeticiones=0)
+        self.assertEqual(t.repeticiones, 0)
+        self.assertEqual(Trayectoria.from_dict(json.loads(json.dumps(t.to_dict()))), t)
+        self.assertEqual(Trayectoria.from_dict(t.to_dict()).repeticiones, 0)
+        self.assertEqual(Trayectoria('mil', [Punto('A', q=A)], repeticiones=1000).repeticiones, 1000)
+
     def test_punto_con_q_y_con_pose(self):
         self.assertEqual(Punto('A', q=A).pose, None)
         self.assertEqual(Punto('B', pose=[1, 2, 3, 0, 0, 0]).q, None)
@@ -44,10 +51,41 @@ class ModeloTest(unittest.TestCase):
             Punto('X', q=A, tipo='curvo')
         with self.assertRaisesRegex(ValueError, 'repetidos'):
             Trayectoria('t', [Punto('A', q=A), Punto('A', q=B)])
-        with self.assertRaisesRegex(ValueError, 'repeticiones'):
-            Trayectoria('t', [Punto('A', q=A)], repeticiones=0)
+        for malo in (-1, 1001, 1.5, True):
+            with self.assertRaisesRegex(ValueError, 'repeticiones'):
+                Trayectoria('t', [Punto('A', q=A)], repeticiones=malo)
         with self.assertRaisesRegex(ValueError, 'Herramienta'):
             Trayectoria('t', [Punto('A', q=A)], herramienta='pinza')
+
+
+class DemosTest(unittest.TestCase):
+    """Las trayectorias de exhibición: en el repositorio y regeneradas, seguras y sin avisos."""
+
+    def test_demos_regeneradas_son_validas_y_seguras(self):
+        from irb120_control.trayectorias import demos
+        for archivo, fabrica in demos.DEMOS:
+            with self.subTest(archivo):
+                tray = demos.construir(fabrica)
+                self.assertEqual((tray.repeticiones, tray.cerrar), (0, True))
+                self.assertTrue(all(p.tipo == 'articular' and p.q is not None for p in tray.puntos))
+                res, problemas = demos.verificar(tray)
+                self.assertEqual(problemas, [])
+                self.assertTrue(res['ok'])
+                self.assertTrue(6. <= res['duracion_s'] <= 20.)
+                self.assertGreaterEqual(res['z_min'], 200.)
+                self.assertGreaterEqual(res['margen_min'], 15.)
+
+    def test_ocho_tiene_entre_12_y_16_puntos(self):
+        from irb120_control.trayectorias import demos
+        self.assertTrue(12 <= len(demos.construir(demos._ocho).puntos) <= 16)
+
+    def test_archivos_de_la_biblioteca_coinciden(self):
+        from irb120_control.trayectorias import demos
+        for archivo, fabrica in demos.DEMOS:
+            ruta = demos.CARPETA / f'{archivo}.json'
+            if not ruta.exists():
+                self.skipTest('salidas/trayectorias no existe en este árbol')
+            self.assertEqual(Trayectoria.cargar(ruta), demos.construir(fabrica), archivo)
 
 
 class PlanificadorTest(unittest.TestCase):
@@ -72,6 +110,14 @@ class PlanificadorTest(unittest.TestCase):
             for campo in (m.q, m.qd, m.qdd, m.tau):
                 self.assertEqual(campo.shape, (len(m.t), 6))
             self.assertEqual(m.tcp.shape, (len(m.t), 3))
+
+    def test_abierta_cada_vuelta_empieza_volviendo_a_a(self):
+        # vuelta ≥ 2 de un bucle abierto: se planifica desde el último punto y el tramo 0 lleva a A
+        plan = planificar(tres_puntos(cerrar=False, repeticiones=0), C, 25.)
+        self.assertTrue(plan.ok, plan.resumen)
+        self.assertEqual((plan.tramos[0].desde, plan.tramos[0].hasta), ('Inicio', 'A'))
+        self.assertLess(max(abs(a - b) for a, b in zip(plan.tramos[0].qf, A)), 1e-6)
+        self.assertGreater(plan.tramos[0].opciones[plan.tramos[0].tipo].duracion_s, 0)
 
     def test_sin_cerrar(self):
         plan = planificar(tres_puntos(cerrar=False), CERO, 25)
