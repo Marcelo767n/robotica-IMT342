@@ -2,11 +2,11 @@
 id_prueba: FK-N2
 equipo: "Dayana Andrade, Mirko Ayala, Marcelo Navarro (IMT-342, UCB, 2-2026)"
 operador: por completar por el equipo
-generado_utc: "2026-11-24T14:11:45Z"
+generado_utc: "2026-11-26T21:43:19Z"
 tipo: FK nominal (real)
 codigo_modelo:
   repositorio: robotica-IMT342 (rama claude/proyecto-hito3-4-objetivos-9709f0)
-  commit: 6e82c45680df44e3fdd1cdff2d5a6ab727dd0060
+  commit: b54ccfa6b46b691314203f684080c401e2faeca0
   hito3_sin_versionar: true
   modelo_propio:
     archivos:
@@ -95,7 +95,7 @@ validation_cases_row:
   q_rad_vector: "[0.05142675585, -0.0336408033, 0.04518282487, -0.2280233812, 1.564910608, -2.338438663]"
   base_frame: base_link (modelo propio) = Base del IRC5
   tcp_frame: tool0 (brida); sin TCP
-  model_version: "hito2/irb120/dh.py sha256:6af5c24c5d4e @ 6e82c45680+hito3 sin versionar"
+  model_version: "hito2/irb120/dh.py sha256:6af5c24c5d4e @ b54ccfa6b4+hito3 sin versionar"
   reference_version: "IRC5 RWS http://192.168.125.1 (tool0/Base/wobj0) comunicacion_20261104_225612_309539Z_fk.jsonl sha256:7dadde162896"
   position_error_m: "1.434385e-06"
   orientation_error_rad: "7.526606e-06"

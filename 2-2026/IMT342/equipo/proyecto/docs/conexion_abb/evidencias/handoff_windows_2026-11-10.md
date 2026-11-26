@@ -53,7 +53,7 @@ Elegimos **RWS + RAPID** para la primera demostración de una postura. RobotStud
 
 ## Cómo funciona el módulo
 
-Archivo: [LabJointRws.mod](LabJointRws.mod).
+Archivo: [LabJointRws.mod](LabJointRws_original_2026-11-10.mod).
 
 - **pcTarget** guarda un objetivo absoluto en grados, en orden **J1 a J6**. El valor inicial **9E+09** en los ejes indica que todavía no hay objetivo preparado.
 - **MostrarObjetivo** muestra los seis valores guardados en el FlexPendant.

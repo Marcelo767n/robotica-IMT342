@@ -1,5 +1,7 @@
 # hito3/docs · documentación de evidencia del Hito 3
 
+> **Alcance.** `hito3/` contiene la **evidencia y la validación**: documentos de esta carpeta, el paquete reproducible `hito3/validacion` (`python3 -m hito3.validacion`, 34 casos), `hito3/resultados`, `hito3/datos` y `hito3/manifiestos`. La planificación y los requisitos están en [docs/hitos_3_4](../../docs/hitos_3_4/README.md); el informe en [entregables/hito3_4](../../entregables/README.md) (fuente: [`../informe/informe_hito3.tex`](../informe/informe_hito3.tex)). Guía de revisión: [COMO_REVISAR.md](../../COMO_REVISAR.md).
+
 Preparada el 24/11/2026 a partir de los requisitos oficiales (W12–W14) y de la evidencia del repositorio. Regla de oro: no se inventan datos, firmas, autorizaciones ni nombres; lo que no consta queda «por completar por el equipo» o «pendiente», y se distingue lo observado de lo inferido.
 
 | Documento | Para qué sirve | Requisito oficial |
@@ -15,7 +17,7 @@ Preparada el 24/11/2026 a partir de los requisitos oficiales (W12–W14) y de la
 
 Bitácora relacionada (en `docs/bitacora/`): [18/11](../../docs/bitacora/2026-11-18_sesion_auto_v4.md), [19/11](../../docs/bitacora/2026-11-19_sesion.md), [20/11](../../docs/bitacora/2026-11-20_trayectorias_plc.md) y [backlog](../../docs/bitacora/backlog.md).
 
-El paquete de validación FK/IK/J está en `hito3/validacion` y sus resultados en `hito3/resultados`; estos documentos no afirman ningún resultado de ese paquete.
+El paquete de validación FK/IK/J está en `hito3/validacion` y sus resultados en `hito3/resultados`; estos documentos no afirman ningún resultado de ese paquete. Material del docente que define los criterios: [semana 14](../../material_docente/semana_14/).
 
 ## Qué falta, en una línea cada uno
 

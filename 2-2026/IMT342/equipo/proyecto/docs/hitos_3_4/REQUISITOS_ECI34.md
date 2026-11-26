@@ -1,6 +1,6 @@
 # Requisitos ECI-3/4 (Hitos 3 y 4) · resumen de W12-S01
 
-Fuente: `berquiroga/planificacion-UCB`, `2-2026/IMT342/Semana_12/sesion_01`. Los .tex/.pdf originales están en [actualizacion_semana_12](<../../archivos que hay que presentar/actualizacion_semana_12/>) (verificados idénticos a los del repositorio del docente).
+Fuente: `berquiroga/planificacion-UCB`, `2-2026/IMT342/Semana_12/sesion_01`. Los .tex/.pdf originales están en [actualizacion_semana_12](../../material_docente/actualizacion_semana_12/) (verificados idénticos a los del repositorio del docente).
 
 ## Evaluación
 

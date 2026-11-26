@@ -16,8 +16,9 @@ MANIFIESTOS = HITO3 / "manifiestos"
 EVIDENCIAS = RAIZ / "docs" / "conexion_abb" / "evidencias"
 URDF = RAIZ / "hito2" / "datos" / "irb120.urdf"
 
-# Checkout principal con los registros crudos (SOLO LECTURA). Solo hace falta para re-extraer datos.
-RAIZ_M = Path(os.environ.get("HITO3_M", "/home/marcelo767/Documentos/robotica/robotica-IMT342/2-2026/IMT342/equipo/proyecto"))
+# Carpeta con los registros crudos del robot (SOLO LECTURA; salidas/ no se versiona). Solo hace falta para
+# re-extraer datos con --reextraer: por defecto, la propia copia del proyecto; HITO3_M apunta a otra.
+RAIZ_M = Path(os.environ.get("HITO3_M", str(RAIZ)))
 ORIGEN_CRUDO = RAIZ_M / "salidas" / "prueba_comunicacion"
 
 _hito2 = str(RAIZ / "hito2")

@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1025" viewBox="0 0 1440 1025" role="img" aria-labelledby="titulo descripcion">
+<title id="titulo">Mapa de conexiones ROS 2 · ABB IRB 120</title>
+<desc id="descripcion">El panel valida las órdenes de RViz, Estudio y la celda PLC, y se comunica por RWS con el IRC5. Dos publicadores convierten los ángulos medidos y objetivo en transformaciones para el gemelo de RViz.</desc>
+<defs>
+<marker id="blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M 0,0 L 8,4 L 0,8 Z" fill="#204db0"/></marker>
+<marker id="teal" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M 0,0 L 8,4 L 0,8 Z" fill="#08796e"/></marker>
+<marker id="orange" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M 0,0 L 8,4 L 0,8 Z" fill="#a84a11"/></marker>
+<marker id="gray" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M 0,0 L 8,4 L 0,8 Z" fill="#47596e"/></marker>
+</defs>
+<rect x="0" y="0" width="1440" height="1025" rx="0" fill="#f2f5f9" stroke="none"/>
+<rect x="0" y="0" width="1440" height="148" rx="0" fill="#142438" stroke="none"/>
+<text x="42" y="34" font-family="DejaVu Sans,sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#9cbbff">IMT-342 ROBÓTICA   /   ABB IRB 120</text>
+<text x="40" y="82" font-family="DejaVu Sans,sans-serif" font-size="43" font-weight="700" text-anchor="start" fill="#ffffff">Mapa de conexiones ROS 2</text>
+<text x="42" y="116" font-family="DejaVu Sans,sans-serif" font-size="19" font-weight="400" text-anchor="start" fill="#e0e9f5">De la orden de movimiento al gemelo digital en RViz</text>
+<text x="1398" y="36" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="end" fill="#c9d6e9">24 NOV 2026   ·   37ca9ee</text>
+<rect x="24" y="166" width="1392" height="493" rx="17" fill="#fff" stroke="#dce4ee"/>
+<rect x="24" y="677" width="1392" height="276" rx="17" fill="#fff" stroke="#dce4ee"/>
+<text x="45" y="203" font-family="DejaVu Sans,sans-serif" font-size="24" font-weight="700" text-anchor="start" fill="#142438">01  Órdenes y estado del robot</text>
+<text x="45" y="229" font-family="DejaVu Sans,sans-serif" font-size="15" font-weight="400" text-anchor="start" fill="#44586c">El nodo del brazo recibe órdenes, valida el movimiento y sincroniza el estado con RViz y el PLC.</text>
+<text x="45" y="715" font-family="DejaVu Sans,sans-serif" font-size="24" font-weight="700" text-anchor="start" fill="#142438">02  Gemelo digital en RViz</text>
+<text x="45" y="740" font-family="DejaVu Sans,sans-serif" font-size="15" font-weight="400" text-anchor="start" fill="#44586c">Cada publicador convierte los ángulos de los seis ejes en posiciones de las piezas del modelo 3D.</text>
+<path d="M 658 324 V 391 H 864 V 437" stroke="#204db0" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#blue)"/>
+<path d="M 898 329 V 437" stroke="#204db0" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#blue)"/>
+<path d="M 988 438 V 329" stroke="#08796e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#teal)"/>
+<path d="M 1285 330 V 391 H 1040 V 437" stroke="#47596e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-start="url(#gray)" marker-end="url(#gray)" stroke-dasharray="7 5"/>
+<text x="752" y="383" font-family="DejaVu Sans Mono,monospace" font-size="12" font-weight="700" text-anchor="middle" fill="#204db0">trayectoria/punto_externo</text>
+<text x="854" y="355" font-family="DejaVu Sans Mono,monospace" font-size="12" font-weight="700" text-anchor="middle" fill="#204db0">panel/orden</text>
+<text x="1038" y="355" font-family="DejaVu Sans Mono,monospace" font-size="12" font-weight="700" text-anchor="middle" fill="#08796e">panel/estado</text>
+<text x="1170" y="382" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#47596e">HTTP local · órdenes y estado</text>
+<path d="M 194 475 H 287" stroke="#47596e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#gray)" stroke-dasharray="7 5"/>
+<path d="M 290 531 H 197" stroke="#47596e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#gray)" stroke-dasharray="7 5"/>
+<text x="242.0" y="464" font-family="DejaVu Sans,sans-serif" font-size="11.7" font-weight="700" text-anchor="middle" fill="#47596e">TCP · 2000</text>
+<text x="242.0" y="554" font-family="DejaVu Sans,sans-serif" font-size="11.5" font-weight="700" text-anchor="middle" fill="#47596e">Estado PLC</text>
+<path d="M 471 475 H 567" stroke="#204db0" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#blue)"/>
+<path d="M 570 531 H 474" stroke="#08796e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#teal)"/>
+<text x="520.5" y="464" font-family="DejaVu Sans Mono,monospace" font-size="11.7" font-weight="700" text-anchor="middle" fill="#204db0">plc/entrada</text>
+<text x="520.5" y="554" font-family="DejaVu Sans Mono,monospace" font-size="11.5" font-weight="700" text-anchor="middle" fill="#08796e">plc/salida</text>
+<path d="M 748 475 H 840" stroke="#204db0" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#blue)"/>
+<path d="M 843 531 H 751" stroke="#08796e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#teal)"/>
+<text x="795.5" y="464" font-family="DejaVu Sans Mono,monospace" font-size="11.7" font-weight="700" text-anchor="middle" fill="#204db0">panel/orden</text>
+<text x="795.5" y="554" font-family="DejaVu Sans Mono,monospace" font-size="11.5" font-weight="700" text-anchor="middle" fill="#08796e">panel/estado</text>
+<path d="M 1061 475 H 1172" stroke="#47596e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#gray)" stroke-dasharray="7 5"/>
+<path d="M 1175 531 H 1064" stroke="#47596e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#gray)" stroke-dasharray="7 5"/>
+<text x="1118.0" y="464" font-family="DejaVu Sans,sans-serif" font-size="11.7" font-weight="700" text-anchor="middle" fill="#47596e">RWS · HTTP 80</text>
+<text x="1118.0" y="554" font-family="DejaVu Sans,sans-serif" font-size="11.5" font-weight="700" text-anchor="middle" fill="#47596e">Ángulos / estado</text>
+<rect x="545" y="240" width="226" height="89" rx="12" fill="#edf3ff" stroke="#b6c9f2"/>
+<text x="560" y="268" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Entrada de visión</text>
+<text x="560" y="289" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#204db0">publicar_punto · opcional</text>
+<text x="560" y="311" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Entrega una pose al buzón.</text>
+<rect x="843" y="240" width="218" height="89" rx="12" fill="#edf3ff" stroke="#b6c9f2"/>
+<text x="858" y="268" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">RViz · panel IRB 120</text>
+<text x="858" y="289" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#204db0">rviz2 + complemento</text>
+<text x="858" y="311" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Envía órdenes y ve el estado.</text>
+<rect x="1175" y="240" width="220" height="89" rx="12" fill="#f3f5f8" stroke="#c8d1dc"/>
+<text x="1190" y="268" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Estudio</text>
+<text x="1190" y="289" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="700" text-anchor="start" fill="#47596e">Aplicación local</text>
+<text x="1190" y="311" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Edita, analiza y envía rutas.</text>
+<rect x="45" y="438" width="149" height="110" rx="12" fill="#fff3e9" stroke="#e8c6ab"/>
+<text x="60" y="466" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">PLC S7-1200</text>
+<text x="60" y="487" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="700" text-anchor="start" fill="#a84a11">Equipo externo</text>
+<text x="60" y="509" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Opcional.</text>
+<rect x="290" y="438" width="181" height="110" rx="12" fill="#edf3ff" stroke="#b6c9f2"/>
+<text x="305" y="466" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Puente del PLC</text>
+<text x="305" y="487" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#204db0">irb120_plc_s7</text>
+<text x="305" y="509" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Convierte telegramas</text>
+<text x="305" y="527" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">TCP a mensajes ROS.</text>
+<rect x="570" y="438" width="178" height="110" rx="12" fill="#edf3ff" stroke="#b6c9f2"/>
+<text x="585" y="466" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Lógica de celda</text>
+<text x="585" y="487" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#204db0">irb120_celda</text>
+<text x="585" y="509" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Traduce órdenes y</text>
+<text x="585" y="527" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">devuelve el estado.</text>
+<rect x="843" y="438" width="218" height="110" rx="12" fill="#edf3ff" stroke="#b6c9f2"/>
+<text x="858" y="466" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Control del brazo</text>
+<text x="858" y="487" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#204db0">irb120_panel_rws</text>
+<text x="858" y="509" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Resuelve poses y valida</text>
+<text x="858" y="527" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">trayectorias antes de enviar.</text>
+<rect x="1175" y="438" width="220" height="110" rx="12" fill="#fff3e9" stroke="#e8c6ab"/>
+<text x="1190" y="466" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Controlador IRC5</text>
+<text x="1190" y="487" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="700" text-anchor="start" fill="#a84a11">LabJointRws · RAPID</text>
+<text x="1190" y="509" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Ejecuta el movimiento</text>
+<text x="1190" y="527" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">del brazo físico ABB IRB 120.</text>
+<rect x="45" y="584" width="1350" height="55" rx="8" fill="#edf2f8" stroke="none"/>
+<text x="61" y="608" font-family="DejaVu Sans,sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142438">Modo real · dominio ROS 120</text>
+<text x="61" y="627" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">El panel se comunica con el IRC5 por Ethernet.</text>
+<text x="580" y="608" font-family="DejaVu Sans,sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142438">Modo simulado · dominio ROS 121</text>
+<text x="580" y="627" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Un robot ficticio sustituye al IRC5. El PLC puede simularse con otro proceso.</text>
+<path d="M 264 817 H 335 V 794 H 650" stroke="#08796e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#teal)"/>
+<path d="M 264 873 H 335 V 889 H 650" stroke="#204db0" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#blue)"/>
+<path d="M 905 794 H 1152" stroke="#08796e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#teal)"/>
+<path d="M 905 889 H 1152" stroke="#204db0" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#blue)"/>
+<text x="484" y="784" font-family="DejaVu Sans Mono,monospace" font-size="12" font-weight="700" text-anchor="middle" fill="#08796e">control/medido/joint_states</text>
+<text x="484" y="878" font-family="DejaVu Sans Mono,monospace" font-size="12" font-weight="700" text-anchor="middle" fill="#204db0">control/objetivo/joint_states</text>
+<text x="1028" y="784" font-family="DejaVu Sans,sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#08796e">TF + descripción URDF</text>
+<text x="1028" y="878" font-family="DejaVu Sans,sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#204db0">TF + descripción URDF</text>
+<rect x="45" y="790" width="219" height="119" rx="12" fill="#edf3ff" stroke="#b6c9f2"/>
+<text x="60" y="818" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Control del brazo</text>
+<text x="60" y="839" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#204db0">irb120_panel_rws</text>
+<text x="60" y="861" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Publica los ángulos en</text>
+<text x="60" y="879" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">ROS 2 para ambas posturas.</text>
+<rect x="650" y="754" width="255" height="78" rx="12" fill="#e6f6f2" stroke="#a0d5c9"/>
+<text x="665" y="782" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Postura medida</text>
+<text x="665" y="803" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#08796e">irb120_rsp_medido</text>
+<rect x="650" y="849" width="255" height="78" rx="12" fill="#fff4e8" stroke="#eac5a0"/>
+<text x="665" y="877" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">Postura objetivo</text>
+<text x="665" y="898" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#a84a11">irb120_rsp_objetivo</text>
+<rect x="1152" y="754" width="243" height="173" rx="12" fill="#edf3ff" stroke="#b6c9f2"/>
+<text x="1167" y="782" font-family="DejaVu Sans,sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#142438">RViz · gemelo digital</text>
+<text x="1167" y="803" font-family="DejaVu Sans Mono,monospace" font-size="13" font-weight="700" text-anchor="start" fill="#204db0">rviz2</text>
+<text x="1167" y="825" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Blanco: postura medida.</text>
+<text x="1167" y="843" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Naranja: objetivo previsto.</text>
+<rect x="1170" y="864" width="18" height="13" rx="3" fill="#fafafa" stroke="#92a0b4"/>
+<rect x="1198" y="864" width="18" height="13" rx="3" fill="#edab64" stroke="#bc6a26"/>
+<path d="M 46 979 H 80" stroke="#204db0" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#blue)"/>
+<text x="91" y="984" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="700" text-anchor="start" fill="#142438">Tópico ROS 2</text>
+<path d="M 226 979 H 260" stroke="#47596e" stroke-width="2.15" fill="none" stroke-linejoin="round" marker-end="url(#gray)" stroke-dasharray="7 5"/>
+<text x="271" y="984" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="700" text-anchor="start" fill="#142438">Enlace externo a ROS 2</text>
+<text x="475" y="984" font-family="DejaVu Sans,sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#44586c">Las flechas indican hacia dónde viajan los datos. Los nombres ROS abreviados llevan /irb120/ delante.</text>
+<text x="45" y="1007" font-family="DejaVu Sans,sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#44586c">Los nombres de tópicos completos y los enlaces del control 3D se detallan en MAPA_ROS2.md.</text>
+</svg>

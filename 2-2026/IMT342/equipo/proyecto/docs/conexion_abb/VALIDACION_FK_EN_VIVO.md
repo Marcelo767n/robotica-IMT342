@@ -24,7 +24,7 @@ La orientación ABB usa `q1,q2,q3,q4 = w,x,y,z`. Se normaliza dentro de una tole
 
 La referencia viene del **controlador**, no del TF de nuestro modelo. El contexto fijo es Base/tool0/wobj0. Se adopta la correspondencia entre `base_link` propio y Base ABB, cuya concordancia se observó en la primera postura del 29/10; se debe confirmar en más posturas. No se incluye el TCP supuesto de la pinza de 150 mm, pues todavía no está medido.
 
-Fuentes: [GET robtarget de ABB](https://developercenter.robotstudio.com/api/rwsApi/ms_mechunit_robtarget_page.html) y [protocolo de comparación del docente](<../../archivos que hay que presentar/actualizacion_semana_12/w12_s01_protocolo_validacion.tex>).
+Fuentes: [GET robtarget de ABB](https://developercenter.robotstudio.com/api/rwsApi/ms_mechunit_robtarget_page.html) y [protocolo de comparación del docente](../../material_docente/actualizacion_semana_12/w12_s01_protocolo_validacion.tex).
 
 ## Cálculo que ejecuta el código en cada muestra
 

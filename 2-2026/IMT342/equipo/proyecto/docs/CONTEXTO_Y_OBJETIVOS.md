@@ -1,6 +1,24 @@
 # Contexto actual y próximos objetivos · IRB 120 desde RViz
 
-Actualizado el **20/11/2026**. Resume dónde está el proyecto para retomarlo en otra sesión (o con otra persona) y fija los objetivos siguientes. Rama: `proyectoHito3y4`.
+Actualizado el **26/11/2026**. Resume dónde está el proyecto para retomarlo en otra sesión (o con otra persona) y fija los objetivos siguientes. Rama: `proyectoHito3y4`. Las secciones 1 a 6 describen el estado del 20/11; el bloque siguiente prevalece donde difieran.
+
+## Estado final (26/11/2026)
+
+**Logrado**
+- Control real del IRB 120 desde RViz por RWS + módulo RAPID `LabJointRws`: 265 órdenes registradas entre el 16 y el 19/11, 264 con llegada confirmada (la orden 59 del 18/11 quedó sin resultado). Evidencia en [hito3/docs](../hito3/docs/README.md).
+- FK propia frente al controlador: error de posición mediano 7,5e-8 m. Validación FK/IK/J del Hito 3 reproducible sin robot (`python3 -m hito3.validacion`, 34 casos, P1–P7 y niveles S0–S3).
+- Panel «IRB 120» de RViz con dos pestañas: «Mover» (ángulos, pose con IK, velocidad, verificación) y «Trayectorias» (lista de guardadas y de movimientos vistosos 10 a 14: saludo, reverencia, mirar alrededor, ocho y baile; bucle continuo; vista previa en el modelo naranja; ejecutar, pausar, reanudar, detener al final y cancelar; grabar puntos y guardar `NN_nombre.json` en `salidas/trayectorias/`).
+- Planificador que elige entre movimiento articular y lineal por tramo, con las reglas del Hito 2 más estrictas ([ARQUITECTURA_TRAYECTORIAS.md](ARQUITECTURA_TRAYECTORIAS.md)); Estudio CustomTkinter para análisis, gráficas y matemática en LaTeX.
+- Una sola entrada: `brazo sesion` (con robot), `brazo sesion --simulado` (sin robot), `brazo sesion --v4` (módulo de respaldo ya probado), `brazo nodos` (grafo ROS 2 en vivo, [MAPA_ROS2.md](MAPA_ROS2.md)), `brazo demo` y `brazo pruebas` (≈300 pruebas offline).
+- RAPID v5 («una orden por tramo», `MoveL`): ya no hay cortes de 40° dentro de un tramo; esos cortes siguen existiendo solo en la v4, que es la que se probó en el robot.
+
+**Pendiente o no acreditado**
+- GO/NO-GO de laboratorio firmado y observación independiente del movimiento; aceptación escrita para trabajar en AUTO sin habilitador.
+- Tolerancias de FK/IK/J aprobadas por el docente; cobertura de J4 a J6 en la comparación física; 25 muestras FUERA sin explicar.
+- TCP físico sin medir (se usa 0,150 m por diseño).
+- RAPID v5 y `MoveL` sin probar en el IRC5 (instalable; su sintaxis no se pudo compilar sin el controlador).
+- Celda PLC S7-1200: implementada y probada solo con un PLC simulado ([PLC_S7_1200.md](PLC_S7_1200.md)); **no integrada con el PLC real**, el FB SCL no se compiló en TIA Portal. Trabajo futuro.
+- Visión: solo existe la entrada de puntos (`/irb120/trayectoria/punto_externo`); no hay cámara ni calibración. EGM y `ros2_control` no probados.
 
 ## 1. Estado en una frase
 
@@ -21,7 +39,7 @@ El ABB IRB 120 real se controla desde la PC Linux **dentro de RViz**: se escribe
 brazo sesion        # desde cualquier carpeta (atajo en ~/.local/bin/brazo)
 ```
 
-Una contraseña. La terminal guía: llave en **AUTO** (confirmar) → si hace falta, **Stop + Motors Off** y reinstala el módulo → **Motors On** → la PC pone el puntero en `ServidorPC` y arranca → **Ventana del operador → «Iniciar»** (2 min, con reintentos). Después abre RViz + panel «IRB 120» + ventana de análisis del Hito 2. Otros comandos: `brazo eventos` (registro del controlador), `brazo estado`, `brazo respaldar`, `brazo simulado --analisis`, `brazo pruebas`, `brazo ayuda`.
+Una contraseña. La terminal guía: llave en **AUTO** (confirmar) → si hace falta, **Stop + Motors Off** y reinstala el módulo → **Motors On** → la PC pone el puntero en `ServidorPC` y arranca → **Ventana del operador → «Iniciar»** (2 min, con reintentos). Después abre RViz + panel «IRB 120» (pestañas Mover y Trayectorias) + Estudio CustomTkinter. Otros comandos: `brazo sesion --simulado` (sin robot), `brazo sesion --v4` (módulo de respaldo), `brazo nodos`, `brazo demo`, `brazo eventos` (registro del controlador), `brazo estado`, `brazo respaldar`, `brazo estudio`, `brazo pruebas`, `brazo ayuda`.
 
 Guía completa del laboratorio: [MOVER_DESDE_PC.md](conexion_abb/MOVER_DESDE_PC.md) · cómo funciona por dentro: [COMO_FUNCIONA.md](conexion_abb/COMO_FUNCIONA.md) · respaldo del programa del robot: [RESPALDO_Y_RESTAURACION.md](conexion_abb/RESPALDO_Y_RESTAURACION.md).
 
@@ -30,7 +48,7 @@ Guía completa del laboratorio: [MOVER_DESDE_PC.md](conexion_abb/MOVER_DESDE_PC.
 ```text
 RViz: panel «IRB 120» (C++) + control 3D ──JSON /irb120/panel/orden|estado──► nodo irb120_panel_rws (Python)
                                                                                │  validación, IK Pieper,
-Ventana de análisis (tkinter + matplotlib) ◄── HTTP 127.0.0.1:8770/estado ─────┤  verificación, tramos ≤ 40°
+Estudio (CustomTkinter) y análisis (tkinter) ◄── HTTP 127.0.0.1:8770/estado ─────┤  verificación, tramos ≤ 40° (v4) o una orden por tramo (v5)
                                                                                │
                                               RWS 1.0 (HTTP 80, Digest) ───────► IRC5 · LabJointRws v4 · ServidorPC
                                                                                │  MoveAbsJ a pcVelPct % de 250 mm/s
@@ -44,7 +62,9 @@ gemelo digital (blanco) ◄── JointState ◄── lectura de ejes cada 0,3 
 | Cliente RWS | `ros2_ws/src/irb120_control/irb120_control/rws_mover.py`, `rws_j6.py` |
 | Programa RAPID | `ros2_ws/src/irb120_control/rapid/rws_mover/LabJointRws.mod` (v4, ≤ 4900 caracteres) |
 | Panel de RViz (C++/Qt) | `ros2_ws/src/irb120_rviz_panel/` |
-| Ventana de análisis | `ros2_ws/src/irb120_control/irb120_control/analisis/` |
+| Ventana de análisis (anterior) y Estudio CustomTkinter | `.../irb120_control/analisis/` y `.../irb120_control/estudio/` |
+| Trayectorias y planificador | `.../irb120_control/trayectorias/` · `panel/trayectoria.py` |
+| Celda PLC (extensión simulada) y visión | `.../irb120_control/plc/`, `celda/`, `vision/` |
 | Matemática del Hito 2 | `hito2/irb120/` (DH, Pieper, Jacobiano, LSPB, dinámica) |
 
 ## 5. Verificación antes de enviar (pedido del ingeniero)
@@ -68,7 +88,7 @@ El envío se bloquea si la pose no es alcanzable, sale de los límites (con 2° 
 | Pérdida de enlace | Hub USB | Adaptador USB-Ethernet directo a la laptop |
 | Otros grupos usan el robot | `Module1` vacío, `MainModule`, `IMT342_*` | Respaldo con `brazo respaldar`; la sesión reinstala nuestro módulo si cambió |
 
-## 7. Nuevos objetivos
+## 7. Objetivos planteados el 20/11 (cumplidos en simulación; ver sección 10 y el bloque «Estado final»)
 
 ### 7.1 Interfaz gráfica nueva con CustomTkinter
 - Sustituir la ventana de análisis actual (tkinter/ttk) por una interfaz **CustomTkinter** más clara: tema oscuro/claro, pestañas, tarjetas con indicadores verde/rojo.
@@ -100,7 +120,7 @@ Antes de permitir la ejecución, comprobar a lo largo de **toda** la trayectoria
 |---|---|
 | Tipo de movimiento entre puntos | **Lo elige el programa según los cálculos**: para cada tramo evalúa recta cartesiana y movimiento articular (alcanzabilidad en todo el tramo, rama de IK consistente, σ_min(J), límites, duración LSPB, par) y propone el mejor, explicando por qué. |
 | Paradas | El robot **se detiene en cada punto de paso** (`fine`), donde se verifica la llegada (mm y %). |
-| Fluidez dentro de un tramo | **Sin paradas intermedias**: eliminar los cortes cada 40° que hoy dividen un tramo largo en varias órdenes con parada (requiere ampliar el RAPID a una sola orden por tramo o encolar subpuntos con zona y `fine` solo al final). |
+| Fluidez dentro de un tramo | **Sin paradas intermedias**: eliminar los cortes cada 40° que la v4 aplica a un tramo largo (resuelto en la v5 con una sola orden por tramo y `fine` solo al final; la v5 aún no se probó en el IRC5). |
 | Cómo se definen los puntos | **Capturando la postura actual** del robot y **arrastrando el control 3D en RViz** («Añadir a la trayectoria»). |
 | Interfaz CustomTkinter | **Solo análisis y trayectorias** (diseñar, verificar, ver la matemática). Para mover se sigue usando el panel de RViz; la trayectoria verificada se envía al panel. |
 | Visión artificial | Dejar el **cimiento**: una entrada de puntos externa (p. ej. un tópico ROS con poses en `base_link`) para que un nodo de visión publique coordenadas que aparezcan como puntos de trayectoria, con la misma verificación. |

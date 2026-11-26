@@ -179,7 +179,7 @@ El navegador no implementa una parada de emergencia certificada. La parada norma
 
 Los parámetros operativos pendientes no tendrán valores físicos implícitos: el futuro lanzador rechazará armado si no están configurados. Los valores académicos de simulación no completan esta ficha.
 
-El [checklist institucional, línea 39](<../../archivos que hay que presentar/actualizacion_semana_12/w12_s01_checklist_seguridad.tex>) establece: «Ninguna prueba con movimiento físico procede hasta que el operador autorizado y el responsable del laboratorio completen la verificación externa y declaren expresamente GO». Esta condición se aplica a P4 y siguientes, y cualquier cambio/arranque previo del controlador se tramita por su procedimiento local. La planificación y el desarrollo offline pueden continuar ahora.
+El [checklist institucional, línea 39](../../material_docente/actualizacion_semana_12/w12_s01_checklist_seguridad.tex) establece: «Ninguna prueba con movimiento físico procede hasta que el operador autorizado y el responsable del laboratorio completen la verificación externa y declaren expresamente GO». Esta condición se aplica a P4 y siguientes, y cualquier cambio/arranque previo del controlador se tramita por su procedimiento local. La planificación y el desarrollo offline pueden continuar ahora.
 
 ## 7. Organización propuesta del código nuevo
 

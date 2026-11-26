@@ -189,8 +189,8 @@ class Panel:
             if getattr(self, '_arrival_note', False):
                 self._arrival_note = False
                 check = self.verification()
-                if check and check['robot']:
-                    robot = check['robot']
+                robot = check.get('robot') if check else None
+                if robot:
                     self.say(f"Verificación tras la llegada: pose real frente a la pedida {robot['pos_mm']:.3f} mm "
                              f"(dx {robot['dx_mm']:+.3f}, dy {robot['dy_mm']:+.3f}, dz {robot['dz_mm']:+.3f} mm) / "
                              f"{robot['rot_deg']:.3f}°, error articular máx. {robot['max_eje_deg']:.3f}° "

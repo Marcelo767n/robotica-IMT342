@@ -1,7 +1,7 @@
 {
   "contexto": {
     "git": {
-      "commit": "6e82c45680df44e3fdd1cdff2d5a6ab727dd0060",
+      "commit": "b54ccfa6b46b691314203f684080c401e2faeca0",
       "hito3_sin_versionar": true
     },
     "sha": {
@@ -18,7 +18,7 @@
     "scipy": "1.16.3",
     "matplotlib": "3.10.7+dfsg1",
     "so": "Linux-7.0.0-44-generic-x86_64-desconocido-with-glibc2.43",
-    "generado_utc": "2026-11-24T14:11:45Z"
+    "generado_utc": "2026-11-26T21:43:19Z"
   },
   "estados": {
     "verificado": 21,
@@ -2418,7 +2418,7 @@
           "ramas_reales_halladas_por_DLS": 8,
           "mejor_residuo_sin_convergencia": null,
           "iteraciones_mediana": 14.5,
-          "tiempo_total_s": 1.1847704830051953,
+          "tiempo_total_s": 1.2361355650004953,
           "sin_rama_propia_q_wrapped": [],
           "sumas_q4_q6_familia": null,
           "n_familia_singular_q4_distintos": null,
@@ -2792,7 +2792,7 @@
           "ramas_reales_halladas_por_DLS": 8,
           "mejor_residuo_sin_convergencia": null,
           "iteraciones_mediana": 12.0,
-          "tiempo_total_s": 0.9382868409993534,
+          "tiempo_total_s": 0.997580552000727,
           "sin_rama_propia_q_wrapped": [],
           "sumas_q4_q6_familia": null,
           "n_familia_singular_q4_distintos": null,
@@ -3162,7 +3162,7 @@
           "ramas_reales_halladas_por_DLS": 8,
           "mejor_residuo_sin_convergencia": null,
           "iteraciones_mediana": 17.0,
-          "tiempo_total_s": 0.781065658998159,
+          "tiempo_total_s": 0.8436573360002058,
           "sin_rama_propia_q_wrapped": [],
           "sumas_q4_q6_familia": null,
           "n_familia_singular_q4_distintos": null,
@@ -3532,7 +3532,7 @@
           "ramas_reales_halladas_por_DLS": 8,
           "mejor_residuo_sin_convergencia": null,
           "iteraciones_mediana": 13.5,
-          "tiempo_total_s": 0.51399855499767,
+          "tiempo_total_s": 0.49944996500016714,
           "sin_rama_propia_q_wrapped": [],
           "sumas_q4_q6_familia": [
             1.047198
@@ -3775,7 +3775,7 @@
           "ramas_reales_halladas_por_DLS": 0,
           "mejor_residuo_sin_convergencia": 0.66915716390363,
           "iteraciones_mediana": null,
-          "tiempo_total_s": 5.93874249199871,
+          "tiempo_total_s": 6.564981515999534,
           "sin_rama_propia_q_wrapped": [],
           "sumas_q4_q6_familia": null,
           "n_familia_singular_q4_distintos": null,

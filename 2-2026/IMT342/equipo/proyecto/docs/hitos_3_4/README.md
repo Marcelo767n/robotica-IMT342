@@ -1,4 +1,8 @@
-# Hitos 3 y 4 integrados · ECI-3/4
+# Hitos 3 y 4 integrados · ECI-3/4 (planificación y requisitos)
+
+> **Alcance de esta carpeta.** Aquí están la **planificación y los requisitos** de los Hitos 3/4: requisitos ECI-3/4, plan de control y contexto de octubre. Es material de trabajo previo al resultado. La **evidencia y la validación** están en [hito3/docs](../../hito3/docs/README.md) y `hito3/resultados`; el informe, en [entregables/hito3_4](../../entregables/README.md); el estado final, en [CONTEXTO_Y_OBJETIVOS.md](../CONTEXTO_Y_OBJETIVOS.md). Los criterios unificados del docente (semana 14) están en [material_docente/semana_14](../../material_docente/semana_14/).
+
+**Estado final (26/11/2026):** el robot real se controla desde RViz por RWS + RAPID (265 órdenes registradas del 16 al 19/11, 264 con llegada); la FK propia se validó contra el controlador; trayectorias, Estudio y validación FK/IK/J están implementados. Siguen pendientes el GO firmado, la aprobación de tolerancias, la prueba de la v5 en el IRC5 y la integración del PLC real (solo simulado). Las secciones siguientes conservan el estado de los cortes del 10 y 4/11, anteriores al control real.
 
 **Corte del 10/11:** [bitácora del avance y resultado de la sesión](../bitacora/AVANCE_2026-11-10.md). Se verificaron recepción RWS y transferencia del módulo J6, pero el intento no consiguió movimiento físico. Sigue pendiente G3. [Procedimiento para la próxima visita](../conexion_abb/PROXIMA_SESION_J6.md).
 
@@ -16,9 +20,9 @@ Prioridad actual: cerrar la validación física FK y preparar el control EGM por
 - [Inventario Gate 0](../conexion_abb/gate0_inventario.csv).
 - [Manifiesto](../../model_manifest.yaml) y [fotos](../../fotos/README.md).
 - [Casos Gate 2 predefinidos](../conexion_abb/validation_cases.csv).
-- [Material original W12-S01](<../../archivos que hay que presentar/actualizacion_semana_12/>).
+- [Material original W12-S01](../../material_docente/actualizacion_semana_12/).
 
-## Estado de los gates
+## Estado de los gates (corte del 04/11; el estado actual está en hito3/docs)
 
 | Gate | Evidencia disponible | Pendiente |
 |---|---|---|

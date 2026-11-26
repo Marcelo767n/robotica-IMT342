@@ -1,5 +1,7 @@
 # Qué logramos el 29 de octubre de 2026: conexión con el ABB IRB 120
 
+> **Histórico.** Resumen del 29/10/2026. Superado por [CONTEXTO_Y_OBJETIVOS.md](../CONTEXTO_Y_OBJETIVOS.md).
+
 Resumen de la primera sesión con el robot real del laboratorio (IRB 120-3/0.6, sistema `120-101516`). Distingue lo **medido en el robot**, lo **probado solo con simulaciones** y lo que **sigue pendiente**. Ningún comando de este día movió el robot, encendió motores ni inició programas.
 
 ## En una frase

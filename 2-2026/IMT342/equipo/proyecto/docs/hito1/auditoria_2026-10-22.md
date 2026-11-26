@@ -14,7 +14,7 @@ ECI-3/4. La auditoría no modificó código, URDF, pruebas ni entregables.
   sección 3.1 (sin MoveIt ni resolvedores automáticos) y sección 6 (Conventional
   Commits; ramas `main`, `dev`, `feature/*`).
 - No se encontró rúbrica ni worksheet propia del Hito 1 en `referencias/`, `archivo/` ni
-  `archivos que hay que presentar/` (allí solo hay material del Hito 2 y de W12). La
+  `material_docente/` (allí solo hay material del Hito 2 y de W12). La
   "worksheet de validación URDF" citada antes en `trazabilidad.md` no está en el
   repositorio.
 

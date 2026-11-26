@@ -12,7 +12,7 @@ La hoja específica está aquí:
 - **Rama:** `main`.
 - **Ruta dentro del repositorio:** `2-2026/IMT342/Semana_10/hito_2/hito_2_rubrica.pdf`.
 - **Abrir en GitHub:** [Rúbrica oficial del Hito 2](https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_10/hito_2/hito_2_rubrica.pdf).
-- **Abrir la copia local:** [hito_2_rubrica.pdf](<../../archivos que hay que presentar/hito_2/hito_2_rubrica.pdf>).
+- **Abrir la copia local:** [hito_2_rubrica.pdf](../../material_docente/hito_2/hito_2_rubrica.pdf).
 - **Página 1:** ponderación. **Página 2:** criterios A–F del producto grupal. **Página 3:** defensa individual G1–G4.
 
 Verifiqué las copias locales contra los objetos de GitHub el 30/10: la guía general tiene SHA de blob `828d5714b312e983f5a1123d74faa220ce3ac591`; la rúbrica específica, `97b991b1b90857cebf3a45cdc2816462f72e34b7`. Coinciden con las versiones consultadas en `main`.

@@ -18,7 +18,7 @@
 \usepackage{pdflscape}
 \usepackage{caption}
 \usepackage{enumitem}
-\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
 
 \sisetup{output-decimal-marker={,}}
 \captionsetup{font=small,labelfont=bf}
@@ -32,40 +32,56 @@
 \newcommand{\ep}{e_p}
 \newcommand{\eR}{e_R}
 \urlstyle{tt}
-\newcommand{\ruta}[1]{\path{#1}}
+\DeclareRobustCommand{\ruta}[1]{\path{#1}}
 \newcommand{\pend}{\textit{pendiente}}
 
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{\textbf{IMT-342} \textperiodcentered\ Informe técnico del Hito 3 (ECI-3/4)}
+\lhead{\textbf{IMT-342} \textperiodcentered\ Informe técnico ECI-3/4 (Hitos 3 y 4)}
 \rhead{ABB IRB~120 + ROS~2}
 \cfoot{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 
+\hypersetup{pdftitle={Integración ROS 2 – ABB IRB 120: validación cinemática, control desde RViz y trayectorias. Informe técnico ECI-3/4 (Hitos 3 y 4)},pdfauthor={Dayana Andrade, Mirko Ayala, Marcelo Navarro}}
+
 \begin{document}
 
 % ---------------------------------------------------------------- Portada
-\begin{center}
-{\LARGE\bfseries\color{ucbblue} Validación cinemática, procedencia e integración\\[2pt] ROS--ABB IRB~120\par}
-\vspace{4pt}
-{\large Informe técnico del Hito 3 (ECI-3/4)\par}
-\vspace{6pt}
-IMT-342 Robótica \textperiodcentered\ Universidad Católica Boliviana \textperiodcentered\ 2-2026\\
-Equipo (según el \texttt{README.md} del proyecto): Dayana Andrade, Mirko Ayala y Marcelo Navarro\\
-Versión del documento: borrador del 24/11/2026
-\end{center}
-
-\begin{tcolorbox}[colback=yellow!8,colframe=orange!70!black,boxrule=0.6pt,left=3pt,right=3pt,top=2pt,bottom=2pt]
-\small\textbf{Estado de este informe.} Es un borrador técnico para revisión del equipo y del docente. No lleva firmas ni autorizaciones: la firma P7 (sección~\ref{sec:p7}), el registro GO/NO-GO de las sesiones de laboratorio y la aprobación de umbrales por el docente figuran como \pend. Todo dato proviene de los archivos del repositorio; lo que no consta se declara como no verificado. Los resultados de FK/IK/$J$ corresponden al paquete \ruta{hito3/validacion}, ejecutado el 24/11/2026 (commit base \texttt{6e82c45}, carpeta \texttt{hito3/} sin versionar en ese momento).
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\vspace*{1.2cm}
+{\large Universidad Católica Boliviana \textperiodcentered\ IMT-342 Robótica \textperiodcentered\ 2-2026\par}
+\vspace{1.6cm}
+{\fontsize{22}{27}\selectfont\bfseries\color{ucbblue} Integración ROS 2 -- ABB IRB~120:\\[4pt] validación cinemática, control desde RViz\\[4pt] y trayectorias\par}
+\vspace{0.8cm}
+{\Large Informe técnico ECI-3/4 (Hitos 3 y 4)\par}
+\vspace{2.0cm}
+\begin{tabular}{@{}rl@{}}
+\textbf{Equipo:} & Dayana Andrade, Mirko Ayala y Marcelo Navarro\\
+\textbf{Fecha:} & 26/11/2026\\
+\textbf{Versión del documento:} & 1.0 (informe final, sin firmas)\\
+\textbf{Código base:} & commit \texttt{b54ccfa}, rama del Hito 3/4 (el informe y \ruta{entregables/hito3_4/}\\
+& se añaden sobre ese commit, sin confirmar al compilar)\\
+\end{tabular}
+\vfill
+\begin{tcolorbox}[colback=yellow!8,colframe=orange!70!black,boxrule=0.6pt,left=4pt,right=4pt,top=3pt,bottom=3pt,width=0.9\textwidth]
+\small\textbf{Estado de este informe.} Documento técnico para revisión del equipo y del docente. \textbf{No lleva firmas ni autorizaciones.} La firma P7 (sección~\ref{sec:p7}), el registro GO/NO-GO de las sesiones de laboratorio y la aprobación de umbrales por el docente figuran como \pend. Todo dato proviene de los archivos del repositorio y de las ejecuciones citadas; lo que no consta se declara como no verificado.
 \end{tcolorbox}
-\setcounter{tocdepth}{1}
-\tableofcontents
+\vspace{1cm}
+\end{titlepage}
 
-% ---------------------------------------------------------------- 1
+\setcounter{tocdepth}{2}
+\tableofcontents
+\clearpage
+\listoffigures
+\listoftables
+\clearpage
+% 1
 \section{Resumen y alcance}
 \label{sec:resumen}
 
-El informe documenta la validación de los modelos cinemáticos propios del IRB~120 (FK, IK y Jacobiano), la procedencia de los datos usados, la cadena de integración PC$\to$IRC5 y el nivel de evidencia que sostiene cada afirmación. Se sigue la estructura de los criterios unificados de la sesión W14-S02 (Bloques B a H, plantillas P1 a P7) y la rúbrica del ECI-3/4.
+El informe cubre el elemento integrado ECI-3/4 (Hitos 3 y 4). Documenta (i) la arquitectura ROS~2 final y el control del brazo desde RViz (secciones~\ref{sec:ros2} y~\ref{sec:rapid}); (ii) la validación de los modelos cinemáticos propios del IRB~120 (FK, IK y Jacobiano), la procedencia de los datos y la integración PC$\to$IRC5, con los Bloques B a H y las plantillas P1 a P7 de los criterios unificados W14-S02 (secciones~\ref{sec:arqdatos} a~\ref{sec:tol}); (iii) las trayectorias del Hito~4 (sección~\ref{sec:tray}); (iv) el movimiento real registrado (sección~\ref{sec:gate3}); y (v) pruebas, seguridad, reproducibilidad y limitaciones. La rúbrica ECI-3/4 tiene cinco dominios (sistema y compatibilidad, modelos y validación, integración ROS--ABB, seguridad y reproducibilidad, defensa y documentación); \ruta{hito3/docs/rubrica_autoevaluacion.md} los autoevalúa sin asignar nota.
 
 \subsection{Niveles de evidencia usados}
 Se usa la escala oficial S0--S3: \textbf{S0} modelo o simulación offline; \textbf{S1} observación del controlador con interfaz, unidad, fuente y marca temporal; \textbf{S2} observación trazada en ROS; \textbf{S3} ejecución física autorizada (orden verificable $\to$ aceptación $\to$ estado $\to$ movimiento observado, con registros).
@@ -80,28 +96,135 @@ Se usa la escala oficial S0--S3: \textbf{S0} modelo o simulación offline; \text
 S0 & FK, IK, Jacobiano, singularidades y esfuerzo estático del modelo propio son coherentes entre sí y con una referencia independiente de la tabla DH (ROS-Industrial) y con diferencias finitas. 21 casos con estado \textit{verificado} en sentido procedimental. & Exactitud física del robot. La referencia no es independiente de la geometría nominal ABB.\\
 S1 & El IRC5 reportó por RWS las posturas y poses usadas (04/11, dos posturas, 1804 y 1487 lecturas estacionarias). La FK propia en \texttt{tool0} coincide con el \texttt{robtarget} del controlador con errores de orden $10^{-7}$ m y $10^{-7}$ rad (mediana), con 155 muestras fuera del criterio estricto en el registro, sin causa demostrada. & Conformidad con un umbral aprobado (no existe). Posturas independientes entre sí con J4--J6 variados. Comparación en el TCP físico (no medido).\\
 S2 & Lectura RWS$\to$ROS$\to$TF con el robot quieto el 03/11 (28 muestras, sin comandos). & Que el gemelo en RViz siguiera al robot (reporte del usuario, no medida).\\
-S3 & \textbf{S3 técnico}: 265 órdenes PC$\to$RWS$\to$RAPID$\to$movimiento registradas del 16 al 19/11, 264 con llegada confirmada. & \textbf{S3 autorizado}: no hay GO firmado ni observación independiente. Tampoco control continuo, \texttt{MoveL}/RAPID v5, EGM, trayectorias A$\to$B$\to$C ni celda PLC (solo S0).\\
+S3 & \textbf{S3 técnico}: 265 órdenes PC$\to$RWS$\to$RAPID$\to$movimiento registradas del 16 al 19/11, 264 con llegada confirmada. & \textbf{S3 autorizado}: no hay GO firmado ni observación independiente. Tampoco \texttt{MoveL}/RAPID v5, bucle continuo, trayectorias A$\to$B$\to$C y movimientos vistosos (solo S0, sección~\ref{sec:tray}), EGM ni celda PLC.\\
 \bottomrule
 \end{tabularx}
 \caption{Alcance de las afirmaciones por nivel de evidencia.}
 \end{table}
 
 \subsection{Resultado global por estado P5}
-El paquete de validación define 34 casos. Distribución final por estado P5: \textbf{21 verificados}, \textbf{9 parciales}, \textbf{4 bloqueados por acceso}, 0 fallidos y 0 no ejecutados (fuente: \ruta{hito3/resultados/resultados.json}). Conforme a la definición oficial de P5, \textit{verificado} significa aquí verificación procedimental, no conformidad física formal, porque ningún umbral ha sido aprobado por el docente. Nótese que \ruta{hito3/docs/niveles_evidencia.md} afirma que ningún experimento se marca \textit{verificado}; esa nota es anterior al paquete y se refiere a los experimentos de laboratorio anteriores, no a los casos offline S0.
+El paquete de validación (\texttt{hito3/validacion}, regenerable) define 34 casos. Distribución final por estado P5: \textbf{21 verificados}, \textbf{9 parciales}, \textbf{4 bloqueados por acceso}, 0 fallidos y 0 no ejecutados (fuente: \ruta{hito3/resultados/resultados.json}). Conforme a la definición oficial de P5, \textit{verificado} significa aquí verificación procedimental, no conformidad física formal, porque ningún umbral ha sido aprobado por el docente. Nótese que \ruta{hito3/docs/niveles_evidencia.md} afirma que ningún experimento se marca \textit{verificado}; esa nota es anterior al paquete y se refiere a los experimentos de laboratorio anteriores, no a los casos offline S0.
 
 \subsection{Lo que el equipo no puede afirmar hoy}
 \begin{itemize}
 \item Ninguna autorización GO firmada por el responsable del laboratorio consta para las sesiones del 16 al 19/11.
 \item Ninguna tolerancia de FK/IK/$J$ está aprobada; todas son propuestas (criterio estricto del proyecto de $10^{-6}$ m y $10^{-6}$ rad frente al IRC5).
 \item El TCP físico no se midió (\texttt{tcp\_verified\_on\_robot: false}); las comparaciones con el controlador se hacen en \texttt{tool0} (brida).
-\item El módulo RAPID v5 (\texttt{MoveL}), EGM y la celda PLC no se han probado en el IRC5.
+\item El módulo RAPID v5 (\texttt{MoveL}), las trayectorias del planificador, EGM y la celda PLC no se han probado en el IRC5 (la v4 sí).
 \end{itemize}
 
-% ---------------------------------------------------------------- 2
-\section{Arquitectura y procedencia (Bloque B)}
+
+\subsection{Estado final de los dos hitos}
+\begin{itemize}[leftmargin=*]
+\item \textbf{Hito 3 (integración y validación).} Validación FK/IK/$J$/singularidades reproducible (S0 y S1), lectura RWS$\to$ROS$\to$TF (S2) y 265 órdenes reales con 264 llegadas (S3 técnico). Gate~3 formal \textbf{no acreditado}: GO sin firmar.
+\item \textbf{Hito 4 (control y trayectorias).} Control completo desde RViz con panel propio, cuatro verificaciones antes de enviar, planificador con reglas más estrictas que las del Hito~2, bucle continuo y movimientos vistosos 10--14. Probado offline (298 pruebas de \texttt{brazo.sh pruebas}); sin ejecución del planificador en el robot.
+\end{itemize}
+% ---------------------------------------------------------------- ROS 2 final
+\section{Arquitectura ROS 2 final y control desde RViz}
+\label{sec:ros2}
+
+Esta sección describe el sistema tal como queda en el commit \texttt{b54ccfa} (mapa en \ruta{docs/MAPA_ROS2.md}, revisión \texttt{37ca9ee} del 24/11/2026). Todo el control se hace dentro de RViz: no hay ventana de control aparte, y un robot ficticio permite ensayar la misma interfaz sin el IRC5.
+
+\subsection{Nodos y procesos}
+El nodo \texttt{irb120\_panel\_rws} (el «brazo») conecta la PC con el controlador: recibe órdenes, resuelve la cinemática, verifica, escribe en el IRC5 por RWS y lee la postura. Dos instancias de \texttt{robot\_state\_publisher} (\texttt{irb120\_rsp\_medido} e \texttt{irb120\_rsp\_objetivo}) convierten los ángulos en TF y descripción URDF, de modo que RViz muestra dos modelos superpuestos: blanco (postura medida) y naranja (objetivo). RViz (\texttt{rviz2}) carga además el panel C++ «IRB 120» (paquete \texttt{irb120\_rviz\_panel}, pestañas de control y «Trayectorias») y un control 3D (marcador interactivo) que publica el propio nodo del brazo.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figuras/grafo_ros2.png}
+\caption{Mapa de conexiones ROS 2 (\ruta{docs/grafo_ros2.svg}, revisión \texttt{37ca9ee}, rasterizado desde el SVG). Arriba: órdenes y estado. Abajo: gemelo digital. Los enlaces PLC y Estudio son extensiones (sección~\ref{sec:ext}).}
+\label{fig:grafo}
+\end{figure}
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{6.6cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Publica $\to$ escucha} & \textbf{Tópico} & \textbf{Contenido}\\
+\midrule
+Panel RViz $\to$ brazo & \texttt{/irb120/panel/orden} & Órdenes (JSON en \texttt{std\_msgs/String}).\\
+Brazo $\to$ panel RViz & \texttt{/irb120/panel/estado} & Postura, objetivo, verificación y progreso de trayectoria (JSON).\\
+Brazo $\to$ \texttt{rsp\_medido} & \texttt{/irb120/control/medido/joint\_states} & \texttt{JointState} medido, rad.\\
+Brazo $\to$ \texttt{rsp\_objetivo} & \texttt{/irb120/control/objetivo/joint\_states} & \texttt{JointState} del objetivo, rad.\\
+Ambos \texttt{rsp} $\to$ RViz & \texttt{/irb120/control/tf}, \texttt{tf\_static}, \texttt{robot\_description} & Transformaciones y URDF de cada modelo.\\
+Brazo $\leftrightarrow$ RViz & \texttt{/irb120/control/articulacion/} \texttt{update} y \texttt{feedback} & Marcador interactivo (control 3D).\\
+Fuente externa $\to$ brazo & \texttt{/irb120/trayectoria/punto\_externo} & \texttt{PoseStamped} en \texttt{base\_link} (m); pose al buzón de puntos si es alcanzable.\\
+\bottomrule
+\end{tabularx}
+\caption{Tópicos de la sesión de control. Dominio ROS~2: 120 (robot real) y 121 (simulado).}
+\label{tab:topicos}
+\end{table}
+
+El comando \texttt{brazo nodos} (\ruta{irb120_control/grafo_ros.py}) descubre en vivo los nodos y tópicos del dominio y los contrasta con este mapa; no se ejecutó con una sesión abierta al preparar este informe, por lo que la figura~\ref{fig:grafo} es el mapa documentado, no una captura. Los enlaces externos a ROS (RWS/HTTP puerto 80 con el IRC5; HTTP local con el Estudio, puertos 8770 real y 8771 simulado; TCP 2000 con el PLC) están en el mapa del repositorio.
+
+\subsection{Modos de arranque}
+\begin{itemize}[leftmargin=*]
+\item \texttt{brazo sesion}: robot real. Comprueba el enlace, guía el paso a AUTO, instala o verifica el módulo RAPID, abre RViz, el panel y el Estudio. La interfaz se abre aunque el robot no quede listo.
+\item \texttt{brazo sesion --simulado} (y \texttt{brazo simulado}): la misma sesión con un robot ficticio en el mismo proceso, sin cable ni FlexPendant.
+\item \texttt{brazo sesion --v4}: respaldo con el módulo RAPID v4 ya probado (sección~\ref{sec:rapid}).
+\item \texttt{brazo demo}: todo sin robot, con el Estudio; el simulador de PLC es un proceso aparte (sección~\ref{sec:ext}).
+\end{itemize}
+
+% ---------------------------------------------------------------- flujo de una orden
+\section{Flujo de una orden y módulo RAPID}
+\label{sec:rapid}
+
+\subsection{De la petición al movimiento}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=0.5cm and 0.5cm,
+  bx/.style={draw=ucbblue,thick,fill=ucbblue!8,rounded corners,text width=3.3cm,align=center,font=\footnotesize,minimum height=1.5cm},
+  bs/.style={draw=orange!80!black,thick,fill=yellow!12,rounded corners,text width=3.3cm,align=center,font=\footnotesize,minimum height=1.5cm},
+  ar/.style={-{Stealth},thick,ucbblue}]
+\node[bx] (a) {1. Pedir\\pose o ángulos (panel/ control 3D)};
+\node[bx,right=of a] (b) {2. IK de Pieper\\8 ramas, elige la mejor};
+\node[bx,right=of b] (c) {3. Cuatro verificaciones\\envío bloqueado si falla};
+\node[bs,right=of c] (d) {4. RWS escribe\\\texttt{pcTarget}, \texttt{pcPose}, \texttt{pcTipo}; relee};
+\node[bs,below=0.8cm of d] (e) {5. Sube \texttt{pcSeq}};
+\node[bs,left=of e] (f) {6. RAPID valida y ejecuta \texttt{MoveAbsJ}/\texttt{MoveL}};
+\node[bs,left=of f] (g) {7. \texttt{rbCodigo}$=2$, \texttt{rbSeq}};
+\node[bx,left=of g] (h) {8. PC relee \texttt{joints\_deg}, compara y publica};
+\draw[ar] (a)--(b); \draw[ar] (b)--(c); \draw[ar] (c)--(d); \draw[ar] (d)--(e);
+\draw[ar] (e)--(f); \draw[ar] (f)--(g); \draw[ar] (g)--(h);
+\end{tikzpicture}
+\caption{Flujo de una orden. En color naranja, los pasos que ocurren contra el IRC5 (solo con robot real y autorización).}
+\label{fig:flujo}
+\end{figure}
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Pedir.} El usuario escribe ángulos o una pose cartesiana (TCP en \texttt{base\_link}) en el panel, o arrastra el control 3D.
+\item \textbf{IK de Pieper.} Se usa la IK analítica del Hito~2 (sección~\ref{sec:ik}); la rama se elige por cercanía a la postura actual y alejamiento de límites y singularidades.
+\item \textbf{Cuatro verificaciones} (\ruta{panel/verificacion.py}, tolerancias del código): (i) IK$\to$FK entre la pose pedida y la FK del objetivo, $\le0{,}001$~mm y $0{,}001^\circ$; (ii) ida y vuelta IK(FK($\mathbf{q}$)) frente a $\mathbf{q}$, $\le0{,}001^\circ$ por eje; (iii) FK propia de \texttt{tool0} frente al \texttt{robtarget} que informa el controlador, $\le0{,}5$~mm y $0{,}1^\circ$, con lectura de edad $\le5$~s; (iv) llegada: FK de la postura medida frente a la pedida durante y al final del movimiento, $0{,}5$~mm y $0{,}1^\circ$. Además se exige pose alcanzable y objetivo dentro de límites; si (i) o (iii) fallan, el envío se bloquea (\texttt{Refused}).
+\item \textbf{Escritura por RWS.} El cliente (\ruta{rws_j6.py}, \ruta{rws_mover.py}) escribe \texttt{pcTarget} (objetivo articular), \texttt{pcPose} y \texttt{pcTipo}, \textbf{relee} lo escrito y solo entonces sube \texttt{pcSeq}.
+\item \textbf{RAPID.} La tarea \texttt{ServidorPC} (\texttt{LabJointRws}) detecta el nuevo \texttt{pcSeq}, valida contra los límites articulares y ejecuta \texttt{MoveAbsJ} (o \texttt{MoveL} en la v5) con parada \texttt{fine}; devuelve \texttt{rbCodigo} (2 = llegada) y \texttt{rbSeq}.
+\item \textbf{Estado.} La PC lee la postura real, la publica y calcula el error de llegada.
+\end{enumerate}
+El código 2 certifica que RAPID aceptó y terminó la orden; no prueba por sí solo la posición física (sección~\ref{sec:gate3}).
+
+\subsection{Módulo RAPID \texttt{LabJointRws}: versiones}
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{4.0cm}@{}}
+\toprule
+Versión & Contenido & Estado\\
+\midrule
+v2--v3 & \texttt{MoveAbsJ}; v2: 20~mm/s y 5$^\circ$/s fijos, paso máx.\ 10$^\circ$. & Probadas en IRC5 (16--17/11).\\
+v4 & Velocidad en \% ($[250,60,250,60]$), paso máx.\ 45$^\circ$; módulo $\le5000$ caracteres (límite de RWS). & \textbf{Probada en el IRC5} (17--19/11, sección~\ref{sec:gate3}).\\
+v5 & \texttt{pcTipo} (0 = \texttt{MoveAbsJ}, 1 = \texttt{MoveL} con \texttt{ConfL\textbackslash Off}), \texttt{pcPose}; una orden por tramo (\texttt{maxPasoDeg} 360), sin cortes cada 40$^\circ$; 4667 caracteres ($\le4900$). & Instalable. \textbf{Sin probar aún en el robot.}\\
+\bottomrule
+\end{tabularx}
+\caption{Versiones del módulo RAPID.}
+\end{table}
+El instalador es robusto: \texttt{Module1} deja de ser obligatorio, la sesión reinstala si encuentra la v4 y no se detiene aunque el robot no quede listo (abre la interfaz igualmente). El modo de respaldo \texttt{brazo sesion --v4} usa el módulo ya probado y limita el movimiento a \texttt{MoveAbsJ}.
+
+% 2
+\section{Procedencia de los datos y comparabilidad (Bloque B)}
+\label{sec:arqdatos}
 \label{sec:arq}
 
-\subsection{Cadenas de datos y de comando}
+\subsection{Cadenas de datos y de comando (diagrama de la matriz A/B)}
 La ruta técnica elegida es RWS + RAPID (hipótesis A de la ficha Gate~0). El proyecto no usa \texttt{abb\_ros2} ni EGM. Se separan, como pide la matriz A/B, la cadena de estado (para comparar) y la de comando (para mover).
 
 \begin{figure}[H]
@@ -186,7 +309,7 @@ Tolerancias y definición de error & $\ep=\lVert\Delta p\rVert_2$, $\eR$ por \te
 
 Regla de bloqueo: como el TCP físico es desconocido, las comparaciones con el controlador se conservan como resultado exploratorio válido en \texttt{tool0}, pero no pasan a conformidad de FK en la punta de la pinza.
 
-% ---------------------------------------------------------------- 3
+% 3
 \section{Gate 0 y Gate 1}
 \label{sec:gates01}
 
@@ -205,7 +328,7 @@ La matriz de 12 filas compara la ruta A (RWS + RAPID, en uso) con la ruta B (EGM
 \end{itemize}
 Alcance: lectura de estado real validada (S1) y retransmitida por ROS/TF (S2) con el robot quieto. No se concluye control de trayectoria. Dos limitaciones deben decirse en la defensa: el contraste del 29/10 se hizo contra una foto de la pantalla y sin operador presente, y el seguimiento del gemelo en RViz del 03/11 es un reporte del usuario.
 
-% ---------------------------------------------------------------- 4
+% 4
 \section{Cinemática directa (Bloque C)}
 \label{sec:fk}
 
@@ -277,7 +400,7 @@ Nota de conteo. La tabla P1c cuenta 20 y 173 lecturas estacionarias fuera del cr
 \subsection{Casos bloqueados}
 FK-L-REAL (FK cerca de límites con datos reales) y FK-TCP-REAL (FK con el TCP físico) quedan \textit{bloqueados por acceso}: requieren permiso y hardware no disponibles en la sesión W14-S02 (NO-GO físico), y el plan alternativo es el offline ya presentado.
 
-% ---------------------------------------------------------------- 5
+% 5
 \section{Cinemática inversa (Bloque D)}
 \label{sec:ik}
 
@@ -313,7 +436,7 @@ Los residuos de FK de las ramas válidas y no válidas son del orden de $10^{-16
 
 IK-1 a IK-3 y IK-5 quedan \textit{verificados} (S0, procedimental) e IK-4 \textit{parcial}. IK-REAL (IK con movimiento físico) está \textit{bloqueado por acceso}: S3 no alcanzado y plan alternativo offline.
 
-% ---------------------------------------------------------------- 6
+% 6
 \section{Jacobiano y diferencias finitas (Bloque E)}
 \label{sec:jac}
 
@@ -352,7 +475,7 @@ El error baja con pendiente log-log 2,00 (truncamiento, $O(h^2)$) hasta un míni
 
 J-N1 a J-N4 y J-FD quedan \textit{verificados} (S0, procedimental). J-REAL (Jacobiano frente al controlador) está \textit{bloqueado por acceso}: depende de hardware y GO. No se comparó $J$ con un Jacobiano del controlador ni de MoveIt; la referencia es numérica sobre la FK independiente.
 
-% ---------------------------------------------------------------- 7
+% 7
 \section{Singularidades y esfuerzo (Bloque F)}
 \label{sec:sing}
 
@@ -377,7 +500,7 @@ Se analiza la matriz escalada $J_s=[J_v/L;\,J_\omega]$ con $L=0{,}58$~m y el umb
 
 Los casos F-reg, F-q5, F-q5-0, F-codo, F-hombro y F-TAU quedan \textit{verificados} (S0, análisis algebraico del modelo, sin datos físicos). Ninguno corresponde a una medición en el robot. Los valores de $\tau_{act}$ son del modelo dinámico propio (\texttt{dynamics.py}); no se midieron torques ni corrientes.
 
-% ---------------------------------------------------------------- 8
+% 8
 \section{Sincronización, tolerancias y presupuesto (Bloques G y H)}
 \label{sec:tol}
 
@@ -397,7 +520,77 @@ $K$ y $N_{ops}$ son estimaciones del equipo. El error máximo observado (\SI{2,4
 
 Estado: TOL-OFF (\textit{parcial}, presupuesto sin aprobación), TOL-IRC5 (\textit{parcial}: no se inventa ninguna tolerancia física). La repetibilidad del IRB~120 que cita el repositorio (0,01~mm, hoja ABB) no se verificó localmente.
 
-% ---------------------------------------------------------------- 9
+% ---------------------------------------------------------------- Trayectorias
+\section{Trayectorias (Hito 4)}
+\label{sec:tray}
+
+\subsection{Planificador}
+El planificador (\ruta{irb120_control/trayectorias/}, contrato en \ruta{docs/ARQUITECTURA_TRAYECTORIAS.md}) es código puro, sin ROS, GUI ni red. Recibe una lista de puntos (pose cartesiana del TCP o ángulos), la postura medida de partida y el porcentaje de velocidad, y devuelve un plan por tramos. Se parte de la postura real: el tramo 0 va de ella al primer punto, y con \texttt{cerrar} el último vuelve al primero (A$\to$B$\to$C$\to$A).
+\begin{itemize}[leftmargin=*]
+\item \textbf{Rama de IK.} Pieper (\texttt{rank\_candidates}) con referencia en $\mathbf{q}$ del punto anterior, filtrando por $\sigma_{\min}$ y margen a los límites.
+\item \textbf{Elección articular o lineal por tramo.} Ambas opciones se evalúan: el tramo \textit{articular} usa el perfil LSPB del Hito~2; el \textit{lineal} traza una recta en posición con \textit{slerp} en orientación, perfil LSPB en el parámetro de camino, $v=250\,\mathrm{mm/s}\cdot p/100$, e IK en cada muestra con la rama más cercana a la anterior. Se descartan las opciones con alguna regla en \textit{falla}; entre las factibles, gana la de mayor $\sigma_{\min}$ si la otra tiene avisos de singularidad y, si no, la más corta. Si ninguna es factible se proponen otra rama o un punto intermedio.
+\item \textbf{Bucle continuo} (\texttt{repeticiones}$=0$): repite hasta «Detener al final» (termina la vuelta en curso) o cancelar/pausar (entre tramos). Cada vuelta se re-planifica desde la postura real.
+\end{itemize}
+
+\subsection{Reglas más estrictas que las del Hito 2}
+Las tolerancias bloquean el envío; las de «aviso» solo se marcan. Son decisión del equipo (el Hito~2 usaba $\sigma_{\min}>0{,}01$ y margen de $5^\circ$), no un criterio aprobado por el docente. Fuente: \texttt{TOLERANCIAS} en \ruta{trayectorias/reglas.py}.
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{2.0cm}@{}}
+\toprule
+\textbf{Regla} & \textbf{Aviso} & \textbf{Bloqueo} & \textbf{Hito 2}\\
+\midrule
+$\sigma_{\min}(J)$ a lo largo del tramo & $<0{,}04$ & $<0{,}02$ & 0,01\\
+Número de condición $\kappa(J)$ & $>150$ & $>500$ & ---\\
+Margen a límites articulares & $<15^\circ$ & $<10^\circ$ & $5^\circ$\\
+Velocidad articular del perfil & $>$\,70\,\% de la máx. & $>$\,85\,\% & LSPB\\
+Aceleración articular del perfil & $>$\,70\,\% & $>$\,100\,\% & LSPB\\
+Par articular (dinámica completa) & $>$\,70\,\%\ de $\tau_{ref}$ & $>$\,100\,\%\ de $\tau_{ref}$ & ---\\
+Salto de rama en tramo lineal & --- & $>5^\circ$ entre muestras & ---\\
+Altura $z$ del TCP sobre la base & $<100$~mm & $<30$~mm & ---\\
+Precisión IK$\to$FK por punto & --- & $>0{,}001$~mm / $0{,}001^\circ$ & 0,001\\
+\bottomrule
+\end{tabularx}
+\caption{Tolerancias del planificador. $\tau_{ref}$ es una referencia del proyecto (1,5 veces el par de gravedad máximo de cada eje, mínimo 2~N\,m en la muñeca), no un dato de ABB.}
+\label{tab:tolTray}
+\end{table}
+
+\subsection{Ejecución en el panel}
+El panel (\ruta{panel/trayectoria.py}) recibe la trayectoria y las órdenes del cliente, \textbf{re-planifica con la postura real} y solo ejecuta si coincide. Ejecuta tramo a tramo (una orden por tramo en la v5), y antes de cada uno vuelve a verificar con las comprobaciones de la sección~\ref{sec:rapid}; al terminar compara la llegada con el objetivo. Acciones: \texttt{trayectoria}, \texttt{pausar}, \texttt{reanudar}, \texttt{vista\_previa}, \texttt{buzon\_tomar}. «Cancelar» y «Pausar» actúan entre tramos: no detienen un movimiento en curso (para parar ya: Stop, habilitador o paro de emergencia, como advierte el propio panel).
+
+\subsection{Panel de RViz: pestaña «Trayectorias»}
+La pestaña (\texttt{widget\_trayectorias.cpp}) permite: grabar puntos (desde el control 3D o capturando la postura), guardar y cargar trayectorias, lanzar los \textbf{movimientos vistosos} predefinidos, activar el \textbf{bucle}, ver la \textbf{vista previa} sobre el gemelo (modelo naranja) sin mover el robot, y pausar, «Detener al final» o cancelar. El menú del control 3D añade «Añadir a la trayectoria» (buzón de puntos), y el tópico \texttt{punto\_externo} alimenta el mismo buzón.
+
+\subsection{Movimientos vistosos 10--14}
+Cinco trayectorias de exhibición (\ruta{trayectorias/demos.py}) con puntos dados en ángulos, tipo articular, ciclo cerrado y bucle continuo a 25\,\% de velocidad. Volumen seguro comprobado sobre las muestras de cada plan y no solo en los puntos: margen $\ge15^\circ$ a límites, $|q_5|\ge20^\circ$, TCP a $z\ge200$~mm, $|q_1|\le90^\circ$, J2 en $[-30^\circ,40^\circ]$ y J3 en $[-60^\circ,30^\circ]$. Valores obtenidos el 26/11/2026 con \texttt{python3 -m irb120\_control.trayectorias.demos --sin-escribir} (planificación offline; \textbf{no se ejecutaron en el robot}).
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}lcrrrrr@{}}
+\toprule
+\textbf{Movimiento} & \textbf{Plan ok} & \textbf{Vuelta (s)} & \textbf{1.ª vuelta (s)} & $\bm{\sigma_{\min}}$ & \textbf{Margen ($^\circ$)} & $\bm{z}$ \textbf{mín.\ (mm)}\\
+\midrule
+10 Saludo & sí & 10,2 & 10,8 & 0,068 & 70,0 & 519\\
+11 Reverencia & sí & 7,8 & 8,2 & 0,094 & 70,0 & 479\\
+12 Mirar alrededor & sí & 6,9 & 7,5 & 0,081 & 60,0 & 519\\
+13 Ocho & sí & 6,2 & 6,7 & 0,087 & 58,4 & 482\\
+14 Baile & sí & 10,3 & 10,9 & 0,068 & 70,0 & 508\\
+\bottomrule
+\end{tabular}
+\caption{Movimientos vistosos: duración de una vuelta, de la primera vuelta desde el reposo $[0,0,0,0,30,0]^\circ$, $\sigma_{\min}$ mínimo, margen mínimo a límites y $z$ mínima del TCP. Todos superan el umbral de aviso de $\sigma_{\min}$ (0,04) con holgura.}
+\label{tab:vistosos}
+\end{table}
+
+\subsection{Estudio (CustomTkinter) y matemática}
+El Estudio (\texttt{brazo estudio}; \texttt{brazo sesion} lo abre) tiene pestañas Estado, Trayectoria (editor, captura, buzón, guardar/cargar JSON, planificar, vista previa, enviar), Reglas (verde/amarillo/rojo por tramo con motivo y sugerencias), Gráficas ($\mathbf{q}$, $\dot{\mathbf{q}}$, $\ddot{\mathbf{q}}$, $\tau$, $\sigma_{\min}$) y Matemática (formulación en \LaTeX{} con \textit{matplotlib} \texttt{usetex}; cae a \textit{mathtext} si falla TeX). No mueve el robot: envía al panel, que vuelve a verificar y ejecuta. En esta máquina las GUI Tk requieren \texttt{XMODIFIERS=@im=none} (ya incluido en el lanzador) para no congelarse.
+
+\subsection{Alcance de la evidencia}
+Las trayectorias, el bucle, los movimientos vistosos y el \texttt{MoveL} son \textbf{S0 / simulación}: probados offline y con el panel simulado (sección~\ref{sec:pruebas}). No hay ninguna trayectoria A$\to$B$\to$C ejecutada en el IRC5 con el planificador; los 265 movimientos reales (sección~\ref{sec:gate3}) son órdenes articulares individuales.
+
+% 9
 \section{Integración y movimiento (Gate 3)}
 \label{sec:gate3}
 
@@ -444,17 +637,51 @@ Observaciones que no se ocultan:
 \end{itemize}
 
 \subsection{Panel de RViz}
-El panel «IRB 120» de RViz (paquetes \texttt{irb120\_rviz\_panel} e \texttt{irb120\_control}) envía las órdenes de las sesiones S17 a S19 y calcula IK/FK antes de enviar; bloquea el envío si falla la verificación IK$\to$FK, la ida y vuelta o la comparación modelo--controlador. Según \ruta{hito3/docs/niveles_evidencia.md}, con robot simulado pasan las pruebas offline (\texttt{./brazo.sh pruebas}); esas pruebas no se ejecutaron al preparar este informe y no se afirma corrección de la IK/FK del panel fuera de las posturas probadas. El flujo es PC (RViz) $\to$ RWS $\to$ RAPID, no \texttt{ros2\_control} ni EGM.
+El panel «IRB 120» de RViz (paquetes \texttt{irb120\_rviz\_panel} e \texttt{irb120\_control}) envía las órdenes de las sesiones S17 a S19 y calcula IK/FK antes de enviar; bloquea el envío si falla la verificación IK$\to$FK, la ida y vuelta o la comparación modelo--controlador (sección~\ref{sec:rapid}). El flujo es PC (RViz) $\to$ RWS $\to$ RAPID, no \texttt{ros2\_control} ni EGM. La corrección del panel se respalda con las pruebas offline de la sección~\ref{sec:pruebas}, no con mediciones adicionales en el robot.
 
 \subsection{Elementos que son solo S0 (simulación)}
 \begin{itemize}[leftmargin=*]
-\item \textbf{RAPID v5 y \texttt{MoveL}.} El código existe (4667 caracteres, por debajo del límite de 4900) pero \textbf{no se compiló ni se probó en el IRC5}: no se puede afirmar que su sintaxis sea válida ni que funcionen \texttt{MoveL} o \texttt{ConfL}.
-\item \textbf{Planificador de trayectorias A$\to$B$\to$C$\to$A y Estudio (CustomTkinter).} Evalúa tramos articulares y lineales y muestrea $\sigma_{\min}$, $\kappa$, límites, $\dot{\mathbf{q}}$, $\ddot{\mathbf{q}}$ y $\tau$; probado offline y con el panel simulado. Las reglas más estrictas que las del Hito~2 son una decisión del equipo, no un criterio aprobado.
-\item \textbf{Celda PLC S7-1200 $\leftrightarrow$ PC $\leftrightarrow$ robot.} Nodos ROS~2 independientes con telegramas de dos palabras (núcleo) y parte extendida, probados con PLC y panel simulados. Sin PLC real; el bloque SCL no se compiló en TIA Portal; ningún movimiento ordenado desde el PLC.
+\item \textbf{RAPID v5 y \texttt{MoveL}.} Instalable (4667 caracteres, por debajo del límite de 4900) pero \textbf{no probado en el IRC5}: no se puede afirmar que funcionen \texttt{MoveL} ni \texttt{ConfL\textbackslash Off}. Respaldo: \texttt{brazo sesion --v4}.
+\item \textbf{Planificador de trayectorias, bucle y movimientos vistosos.} Secci\'on~\ref{sec:tray}; probados offline y con el panel simulado, sin ejecución en el robot.
+\item \textbf{Celda PLC S7-1200 $\leftrightarrow$ PC $\leftrightarrow$ robot.} Nodos ROS~2 independientes con telegramas de dos palabras (núcleo) y parte extendida, probados con PLC y panel simulados. Sin PLC real (sección~\ref{sec:ext}).
 \item \textbf{EGM.} 24 pruebas offline con EGM UDP simulado (\textit{loopback}); sin comunicación EGM con el controlador (\texttt{physical\_motion\_tested: false}).
 \end{itemize}
 
-% ---------------------------------------------------------------- 10
+% ---------------------------------------------------------------- Pruebas
+\section{Pruebas automáticas}
+\label{sec:pruebas}
+
+Recuentos ejecutados el 26/11/2026 sobre el commit \texttt{b54ccfa} (Python 3.14 del sistema para \texttt{hito3}; \texttt{\textasciitilde/ros\_py312} o \texttt{python3} para el control, según \texttt{brazo.sh}).
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{5.2cm}rX@{}}
+\toprule
+\textbf{Conjunto} & \textbf{Pruebas} & \textbf{Alcance}\\
+\midrule
+\texttt{python3 -m unittest hito3.tests.test\_validacion} & 10 (OK) & Reproducibilidad del paquete de validación FK/IK/$J$/singularidades y sus tablas.\\
+\texttt{test\_r[we]*.py} & 78 (OK) & \texttt{rws\_j6}, \texttt{rws\_mover}, \texttt{respaldo}, \texttt{runtime}: cliente RWS, módulo RAPID y respaldo.\\
+\texttt{test\_panel*.py} & 69 (OK) & Panel: órdenes, verificación, límites, trayectoria y biblioteca.\\
+\texttt{test\_sesion.py} & 15 (OK) & Arranque de la sesión, instalador y modo de respaldo.\\
+\texttt{test\_trayectorias.py} & 26 (OK) & Planificador, reglas y movimientos vistosos.\\
+\texttt{test\_analisis.py} & 7 (OK) & Ventana de análisis.\\
+\texttt{test\_estudio*.py} & 44 (OK) & Estudio y matemática en \LaTeX.\\
+\texttt{test\_plc.py} & 22 (OK) & Telegramas y nodo PLC (simulados).\\
+\texttt{test\_celda.py} & 37 (OK) & Lógica de celda y enclavamientos (simulados).\\
+\midrule
+\textbf{Total \texttt{brazo.sh pruebas}} & \textbf{298 (OK)} & Sin robot ni red: panel con RWS simulado, sesión, planificador, análisis, Estudio, PLC y celda simulados.\\
+\bottomrule
+\end{tabularx}
+\caption{Pruebas automáticas y recuentos reales de esta ejecución.}
+\label{tab:pruebas}
+\end{table}
+
+Las ocho invocaciones de \texttt{brazo.sh pruebas} terminaron sin fallos (298 pruebas; 308 con las 10 del paquete \texttt{hito3}). Durante \texttt{test\_panel*} el registro muestra un \texttt{KeyError: 'robot'} impreso desde el hilo de ejecución del panel simulado (\ruta{panel/estado.py}, línea 192); la prueba no falla y no se investigó. Las pruebas de \texttt{hito3} anteriores indicaban \texttt{pytest}; aquí se usa \texttt{unittest}.
+
+Alcance y límites: son pruebas \textbf{offline} (S0). Con un robot ficticio verifican la lógica del panel, el protocolo RWS contra un servidor simulado, las reglas y el planificador, y las GUI no interactivas; \textbf{no prueban} el comportamiento del IRC5 con la v5 ni \texttt{MoveL}, ni el panel C++ de RViz frente a una sesión gráfica completa, ni el PLC real.
+
+% 10
 \section{Seguridad y reproducibilidad}
 \label{sec:seg}
 
@@ -464,16 +691,18 @@ La plantilla de \ruta{hito3/docs/checklist_seguridad.md} contiene 11 puertas pre
 Estado inicial de toda sesión: NO-GO para movimiento físico. La plantilla incluye una versión de 14 puertas para la próxima sesión, en blanco.
 
 \subsection{Reproducibilidad}
-Desde la carpeta \texttt{proyecto/} del repositorio:
+La sesión de control requiere Ubuntu con ROS~2 Jazzy. Desde la carpeta \texttt{proyecto/} del repositorio:
 \begin{itemize}[leftmargin=*]
 \item Validación completa: \texttt{python3 -m hito3.validacion}. Regenera resultados, manifiestos y tablas \LaTeX.
-\item Pruebas del paquete: \texttt{python3 -m pytest hito3/tests -q}. Resultado al preparar este informe: 10 pruebas aprobadas.
-\item Pruebas offline del resto del proyecto (panel, RWS simulado): \texttt{./brazo.sh pruebas}. Estas \textbf{no se ejecutaron} para este informe.
-\item Compilar este informe: \texttt{make -C hito3/informe}.
+\item Pruebas del paquete: \texttt{python3 -m unittest hito3.tests.test\_validacion}: 10 pruebas OK el 26/11/2026.
+\item Pruebas offline del resto del proyecto: \texttt{cd ros2\_ws \&\& ./brazo.sh pruebas}: 298 pruebas OK el 26/11/2026 (sección~\ref{sec:pruebas}).
+\item Sesión con robot: \texttt{./brazo.sh sesion}; sin robot: \texttt{./brazo.sh sesion --simulado}; respaldo con el módulo v4: \texttt{./brazo.sh sesion --v4}.
+\item Demo de trayectorias sin escribir archivos: \texttt{PYTHONPATH=src/irb120\_control:src/irb120\_conexion python3 -m irb120\_control.trayectorias.demos --sin-escribir} (desde \texttt{ros2\_ws}).
+\item Compilar este informe: \texttt{make -C hito3/informe}; entregarlo: \texttt{make -C hito3/informe entregar} (copia el PDF a \ruta{entregables/hito3_4/informe_hito3_4.pdf}).
 \end{itemize}
 Las entradas reales están conservadas en \ruta{hito3/datos/} (subconjuntos estacionarios, con SHA-256 del archivo crudo y recuento de líneas). Los archivos crudos \texttt{comunicacion\_*.jsonl} (14,1~MB y 16,0~MB) viven en el checkout principal y no están versionados. El código del modelo se identifica por SHA-256 en cada manifiesto. Ejecución anterior consignada: Python 3.14.4, NumPy 2.3.5, SciPy 1.16.3. Una ejecución desde cero en una máquina limpia no se ha realizado.
 
-% ---------------------------------------------------------------- 11
+% 11
 \section{Estados formales P5, checklist P6 y firma P7}
 \label{sec:p5p7}
 
@@ -535,8 +764,20 @@ Enlace a la evidencia & \\
 \caption{Firma P7 (en blanco).}
 \end{table}
 
-% ---------------------------------------------------------------- 12
-\section{Limitaciones y trabajo pendiente}
+% ---------------------------------------------------------------- Extensiones
+\section{Extensiones no integradas al flujo principal}
+\label{sec:ext}
+
+Estas piezas existen en el repositorio y tienen pruebas offline, pero \textbf{no forman parte del flujo validado} ni se han probado con hardware.
+
+\textbf{Celda PLC S7-1200} (\ruta{docs/PLC_S7_1200.md}). Dos nodos ROS~2 independientes, \texttt{irb120\_plc\_s7} (transporte TCP, puerto 2000 por defecto, telegramas de longitud fija y \textit{big-endian}) e \texttt{irb120\_celda} (traductor y enclavamientos), median entre un PLC y el nodo del brazo: el núcleo es de 2 palabras (4 bytes por sentido) y la parte extendida lleva el telegrama a 36 y 68 bytes (PLC$\to$PC y PC$\to$PLC; el formato «completo»). Probada \textbf{solo en simulación} (\texttt{brazo plc-simulador}, \texttt{brazo demo --plc}); sin PLC real, el bloque SCL no se compiló en TIA Portal y ningún movimiento se ordenó desde el PLC.
+
+\textbf{Entrada de visión.} La cámara no está definida. Se dejó una entrada genérica de puntos: tópico \texttt{/irb120/trayectoria/punto\_externo} (\texttt{PoseStamped} en \texttt{base\_link}) y \texttt{POST /api/punto\_externo}; ambos añaden la pose al buzón con origen \texttt{vision}. \texttt{brazo punto X Y Z R P Y} publica un punto de prueba. La calibración cámara$\to$base queda para cuando se decida si la cámara es fija o va en la pinza.
+
+\textbf{EGM.} Opción 689-1 presente, sin configuración; 24 pruebas con EGM UDP simulado (\textit{loopback}) como en el Hito~3. Sin comunicación EGM con el controlador.
+
+% 12
+\section{Limitaciones y trabajo futuro}
 \label{sec:pend}
 
 \subsection{Limitaciones del trabajo actual}
@@ -545,11 +786,13 @@ Enlace a la evidencia & \\
 \item La referencia independiente (ROS-Industrial) comparte la geometría nominal con el modelo propio: valida la implementación, no la exactitud mecánica.
 \item Las 155 muestras FUERA y las 6263 lecturas inválidas no tienen causa raíz demostrada.
 \item Las tolerancias son propuestas y la repetibilidad citada del IRB~120 no se verificó.
-\item La ruta es RWS + RAPID: una orden a la vez, no control continuo; las velocidades reales no se midieron.
+\item La ruta es RWS + RAPID: una orden (un tramo en la v5) a la vez, sin control en tiempo real; las velocidades reales no se midieron. El «bucle continuo» repite trayectorias tramo a tramo y no es control continuo.
+\item Las reglas de trayectoria más estrictas que las del Hito~2 son decisión del equipo; $\tau_{ref}$ es una referencia del proyecto y no un dato de ABB.
+\item v5/\texttt{MoveL}, planificador, movimientos vistosos, PLC y visión: solo S0 (secciones~\ref{sec:tray} y~\ref{sec:ext}).
 \item El estado S3 técnico no es S3 autorizado; los \texttt{jsonl} no están versionados.
 \end{itemize}
 
-\subsection{Trabajo pendiente para la próxima sesión de laboratorio}
+\subsection{Trabajo pendiente y trabajo futuro}
 \begin{enumerate}[leftmargin=*]
 \item Obtener el GO/NO-GO firmado por el responsable del laboratorio \textbf{antes} de mover, con alcance exacto y modo permitido (en particular AUTO sin habilitador), y guardar el escaneo.
 \item Registrar nombre del operador y responsable, procedimiento local escrito, placa del controlador y revisión.
@@ -558,10 +801,22 @@ Enlace a la evidencia & \\
 \item Provocar a propósito «detener y reanudar RAPID» para comprobar la corrección del HTTP 403.
 \item Leer el \texttt{tooldata} real por RWS y medir el TCP; repetir la comparación FK en el TCP físico.
 \item Comparar FK en posturas con J4--J6 variados y repetir la adquisición con registro simultáneo para explicar las muestras FUERA.
-\item Probar la v5 en el IRC5 solo con un primer tramo articular corto a 10--20\,\% y con la v4 respaldada.
+\item Probar la v5 en el IRC5 solo con un primer tramo articular corto a 10--20\,\% y con la v4 respaldada (\texttt{brazo sesion --v4}), y solo con GO firmado.
 \item Pedir al docente la aprobación o los umbrales de FK/IK/$J$ y cerrar los estados P5.
 \item Asignar responsables por tarea y preparar la defensa individual.
 \item Decidir con el docente si EGM es exigible (ruta B).
+\item Futuro: probar con el PLC real y compilar el bloque SCL en TIA Portal; definir la cámara y calibrar cámara$\to$base para la entrada de visión; ejecutar en el robot las trayectorias y movimientos vistosos tras la v5.
 \end{enumerate}
+
+
+% ---------------------------------------------------------------- Referencias
+\begin{thebibliography}{9}
+\bibitem{bahani2023} A.~Bahani, M.~E.~Ech-Chhibat, H.~Samri y H.~Ait Elattar, <<The Inverse Kinematics Evaluation of 6-DOF Robots in Cooperative Tasks Using Virtual Modeling Design and Artificial Intelligence Tools>>, \textit{International Journal of Mechanical Engineering and Robotics Research}, vol.~12, n.\textordmasculine~2, marzo de 2023 (\ruta{referencias/bibliografia/IJMERR-V12N2-121.pdf}; Tabla~I: parámetros DH).
+\bibitem{rosi} ROS-Industrial, paquete \texttt{abb\_irb120\_support}, archivo \texttt{urdf/irb120\_3\_58\_macro.xacro}, \url{https://github.com/ros-industrial/abb/blob/kinetic-devel/abb_irb120_support/urdf/irb120_3_58_macro.xacro} (referencia geométrica de \ruta{hito2/irb120/rosi_model.py}).
+\bibitem{rws} ABB, \textit{Robot Web Services API}, RWS 1.0 (\texttt{rwsApi}, páginas de \texttt{ctrlstate}, \texttt{jointtarget}, \texttt{rapid execution} y \texttt{system}), \url{https://developercenter.robotstudio.com/api/rwsApi/}; copias en \ruta{docs/conexion_abb/fuentes/rws_*.html}.
+\bibitem{librws} ROS-Industrial, \texttt{abb\_librws}, \url{https://github.com/ros-industrial/abb_librws}; \texttt{abb\_libegm} y \texttt{abb\_robot\_driver} (README en \ruta{docs/conexion_abb/fuentes/}).
+\bibitem{abbros2} PickNik Robotics, \texttt{abb\_ros2}, \url{https://github.com/PickNikRobotics/abb_ros2} (consultado como alternativa; no se usa, sección~\ref{sec:gates01}).
+\bibitem{guia} Docente de IMT-342, criterios unificados de validación del Hito~3 (W14-S02) y material W12 (rúbrica ECI-3/4, protocolo de validación, fichas Gate~0/1, checklist de seguridad, guía de bitácora), en \ruta{material_docente/}.
+\end{thebibliography}
 
 \end{document}

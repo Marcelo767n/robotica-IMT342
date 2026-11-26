@@ -1,5 +1,7 @@
 # Organización del proyecto
 
+> **Histórico.** Historial de la reorganización del 20/10/2026. La organización vigente está en el [README del proyecto](../../README.md).
+
 Reorganización del 20 de octubre de 2026, basada en la documentación W12 y en las 14 fotografías disponibles. Los nombres originales de las fotos se conservan. El registro completo de archivos trasladados, con tamaño y SHA-256 previo, está en [movimientos_2026-10-20.json](movimientos_2026-10-20.json).
 
 ## Dónde está cada cosa
@@ -13,7 +15,7 @@ Reorganización del 20 de octubre de 2026, basada en la documentación W12 y en 
 | `tmp/` | `archivo/hito1/generacion/` |
 | `notebooks/` anterior | `archivo/hito2_ros_anterior/notebooks/` |
 | `docs/hito2/guia_hito2.md`, `metodo_y_resultados.md` | `archivo/hito2_ros_anterior/documentacion/` |
-| Ocho PDF/TEX de Hito 2 en la carpeta docente | `archivos que hay que presentar/hito_2/` |
+| Ocho PDF/TEX de Hito 2 en la carpeta docente | `material_docente/hito_2/` |
 | Fotos sueltas | `fotos/equipo/`, `fotos/flexpendant/`, `fotos/conexiones/` |
 
 `hito2/`, `ros2_ws/src/` y las utilidades activas en `scripts/` mantienen su ubicación. El informe IEEE conserva sus rutas relativas a resultados y figuras. El manifiesto permanece en la raíz como solicita la guía docente.

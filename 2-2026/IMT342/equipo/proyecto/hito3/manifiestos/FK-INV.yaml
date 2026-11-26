@@ -2,11 +2,11 @@
 id_prueba: FK-INV
 equipo: "Dayana Andrade, Mirko Ayala, Marcelo Navarro (IMT-342, UCB, 2-2026)"
 operador: por completar por el equipo
-generado_utc: "2026-11-24T14:11:45Z"
+generado_utc: "2026-11-26T21:43:19Z"
 tipo: FK diagnóstico lecturas inválidas
 codigo_modelo:
   repositorio: robotica-IMT342 (rama claude/proyecto-hito3-4-objetivos-9709f0)
-  commit: 6e82c45680df44e3fdd1cdff2d5a6ab727dd0060
+  commit: b54ccfa6b46b691314203f684080c401e2faeca0
   hito3_sin_versionar: true
   modelo_propio:
     archivos:

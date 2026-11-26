@@ -165,7 +165,7 @@ Los entregables y pendientes concretos están en `plan_semana_12.md`, `gate0_inv
 
 ## Material del docente actualizado
 
-Se descargaron los seis documentos PDF y sus seis fuentes TEX de W12-S01 en `archivos que hay que presentar/actualizacion_semana_12/`, con origen y verificaciones en `origen_descargas.json`. La sesión distingue Gate 0 documental, Gate 1 lectura sin movimiento, Gate 2 validación FK/IK/J, Gate 3 movimiento con GO y Gate 4 tarea repetible. Integra III/IV como ECI-3/4; no confundirlo con haber superado los gates por tener una simulación.
+Se descargaron los seis documentos PDF y sus seis fuentes TEX de W12-S01 en `material_docente/actualizacion_semana_12/`, con origen y verificaciones en `origen_descargas.json`. La sesión distingue Gate 0 documental, Gate 1 lectura sin movimiento, Gate 2 validación FK/IK/J, Gate 3 movimiento con GO y Gate 4 tarea repetible. Integra III/IV como ECI-3/4; no confundirlo con haber superado los gates por tener una simulación.
 
 La rúbrica propuesta distribuye: auditoría/compatibilidad 20%; modelos propios/validación 25%; integración ROS–ABB 25%; seguridad/reproducibilidad 20%; documentación/defensa individual 10%. El calendario es tentativo: W12 G0, W13 G1/G2 y contingencia, W14 G2/G3 condicionado, W15 tarea, W16 cierre EC; EF posterior con nuevo escenario. La nueva fecha exacta de Hito 2 no figura en los documentos consultados. [Diapositivas W12-S01](https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_12/sesion_01/w12_s01_slides.pdf), [guía autónoma](https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_12/sesion_01/w12_s01_guia_autonoma_bitacora.pdf).
 

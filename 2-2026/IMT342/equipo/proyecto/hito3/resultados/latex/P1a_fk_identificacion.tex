@@ -1,30 +1,31 @@
-% Generado por hito3.validacion; requiere \usepackage{booktabs,array,graphicx}
-\begin{table}[htbp]
-\centering
+% Generado por hito3.validacion; requiere \usepackage{booktabs,longtable,array}
+\begingroup
 \scriptsize
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.15}
-\caption{P1a. Casos de FK: identificación, procedencia y decisión. Cuaternión y rotación declaradas en orden $(w,x,y,z)$.}
-\label{tab:P1a}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lllllllll}
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{4.2cm}}
+\caption{P1a. Casos de FK: identificación, procedencia y decisión. Cuaternión y rotación declaradas en orden $(w,x,y,z)$.}\label{tab:P1a}\\
 \toprule
 \textbf{ID} & \textbf{Mod/Commit} & \textbf{$\mathbf{q}$ [rad]} & \textbf{Fecha/$t$} & \textbf{Base$\to$TCP} & \textbf{Ref/Src} & \textbf{Tol.} & \textbf{Decisión} & \textbf{Evidencia} \\
 \midrule
-FK-N1 & dh.py@6e82c45 & $[-1.278,\,-0.212,\,0.173,\,1.604,\,0.5541,\,-2.347]$ & 2026-11-04T22:40:21.297358+00:00 (n=1804) & base\_link=Base -> tool0 & IRC5 RWS (S1) & estricto proyecto 1e-6 m/1e-6 rad (no aprobado) & parcial & \texttt{hito3/datos/fk\_real\_N1\_estacionarias.csv} \\
-FK-N1-S0 & dh.py@6e82c45 & $[-1.278,\,-0.212,\,0.173,\,1.604,\,0.5541,\,-2.347]$ & offline & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_offline\_propia\_vs\_rosi.csv} \\
-FK-N2 & dh.py@6e82c45 & $[0.05143,\,-0.03364,\,0.04518,\,-0.228,\,1.565,\,-2.338]$ & 2026-11-04T23:02:23.336385+00:00 (n=1487) & base\_link=Base -> tool0 & IRC5 RWS (S1) & estricto proyecto 1e-6 m/1e-6 rad (no aprobado) & parcial & \texttt{hito3/datos/fk\_real\_N2\_estacionarias.csv} \\
-FK-N2-S0 & dh.py@6e82c45 & $[0.05143,\,-0.03364,\,0.04518,\,-0.228,\,1.565,\,-2.338]$ & offline & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_offline\_propia\_vs\_rosi.csv} \\
-FK-N3 & dh.py@6e82c45 & $[0.9652,\,0.2958,\,0.01123,\,-0.7929,\,-1.111,\,0.1594]$ & 2026-10-29 (foto FlexPendant) & base\_link=Base -> tool0 & FlexPendant (S1 limitado) & resoluci\'on de pantalla 0.01 mm & parcial & \texttt{g2\_fk\_vs\_controlador\_pose1\_2026-10-29.json} \\
-FK-L1 & dh.py@6e82c45 & $[2.862,\,1.902,\,1.204,\,2.775,\,2.077,\,6.964]$ & offline: todas a 1$^\circ$ del l\'imite superior & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_offline\_propia\_vs\_rosi.csv} \\
-FK-L2 & dh.py@6e82c45 & $[-2.862,\,-1.902,\,-1.902,\,-2.775,\,-2.077,\,-6.964]$ & offline: todas a 1$^\circ$ del l\'imite inferior & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_offline\_propia\_vs\_rosi.csv} \\
-FK-L3 & dh.py@6e82c45 & $[2.862,\,-1.902,\,1.204,\,-2.775,\,2.077,\,-6.964]$ & offline: alternadas sup/inf a 1$^\circ$ & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_offline\_propia\_vs\_rosi.csv} \\
-FK-L4 & dh.py@6e82c45 & $[2.88,\,1.92,\,1.222,\,2.793,\,2.094,\,6.981]$ & offline: exactamente en el l\'imite superior & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_offline\_propia\_vs\_rosi.csv} \\
-FK-D-TCP & dh.py@6e82c45 & $[-1.278,\,-0.212,\,0.173,\,1.604,\,0.5541,\,-2.347]$ & N1 (datos S1) + TCP simulado & base\_link -> TCP 0.150 m (propio) vs tool0 (IRC5) & IRC5 RWS (S1), discrepancia intencional & esperado e\_p = 0.150 m & verificado & \texttt{fk\_d\_tcp.csv} \\
-FK-D-ORD & dh.py@6e82c45 & $[0.05143,\,-0.03364,\,0.04518,\,-2.338,\,1.565,\,-0.228]$ & N2 (datos S1) + permutaci\'on q4<->q6 & base\_link -> tool0 & IRC5 RWS (S1), orden articular err\'oneo intencional & esperado error grande; corregible & verificado & \texttt{fk\_d\_ord.csv} \\
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Mod/Commit} & \textbf{$\mathbf{q}$ [rad]} & \textbf{Fecha/$t$} & \textbf{Base$\to$TCP} & \textbf{Ref/Src} & \textbf{Tol.} & \textbf{Decisión} & \textbf{Evidencia} \\
+\midrule
+\endhead
 \bottomrule
-\end{tabular}
-}
-\par\vspace{2pt}
+\endfoot
+FK-N1 & dh.py@b54ccfa & $[-1.278,\,-0.212,\,0.173,$\newline$1.604,\,0.5541,\,-2.347]$ & 2026-11-04T22:40:21.297358+00:00 (n=1804) & base\_link=Base -> tool0 & IRC5 RWS (S1) & estricto proyecto 1e-6 m/1e-6 rad (no aprobado) & parcial & \texttt{hito3/\allowbreak{}datos/\allowbreak{}fk\_\allowbreak{}real\_\allowbreak{}N1\_\allowbreak{}estacionarias.csv} \\
+FK-N1-S0 & dh.py@b54ccfa & $[-1.278,\,-0.212,\,0.173,$\newline$1.604,\,0.5541,\,-2.347]$ & offline & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_\allowbreak{}offline\_\allowbreak{}propia\_\allowbreak{}vs\_\allowbreak{}rosi.csv} \\
+FK-N2 & dh.py@b54ccfa & $[0.05143,\,-0.03364,\,0.04518,$\newline$-0.228,\,1.565,\,-2.338]$ & 2026-11-04T23:02:23.336385+00:00 (n=1487) & base\_link=Base -> tool0 & IRC5 RWS (S1) & estricto proyecto 1e-6 m/1e-6 rad (no aprobado) & parcial & \texttt{hito3/\allowbreak{}datos/\allowbreak{}fk\_\allowbreak{}real\_\allowbreak{}N2\_\allowbreak{}estacionarias.csv} \\
+FK-N2-S0 & dh.py@b54ccfa & $[0.05143,\,-0.03364,\,0.04518,$\newline$-0.228,\,1.565,\,-2.338]$ & offline & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_\allowbreak{}offline\_\allowbreak{}propia\_\allowbreak{}vs\_\allowbreak{}rosi.csv} \\
+FK-N3 & dh.py@b54ccfa & $[0.9652,\,0.2958,\,0.01123,$\newline$-0.7929,\,-1.111,\,0.1594]$ & 2026-10-29 (foto FlexPendant) & base\_link=Base -> tool0 & FlexPendant (S1 limitado) & resoluci\'on de pantalla 0.01 mm & parcial & \texttt{g2\_\allowbreak{}fk\_\allowbreak{}vs\_\allowbreak{}controlador\_\allowbreak{}pose1\_\allowbreak{}2026-10-29.json} \\
+FK-L1 & dh.py@b54ccfa & $[2.862,\,1.902,\,1.204,$\newline$2.775,\,2.077,\,6.964]$ & offline: todas a 1$^\circ$ del l\'imite superior & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_\allowbreak{}offline\_\allowbreak{}propia\_\allowbreak{}vs\_\allowbreak{}rosi.csv} \\
+FK-L2 & dh.py@b54ccfa & $[-2.862,\,-1.902,\,-1.902,$\newline$-2.775,\,-2.077,\,-6.964]$ & offline: todas a 1$^\circ$ del l\'imite inferior & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_\allowbreak{}offline\_\allowbreak{}propia\_\allowbreak{}vs\_\allowbreak{}rosi.csv} \\
+FK-L3 & dh.py@b54ccfa & $[2.862,\,-1.902,\,1.204,$\newline$-2.775,\,2.077,\,-6.964]$ & offline: alternadas sup/inf a 1$^\circ$ & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_\allowbreak{}offline\_\allowbreak{}propia\_\allowbreak{}vs\_\allowbreak{}rosi.csv} \\
+FK-L4 & dh.py@b54ccfa & $[2.88,\,1.92,\,1.222,$\newline$2.793,\,2.094,\,6.981]$ & offline: exactamente en el l\'imite superior & base\_link -> tool0 & rosi\_model (S0) & $\tau$p=1.5e-12 m; $\tau$R=1.6e-12 rad (pendiente) & verificado & \texttt{fk\_\allowbreak{}offline\_\allowbreak{}propia\_\allowbreak{}vs\_\allowbreak{}rosi.csv} \\
+FK-D-TCP & dh.py@b54ccfa & $[-1.278,\,-0.212,\,0.173,$\newline$1.604,\,0.5541,\,-2.347]$ & N1 (datos S1) + TCP simulado & base\_link -> TCP 0.150 m (propio) vs tool0 (IRC5) & IRC5 RWS (S1), discrepancia intencional & esperado e\_p = 0.150 m & verificado & \texttt{fk\_\allowbreak{}d\_\allowbreak{}tcp.csv} \\
+FK-D-ORD & dh.py@b54ccfa & $[0.05143,\,-0.03364,\,0.04518,$\newline$-2.338,\,1.565,\,-0.228]$ & N2 (datos S1) + permutaci\'on q4<->q6 & base\_link -> tool0 & IRC5 RWS (S1), orden articular err\'oneo intencional & esperado error grande; corregible & verificado & \texttt{fk\_\allowbreak{}d\_\allowbreak{}ord.csv} \\
+\end{longtable}
 {\tiny Fecha/$t$: instante de la muestra representativa (modo de la postura). Grp: IMT-342 Andrade-Ayala-Navarro}
-\end{table}
+\endgroup

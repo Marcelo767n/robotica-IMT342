@@ -14,7 +14,7 @@ Otra sesión estaba editando los archivos durante la revisión. Se trabajó sobr
 
 ## 1. Documentos oficiales descargados
 
-Se descargó todo el contenido del [directorio oficial de GitHub](https://github.com/berquiroga/planificacion-UCB/tree/main/2-2026/IMT342/Semana_10/hito_2) en [archivos que hay que presentar](<../../archivos que hay que presentar>).
+Se descargó todo el contenido del [directorio oficial de GitHub](https://github.com/berquiroga/planificacion-UCB/tree/main/2-2026/IMT342/Semana_10/hito_2) en [material_docente](../../material_docente).
 
 | Documento | Formatos descargados | Uso en esta revisión |
 |---|---|---|

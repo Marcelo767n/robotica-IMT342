@@ -1,5 +1,7 @@
 # Preparación de la semana 12
 
+> **Histórico.** Plan de la semana 12. Los requisitos vigentes están en [hitos_3_4](../hitos_3_4/README.md) y [hito3/docs](../../hito3/docs/README.md).
+
 Fecha: 2026-10-20. Actualizado con nuevas fotos del FlexPendant y de conexiones. Alcance actual: cerrar Gate 0 y preparar la lectura G1. Las fotos confirman opciones y red de servicio, pero no una conexión de Linux al controlador. La disponibilidad actual de cable/adaptador debe confirmarse. Este documento es un borrador del equipo, no una certificación del docente ni permiso para operar.
 
 ## Qué cambió respecto al Hito 2
@@ -14,7 +16,7 @@ La nueva documentación une III/IV en ECI-3/4. El modelo numérico del Hito 2 es
 | Seguridad, reproducibilidad y fallos | 20% | Pruebas offline del diagnóstico y fuentes identificadas | Protocolo local, supervisor/operador, pruebas de fallos autorizadas y logs reales |
 | Documentación y defensa individual | 10% | Investigación, manifiesto y borrador de bitácora | Responsables, aportes individuales, explicación de decisiones y defensa |
 
-La rúbrica dice que sus pesos requieren formalización administrativa. Se mantiene ese carácter de propuesta. Fuente: `archivos que hay que presentar/actualizacion_semana_12/w12_s01_rubrica_hito_3.pdf`.
+La rúbrica dice que sus pesos requieren formalización administrativa. Se mantiene ese carácter de propuesta. Fuente: `material_docente/actualizacion_semana_12/w12_s01_rubrica_hito_3.pdf`.
 
 ## Cinco hipótesis de compatibilidad
 

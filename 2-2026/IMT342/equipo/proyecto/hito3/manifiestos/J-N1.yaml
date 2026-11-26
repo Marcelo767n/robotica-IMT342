@@ -2,11 +2,11 @@
 id_prueba: J-N1
 equipo: "Dayana Andrade, Mirko Ayala, Marcelo Navarro (IMT-342, UCB, 2-2026)"
 operador: por completar por el equipo
-generado_utc: "2026-11-24T14:11:45Z"
+generado_utc: "2026-11-26T21:43:19Z"
 tipo: "Jacobiano (offline, ref. independiente)"
 codigo_modelo:
   repositorio: robotica-IMT342 (rama claude/proyecto-hito3-4-objetivos-9709f0)
-  commit: 6e82c45680df44e3fdd1cdff2d5a6ab727dd0060
+  commit: b54ccfa6b46b691314203f684080c401e2faeca0
   hito3_sin_versionar: true
   modelo_propio:
     archivos:
@@ -87,7 +87,7 @@ validation_cases_row:
   q_rad_vector: "[-1.277670974, -0.2120334291, 0.172987343, 1.60367811, 0.5541037879, -2.347443343]"
   base_frame: base_link (modelo propio)
   tcp_frame: TCP z=0.150 m (y tool0 en notes)
-  model_version: "hito2/irb120/dh.py sha256:6af5c24c5d4e @ 6e82c45680+hito3 sin versionar (jacobian.py)"
+  model_version: "hito2/irb120/dh.py sha256:6af5c24c5d4e @ b54ccfa6b4+hito3 sin versionar (jacobian.py)"
   reference_version: "hito2/irb120/rosi_model.py sha256:c626eb8728a4 (ROS-Industrial abb_irb120_support kinetic-devel) + FD central"
   position_error_m: ""
   orientation_error_rad: ""

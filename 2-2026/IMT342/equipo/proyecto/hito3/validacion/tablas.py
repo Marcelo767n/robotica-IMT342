@@ -14,6 +14,20 @@ def _q(v):
     return vectex(v, 4)
 
 
+def _q_partido(v):
+    """q en dos líneas de tres ejes (cabe en una columna estrecha de la tabla P1a)."""
+    partes = vectex(v, 4).split(r",\,")
+    if len(partes) != 6:
+        return vectex(v, 4)
+    return r",\,".join(partes[:3]) + r",$\newline$" + r",\,".join(partes[3:])
+
+
+def _ruta_partida(texto):
+    """Nombre de archivo en monoespaciado que puede cortar línea tras «_» y «/»."""
+    t = tex(texto)
+    return r"\texttt{" + t.replace(r"\_", r"\_\allowbreak{}").replace("/", r"/\allowbreak{}") + "}"
+
+
 def _fmt_p(v):
     return vectex(v, 6)
 
@@ -57,8 +71,11 @@ def p1(res, meta, ctx):
     util.escribir_csv(rutas.RESULTADOS / "P1_fk.csv", cols, [[f[c] if not isinstance(f[c], np.ndarray) else list(f[c]) for c in cols] for f in filas])
     # LaTeX: P1a (identificación) y P1b (poses)
     ha = ["ID", "Mod/Commit", r"$\mathbf{q}$ [rad]", "Fecha/$t$", "Base$\\to$TCP", "Ref/Src", "Tol.", "Decisión", "Evidencia"]
-    fa = [[tex(f["ID"]), tex(f["Mod/Commit"]), _q(f["q_rad"]), tex(f["Fecha/t"]), tex(f["Base->TCP"]), tex(f["Ref/Src"]), tex(f["Tol"]), tex(f["Decision"]), r"\texttt{" + tex(f["Evidencia"]) + "}"] for f in filas]
-    util.escribir_tex("P1a_fk_identificacion.tex", util.tabla_latex(ha, fa, "lllllllll", caption="P1a. Casos de FK: identificación, procedencia y decisión. Cuaternión y rotación declaradas en orden $(w,x,y,z)$.", label="tab:P1a", ajustar=True,
+    fa = [[tex(f["ID"]), tex(f["Mod/Commit"]), _q_partido(f["q_rad"]), tex(f["Fecha/t"]), tex(f["Base->TCP"]), tex(f["Ref/Src"]), tex(f["Tol"]), tex(f["Decision"]), _ruta_partida(f["Evidencia"])] for f in filas]
+    # Columnas de ancho fijo con salto de línea (legible en apaisado) en lugar de encoger la tabla entera.
+    col = lambda cm: r">{\raggedright\arraybackslash}p{%.1fcm}" % cm
+    spec_p1a = "".join(col(c) for c in (1.6, 2.0, 3.8, 3.0, 2.2, 3.4, 2.8, 1.6, 4.2))
+    util.escribir_tex("P1a_fk_identificacion.tex", util.tabla_latex(ha, fa, spec_p1a, caption="P1a. Casos de FK: identificación, procedencia y decisión. Cuaternión y rotación declaradas en orden $(w,x,y,z)$.", label="tab:P1a", largo=True,
                                                                   nota="Fecha/$t$: instante de la muestra representativa (modo de la postura). Grp: " + tex(GRUPO)))
     hb = ["ID", r"$p_{own}$ [m]", r"$p_{ref}$ [m]", r"$R_{own}$ ($w,x,y,z$)", r"$R_{ref}$ ($w,x,y,z$)", r"$e_p$ [m]", r"$e_R$ [rad]"]
     fb = [[tex(f["ID"]), _fmt_p(f["p_own_m"]), _fmt_p(f["p_ref_m"]), vectex(f["R_own_quat_wxyz"], 7), vectex(f["R_ref_quat_wxyz"], 7), num(f["e_p_m"]), num(f["e_R_rad"])] for f in filas]

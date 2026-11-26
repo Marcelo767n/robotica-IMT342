@@ -1,6 +1,8 @@
 # Traspaso de trabajo: conexión Linux ↔ ABB IRB 120
 
-**Fecha de corte:** 22 de octubre de 2026. **Proyecto:** IMT-342, integración de Hitos 3/4 (ECI-3/4). **Objetivo inmediato:** dejar lista y reproducible la conexión de lectura entre esta computadora Linux y el controlador ABB; después adaptar y validar un driver ROS 2 para el IRB 120. Este documento sirve para que Claude continúe el trabajo de fondo en este mismo proyecto. Leer también [`README.md`](README.md), [`plan_semana_12.md`](plan_semana_12.md), el [`model_manifest.yaml`](../../model_manifest.yaml) y el material del docente en [`archivos que hay que presentar/actualizacion_semana_12/`](../../archivos%20que%20hay%20que%20presentar/actualizacion_semana_12/).
+> **Histórico.** Traspaso del 22/10/2026, previo al control del robot. Lo vigente está en [CONTEXTO_Y_OBJETIVOS.md](../CONTEXTO_Y_OBJETIVOS.md).
+
+**Fecha de corte:** 22 de octubre de 2026. **Proyecto:** IMT-342, integración de Hitos 3/4 (ECI-3/4). **Objetivo inmediato:** dejar lista y reproducible la conexión de lectura entre esta computadora Linux y el controlador ABB; después adaptar y validar un driver ROS 2 para el IRB 120. Este documento sirve para que Claude continúe el trabajo de fondo en este mismo proyecto. Leer también [`README.md`](README.md), [`plan_semana_12.md`](plan_semana_12.md), el [`model_manifest.yaml`](../../model_manifest.yaml) y el material del docente en [`material_docente/actualizacion_semana_12/`](../../material_docente/actualizacion_semana_12/).
 
 ## Estado real, al comenzar
 
@@ -57,6 +59,6 @@ La guía principal contiene la secuencia G1 y los fallos posibles: [`README.md`]
 - Invocación **futura y supervisada**, después de confirmar IP, ruta y usuario: `python3 scripts/abb_lectura_rws.py --host IP_VERIFICADA --user USUARIO_UAS --output docs/conexion_abb/evidencias/g1_rws.json`. Los marcadores no son valores para pegar literalmente.
 - Inventario y decisiones: [`gate0_inventario.csv`](gate0_inventario.csv), [`model_manifest.yaml`](../../model_manifest.yaml), [`README.md`](README.md), [`plan_semana_12.md`](plan_semana_12.md).
 - Fuentes y copias de documentación revisada: [`fuentes/`](fuentes/) y sus `origenes*.json`. Consultar fuentes originales al tomar nuevas decisiones; parte de los manuales ABB no se pudo descargar localmente.
-- Documentación docente: [diapositivas semana 12](https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_12/sesion_01/w12_s01_slides.pdf) y copias locales en [`actualizacion_semana_12/`](../../archivos%20que%20hay%20que%20presentar/actualizacion_semana_12/). Gates G0 inventario, G1 lectura, G2 FK/IK/J, G3 movimiento con GO, G4 tarea repetible; Hitos 3/4 integrados. La fecha exacta nueva del Hito 2 no quedó establecida en los documentos consultados.
+- Documentación docente: [diapositivas semana 12](https://github.com/berquiroga/planificacion-UCB/blob/main/2-2026/IMT342/Semana_12/sesion_01/w12_s01_slides.pdf) y copias locales en [`actualizacion_semana_12/`](../../material_docente/actualizacion_semana_12/). Gates G0 inventario, G1 lectura, G2 FK/IK/J, G3 movimiento con GO, G4 tarea repetible; Hitos 3/4 integrados. La fecha exacta nueva del Hito 2 no quedó establecida en los documentos consultados.
 
 **Nota sobre registros anteriores:** `plan_semana_12.md` conserva una bitácora original del 20/10 que decía «RobotWare pendiente» y agrega la actualización del 22/10 al final. El valor vigente para la preparación es **6.12.01.00 reportado por el usuario**, aún sin contraste RWS. No repetir esa pregunta al usuario.

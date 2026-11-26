@@ -1,5 +1,7 @@
 # Cierre de la prueba J6 del 10 de noviembre de 2026
 
+> **Histórico.** Cierre de la prueba de J6 del 10/11/2026 (sin movimiento). El primer movimiento real fue el 16/11: [bitácora](../bitacora/2026-11-16_primer_movimiento_real.md).
+
 **Resultado: el objetivo de movimiento físico no se consiguió.** La comunicación y la preparación del objetivo se verificaron, pero no se demostró la ejecución de `MoveAbsJ` ni el giro de J6. El usuario confirmó que el brazo no se movió. No presentar esta sesión como control físico conseguido.
 
 ## Evidencia y alcance

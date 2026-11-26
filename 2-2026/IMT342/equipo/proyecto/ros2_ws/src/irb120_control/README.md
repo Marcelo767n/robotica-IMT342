@@ -1,6 +1,55 @@
-# irb120_control · ensayo de J1 a J6 desde RViz
+# irb120_control · control del IRB 120 desde la PC
 
-**11/11 — ruta para mover desde la PC:** `./iniciar.sh rws_mover interactivo` con el módulo [`rapid/rws_mover/LabJointRws.mod`](rapid/rws_mover/LabJointRws.mod) (`ServidorPC`). Guía y pasos del FlexPendant: [MOVER_DESDE_PC.md](../../../docs/conexion_abb/MOVER_DESDE_PC.md). 37 pruebas RWS offline aprobadas (`python3 -m unittest discover -s src/irb120_control/test -p 'test_rws_*.py'` desde `ros2_ws/`); falta ejecutarlo en el IRC5 real.
+Este paquete contiene todo lo que mueve el robot desde la PC y el software de apoyo. Hay dos rutas:
+
+1. **Ruta vigente: RWS + RAPID**, usada en las sesiones reales. La PC valida y envía objetivos por RWS al módulo RAPID `LabJointRws` (`ServidorPC`), que los ejecuta con `MoveAbsJ` (y `MoveL` en la v5). Todo se opera dentro de RViz.
+2. **Ruta EGM UDP**, solo en simulación (loopback); descrita más abajo. No se probó con el controlador.
+
+## Comandos
+
+Desde `proyecto/ros2_ws/` (el atajo `brazo` equivale a `./brazo.sh`; `./brazo.sh ayuda` lista todo):
+
+```bash
+./brazo.sh compilar              # una vez: panel «IRB 120» de RViz
+./brazo.sh sesion                # con robot: enlace + AUTO guiado + RViz + panel + Estudio
+./brazo.sh sesion --simulado     # la misma sesión sin robot
+./brazo.sh sesion --v4           # con robot y el módulo de respaldo v4 (probado; ≤ 40° por orden, sin MoveL)
+./brazo.sh demo                  # todo sin robot (--plc: con la celda PLC simulada)
+./brazo.sh nodos                 # grafo ROS 2 en vivo
+./brazo.sh estudio               # solo el Estudio CustomTkinter
+./brazo.sh pruebas               # ≈300 pruebas offline
+```
+
+## Estructura del paquete Python
+
+| Carpeta o módulo (`irb120_control/`) | Función |
+|---|---|
+| `panel/` | Nodo `irb120_panel_rws`: validación, IK de Pieper, verificación, sesión RWS, ejecución de trayectorias, buzón de puntos, biblioteca de guardadas, puente ROS 2 y control 3D |
+| `trayectorias/` | Modelo, planificador (articular o lineal por tramo), reglas del Hito 2 más estrictas y movimientos vistosos |
+| `estudio/` | Estudio CustomTkinter (análisis, editor, gráficas, matemática LaTeX) |
+| `analisis/` | Ventana de análisis anterior (tkinter) |
+| `plc/` · `celda/` | Celda con PLC S7-1200: nodos `irb120_plc_s7` e `irb120_celda` (extensión simulada) |
+| `vision/` | Entrada de puntos de visión (`publicar_punto`) |
+| `grafo_ros.py` | Grafo ROS 2 en vivo |
+| `rws_mover.py`, `rws_j6.py`, `respaldo.py` | Cliente RWS, instalación del módulo y respaldo del controlador |
+| `supervisor.py`, `protocolo.py`, `runtime.py`, `simulador.py`, `rviz_control.py`, `arranque.py` | Ruta EGM simulada (ver «Código» más abajo) |
+
+Módulos RAPID en `rapid/rws_mover/`: `LabJointRws.mod` (v5, una orden por tramo, `MoveL`; **sin probar en el IRC5**) y `LabJointRws_v4.mod` (respaldo, **probado en el robot**). Los respaldos del controlador están en `rapid/respaldo_controlador/`.
+
+## Panel de RViz: pestaña «Trayectorias»
+
+El panel «IRB 120» ([README del plugin](../irb120_rviz_panel/README.md)) tiene dos pestañas. «Mover» edita ángulos o una pose; «Trayectorias» ofrece:
+- lista de **movimientos vistosos** (10 saludo, 11 reverencia, 12 mirar_alrededor, 13 ocho, 14 baile) y de trayectorias **guardadas** (`salidas/trayectorias/NN_nombre.json`);
+- **Bucle** continuo hasta «Detener al final»; **Vista previa** (anima el modelo naranja sin mover el robot); **Ejecutar** (con confirmación); **Pausar**, **Reanudar**, **Detener al final** y **Cancelar**;
+- **Grabar**: capturar la postura actual como punto, borrar el último, vaciar y guardar con nombre (y bucle opcional).
+
+Pausar y cancelar actúan al terminar el tramo en curso; para parar YA: habilitador, Stop o paro de emergencia.
+
+---
+
+## Historia y ruta EGM simulada (referencia)
+
+**11/11 (histórico) — ruta para mover desde la PC:** `./iniciar.sh rws_mover interactivo` con el módulo [`rapid/rws_mover/LabJointRws.mod`](rapid/rws_mover/LabJointRws.mod) (`ServidorPC`). Guía y pasos del FlexPendant: [MOVER_DESDE_PC.md](../../../docs/conexion_abb/MOVER_DESDE_PC.md). 37 pruebas RWS offline aprobadas (`python3 -m unittest discover -s src/irb120_control/test -p 'test_rws_*.py'` desde `ros2_ws/`); esa ruta se ejecutó después en el IRC5 real (16 a 19/11).
 
 **10/11 — movimiento físico no conseguido:** [prueba puntual J6 mediante RWS + RAPID](../../../docs/conexion_abb/PRUEBA_J6_RWS_RAPID.md). `rws_j6.py` inspecciona, respalda/transfiere únicamente `LabJointRws`, comprueba recepción sin desplazamiento y prepara ±0,1° de J6 para confirmación local en FlexPendant. La recepción y transferencia se verificaron, pero el monitor terminó sin movimiento y no se comprobó la ejecución local en manual reducido. [Diagnóstico del intento](../../../docs/conexion_abb/CIERRE_PRUEBA_J6_2026-11-10.md). Esta ruta está separada de la demo/EGM descrita a continuación.
 
@@ -75,7 +124,7 @@ Al armar se comprueban 41 puntos del recorrido articular con la SVD del Jacobian
 3. Validar el RAPID/handshake **stream → PC armada en mantenimiento → Guidance → ejecutar**, con datos reales de `motorState`, `rapidExecState` y `mciState`. La ventana de espera no debe activar movimiento ni agotar el timeout antes de armar la PC.
 4. Ensayar la parada por pérdida de paquetes mediante `CommTimeout` y su manejo de errores en el controlador virtual y luego bajo el procedimiento físico aprobado. Si la PC/proceso se congela por completo, la protección debe quedar en el ABB. El software no asume que cerrar UDP equivale a parada certificada.
 5. Leer límites efectivos, herramienta/carga, confirmar postura y revisar recorrido.
-6. Completar [config/sesion_robot.ejemplo.yaml](config/sesion_robot.ejemplo.yaml) en una ficha de sesión real. Conservar la plantilla NO-GO. El [checklist docente](<../../../archivos que hay que presentar/actualizacion_semana_12/w12_s01_checklist_seguridad.tex>) exige GO del operador autorizado y responsable del laboratorio.
+6. Completar [config/sesion_robot.ejemplo.yaml](config/sesion_robot.ejemplo.yaml) en una ficha de sesión real. Conservar la plantilla NO-GO. El [checklist docente](../../../material_docente/actualizacion_semana_12/w12_s01_checklist_seguridad.tex) exige GO del operador autorizado y responsable del laboratorio.
 
 El `true` de una ficha representa una verificación realizada; escribirlo no verifica físicamente el controlador. El programa valida estructura, vigencia y coherencia numérica, no certifica esas declaraciones.
 
